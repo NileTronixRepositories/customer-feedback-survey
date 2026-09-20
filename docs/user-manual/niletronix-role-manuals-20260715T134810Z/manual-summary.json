@@ -1,0 +1,267 @@
+[
+  {
+    "role": "SuperAdmin",
+    "screenshots": [
+      {
+        "title": "تسجيل الدخول",
+        "route": "/auth/login",
+        "file": "SuperAdmin\\screenshots\\01-login.png"
+      },
+      {
+        "title": "لوحة الاستبيانات الموحدة",
+        "route": "/reports/survey-dashboard",
+        "file": "SuperAdmin\\screenshots\\02-reports-survey-dashboard.png"
+      },
+      {
+        "title": "لوحة النظام",
+        "route": "/reports/system-dashboard",
+        "file": "SuperAdmin\\screenshots\\03-reports-system-dashboard.png"
+      },
+      {
+        "title": "سجل ردود النظام",
+        "route": "/reports/system-responses",
+        "file": "SuperAdmin\\screenshots\\04-reports-system-responses.png"
+      },
+      {
+        "title": "القوالب العامة",
+        "route": "/anonymous-templates",
+        "file": "SuperAdmin\\screenshots\\05-anonymous-templates.png"
+      },
+      {
+        "title": "الفروع",
+        "route": "/branches",
+        "file": "SuperAdmin\\screenshots\\06-branches.png"
+      },
+      {
+        "title": "مناطق الفروع",
+        "route": "/branch-areas",
+        "file": "SuperAdmin\\screenshots\\07-branch-areas.png"
+      },
+      {
+        "title": "إنشاء منطقة فروع",
+        "route": "/branch-areas/create",
+        "file": "SuperAdmin\\screenshots\\08-branch-areas-create.png"
+      },
+      {
+        "title": "كتالوج القوالب",
+        "route": "/templates",
+        "file": "SuperAdmin\\screenshots\\09-templates.png"
+      },
+      {
+        "title": "الإدارات",
+        "route": "/departments",
+        "file": "SuperAdmin\\screenshots\\10-departments.png"
+      },
+      {
+        "title": "مجموعات الأسئلة العامة",
+        "route": "/global-question-groups",
+        "file": "SuperAdmin\\screenshots\\11-global-question-groups.png"
+      },
+      {
+        "title": "الأسئلة العامة",
+        "route": "/global-questions",
+        "file": "SuperAdmin\\screenshots\\12-global-questions.png"
+      },
+      {
+        "title": "المشغلون",
+        "route": "/operators",
+        "file": "SuperAdmin\\screenshots\\13-operators.png"
+      },
+      {
+        "title": "ردود القوالب الداخلية",
+        "route": "/reports/survey-dashboard/internal-responses",
+        "file": "SuperAdmin\\screenshots\\14-reports-survey-dashboard-internal-responses.png"
+      }
+    ]
+  },
+  {
+    "role": "DepartmentAdmin",
+    "screenshots": [
+      {
+        "title": "تسجيل الدخول",
+        "route": "/auth/login",
+        "file": "DepartmentAdmin\\screenshots\\01-login.png"
+      },
+      {
+        "title": "تقارير الإدارة",
+        "route": "/reports/department/dashboard",
+        "file": "DepartmentAdmin\\screenshots\\02-reports-department-dashboard.png"
+      },
+      {
+        "title": "المشغلون",
+        "route": "/operators",
+        "file": "DepartmentAdmin\\screenshots\\03-operators.png"
+      }
+    ]
+  },
+  {
+    "role": "BranchAdmin",
+    "screenshots": [
+      {
+        "title": "تسجيل الدخول",
+        "route": "/auth/login",
+        "file": "BranchAdmin\\screenshots\\01-login.png"
+      },
+      {
+        "title": "لوحة الاستبيانات الموحدة",
+        "route": "/reports/survey-dashboard",
+        "file": "BranchAdmin\\screenshots\\02-reports-survey-dashboard.png"
+      },
+      {
+        "title": "تقرير القوالب PDF/Excel",
+        "route": "/branch-admin/reports/templates-pdf",
+        "file": "BranchAdmin\\screenshots\\03-branch-admin-reports-templates-pdf.png"
+      },
+      {
+        "title": "مستخدمو الفرع",
+        "route": "/branch-admin/users",
+        "file": "BranchAdmin\\screenshots\\04-branch-admin-users.png"
+      },
+      {
+        "title": "القوالب الداخلية",
+        "route": "/branch-admin/templates",
+        "file": "BranchAdmin\\screenshots\\05-branch-admin-templates.png"
+      },
+      {
+        "title": "لوحة قوالب الفرع",
+        "route": "/branch-admin/templates/dashboard",
+        "file": "BranchAdmin\\screenshots\\06-branch-admin-templates-dashboard.png"
+      },
+      {
+        "title": "القوالب العامة",
+        "route": "/anonymous-templates",
+        "file": "BranchAdmin\\screenshots\\07-anonymous-templates.png"
+      },
+      {
+        "title": "أسئلة الفرع",
+        "route": "/branch-admin/questions",
+        "file": "BranchAdmin\\screenshots\\08-branch-admin-questions.png"
+      },
+      {
+        "title": "مجموعات أسئلة الفرع",
+        "route": "/branch-admin/question-groups",
+        "file": "BranchAdmin\\screenshots\\09-branch-admin-question-groups.png"
+      },
+      {
+        "title": "ردود قوالب الفرع",
+        "route": "/branch-admin/templates/responses",
+        "file": "BranchAdmin\\screenshots\\10-branch-admin-templates-responses.png"
+      },
+      {
+        "title": "لوحة القوالب العامة",
+        "route": "/anonymous-templates/dashboard",
+        "file": "BranchAdmin\\screenshots\\11-anonymous-templates-dashboard.png"
+      },
+      {
+        "title": "ردود القوالب العامة",
+        "route": "/anonymous-templates/responses",
+        "file": "BranchAdmin\\screenshots\\12-anonymous-templates-responses.png"
+      },
+      {
+        "title": "تفاصيل رد قالب عام",
+        "route": "/anonymous-templates/8a34f944-350d-4b8d-9f16-4660a9e03ba1/responses/5f281e86-c7b5-4758-996b-bbd2ce123dab",
+        "file": "BranchAdmin\\screenshots\\13-anonymous-templates-8a34f944-350d-4b8d-9f16-4660a9e03ba1-responses-5f281e86-c7b5-4758-996b-bbd2ce123dab.png"
+      }
+    ]
+  },
+  {
+    "role": "Operator",
+    "screenshots": [
+      {
+        "title": "تسجيل الدخول",
+        "route": "/auth/login",
+        "file": "Operator\\screenshots\\01-login.png"
+      },
+      {
+        "title": "قوالب المشغل",
+        "route": "/operator/templates",
+        "file": "Operator\\screenshots\\02-operator-templates.png"
+      }
+    ]
+  },
+  {
+    "role": "BranchArea",
+    "screenshots": [
+      {
+        "title": "تسجيل الدخول",
+        "route": "/auth/login",
+        "file": "BranchArea\\screenshots\\01-login.png"
+      },
+      {
+        "title": "اختيار الفرع",
+        "route": "/auth/login",
+        "file": "BranchArea\\screenshots\\02-branch-selection.png"
+      },
+      {
+        "title": "لوحة الاستبيانات الموحدة",
+        "route": "/reports/survey-dashboard",
+        "file": "BranchArea\\screenshots\\03-reports-survey-dashboard.png"
+      },
+      {
+        "title": "تقرير القوالب PDF/Excel",
+        "route": "/branch-admin/reports/templates-pdf",
+        "file": "BranchArea\\screenshots\\04-branch-admin-reports-templates-pdf.png"
+      },
+      {
+        "title": "مستخدمو الفرع",
+        "route": "/branch-admin/users",
+        "file": "BranchArea\\screenshots\\05-branch-admin-users.png"
+      },
+      {
+        "title": "القوالب الداخلية",
+        "route": "/branch-admin/templates",
+        "file": "BranchArea\\screenshots\\06-branch-admin-templates.png"
+      },
+      {
+        "title": "لوحة قوالب الفرع",
+        "route": "/branch-admin/templates/dashboard",
+        "file": "BranchArea\\screenshots\\07-branch-admin-templates-dashboard.png"
+      },
+      {
+        "title": "القوالب العامة",
+        "route": "/anonymous-templates",
+        "file": "BranchArea\\screenshots\\08-anonymous-templates.png"
+      },
+      {
+        "title": "أسئلة الفرع",
+        "route": "/branch-admin/questions",
+        "file": "BranchArea\\screenshots\\09-branch-admin-questions.png"
+      },
+      {
+        "title": "مجموعات أسئلة الفرع",
+        "route": "/branch-admin/question-groups",
+        "file": "BranchArea\\screenshots\\10-branch-admin-question-groups.png"
+      },
+      {
+        "title": "ردود قوالب الفرع",
+        "route": "/branch-admin/templates/responses",
+        "file": "BranchArea\\screenshots\\11-branch-admin-templates-responses.png"
+      },
+      {
+        "title": "لوحة القوالب العامة",
+        "route": "/anonymous-templates/dashboard",
+        "file": "BranchArea\\screenshots\\12-anonymous-templates-dashboard.png"
+      },
+      {
+        "title": "ردود القوالب العامة",
+        "route": "/anonymous-templates/responses",
+        "file": "BranchArea\\screenshots\\13-anonymous-templates-responses.png"
+      },
+      {
+        "title": "تفاصيل رد قالب عام",
+        "route": "/anonymous-templates/8a34f944-350d-4b8d-9f16-4660a9e03ba1/responses/5f281e86-c7b5-4758-996b-bbd2ce123dab",
+        "file": "BranchArea\\screenshots\\14-anonymous-templates-8a34f944-350d-4b8d-9f16-4660a9e03ba1-responses-5f281e86-c7b5-4758-996b-bbd2ce123dab.png"
+      }
+    ]
+  },
+  {
+    "role": "BranchUser",
+    "screenshots": [
+      {
+        "title": "تسجيل الدخول",
+        "route": "/auth/login",
+        "file": "BranchUser\\screenshots\\01-login.png"
+      }
+    ]
+  }
+]
