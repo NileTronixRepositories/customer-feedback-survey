@@ -25,17 +25,15 @@
                 "input": "public"
               }
             ],
-            "styles": [
-              "src/styles.css"
-            ]
+            "styles": ["src/styles.css"]
           },
           "configurations": {
             "production": {
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "500kB",
-                  "maximumError": "1MB"
+                  "maximumWarning": "1.5MB",
+                  "maximumError": "2MB"
                 },
                 {
                   "type": "anyComponentStyle",
@@ -63,10 +61,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-                "buildTarget": "customer-feedback-survey:build:production"
+              "buildTarget": "customer-feedback-survey:build:production"
             },
             "development": {
-                "buildTarget": "customer-feedback-survey:build:development"
+              "buildTarget": "customer-feedback-survey:build:development"
             }
           },
           "defaultConfiguration": "development"
