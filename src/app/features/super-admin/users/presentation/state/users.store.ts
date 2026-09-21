@@ -47,7 +47,7 @@ export class UsersStore {
         error: () => {
           this.usersSignal.set([]);
           this.errorSignal.set('users.loadError');
-        }
+        },
       });
   }
 

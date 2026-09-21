@@ -34,21 +34,21 @@ export const DEPARTMENT_REPORTS_ROUTES: Routes = [
       {
         path: 'dashboard',
         loadComponent: () =>
-          import('./presentation/pages/department-dashboard-page.component').then(
+          import('./presentation/pages/department-dashboard-page/department-dashboard-page.component').then(
             (m) => m.DepartmentDashboardPageComponent,
           ),
       },
       {
         path: 'operators/:operatorId/responses',
         loadComponent: () =>
-          import('./presentation/pages/department-operator-responses-page.component').then(
+          import('./presentation/pages/department-operator-responses-page/department-operator-responses-page.component').then(
             (m) => m.DepartmentOperatorResponsesPageComponent,
           ),
       },
       {
         path: 'operators/:operatorId/responses/:surveyResponseId',
         loadComponent: () =>
-          import('./presentation/pages/department-response-details-page.component').then(
+          import('./presentation/pages/department-response-details-page/department-response-details-page.component').then(
             (m) => m.DepartmentResponseDetailsPageComponent,
           ),
       },

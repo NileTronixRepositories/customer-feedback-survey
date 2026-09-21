@@ -8,6 +8,6 @@ export const SURVEY_ROUTES: Routes = [
     path: '',
     canActivate: [roleGuard(['BRANCH_ADMIN', 'DEPARTMENT_ADMIN'])],
     providers: [SurveyService, SurveyStore],
-    loadComponent: () => import('./presentation/pages/survey-page.component').then((m) => m.SurveyPageComponent)
+    loadComponent: () => import('./presentation/pages/survey-page/survey-page.component').then((m) => m.SurveyPageComponent)
   }
 ];

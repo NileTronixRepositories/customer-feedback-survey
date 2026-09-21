@@ -18,7 +18,7 @@ export const SURVEY_DASHBOARD_ROUTES: Routes = [
       BranchResponsesHistoryStore,
     ],
     loadComponent: () =>
-      import('../../branch-admin/dashboard/presentation/pages/branch-responses-history-page.component').then(
+      import('../../branch-admin/dashboard/presentation/pages/branch-responses-history-page/branch-responses-history-page.component').then(
         (m) => m.BranchResponsesHistoryPageComponent,
       ),
   },
@@ -33,7 +33,7 @@ export const SURVEY_DASHBOARD_ROUTES: Routes = [
       SurveyDashboardStore,
     ],
     loadComponent: () =>
-      import('./presentation/pages/survey-dashboard-page.component').then(
+      import('./presentation/pages/survey-dashboard-page/survey-dashboard-page.component').then(
         (m) => m.SurveyDashboardPageComponent,
       ),
   },

@@ -15,7 +15,7 @@ export const ANONYMOUS_TEMPLATES_ROUTES: Routes = [
     canActivate: [anonymousTemplateDashboardAccessGuard],
     providers: [AnonymousTemplatesService, AnonymousTemplateDashboardStore],
     loadComponent: () =>
-      import('./presentation/pages/anonymous-template-dashboard-page.component').then(
+      import('./presentation/pages/anonymous-template-dashboard-page/anonymous-template-dashboard-page.component').then(
         (m) => m.AnonymousTemplateDashboardPageComponent,
       ),
   },
@@ -24,7 +24,7 @@ export const ANONYMOUS_TEMPLATES_ROUTES: Routes = [
     canActivate: [anonymousResponsesReportAccessGuard],
     providers: [AnonymousTemplatesService, AnonymousTemplatesStore, AnonymousBranchResponsesStore],
     loadComponent: () =>
-      import('./presentation/pages/anonymous-branch-responses-page.component').then(
+      import('./presentation/pages/anonymous-branch-responses-page/anonymous-branch-responses-page.component').then(
         (m) => m.AnonymousBranchResponsesPageComponent,
       ),
   },
@@ -33,7 +33,7 @@ export const ANONYMOUS_TEMPLATES_ROUTES: Routes = [
     canActivate: [anonymousTemplateAccessGuard],
     providers: [AnonymousTemplatesService, AnonymousTemplatesStore, BranchesService],
     loadComponent: () =>
-      import('./presentation/pages/anonymous-template-response-details-page.component').then(
+      import('./presentation/pages/anonymous-template-response-details-page/anonymous-template-response-details-page.component').then(
         (m) => m.AnonymousTemplateResponseDetailsPageComponent,
       ),
   },
@@ -42,7 +42,7 @@ export const ANONYMOUS_TEMPLATES_ROUTES: Routes = [
     canActivate: [anonymousTemplateAccessGuard],
     providers: [AnonymousTemplatesService, AnonymousTemplatesStore, BranchesService],
     loadComponent: () =>
-      import('./presentation/pages/anonymous-template-responses-page.component').then(
+      import('./presentation/pages/anonymous-template-responses-page/anonymous-template-responses-page.component').then(
         (m) => m.AnonymousTemplateResponsesPageComponent,
       ),
   },
@@ -51,7 +51,7 @@ export const ANONYMOUS_TEMPLATES_ROUTES: Routes = [
     canActivate: [anonymousTemplateAccessGuard],
     providers: [AnonymousTemplatesService, AnonymousTemplatesStore, BranchesService],
     loadComponent: () =>
-      import('./presentation/pages/anonymous-template-questions-page.component').then(
+      import('./presentation/pages/anonymous-template-questions-page/anonymous-template-questions-page.component').then(
         (m) => m.AnonymousTemplateQuestionsPageComponent,
       ),
   },
@@ -60,7 +60,7 @@ export const ANONYMOUS_TEMPLATES_ROUTES: Routes = [
     canActivate: [anonymousTemplateAccessGuard],
     providers: [AnonymousTemplatesService, AnonymousTemplatesStore, BranchesService],
     loadComponent: () =>
-      import('./presentation/pages/anonymous-template-questions-page.component').then(
+      import('./presentation/pages/anonymous-template-questions-page/anonymous-template-questions-page.component').then(
         (m) => m.AnonymousTemplateQuestionsPageComponent,
       ),
   },
@@ -69,7 +69,7 @@ export const ANONYMOUS_TEMPLATES_ROUTES: Routes = [
     canActivate: [anonymousTemplateAccessGuard],
     providers: [AnonymousTemplatesService, AnonymousTemplatesStore, BranchesService],
     loadComponent: () =>
-      import('./presentation/pages/anonymous-template-details-page.component').then(
+      import('./presentation/pages/anonymous-template-details-page/anonymous-template-details-page.component').then(
         (m) => m.AnonymousTemplateDetailsPageComponent,
       ),
   },
@@ -83,7 +83,7 @@ export const ANONYMOUS_TEMPLATES_ROUTES: Routes = [
       SuperAdminTemplatesService,
     ],
     loadComponent: () =>
-      import('./presentation/pages/anonymous-templates-page.component').then(
+      import('./presentation/pages/anonymous-templates-page/anonymous-templates-page.component').then(
         (m) => m.AnonymousTemplatesPageComponent,
       ),
   },

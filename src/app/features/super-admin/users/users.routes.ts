@@ -8,6 +8,6 @@ export const USERS_ROUTES: Routes = [
     path: '',
     canActivate: [roleGuard(['SUPER_ADMIN', 'BRANCH_ADMIN'])],
     providers: [UsersService, UsersStore],
-    loadComponent: () => import('./presentation/pages/users-page.component').then((m) => m.UsersPageComponent)
+    loadComponent: () => import('./presentation/pages/users-page/users-page.component').then((m) => m.UsersPageComponent)
   }
 ];

@@ -28,14 +28,14 @@ export const REPORTS_ROUTES: Routes = [
       {
         path: 'system-dashboard',
         loadComponent: () =>
-          import('./presentation/pages/system-dashboard-page.component').then(
+          import('./presentation/pages/system-dashboard-page/system-dashboard-page.component').then(
             (m) => m.SystemDashboardPageComponent,
           ),
       },
       {
         path: 'system-responses',
         loadComponent: () =>
-          import('./presentation/pages/system-responses-history-page.component').then(
+          import('./presentation/pages/system-responses-history-page/system-responses-history-page.component').then(
             (m) => m.SystemResponsesHistoryPageComponent,
           ),
       },

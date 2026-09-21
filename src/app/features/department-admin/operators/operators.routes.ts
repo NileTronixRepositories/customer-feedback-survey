@@ -8,6 +8,6 @@ export const OPERATORS_ROUTES: Routes = [
     path: '',
     canActivate: [roleGuard(['SUPER_ADMIN', 'DEPARTMENT_ADMIN'])],
     providers: [OperatorsService, OperatorsStore],
-    loadComponent: () => import('./presentation/pages/operators-page.component').then((m) => m.OperatorsPageComponent),
+    loadComponent: () => import('./presentation/pages/operators-page/operators-page.component').then((m) => m.OperatorsPageComponent),
   },
 ];

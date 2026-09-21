@@ -1,0 +1,69 @@
+<aside
+  class="app-sidebar flex h-dvh transition-all duration-400"
+  [class.sidebar-collapsed]="collapsed() && !mobileOpen()"
+  [class.mobile-open]="mobileOpen()"
+>
+  <div class="sidebar-inner flex min-h-0 w-full flex-col px-3.5 py-4">
+    <!-- Brand -->
+    <div class="brand-section mb-6 flex items-center gap-3 px-1.5">
+      <div class="brand-logo-container">
+        <img
+          class="brand-logo-image"
+          [src]="brandAssets.sidebarLogo"
+          [attr.alt]="'common.niletronixLogoAlt' | t"
+        />
+      </div>
+      <div class="brand-text min-w-0">
+        <p class="brand-name truncate">{{ 'app.brand' | t }}</p>
+        <p class="brand-subtitle truncate">{{ 'app.console' | t }}</p>
+      </div>
+      @if (mobileOpen()) {
+        <button
+          type="button"
+          class="sidebar-close-btn ms-auto xl:hidden"
+          [attr.aria-label]="'common.closeSidebar' | t"
+          (click)="close.emit()"
+        >
+          <app-icon [icon]="panelLeftCloseIcon" [size]="18" />
+        </button>
+      }
+    </div>
+
+    <!-- Nav -->
+    <nav
+      class="sidebar-nav min-h-0 flex-1 space-y-2.5 overflow-x-hidden overflow-y-auto custom-scrollbar"
+    >
+      @for (item of menuItems(); track item.path) {
+        <a
+          [routerLink]="item.path"
+          routerLinkActive="nav-item-active"
+          [routerLinkActiveOptions]="{ exact: item.exact ?? false }"
+          class="nav-item group min-w-0 w-full"
+          (click)="close.emit()"
+        >
+          <div class="nav-icon-box">
+            <app-icon [icon]="item.icon" [size]="20" />
+          </div>
+          <span class="nav-label flex-1">{{ item.labelKey | t }}</span>
+        </a>
+      }
+    </nav>
+
+    <!-- Footer / Collapse -->
+    <div class="sidebar-footer mt-auto hidden border-t border-white/5 pt-3 xl:block">
+      <button
+        type="button"
+        class="collapse-btn"
+        (click)="toggle.emit()"
+        [attr.aria-label]="
+          collapsed() ? ('common.expandSidebar' | t) : ('common.collapseSidebar' | t)
+        "
+      >
+        <app-icon [icon]="collapsed() ? panelLeftOpenIcon : panelLeftCloseIcon" [size]="18" />
+        @if (!collapsed()) {
+          <span>{{ 'common.collapse' | t }}</span>
+        }
+      </button>
+    </div>
+  </div>
+</aside>

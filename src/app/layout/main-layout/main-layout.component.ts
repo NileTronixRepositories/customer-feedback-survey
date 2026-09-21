@@ -16,7 +16,7 @@ import { AuthStore } from '../../features/auth/presentation/state/auth.store';
 import { BranchContextService } from '../../core/services/branch-context.service';
 import { I18nService } from '../../core/services/i18n.service';
 import { TranslatePipe } from '../../shared/pipes/translate.pipe';
-import { SidebarComponent } from './sidebar.component';
+import { SidebarComponent } from '../sidebar/sidebar.component';
 import { IconComponent } from '../../shared/ui/icon/icon.component';
 import { AppFooterComponent } from '../../shared/ui/app-footer/app-footer.component';
 

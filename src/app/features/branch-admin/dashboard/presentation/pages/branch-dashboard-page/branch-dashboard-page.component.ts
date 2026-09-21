@@ -1,0 +1,455 @@
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  OnDestroy,
+  OnInit,
+  computed,
+  effect,
+  inject,
+  signal,
+  viewChild,
+} from '@angular/core';
+import { DatePipe, DecimalPipe } from '@angular/common';
+import { RouterLink } from '@angular/router';
+import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
+import { Chart, registerables } from 'chart.js';
+import { finalize, take } from 'rxjs';
+import {
+  AlertCircle,
+  AlertTriangle,
+  BarChart3,
+  Calendar,
+  FileText,
+  Frown,
+  Gauge,
+  Hash,
+  HelpCircle,
+  Layers,
+  Meh,
+  MessageSquareWarning,
+  Mic,
+  Search,
+  SlidersHorizontal,
+  Smile,
+  TrendingUp,
+  UsersRound,
+} from 'lucide-angular';
+import { I18nService } from '../../../../../../core/services/i18n.service';
+import { ThemeColorService } from '../../../../../../core/theme/theme-color.service';
+import { TranslatePipe } from '../../../../../../shared/pipes/translate.pipe';
+import { ButtonComponent } from '../../../../../../shared/ui/button/button.component';
+import { IconComponent } from '../../../../../../shared/ui/icon/icon.component';
+import { ModalComponent } from '../../../../../../shared/ui/modal/modal.component';
+import { AuthStore } from '../../../../../auth/presentation/state/auth.store';
+import { BranchAdminBranchStore } from '../../../../branch/presentation/state/branch-admin-branch.store';
+import { BranchAdminTemplate } from '../../../../branch/domain/branch-admin-branch.model';
+import { BranchTemplate } from '../../../../templates/domain/branch-template.model';
+import { BranchTemplatesService } from '../../../../templates/data/branch-templates.service';
+import { BranchTemplateQuestionTreeComponent } from '../../../../templates/presentation/components/branch-template-question-tree/branch-template-question-tree.component';
+import { BranchResponseDetailsModalComponent } from '../../components/branch-response-details-modal/branch-response-details-modal.component';
+import {
+  BranchDashboardCriticalResponse,
+  BranchDashboardCustomInputSegment,
+  BranchDashboardGroupBy,
+  BranchDashboardQuestionInsight,
+  BranchDashboardTemplatePerformance,
+} from '../../../domain/branch-dashboard.model';
+import { BranchDashboardStore } from '../../state/branch-dashboard.store';
+
+Chart.register(...registerables);
+
+@Component({
+  selector: 'app-branch-dashboard-page',
+  standalone: true,
+  imports: [
+    ButtonComponent,
+    DatePipe,
+    DecimalPipe,
+    IconComponent,
+    ModalComponent,
+    BranchResponseDetailsModalComponent,
+    BranchTemplateQuestionTreeComponent,
+    ReactiveFormsModule,
+    RouterLink,
+    TranslatePipe,
+  ],
+  templateUrl: './branch-dashboard-page.component.html',
+  styleUrl: './branch-dashboard-page.component.css',
+  providers: [BranchTemplatesService],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class BranchDashboardPageComponent implements OnInit, OnDestroy {
+  readonly dashboardStore = inject(BranchDashboardStore);
+  readonly branchStore = inject(BranchAdminBranchStore);
+  private readonly branchTemplatesService = inject(BranchTemplatesService);
+  private readonly authStore = inject(AuthStore);
+  private readonly formBuilder = inject(FormBuilder);
+  private readonly i18n = inject(I18nService);
+  private readonly themeColors = inject(ThemeColorService);
+  private readonly chartCanvas = viewChild<ElementRef<HTMLCanvasElement>>('trendCanvas');
+  private trendChart: Chart<'line', number[], string> | null = null;
+
+  readonly alertIcon = AlertTriangle;
+  readonly alertCircleIcon = AlertCircle;
+  readonly chartIcon = BarChart3;
+  readonly calendarIcon = Calendar;
+  readonly complaintIcon = MessageSquareWarning;
+  readonly frownIcon = Frown;
+  readonly gaugeIcon = Gauge;
+  readonly hashIcon = Hash;
+  readonly helpIcon = HelpCircle;
+  readonly layersIcon = Layers;
+  readonly mehIcon = Meh;
+  readonly micIcon = Mic;
+  readonly responsesIcon = UsersRound;
+  readonly searchIcon = Search;
+  readonly filtersIcon = SlidersHorizontal;
+  readonly smileIcon = Smile;
+  readonly templateIcon = FileText;
+  readonly trendIcon = TrendingUp;
+
+  readonly selectedSegmentName = signal('');
+  readonly advancedFiltersOpen = signal(true);
+  readonly customInputSegmentsVisible = false;
+  readonly templateDetailsOpen = signal(false);
+  readonly templateDetailsLoading = signal(false);
+  readonly templateDetailsError = signal<string | null>(null);
+  readonly selectedTemplateDetails = signal<BranchTemplate | null>(null);
+  readonly selectedSegment = computed<BranchDashboardCustomInputSegment | null>(() => {
+    const dashboard = this.dashboardStore.dashboard();
+    const segments = dashboard?.customInputSegments ?? [];
+    if (segments.length === 0) {
+      return null;
+    }
+
+    const selectedName = this.selectedSegmentName();
+    return segments.find((segment) => segment.customInputName === selectedName) ?? segments[0];
+  });
+
+  // SVG Radial Gauge Computations
+  readonly averageScore = computed(() => this.dashboardStore.dashboard()?.summary.averageScorePercentage ?? 0);
+  
+  readonly scoreColor = computed(() => {
+    const score = this.averageScore();
+    if (score >= 80) return this.themeColors.color('success');
+    if (score >= 60) return this.themeColors.color('warning');
+    return this.themeColors.color('danger');
+  });
+
+  readonly scoreBg = computed(() => {
+    const score = this.averageScore();
+    if (score >= 80) return this.themeColors.rgba('success', 0.06);
+    if (score >= 60) return this.themeColors.rgba('warning', 0.06);
+    return this.themeColors.rgba('danger', 0.06);
+  });
+
+  readonly scoreTextColorClass = computed(() => {
+    const score = this.averageScore();
+    if (score >= 80) return 'text-emerald-500';
+    if (score >= 60) return 'text-amber-500';
+    return 'text-rose-500';
+  });
+
+  readonly strokeDashArray = 238.7; // 2 * Math.PI * 38
+  readonly strokeDashOffset = computed(() => {
+    const score = this.averageScore();
+    return this.strokeDashArray - (score / 100) * this.strokeDashArray;
+  });
+
+  // Sentiment Distribution Ratios
+  readonly totalResponses = computed(() => this.dashboardStore.dashboard()?.summary.totalResponses ?? 0);
+  
+  readonly satisfiedPercent = computed(() => {
+    const total = this.totalResponses();
+    return total > 0 ? ((this.dashboardStore.dashboard()?.summary.satisfiedResponses ?? 0) / total) * 100 : 0;
+  });
+
+  readonly neutralPercent = computed(() => {
+    const total = this.totalResponses();
+    return total > 0 ? ((this.dashboardStore.dashboard()?.summary.neutralResponses ?? 0) / total) * 100 : 0;
+  });
+
+  readonly unhappyPercent = computed(() => {
+    const total = this.totalResponses();
+    return total > 0 ? ((this.dashboardStore.dashboard()?.summary.unhappyResponses ?? 0) / total) * 100 : 0;
+  });
+
+  // Operational Template scale
+  readonly activeTemplatesCount = computed(() => this.dashboardStore.dashboard()?.summary.activeTemplatesCount ?? 0);
+  readonly templatesWithResponsesCount = computed(() => this.dashboardStore.dashboard()?.summary.templatesWithResponsesCount ?? 0);
+  readonly templateActivityPercent = computed(() => {
+    const total = this.activeTemplatesCount();
+    return total > 0 ? (this.templatesWithResponsesCount() / total) * 100 : 0;
+  });
+
+  readonly filtersForm = this.formBuilder.nonNullable.group({
+    from: [''],
+    to: [''],
+    templateId: [''],
+    groupBy: ['Day' as BranchDashboardGroupBy],
+    topQuestionsCount: ['5'],
+    criticalResponsesCount: ['10'],
+    criticalScoreThreshold: ['40'],
+  });
+
+  constructor() {
+    effect(() => {
+      const canvas = this.chartCanvas();
+      const dashboard = this.dashboardStore.dashboard();
+      const language = this.i18n.language();
+
+      if (!canvas || !dashboard || dashboard.satisfactionTrend.length === 0) {
+        this.trendChart?.destroy();
+        this.trendChart = null;
+        return;
+      }
+
+      this.renderTrendChart(canvas.nativeElement, dashboard.satisfactionTrend, language);
+    });
+
+    effect(() => {
+      const segments = this.dashboardStore.dashboard()?.customInputSegments ?? [];
+      const selectedName = this.selectedSegmentName();
+      if (segments.length > 0 && !segments.some((segment) => segment.customInputName === selectedName)) {
+        this.selectedSegmentName.set(segments[0].customInputName);
+      }
+    });
+  }
+
+  ngOnInit(): void {
+    if (this.authStore.isBranchScopedActor()) {
+      this.branchStore.load();
+    }
+    this.dashboardStore.load();
+  }
+
+  ngOnDestroy(): void {
+    this.trendChart?.destroy();
+  }
+
+  applyFilters(): void {
+    const value = this.filtersForm.getRawValue();
+    this.dashboardStore.load({
+      from: value.from || undefined,
+      to: value.to || undefined,
+      templateId: value.templateId || undefined,
+      groupBy: value.groupBy,
+      topQuestionsCount: this.toOptionalPositiveInteger(value.topQuestionsCount),
+      criticalResponsesCount: this.toOptionalPositiveInteger(value.criticalResponsesCount),
+      criticalScoreThreshold: this.toOptionalPercentage(value.criticalScoreThreshold),
+    });
+  }
+
+  clearFilters(): void {
+    this.filtersForm.setValue({
+      from: '',
+      to: '',
+      templateId: '',
+      groupBy: 'Day',
+      topQuestionsCount: '5',
+      criticalResponsesCount: '10',
+      criticalScoreThreshold: '40',
+    });
+    this.dashboardStore.load();
+  }
+
+  toggleAdvancedFilters(): void {
+    this.advancedFiltersOpen.update((open) => !open);
+  }
+
+  filterByTemplate(templateId: string): void {
+    this.filtersForm.patchValue({ templateId });
+    this.applyFilters();
+  }
+
+  openTemplateDetails(event: Event, templateId: string): void {
+    event.stopPropagation();
+    if (!templateId || this.templateDetailsLoading()) {
+      return;
+    }
+
+    this.templateDetailsOpen.set(true);
+    this.templateDetailsLoading.set(true);
+    this.templateDetailsError.set(null);
+    this.selectedTemplateDetails.set(null);
+
+    this.branchTemplatesService
+      .getById(templateId)
+      .pipe(
+        take(1),
+        finalize(() => this.templateDetailsLoading.set(false)),
+      )
+      .subscribe({
+        next: (template) => {
+          this.selectedTemplateDetails.set(template.templateId.length > 0 ? template : null);
+          if (template.templateId.length === 0) {
+            this.templateDetailsError.set('branchTemplates.notFound');
+          }
+        },
+        error: () => {
+          this.templateDetailsError.set('branchTemplates.detailsLoadError');
+        },
+      });
+  }
+
+  closeTemplateDetails(): void {
+    this.templateDetailsOpen.set(false);
+    this.templateDetailsLoading.set(false);
+    this.templateDetailsError.set(null);
+    this.selectedTemplateDetails.set(null);
+  }
+
+  templateName(template: BranchAdminTemplate): string {
+    return this.localized(template.nameEn, template.nameAr);
+  }
+
+  performanceTemplateName(item: BranchDashboardTemplatePerformance): string {
+    return this.localized(item.templateNameEn, item.templateNameAr);
+  }
+
+  templateBranchName(template: BranchTemplate): string {
+    const branchName = this.localized(template.branchNameEn, template.branchNameAr);
+    return template.branchCode ? `${branchName} (${template.branchCode})` : branchName;
+  }
+
+  templateCustomInputLabel(customInput: BranchTemplate['customInputs'][number]): string {
+    return this.localized(customInput.labelEn ?? customInput.name, customInput.labelAr);
+  }
+
+  questionTemplateName(item: BranchDashboardQuestionInsight): string {
+    return this.localized(item.templateNameEn, item.templateNameAr);
+  }
+
+  questionText(item: BranchDashboardQuestionInsight): string {
+    return this.localized(item.questionTextEn, item.questionTextAr);
+  }
+
+  criticalTemplateName(item: BranchDashboardCriticalResponse): string {
+    return this.localized(item.templateNameEn, item.templateNameAr);
+  }
+
+  riskLabel(item: BranchDashboardTemplatePerformance): string {
+    if (item.riskLevel === 'HighRisk') {
+      return this.i18n.translate('branchDashboard.highRisk');
+    }
+    if (item.riskLevel === 'MediumRisk') {
+      return this.i18n.translate('branchDashboard.mediumRisk');
+    }
+    return this.i18n.translate('branchDashboard.healthy');
+  }
+
+  barWidth(value: number): string {
+    return `${Math.min(Math.max(value, 0), 100)}%`;
+  }
+
+  segmentResponsesTotal(segment: BranchDashboardCustomInputSegment): number {
+    return segment.segments.reduce((total, item) => total + item.responsesCount, 0);
+  }
+
+  segmentAverageScore(segment: BranchDashboardCustomInputSegment): number {
+    const totalResponses = this.segmentResponsesTotal(segment);
+    if (totalResponses === 0) {
+      return 0;
+    }
+
+    const weightedTotal = segment.segments.reduce(
+      (total, item) => total + item.averageScorePercentage * item.responsesCount,
+      0,
+    );
+    return weightedTotal / totalResponses;
+  }
+
+  customInputsText(response: BranchDashboardCriticalResponse): string {
+    if (response.customInputs.length === 0) {
+      return this.i18n.translate('branchDashboard.noCustomFields');
+    }
+
+    return response.customInputs.map((input) => `${input.name}: ${input.value}`).join(' | ');
+  }
+
+  openResponseDetails(surveyResponseId: string): void {
+    this.dashboardStore.loadResponseDetails(surveyResponseId);
+  }
+
+  private localized(englishText: string, arabicText: string | null | undefined): string {
+    if (this.i18n.language() === 'ar') {
+      return arabicText || englishText || '-';
+    }
+
+    return englishText || arabicText || '-';
+  }
+
+  private toOptionalPositiveInteger(value: string): number | undefined {
+    const parsed = Number(value);
+    if (!Number.isInteger(parsed) || parsed <= 0) {
+      return undefined;
+    }
+
+    return parsed;
+  }
+
+  private toOptionalPercentage(value: string): number | undefined {
+    const parsed = Number(value);
+    if (!Number.isFinite(parsed)) {
+      return undefined;
+    }
+
+    return Math.min(Math.max(parsed, 0), 100);
+  }
+
+  private renderTrendChart(
+    canvas: HTMLCanvasElement,
+    trend: readonly { period: string; averageScorePercentage: number; responsesCount: number }[],
+    language: string,
+  ): void {
+    this.trendChart?.destroy();
+    this.trendChart = new Chart(canvas, {
+      type: 'line',
+      data: {
+        labels: trend.map((point) => point.period),
+        datasets: [
+          {
+            label: 'Average Score %',
+            data: trend.map((point) => point.averageScorePercentage),
+            borderColor: this.themeColors.color('accent'),
+            backgroundColor: this.themeColors.rgba('accent', 0.14),
+            fill: true,
+            tension: 0.35,
+            pointRadius: 3,
+            pointHoverRadius: 5,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        locale: language,
+        layout: { padding: { top: 8 } },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              afterLabel: (context) => {
+                const point = trend[context.dataIndex];
+                return `Responses: ${point?.responsesCount ?? 0}`;
+              },
+            },
+          },
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            suggestedMax: 100,
+            grace: '5%',
+            grid: { color: this.themeColors.color('gridLine') },
+          },
+          x: {
+            grid: { display: false },
+            ticks: { maxRotation: 0, autoSkip: true },
+          },
+        },
+      },
+    });
+  }
+}

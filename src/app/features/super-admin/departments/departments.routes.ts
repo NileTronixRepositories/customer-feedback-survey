@@ -12,13 +12,13 @@ export const DEPARTMENTS_ROUTES: Routes = [
     canActivate: [roleGuard(['SUPER_ADMIN'])],
     providers: [DepartmentsService, DepartmentsStore],
     loadComponent: () =>
-      import('./presentation/pages/departments-page.component').then((m) => m.DepartmentsPageComponent),
+      import('./presentation/pages/departments-page/departments-page.component').then((m) => m.DepartmentsPageComponent),
   },
   {
     path: ':departmentId',
     canActivate: [roleGuard(['SUPER_ADMIN'])],
     providers: [DepartmentsService, DepartmentsStore, DepartmentAdminsService, DepartmentAdminsStore],
     loadComponent: () =>
-      import('./presentation/pages/department-details-page.component').then((m) => m.DepartmentDetailsPageComponent),
+      import('./presentation/pages/department-details-page/department-details-page.component').then((m) => m.DepartmentDetailsPageComponent),
   },
 ];

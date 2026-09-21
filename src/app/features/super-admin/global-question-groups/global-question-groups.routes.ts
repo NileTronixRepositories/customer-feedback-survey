@@ -9,7 +9,7 @@ export const GLOBAL_QUESTION_GROUPS_ROUTES: Routes = [
     canActivate: [globalQuestionGroupsAccessGuard],
     providers: [GlobalQuestionGroupsService, GlobalQuestionGroupsStore],
     loadComponent: () =>
-      import('./presentation/pages/global-question-groups-page.component').then(
+      import('./presentation/pages/global-question-groups-page/global-question-groups-page.component').then(
         (m) => m.GlobalQuestionGroupsPageComponent,
       ),
   },

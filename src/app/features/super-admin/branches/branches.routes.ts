@@ -15,7 +15,7 @@ export const BRANCHES_ROUTES: Routes = [
     pathMatch: 'full',
     canActivate: [roleGuard(['SUPER_ADMIN'])],
     providers: [BranchesService, BranchesStore, DepartmentsService, DepartmentsStore],
-    loadComponent: () => import('./presentation/pages/branches-page.component').then((m) => m.BranchesPageComponent)
+    loadComponent: () => import('./presentation/pages/branches-page/branches-page.component').then((m) => m.BranchesPageComponent)
   },
   {
     path: ':branchId',
@@ -31,6 +31,6 @@ export const BRANCHES_ROUTES: Routes = [
       DepartmentAdminsStore,
     ],
     loadComponent: () =>
-      import('./presentation/pages/branch-details-page.component').then((m) => m.BranchDetailsPageComponent)
+      import('./presentation/pages/branch-details-page/branch-details-page.component').then((m) => m.BranchDetailsPageComponent)
   }
 ];

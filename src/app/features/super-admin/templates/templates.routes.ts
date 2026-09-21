@@ -10,7 +10,7 @@ export const SUPER_ADMIN_TEMPLATES_ROUTES: Routes = [
     canActivate: [roleGuard(['SUPER_ADMIN'])],
     providers: [BranchesService, SuperAdminTemplatesService, SuperAdminTemplatesStore],
     loadComponent: () =>
-      import('./presentation/pages/super-admin-templates-page.component').then(
+      import('./presentation/pages/super-admin-templates-page/super-admin-templates-page.component').then(
         (m) => m.SuperAdminTemplatesPageComponent,
       ),
   },

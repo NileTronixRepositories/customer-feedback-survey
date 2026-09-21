@@ -14,7 +14,7 @@ export const OPERATOR_WORKSPACE_ROUTES: Routes = [
     canActivate: [roleGuard(['OPERATOR'])],
     providers: [OperatorTemplatesService, OperatorTemplatesStore],
     loadComponent: () =>
-      import('./presentation/pages/operator-my-templates-page.component').then(
+      import('./presentation/pages/operator-my-templates-page/operator-my-templates-page.component').then(
         (m) => m.OperatorMyTemplatesPageComponent,
       ),
   },

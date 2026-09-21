@@ -42,7 +42,7 @@ export const BRANCH_ADMIN_ROUTES: Routes = [
         path: '',
         canActivate: [branchDashboardAccessGuard],
         loadComponent: () =>
-          import('./dashboard/presentation/pages/branch-dashboard-page.component').then(
+          import('./dashboard/presentation/pages/branch-dashboard-page/branch-dashboard-page.component').then(
             (m) => m.BranchDashboardPageComponent,
           ),
       },
@@ -51,7 +51,7 @@ export const BRANCH_ADMIN_ROUTES: Routes = [
         canActivate: [branchDashboardAccessGuard],
         providers: [BranchResponsesHistoryStore],
         loadComponent: () =>
-          import('./dashboard/presentation/pages/branch-responses-history-page.component').then(
+          import('./dashboard/presentation/pages/branch-responses-history-page/branch-responses-history-page.component').then(
             (m) => m.BranchResponsesHistoryPageComponent,
           ),
       },
@@ -59,7 +59,7 @@ export const BRANCH_ADMIN_ROUTES: Routes = [
         path: 'templates/dashboard',
         canActivate: [branchDashboardAccessGuard],
         loadComponent: () =>
-          import('./templates/presentation/pages/branch-template-dashboard-page.component').then(
+          import('./templates/presentation/pages/branch-template-dashboard-page/branch-template-dashboard-page.component').then(
             (m) => m.BranchTemplateDashboardPageComponent,
           ),
       },
@@ -68,7 +68,7 @@ export const BRANCH_ADMIN_ROUTES: Routes = [
         canActivate: [branchDashboardAccessGuard],
         providers: [BranchResponsesHistoryStore],
         loadComponent: () =>
-          import('./templates/presentation/pages/branch-template-responses-page.component').then(
+          import('./templates/presentation/pages/branch-template-responses-page/branch-template-responses-page.component').then(
             (m) => m.BranchTemplateResponsesPageComponent,
           ),
       },
@@ -83,14 +83,14 @@ export const BRANCH_ADMIN_ROUTES: Routes = [
         ],
         loadComponent: () =>
           import(
-            './reports/presentation/pages/branch-templates-pdf-report-page.component'
+            './reports/presentation/pages/branch-templates-pdf-report-page/branch-templates-pdf-report-page.component'
           ).then((m) => m.BranchTemplatesPdfReportPageComponent),
       },
       {
         path: 'users',
         canActivate: [branchUsersAccessGuard],
         loadComponent: () =>
-          import('../branch-user/branch-users/presentation/pages/branch-users-page.component').then(
+          import('../branch-user/branch-users/presentation/pages/branch-users-page/branch-users-page.component').then(
             (m) => m.BranchUsersPageComponent,
           ),
       },
@@ -99,7 +99,7 @@ export const BRANCH_ADMIN_ROUTES: Routes = [
         canActivate: [questionsAccessGuard],
         providers: [QuestionGroupsService, QuestionsService, QuestionsStore],
         loadComponent: () =>
-          import('./questions/presentation/pages/questions-page.component').then(
+          import('./questions/presentation/pages/questions-page/questions-page.component').then(
             (m) => m.QuestionsPageComponent,
           ),
       },
@@ -108,7 +108,7 @@ export const BRANCH_ADMIN_ROUTES: Routes = [
         canActivate: [questionGroupsAccessGuard, questionsAccessGuard],
         providers: [QuestionGroupsService, QuestionsService, QuestionsStore],
         loadComponent: () =>
-          import('./questions/presentation/pages/questions-page.component').then(
+          import('./questions/presentation/pages/questions-page/questions-page.component').then(
             (m) => m.QuestionsPageComponent,
           ),
       },
@@ -117,7 +117,7 @@ export const BRANCH_ADMIN_ROUTES: Routes = [
         canActivate: [questionGroupsAccessGuard],
         providers: [QuestionGroupsService, QuestionGroupsStore],
         loadComponent: () =>
-          import('./question-groups/presentation/pages/question-groups-page.component').then(
+          import('./question-groups/presentation/pages/question-groups-page/question-groups-page.component').then(
             (m) => m.QuestionGroupsPageComponent,
           ),
       },
@@ -129,14 +129,14 @@ export const BRANCH_ADMIN_ROUTES: Routes = [
           {
             path: '',
             loadComponent: () =>
-              import('./templates/presentation/pages/branch-templates-page.component').then(
+              import('./templates/presentation/pages/branch-templates-page/branch-templates-page.component').then(
                 (m) => m.BranchTemplatesPageComponent,
               ),
           },
           {
             path: ':templateId/questions',
             loadComponent: () =>
-              import('./templates/presentation/pages/branch-template-questions-page.component').then(
+              import('./templates/presentation/pages/branch-template-questions-page/branch-template-questions-page.component').then(
                 (m) => m.BranchTemplateQuestionsPageComponent,
               ),
           },
@@ -144,7 +144,7 @@ export const BRANCH_ADMIN_ROUTES: Routes = [
             path: ':templateId',
             providers: [BranchResponsesHistoryStore],
             loadComponent: () =>
-              import('./templates/presentation/pages/branch-template-details-page.component').then(
+              import('./templates/presentation/pages/branch-template-details-page/branch-template-details-page.component').then(
                 (m) => m.BranchTemplateDetailsPageComponent,
               ),
           },

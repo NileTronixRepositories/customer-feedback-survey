@@ -14,7 +14,7 @@ export const BRANCH_AREAS_ROUTES: Routes = [
     canActivate: [branchAreasAccessGuard],
     providers: [BranchAreasService, BranchAreasStore],
     loadComponent: () =>
-      import('./presentation/pages/branch-areas-page.component').then(
+      import('./presentation/pages/branch-areas-page/branch-areas-page.component').then(
         (m) => m.BranchAreasPageComponent,
       ),
   },
@@ -23,7 +23,7 @@ export const BRANCH_AREAS_ROUTES: Routes = [
     canActivate: [branchAreaCreateAccessGuard],
     providers: [BranchAreasService, BranchAreaCreateStore],
     loadComponent: () =>
-      import('./presentation/pages/branch-area-create-page.component').then(
+      import('./presentation/pages/branch-area-create-page/branch-area-create-page.component').then(
         (m) => m.BranchAreaCreatePageComponent,
       ),
   },
@@ -32,7 +32,7 @@ export const BRANCH_AREAS_ROUTES: Routes = [
     canActivate: [branchAreaDetailsAccessGuard],
     providers: [BranchAreasService, BranchAreaDetailsStore],
     loadComponent: () =>
-      import('./presentation/pages/branch-area-details-page.component').then(
+      import('./presentation/pages/branch-area-details-page/branch-area-details-page.component').then(
         (m) => m.BranchAreaDetailsPageComponent,
       ),
   },

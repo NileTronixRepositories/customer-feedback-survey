@@ -1,0 +1,68 @@
+import { DatePipe } from '@angular/common';
+import { ChangeDetectionStrategy, Component, inject, input, output } from '@angular/core';
+import { Pencil, Trash2 } from 'lucide-angular';
+import { I18nService } from '../../../../../../core/services/i18n.service';
+import { TranslatePipe } from '../../../../../../shared/pipes/translate.pipe';
+import { ButtonComponent } from '../../../../../../shared/ui/button/button.component';
+import { IconComponent } from '../../../../../../shared/ui/icon/icon.component';
+import { Branch } from '../../../domain/branch.model';
+
+@Component({
+  selector: 'app-branch-table',
+  standalone: true,
+  imports: [ButtonComponent, DatePipe, IconComponent, TranslatePipe],
+  templateUrl: './branch-table.component.html',
+  styleUrl: './branch-table.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush
+})
+export class BranchTableComponent {
+  private readonly i18n = inject(I18nService);
+
+  readonly branches = input<readonly Branch[]>([]);
+  readonly editBranch = output<Branch>();
+  readonly deleteBranch = output<Branch>();
+  readonly branchSelected = output<Branch>();
+  readonly editIcon = Pencil;
+  readonly deleteIcon = Trash2;
+
+  selectBranch(branch: Branch): void {
+    this.branchSelected.emit(branch);
+  }
+
+  editSelectedBranch(branch: Branch, event: MouseEvent): void {
+    event.stopPropagation();
+    this.editBranch.emit(branch);
+  }
+
+  deleteSelectedBranch(branch: Branch, event: MouseEvent): void {
+    event.stopPropagation();
+    this.deleteBranch.emit(branch);
+  }
+
+  createdByName(branch: Branch): string {
+    if (!branch.createdBy) {
+      return '-';
+    }
+
+    return this.localizedText(branch.createdBy.nameEn, branch.createdBy.nameAr);
+  }
+
+  branchDisplayName(branch: { nameEn: string | null; nameAr?: string | null }): string {
+    return this.localizedText(branch.nameEn, branch.nameAr);
+  }
+
+  private localizedText(
+    enValue: string | null | undefined,
+    arValue: string | null | undefined,
+    fallback = '-',
+  ): string {
+    const englishText = enValue?.trim() ?? '';
+    const arabicText = arValue?.trim() ?? '';
+
+    if (this.i18n.language() === 'ar') {
+      return arabicText || englishText || fallback;
+    }
+
+    return englishText || arabicText || fallback;
+  }
+}

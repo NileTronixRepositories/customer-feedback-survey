@@ -7,6 +7,6 @@ export const DASHBOARD_ROUTES: Routes = [
     path: '',
     providers: [DashboardService, DashboardStore],
     loadComponent: () =>
-      import('./presentation/pages/dashboard-page.component').then((m) => m.DashboardPageComponent)
+      import('./presentation/pages/dashboard-page/dashboard-page.component').then((m) => m.DashboardPageComponent)
   }
 ];

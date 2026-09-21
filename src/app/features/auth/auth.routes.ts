@@ -4,13 +4,16 @@ import { passwordChangeGuard } from '../../core/guards/password-change.guard';
 export const AUTH_ROUTES: Routes = [
   {
     path: 'login',
-    loadComponent: () => import('./presentation/pages/login-page.component').then((m) => m.LoginPageComponent),
+    loadComponent: () =>
+      import('./presentation/pages/login-page/login-page.component').then(
+        (m) => m.LoginPageComponent,
+      ),
   },
   {
     path: 'change-password',
     canActivate: [passwordChangeGuard],
     loadComponent: () =>
-      import('./presentation/pages/change-password-page.component').then(
+      import('./presentation/pages/change-password-page/change-password-page.component').then(
         (m) => m.ChangePasswordPageComponent,
       ),
   },
