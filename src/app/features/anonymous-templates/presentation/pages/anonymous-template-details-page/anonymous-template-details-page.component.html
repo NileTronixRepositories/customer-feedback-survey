@@ -6,7 +6,9 @@
         {{ 'common.back' | t }}
       </app-button>
       <div class="min-w-0">
-        <p class="inline-flex rounded-full bg-cyan-50 px-2 py-0.5 text-[10px] font-bold uppercase text-[var(--theme-color-secondary)]">
+        <p
+          class="inline-flex rounded-full bg-cyan-50 px-2 py-0.5 text-[10px] font-bold uppercase text-[var(--theme-color-secondary)]"
+        >
           {{ 'anonymousTemplates.title' | t }}
         </p>
         <h2 class="mt-1 text-base font-bold text-slate-900">
@@ -20,29 +22,43 @@
   </div>
 
   @if (anonymousTemplatesStore.success()) {
-    <div class="rounded-md border border-emerald-100 bg-emerald-50 p-2 text-[11px] font-semibold text-emerald-700">
+    <div
+      class="rounded-md border border-emerald-100 bg-emerald-50 p-2 text-[11px] font-semibold text-emerald-700"
+    >
       {{ anonymousTemplatesStore.success() ?? '' | t }}
     </div>
   }
 
   @if (anonymousTemplatesStore.error()) {
-    <div class="rounded-md border border-rose-100 bg-rose-50 p-2 text-[11px] font-semibold text-[var(--theme-color-danger)]">
+    <div
+      class="rounded-md border border-rose-100 bg-rose-50 p-2 text-[11px] font-semibold text-[var(--theme-color-danger)]"
+    >
       {{ anonymousTemplatesStore.error() ?? '' | t }}
     </div>
   }
 
   @if (anonymousTemplatesStore.detailsLoading()) {
-    <div class="flex items-center gap-2 border border-slate-100 bg-white p-3 text-xs font-semibold text-slate-600">
-      <span class="h-4 w-4 animate-spin rounded-full border-2 border-[var(--theme-color-accent)]/30 border-t-[var(--theme-color-accent)]"></span>
+    <div
+      class="flex items-center gap-2 border border-slate-100 bg-white p-3 text-xs font-semibold text-slate-600"
+    >
+      <span
+        class="h-4 w-4 animate-spin rounded-full border-2 border-[var(--theme-color-accent)]/30 border-t-[var(--theme-color-accent)]"
+      ></span>
       {{ 'anonymousTemplates.detailsLoading' | t }}
     </div>
   } @else if (anonymousTemplatesStore.detailsError()) {
-    <div class="border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-[var(--theme-color-danger)]">
+    <div
+      class="border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-[var(--theme-color-danger)]"
+    >
       {{ anonymousTemplatesStore.detailsError() ?? '' | t }}
     </div>
   } @else if (anonymousTemplatesStore.selectedTemplate(); as template) {
-    <section class="rounded-lg border border-slate-200/70 bg-white p-3 shadow-sm shadow-slate-200/50">
-      <div class="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)_14rem] xl:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)_14rem] xl:gap-4">
+    <section
+      class="rounded-lg border border-slate-200/70 bg-white p-3 shadow-sm shadow-slate-200/50"
+    >
+      <div
+        class="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)_14rem] xl:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)_14rem] xl:gap-4"
+      >
         <div class="min-w-0 flex flex-col rounded-md border border-slate-100 bg-slate-50/50 p-3">
           <div class="flex flex-wrap items-center gap-1.5">
             <h3 class="break-words text-sm font-bold text-slate-900 [overflow-wrap:anywhere]">
@@ -68,7 +84,9 @@
             </span>
           </div>
           @if (template.description) {
-            <p class="mt-1.5 break-words text-[10px] leading-4 text-slate-600 [overflow-wrap:anywhere]">
+            <p
+              class="mt-1.5 break-words text-[10px] leading-4 text-slate-600 [overflow-wrap:anywhere]"
+            >
               {{ template.description }}
             </p>
           }
@@ -86,7 +104,12 @@
               </app-button>
             }
             @if (canUpdateTemplate(template)) {
-              <app-button size="sm" type="button" variant="secondary" (pressed)="openEditTemplate(template)">
+              <app-button
+                size="sm"
+                type="button"
+                variant="secondary"
+                (pressed)="openEditTemplate(template)"
+              >
                 <app-icon [icon]="editIcon" [size]="13" />
                 {{ 'common.edit' | t }}
               </app-button>
@@ -94,10 +117,14 @@
           </div>
         </div>
 
-        <div class="min-w-0 flex flex-col justify-between rounded-md border border-slate-100 bg-slate-50/50 p-3">
+        <div
+          class="min-w-0 flex flex-col justify-between rounded-md border border-slate-100 bg-slate-50/50 p-3"
+        >
           <ul class="grid grid-cols-1 gap-x-3 gap-y-3.5 sm:grid-cols-2 text-[11px]">
             <li class="flex items-start gap-2.5">
-              <span class="mt-0.5 flex shrink-0 items-center justify-center rounded-md bg-white p-1.5 text-slate-400 shadow-sm ring-1 ring-slate-200/60">
+              <span
+                class="mt-0.5 flex shrink-0 items-center justify-center rounded-md bg-white p-1.5 text-slate-400 shadow-sm ring-1 ring-slate-200/60"
+              >
                 <app-icon [icon]="buildingIcon" [size]="13" />
               </span>
               <div class="min-w-0">
@@ -111,7 +138,9 @@
             </li>
 
             <li class="flex items-start gap-2.5">
-              <span class="mt-0.5 flex shrink-0 items-center justify-center rounded-md bg-white p-1.5 text-[var(--theme-color-accent)] shadow-sm ring-1 ring-slate-200/60">
+              <span
+                class="mt-0.5 flex shrink-0 items-center justify-center rounded-md bg-white p-1.5 text-[var(--theme-color-accent)] shadow-sm ring-1 ring-slate-200/60"
+              >
                 <app-icon [icon]="activityIcon" [size]="13" />
               </span>
               <div class="min-w-0">
@@ -125,7 +154,9 @@
             </li>
 
             <li class="flex items-start gap-2.5">
-              <span class="mt-0.5 flex shrink-0 items-center justify-center rounded-md bg-white p-1.5 text-emerald-500 shadow-sm ring-1 ring-slate-200/60">
+              <span
+                class="mt-0.5 flex shrink-0 items-center justify-center rounded-md bg-white p-1.5 text-emerald-500 shadow-sm ring-1 ring-slate-200/60"
+              >
                 <app-icon [icon]="calendarIcon" [size]="13" />
               </span>
               <div class="min-w-0">
@@ -139,7 +170,9 @@
             </li>
 
             <li class="flex items-start gap-2.5">
-              <span class="mt-0.5 flex shrink-0 items-center justify-center rounded-md bg-white p-1.5 text-blue-500 shadow-sm ring-1 ring-slate-200/60">
+              <span
+                class="mt-0.5 flex shrink-0 items-center justify-center rounded-md bg-white p-1.5 text-blue-500 shadow-sm ring-1 ring-slate-200/60"
+              >
                 <app-icon [icon]="clockIcon" [size]="13" />
               </span>
               <div class="min-w-0">
@@ -153,7 +186,9 @@
             </li>
 
             <li class="flex items-start gap-2.5">
-              <span class="mt-0.5 flex shrink-0 items-center justify-center rounded-md bg-white p-1.5 text-rose-400 shadow-sm ring-1 ring-slate-200/60">
+              <span
+                class="mt-0.5 flex shrink-0 items-center justify-center rounded-md bg-white p-1.5 text-rose-400 shadow-sm ring-1 ring-slate-200/60"
+              >
                 <app-icon [icon]="clockIcon" [size]="13" />
               </span>
               <div class="min-w-0">
@@ -161,13 +196,19 @@
                   {{ 'anonymousTemplates.expireToColumn' | t }}
                 </p>
                 <p class="mt-0.5 truncate font-semibold text-slate-800">
-                  {{ template.expireTo ? (template.expireTo | date: 'medium') : ('anonymousTemplates.openEnded' | t) }}
+                  {{
+                    template.expireTo
+                      ? (template.expireTo | date: 'medium')
+                      : ('anonymousTemplates.openEnded' | t)
+                  }}
                 </p>
               </div>
             </li>
 
             <li class="flex items-start gap-2.5">
-              <span class="mt-0.5 flex shrink-0 items-center justify-center rounded-md bg-white p-1.5 text-violet-500 shadow-sm ring-1 ring-slate-200/60">
+              <span
+                class="mt-0.5 flex shrink-0 items-center justify-center rounded-md bg-white p-1.5 text-violet-500 shadow-sm ring-1 ring-slate-200/60"
+              >
                 <app-icon [icon]="calendarIcon" [size]="13" />
               </span>
               <div class="min-w-0">
@@ -180,19 +221,39 @@
               </div>
             </li>
           </ul>
-          
-          <div class="mt-4 flex flex-wrap gap-1 rounded-lg border border-slate-200/70 bg-white p-1.5 shadow-sm shadow-slate-200/40">
-            <div class="inline-flex items-center gap-1.5 rounded-md border border-slate-100 bg-slate-50/70 px-2 py-1">
-              <span class="text-[10px] font-bold uppercase text-slate-400">{{ 'anonymousTemplates.questionsShort' | t }}</span>
-              <span class="text-xs font-extrabold text-slate-900">{{ template.summary.questionsCount }}</span>
+
+          <div
+            class="mt-4 flex flex-wrap gap-1 rounded-lg border border-slate-200/70 bg-white p-1.5 shadow-sm shadow-slate-200/40"
+          >
+            <div
+              class="inline-flex items-center gap-1.5 rounded-md border border-slate-100 bg-slate-50/70 px-2 py-1"
+            >
+              <span class="text-[10px] font-bold uppercase text-slate-400">{{
+                'anonymousTemplates.questionsShort' | t
+              }}</span>
+              <span class="text-xs font-extrabold text-slate-900">{{
+                template.summary.questionsCount
+              }}</span>
             </div>
-            <div class="inline-flex items-center gap-1.5 rounded-md border border-slate-100 bg-slate-50/70 px-2 py-1">
-              <span class="text-[10px] font-bold uppercase text-slate-400">{{ 'anonymousTemplates.inputsShort' | t }}</span>
-              <span class="text-xs font-extrabold text-slate-900">{{ template.summary.customInputsCount }}</span>
+            <div
+              class="inline-flex items-center gap-1.5 rounded-md border border-slate-100 bg-slate-50/70 px-2 py-1"
+            >
+              <span class="text-[10px] font-bold uppercase text-slate-400">{{
+                'anonymousTemplates.inputsShort' | t
+              }}</span>
+              <span class="text-xs font-extrabold text-slate-900">{{
+                template.summary.customInputsCount
+              }}</span>
             </div>
-            <div class="inline-flex items-center gap-1.5 rounded-md border border-slate-100 bg-slate-50/70 px-2 py-1">
-              <span class="text-[10px] font-bold uppercase text-slate-400">{{ 'anonymousTemplates.conditionsShort' | t }}</span>
-              <span class="text-xs font-extrabold text-slate-900">{{ template.summary.questionConditionsCount }}</span>
+            <div
+              class="inline-flex items-center gap-1.5 rounded-md border border-slate-100 bg-slate-50/70 px-2 py-1"
+            >
+              <span class="text-[10px] font-bold uppercase text-slate-400">{{
+                'anonymousTemplates.conditionsShort' | t
+              }}</span>
+              <span class="text-xs font-extrabold text-slate-900">{{
+                template.summary.questionConditionsCount
+              }}</span>
             </div>
           </div>
         </div>
@@ -210,7 +271,9 @@
                 [alt]="'anonymousTemplates.qrCodeAlt' | t"
               />
             } @else {
-              <div class="rounded-md border border-dashed border-slate-200 p-3 text-center text-[11px] text-slate-500">
+              <div
+                class="rounded-md border border-dashed border-slate-200 p-3 text-center text-[11px] text-slate-500"
+              >
                 {{ 'anonymousTemplates.noQrCode' | t }}
               </div>
             }
@@ -224,7 +287,10 @@
                 (pressed)="copyPublicUrl(template.publicUrl)"
               >
                 <app-icon [icon]="copyIcon" [size]="14" />
-                {{ (copiedPublicUrl() ? 'anonymousTemplates.copied' : 'anonymousTemplates.copyUrl') | t }}
+                {{
+                  (copiedPublicUrl() ? 'anonymousTemplates.copied' : 'anonymousTemplates.copyUrl')
+                    | t
+                }}
               </app-button>
               <app-button
                 type="button"
@@ -244,7 +310,9 @@
             <p class="text-[10px] font-bold uppercase text-slate-400">
               {{ 'anonymousTemplates.publicUrl' | t }}
             </p>
-            <p class="mt-1 break-words text-[10px] font-semibold leading-4 text-slate-700 [overflow-wrap:anywhere]">
+            <p
+              class="mt-1 break-words text-[10px] font-semibold leading-4 text-slate-700 [overflow-wrap:anywhere]"
+            >
               {{ template.publicUrl || '-' }}
             </p>
           </div>
@@ -252,18 +320,24 @@
       </div>
     </section>
 
-
-
-    <section class="rounded-lg border border-slate-200/70 bg-white p-2.5 shadow-sm shadow-slate-200/50">
+    <section
+      class="rounded-lg border border-slate-200/70 bg-white p-2.5 shadow-sm shadow-slate-200/50"
+    >
       <div class="mb-2 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h3 class="text-xs font-bold text-slate-900">{{ 'branchTemplates.customInputsTitle' | t }}</h3>
-          <p class="mt-0.5 text-[11px] text-slate-500">{{ 'anonymousTemplates.detailsCustomInputsSubtitle' | t }}</p>
+          <h3 class="text-xs font-bold text-slate-900">
+            {{ 'branchTemplates.customInputsTitle' | t }}
+          </h3>
+          <p class="mt-0.5 text-[11px] text-slate-500">
+            {{ 'anonymousTemplates.detailsCustomInputsSubtitle' | t }}
+          </p>
         </div>
       </div>
       <div class="divide-y divide-slate-100 overflow-hidden rounded-md border border-slate-200/70">
         @for (customInput of template.customInputs; track customInput.customInputId) {
-          <div class="grid gap-2 bg-white px-3 py-2 text-[10px] transition hover:bg-slate-50/70 md:grid-cols-[1fr_1fr_auto] md:items-center">
+          <div
+            class="grid gap-2 bg-white px-3 py-2 text-[10px] transition hover:bg-slate-50/70 md:grid-cols-[1fr_1fr_auto] md:items-center"
+          >
             <div class="min-w-0">
               <p class="break-words text-[11px] font-bold text-slate-900 [overflow-wrap:anywhere]">
                 {{ customInputDisplayLabel(customInput) }}
@@ -275,7 +349,9 @@
             <p class="min-w-0 break-words font-semibold text-slate-600 [overflow-wrap:anywhere]">
               {{ customInputValidationText(customInput) }}
             </p>
-            <div class="flex flex-wrap justify-start gap-1 text-[10px] font-bold text-slate-500 md:justify-end">
+            <div
+              class="flex flex-wrap justify-start gap-1 text-[10px] font-bold text-slate-500 md:justify-end"
+            >
               <span class="rounded-full bg-slate-50 px-2 py-0.5">
                 {{ 'branchTemplates.customInputOrder' | t }} {{ customInput.order }}
               </span>
@@ -306,117 +382,191 @@
       </div>
     </section>
 
-    <section class="rounded-lg border border-slate-200/70 bg-white p-2.5 shadow-sm shadow-slate-200/50">
-      <div class="mb-2 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <h3 class="text-xs font-bold text-slate-900">{{ 'anonymousTemplates.questionsTitle' | t }}</h3>
-          <p class="mt-0.5 text-[11px] text-slate-500">{{ 'anonymousTemplates.questionsSubtitle' | t }}</p>
+    <section
+      class="rounded-2xl border border-slate-200/90 bg-white p-4 sm:p-5 shadow-sm shadow-slate-200/50"
+    >
+      <div
+        class="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 pb-3"
+      >
+        <div class="flex items-center gap-2.5">
+          <span
+            class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-cyan-50 text-[var(--theme-color-secondary)] ring-1 ring-cyan-100"
+          >
+            <app-icon [icon]="listChecksIcon" [size]="18" />
+          </span>
+          <div>
+            <h3 class="text-sm sm:text-base font-extrabold text-slate-900">
+              {{ 'anonymousTemplates.questionsTitle' | t }}
+            </h3>
+            <p class="mt-0.5 text-xs font-semibold text-slate-500">
+              {{ 'anonymousTemplates.questionsSubtitle' | t }}
+            </p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <span
+            class="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-700"
+          >
+            {{ template.questions.length }} {{ 'branchTemplates.questionsSelected' | t }}
+          </span>
         </div>
       </div>
-      <div class="overflow-hidden rounded-md border border-slate-200/70">
+
+      <div class="space-y-3.5">
         @for (question of template.questions; track question.anonymousTemplateQuestionId) {
-          <article class="border-b border-slate-100 bg-white px-2 py-1.5 transition hover:bg-slate-50/40 last:border-b-0">
-            <div class="flex flex-col gap-1 lg:flex-row lg:items-start lg:justify-between">
-              <div class="min-w-0">
-                <div class="flex flex-wrap items-center gap-1.5">
-                  <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-cyan-50 text-[10px] font-bold text-[var(--theme-color-secondary)] ring-1 ring-cyan-100">
-                    {{ question.order }}
-                  </span>
-                  <p class="break-words text-[11px] font-bold text-slate-900 [overflow-wrap:anywhere]">
+          <article
+            class="relative flex flex-col gap-3 rounded-xl border border-slate-200/80 bg-white p-3.5 sm:p-4 shadow-xs transition hover:border-[var(--theme-color-accent)] hover:shadow-sm"
+          >
+            <div class="flex flex-col gap-2.5 lg:flex-row lg:items-start lg:justify-between">
+              <div class="flex items-start gap-2.5 min-w-0 flex-1">
+                <span
+                  class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-cyan-50 text-xs font-black text-[var(--theme-color-secondary)] ring-1 ring-cyan-200/60 mt-0.5"
+                >
+                  #{{ question.order }}
+                </span>
+                <div class="min-w-0 flex-1">
+                  <h4
+                    class="break-words text-sm sm:text-[15px] font-extrabold text-slate-900 leading-snug [overflow-wrap:anywhere]"
+                  >
                     {{ questionDisplayText(question) }}
-                  </p>
+                  </h4>
+                  @if (hasSecondaryText(question)) {
+                    <p
+                      class="mt-0.5 break-words text-xs font-semibold text-slate-400 [overflow-wrap:anywhere]"
+                    >
+                      {{ secondaryQuestionText(question) }}
+                    </p>
+                  }
+                </div>
+              </div>
+
+              <div class="flex shrink-0 flex-wrap items-center gap-1.5 lg:justify-end">
+                <span
+                  class="inline-flex items-center gap-1 rounded-full bg-cyan-50 px-2.5 py-0.5 text-xs font-bold text-[var(--theme-color-secondary)] ring-1 ring-cyan-100"
+                >
+                  {{ questionTypeDisplayName(question.typeName) }}
+                </span>
+
+                @if (question.groupNameEn || question.groupNameAr) {
                   <span
-                    class="rounded-full px-2 py-0.5 text-[10px] font-bold"
+                    class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-bold text-slate-600"
+                  >
+                    {{ questionGroupDisplayName(question) }}
+                  </span>
+                }
+
+                @if (question.scopeName) {
+                  <span
+                    class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-bold"
                     [class.bg-violet-50]="question.isGlobal"
                     [class.text-violet-700]="question.isGlobal"
-                    [class.bg-cyan-50]="!question.isGlobal"
-                    [class.text-[var(--theme-color-secondary)]]="!question.isGlobal"
+                    [class.bg-slate-100]="!question.isGlobal"
+                    [class.text-slate-600]="!question.isGlobal"
                   >
                     {{ question.scopeName }}
                   </span>
-                </div>
-                <div class="mt-1 flex flex-wrap gap-1 ps-7 text-[10px] font-bold text-slate-500">
-                  <span class="rounded-full bg-slate-100/70 px-2 py-0.5">{{ questionTypeDisplayName(question.typeName) }}</span>
-                  <span class="rounded-full bg-slate-100/70 px-2 py-0.5">{{ questionGroupDisplayName(question) }}</span>
+                }
+
+                <span
+                  class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-bold"
+                  [class.bg-emerald-50]="question.isActive"
+                  [class.text-emerald-700]="question.isActive"
+                  [class.bg-slate-100]="!question.isActive"
+                  [class.text-slate-500]="!question.isActive"
+                >
+                  {{ (question.isActive ? 'common.active' : 'branches.inactive') | t }}
+                </span>
+
+                @if (!question.isEditable) {
                   <span
-                    class="rounded-full px-2 py-0.5"
-                    [class.bg-emerald-50]="question.isActive"
-                    [class.text-emerald-700]="question.isActive"
-                    [class.bg-slate-100]="!question.isActive"
-                    [class.text-slate-500]="!question.isActive"
+                    class="inline-flex items-center rounded-full bg-slate-50 border border-slate-200 px-2 py-0.5 text-xs font-bold text-slate-500"
                   >
-                    {{ (question.isActive ? 'common.active' : 'branches.inactive') | t }}
+                    {{ 'anonymousTemplates.readOnly' | t }}
                   </span>
-                  <span class="rounded-full bg-slate-100/70 px-2 py-0.5">
-                    {{ question.isEditable ? ('anonymousTemplates.editable' | t) : ('anonymousTemplates.readOnly' | t) }}
-                  </span>
-                </div>
+                }
               </div>
             </div>
 
             @if (question.options.length > 0) {
-              <div class="mt-2 grid gap-1.5 border-t border-slate-100 pt-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                @for (option of question.options; track option.optionId) {
-                  <div class="rounded-md border border-slate-100 bg-white px-2 py-1">
-                    <div class="flex items-center justify-between gap-2">
-                      <p class="break-words text-[11px] font-bold text-slate-800 [overflow-wrap:anywhere]">
-                        {{ optionDisplayText(option) }}
-                      </p>
-                      <div class="flex shrink-0 flex-wrap justify-end gap-1">
-                        <span class="rounded-full bg-slate-50 px-2 py-0.5 text-[10px] font-bold text-slate-600">
-                          {{ 'branchTemplates.customInputOrder' | t }} {{ option.order }}
-                        </span>
-                        <span class="rounded-full bg-slate-50 px-2 py-0.5 text-[10px] font-bold text-slate-600">
-                          {{ 'anonymousTemplates.value' | t }} {{ option.value ?? '-' }}
+              <div class="border-t border-slate-100 pt-3">
+                <div
+                  class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 w-full"
+                >
+                  @for (option of question.options; track option.optionId) {
+                    <div
+                      class="group relative flex items-center justify-between gap-2 rounded-xl border border-slate-200/90 bg-slate-50/70 p-2.5 transition hover:border-[var(--theme-color-accent)] hover:bg-white hover:shadow-xs"
+                    >
+                      <div class="flex items-center gap-2 min-w-0 flex-1">
+                        <span
+                          class="flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 border-slate-300 bg-white group-hover:border-[var(--theme-color-accent)]"
+                        >
+                          <span
+                            class="h-1.5 w-1.5 rounded-full bg-[var(--theme-color-accent)] opacity-80"
+                          ></span>
                         </span>
                         <span
-                          class="rounded-full px-2 py-0.5 text-[10px] font-bold"
-                          [class.bg-emerald-50]="option.isActive"
-                          [class.text-emerald-700]="option.isActive"
-                          [class.bg-slate-100]="!option.isActive"
-                          [class.text-slate-500]="!option.isActive"
+                          class="break-words text-xs font-bold text-slate-800 [overflow-wrap:anywhere] leading-snug"
                         >
-                          {{ (option.isActive ? 'common.active' : 'branches.inactive') | t }}
+                          {{ optionDisplayText(option) }}
                         </span>
                       </div>
+                      @if (option.value !== null) {
+                        <span
+                          class="shrink-0 inline-flex items-center justify-center rounded-md bg-white border border-slate-200/90 px-2 py-0.5 text-xs font-black text-[var(--theme-color-secondary)] shadow-2xs"
+                          [title]="'anonymousTemplates.value' | t"
+                        >
+                          {{ option.value }}
+                        </span>
+                      }
                     </div>
-                  </div>
-                }
+                  }
+                </div>
               </div>
             }
 
             @if (conditionsForQuestion(question); as questionConditions) {
               @if (questionConditions.length > 0) {
-                <div class="mt-1.5 rounded-md border border-cyan-100 bg-cyan-50/30 p-1.5">
-                  <p class="mb-1 text-[10px] font-bold text-[var(--theme-color-secondary)]">
+                <div class="mt-1 rounded-xl border border-cyan-100 bg-cyan-50/20 p-2.5">
+                  <p
+                    class="mb-1.5 text-xs font-bold text-[var(--theme-color-secondary)] flex items-center gap-1.5"
+                  >
+                    <app-icon [icon]="flowIcon" [size]="14" />
                     {{ 'anonymousTemplates.conditionsTitle' | t }}
                   </p>
-                  <div class="grid gap-1">
-                    @for (conditionView of questionConditions; track conditionView.condition.conditionId) {
-                      <div class="grid gap-1.5 rounded-md border border-cyan-100/70 bg-white px-2.5 py-1.5 md:grid-cols-[1fr_auto_1fr_auto] md:items-center">
+                  <div class="grid gap-1.5">
+                    @for (
+                      conditionView of questionConditions;
+                      track conditionView.condition.conditionId
+                    ) {
+                      <div
+                        class="grid gap-2 rounded-lg border border-cyan-100/70 bg-white p-2 text-xs md:grid-cols-[1fr_auto_1fr_auto] md:items-center"
+                      >
                         <div class="min-w-0">
-                          <p class="text-[10px] font-bold text-slate-500">
+                          <p class="font-bold text-slate-600">
                             {{ conditionTriggerDisplay(conditionView) }}
                           </p>
                         </div>
-                        <span class="w-fit rounded-full bg-cyan-50 px-2 py-0.5 text-[10px] font-bold text-[var(--theme-color-secondary)]">
+                        <span
+                          class="w-fit rounded-full bg-cyan-50 px-2.5 py-0.5 font-bold text-[var(--theme-color-secondary)]"
+                        >
                           {{ 'anonymousTemplates.thenShow' | t }}
                         </span>
-                        <p class="min-w-0 break-words text-[11px] font-bold text-slate-900 [overflow-wrap:anywhere]">
-                          {{ conditionQuestionDisplayText(conditionView.child, conditionView.condition.childAnonymousTemplateQuestionId) }}
+                        <p
+                          class="min-w-0 break-words font-extrabold text-slate-900 [overflow-wrap:anywhere]"
+                        >
+                          {{
+                            conditionQuestionDisplayText(
+                              conditionView.child,
+                              conditionView.condition.childAnonymousTemplateQuestionId
+                            )
+                          }}
                         </p>
                         <div class="flex flex-wrap gap-1">
-                          <span class="w-fit rounded-full bg-slate-50 px-2 py-0.5 text-[10px] font-bold text-slate-600">
-                            {{ 'branchTemplates.customInputOrder' | t }} {{ conditionView.condition.order }}
-                          </span>
                           <span
-                            class="w-fit rounded-full px-2 py-0.5 text-[10px] font-bold"
-                            [class.bg-emerald-50]="conditionView.condition.isActive"
-                            [class.text-emerald-700]="conditionView.condition.isActive"
-                            [class.bg-slate-100]="!conditionView.condition.isActive"
-                            [class.text-slate-500]="!conditionView.condition.isActive"
+                            class="w-fit rounded-full bg-slate-50 px-2 py-0.5 text-[11px] font-bold text-slate-600"
                           >
-                            {{ (conditionView.condition.isActive ? 'common.active' : 'branches.inactive') | t }}
+                            {{ 'branchTemplates.customInputOrder' | t }}
+                            {{ conditionView.condition.order }}
                           </span>
                         </div>
                       </div>
@@ -427,7 +577,9 @@
             }
           </article>
         } @empty {
-          <div class="p-4 text-center text-[11px] text-slate-500">
+          <div
+            class="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-6 text-center text-xs font-semibold text-slate-500"
+          >
             {{ 'anonymousTemplates.noQuestions' | t }}
           </div>
         }
@@ -435,50 +587,83 @@
     </section>
 
     @if (orphanConditionViews().length > 0) {
-      <section class="rounded-lg border border-slate-200/70 bg-white p-2.5 shadow-sm shadow-slate-200/50">
+      <section
+        class="rounded-lg border border-slate-200/70 bg-white p-2.5 shadow-sm shadow-slate-200/50"
+      >
         <div class="mb-2">
-          <h3 class="text-xs font-bold text-slate-900">{{ 'anonymousTemplates.conditionsTitle' | t }}</h3>
-          <p class="mt-0.5 text-[11px] text-slate-500">{{ 'anonymousTemplates.conditionsSubtitle' | t }}</p>
+          <h3 class="text-xs font-bold text-slate-900">
+            {{ 'anonymousTemplates.conditionsTitle' | t }}
+          </h3>
+          <p class="mt-0.5 text-[11px] text-slate-500">
+            {{ 'anonymousTemplates.conditionsSubtitle' | t }}
+          </p>
         </div>
-        <div class="divide-y divide-slate-100 overflow-hidden rounded-md border border-slate-200/70">
-          @for (conditionView of orphanConditionViews(); track conditionView.condition.conditionId) {
-          <article class="bg-white px-2 py-1.5 transition hover:bg-slate-50/40">
-            <div class="grid gap-2 md:grid-cols-[auto_1fr_auto_1fr_auto] md:items-center">
-              <span class="flex h-6 w-6 items-center justify-center rounded-md bg-cyan-50 text-[var(--theme-color-secondary)]">
-                <app-icon [icon]="flowIcon" [size]="14" />
-              </span>
-              <div class="min-w-0">
-                <p class="break-words text-[11px] font-bold text-slate-900 [overflow-wrap:anywhere]">
-                  {{ conditionQuestionDisplayText(conditionView.parent, conditionView.condition.parentAnonymousTemplateQuestionId) }}
-                </p>
-                <p class="mt-0.5 text-[10px] font-bold text-slate-500">
-                  {{ conditionTriggerDisplay(conditionView) }}
-                </p>
-              </div>
-              <span class="w-fit rounded-full bg-cyan-50 px-2 py-0.5 text-[10px] font-bold text-[var(--theme-color-secondary)]">
-                {{ 'anonymousTemplates.thenShow' | t }}
-              </span>
-              <div class="min-w-0">
-                <p class="break-words text-[11px] font-bold text-[var(--theme-color-secondary)] [overflow-wrap:anywhere]">
-                  {{ conditionQuestionDisplayText(conditionView.child, conditionView.condition.childAnonymousTemplateQuestionId) }}
-                </p>
-              </div>
-              <div class="flex flex-wrap gap-1">
-                <span class="w-fit rounded-full bg-slate-50 px-2 py-0.5 text-[10px] font-bold text-slate-600">
-                  {{ 'branchTemplates.customInputOrder' | t }} {{ conditionView.condition.order }}
-                </span>
+        <div
+          class="divide-y divide-slate-100 overflow-hidden rounded-md border border-slate-200/70"
+        >
+          @for (
+            conditionView of orphanConditionViews();
+            track conditionView.condition.conditionId
+          ) {
+            <article class="bg-white px-2 py-1.5 transition hover:bg-slate-50/40">
+              <div class="grid gap-2 md:grid-cols-[auto_1fr_auto_1fr_auto] md:items-center">
                 <span
-                  class="w-fit rounded-full px-2 py-0.5 text-[10px] font-bold"
-                  [class.bg-emerald-50]="conditionView.condition.isActive"
-                  [class.text-emerald-700]="conditionView.condition.isActive"
-                  [class.bg-slate-100]="!conditionView.condition.isActive"
-                  [class.text-slate-500]="!conditionView.condition.isActive"
+                  class="flex h-6 w-6 items-center justify-center rounded-md bg-cyan-50 text-[var(--theme-color-secondary)]"
                 >
-                  {{ (conditionView.condition.isActive ? 'common.active' : 'branches.inactive') | t }}
+                  <app-icon [icon]="flowIcon" [size]="14" />
                 </span>
+                <div class="min-w-0">
+                  <p
+                    class="break-words text-[11px] font-bold text-slate-900 [overflow-wrap:anywhere]"
+                  >
+                    {{
+                      conditionQuestionDisplayText(
+                        conditionView.parent,
+                        conditionView.condition.parentAnonymousTemplateQuestionId
+                      )
+                    }}
+                  </p>
+                  <p class="mt-0.5 text-[10px] font-bold text-slate-500">
+                    {{ conditionTriggerDisplay(conditionView) }}
+                  </p>
+                </div>
+                <span
+                  class="w-fit rounded-full bg-cyan-50 px-2 py-0.5 text-[10px] font-bold text-[var(--theme-color-secondary)]"
+                >
+                  {{ 'anonymousTemplates.thenShow' | t }}
+                </span>
+                <div class="min-w-0">
+                  <p
+                    class="break-words text-[11px] font-bold text-[var(--theme-color-secondary)] [overflow-wrap:anywhere]"
+                  >
+                    {{
+                      conditionQuestionDisplayText(
+                        conditionView.child,
+                        conditionView.condition.childAnonymousTemplateQuestionId
+                      )
+                    }}
+                  </p>
+                </div>
+                <div class="flex flex-wrap gap-1">
+                  <span
+                    class="w-fit rounded-full bg-slate-50 px-2 py-0.5 text-[10px] font-bold text-slate-600"
+                  >
+                    {{ 'branchTemplates.customInputOrder' | t }} {{ conditionView.condition.order }}
+                  </span>
+                  <span
+                    class="w-fit rounded-full px-2 py-0.5 text-[10px] font-bold"
+                    [class.bg-emerald-50]="conditionView.condition.isActive"
+                    [class.text-emerald-700]="conditionView.condition.isActive"
+                    [class.bg-slate-100]="!conditionView.condition.isActive"
+                    [class.text-slate-500]="!conditionView.condition.isActive"
+                  >
+                    {{
+                      (conditionView.condition.isActive ? 'common.active' : 'branches.inactive') | t
+                    }}
+                  </span>
+                </div>
               </div>
-            </div>
-          </article>
+            </article>
           }
         </div>
       </section>
@@ -493,7 +678,11 @@
       <p class="mb-2 text-[11px] font-semibold text-slate-500">
         {{ 'anonymousTemplates.updateSubtitle' | t }}
       </p>
-      <form class="space-y-2 text-[11px]" [formGroup]="editForm" (ngSubmit)="updateTemplate(template)">
+      <form
+        class="space-y-2 text-[11px]"
+        [formGroup]="editForm"
+        (ngSubmit)="updateTemplate(template)"
+      >
         <div class="grid gap-2 md:grid-cols-2">
           <app-input
             size="sm"
@@ -526,7 +715,9 @@
             </span>
             <input
               class="h-8 w-full rounded-md border px-2.5 py-1.5 text-[11px] text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/10 disabled:bg-slate-100"
-              [class.border-[var(--theme-color-danger)]]="templateFieldError('activeFrom').length > 0"
+              [class.border-[var(--theme-color-danger)]]="
+                templateFieldError('activeFrom').length > 0
+              "
               [class.border-slate-200]="templateFieldError('activeFrom').length === 0"
               type="datetime-local"
               formControlName="activeFrom"
@@ -580,12 +771,18 @@
           </div>
 
           @if (customInputsArray.length === 0) {
-            <div class="rounded-md border border-dashed border-slate-200 bg-white p-2 text-center text-[10px] font-semibold text-slate-500">
+            <div
+              class="rounded-md border border-dashed border-slate-200 bg-white p-2 text-center text-[10px] font-semibold text-slate-500"
+            >
               {{ 'branchTemplates.noCustomInputs' | t }}
             </div>
           } @else {
             <div class="space-y-2">
-              @for (inputGroup of customInputsArray.controls; track inputGroup; let inputIndex = $index) {
+              @for (
+                inputGroup of customInputsArray.controls;
+                track inputGroup;
+                let inputIndex = $index
+              ) {
                 <div
                   class="rounded-md border border-slate-200 bg-white p-2 shadow-sm shadow-slate-200/50"
                   [formGroupName]="inputIndex"
@@ -619,13 +816,19 @@
                       </span>
                       <input
                         class="h-8 w-full rounded-md border px-2.5 py-1.5 text-[11px] text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/10"
-                        [class.border-[var(--theme-color-danger)]]="customInputFieldError(inputIndex, 'name').length > 0"
-                        [class.border-slate-200]="customInputFieldError(inputIndex, 'name').length === 0"
+                        [class.border-[var(--theme-color-danger)]]="
+                          customInputFieldError(inputIndex, 'name').length > 0
+                        "
+                        [class.border-slate-200]="
+                          customInputFieldError(inputIndex, 'name').length === 0
+                        "
                         formControlName="name"
                         [placeholder]="'branchTemplates.customInputNamePlaceholder' | t"
                       />
                       @if (customInputFieldError(inputIndex, 'name')) {
-                        <span class="mt-1 block text-[10px] font-medium text-[var(--theme-color-danger)]">
+                        <span
+                          class="mt-1 block text-[10px] font-medium text-[var(--theme-color-danger)]"
+                        >
                           {{ customInputFieldError(inputIndex, 'name') | t }}
                         </span>
                       }
@@ -637,13 +840,19 @@
                       </span>
                       <input
                         class="h-8 w-full rounded-md border px-2.5 py-1.5 text-[11px] text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/10"
-                        [class.border-[var(--theme-color-danger)]]="customInputFieldError(inputIndex, 'labelEn').length > 0"
-                        [class.border-slate-200]="customInputFieldError(inputIndex, 'labelEn').length === 0"
+                        [class.border-[var(--theme-color-danger)]]="
+                          customInputFieldError(inputIndex, 'labelEn').length > 0
+                        "
+                        [class.border-slate-200]="
+                          customInputFieldError(inputIndex, 'labelEn').length === 0
+                        "
                         formControlName="labelEn"
                         [placeholder]="'branchTemplates.customInputLabelEnPlaceholder' | t"
                       />
                       @if (customInputFieldError(inputIndex, 'labelEn')) {
-                        <span class="mt-1 block text-[10px] font-medium text-[var(--theme-color-danger)]">
+                        <span
+                          class="mt-1 block text-[10px] font-medium text-[var(--theme-color-danger)]"
+                        >
                           {{ customInputFieldError(inputIndex, 'labelEn') | t }}
                         </span>
                       }
@@ -655,13 +864,19 @@
                       </span>
                       <input
                         class="h-8 w-full rounded-md border px-2.5 py-1.5 text-[11px] text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/10"
-                        [class.border-[var(--theme-color-danger)]]="customInputFieldError(inputIndex, 'labelAr').length > 0"
-                        [class.border-slate-200]="customInputFieldError(inputIndex, 'labelAr').length === 0"
+                        [class.border-[var(--theme-color-danger)]]="
+                          customInputFieldError(inputIndex, 'labelAr').length > 0
+                        "
+                        [class.border-slate-200]="
+                          customInputFieldError(inputIndex, 'labelAr').length === 0
+                        "
                         formControlName="labelAr"
                         [placeholder]="'branchTemplates.customInputLabelArPlaceholder' | t"
                       />
                       @if (customInputFieldError(inputIndex, 'labelAr')) {
-                        <span class="mt-1 block text-[10px] font-medium text-[var(--theme-color-danger)]">
+                        <span
+                          class="mt-1 block text-[10px] font-medium text-[var(--theme-color-danger)]"
+                        >
                           {{ customInputFieldError(inputIndex, 'labelAr') | t }}
                         </span>
                       }
@@ -679,10 +894,14 @@
                         (change)="changeCustomInputType(inputGroup)"
                       >
                         <option value="1">{{ 'branchTemplates.customInputTypeString' | t }}</option>
-                        <option value="2">{{ 'branchTemplates.customInputTypeInteger' | t }}</option>
+                        <option value="2">
+                          {{ 'branchTemplates.customInputTypeInteger' | t }}
+                        </option>
                       </select>
                       @if (customInputFieldError(inputIndex, 'type')) {
-                        <span class="mt-1 block text-[10px] font-medium text-[var(--theme-color-danger)]">
+                        <span
+                          class="mt-1 block text-[10px] font-medium text-[var(--theme-color-danger)]"
+                        >
                           {{ customInputFieldError(inputIndex, 'type') | t }}
                         </span>
                       }
@@ -694,20 +913,28 @@
                       </span>
                       <input
                         class="h-8 w-full rounded-md border px-2.5 py-1.5 text-[11px] text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/10"
-                        [class.border-[var(--theme-color-danger)]]="customInputFieldError(inputIndex, 'order').length > 0"
-                        [class.border-slate-200]="customInputFieldError(inputIndex, 'order').length === 0"
+                        [class.border-[var(--theme-color-danger)]]="
+                          customInputFieldError(inputIndex, 'order').length > 0
+                        "
+                        [class.border-slate-200]="
+                          customInputFieldError(inputIndex, 'order').length === 0
+                        "
                         type="number"
                         min="1"
                         formControlName="order"
                       />
                       @if (customInputFieldError(inputIndex, 'order')) {
-                        <span class="mt-1 block text-[10px] font-medium text-[var(--theme-color-danger)]">
+                        <span
+                          class="mt-1 block text-[10px] font-medium text-[var(--theme-color-danger)]"
+                        >
                           {{ customInputFieldError(inputIndex, 'order') | t }}
                         </span>
                       }
                     </label>
 
-                    <label class="flex h-8 items-center gap-2 self-end rounded-md border border-slate-200 bg-white px-2.5 text-[11px] font-semibold text-slate-700 shadow-sm">
+                    <label
+                      class="flex h-8 items-center gap-2 self-end rounded-md border border-slate-200 bg-white px-2.5 text-[11px] font-semibold text-slate-700 shadow-sm"
+                    >
                       <input
                         class="h-4 w-4 rounded border-slate-300 text-[var(--theme-color-accent)] focus:ring-[var(--theme-color-accent)]"
                         type="checkbox"
@@ -725,15 +952,21 @@
                         </span>
                         <input
                           class="h-8 w-full rounded-md border px-2.5 py-1.5 text-[11px] text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/10"
-                          [class.border-[var(--theme-color-danger)]]="customInputFieldError(inputIndex, 'minLength').length > 0"
-                          [class.border-slate-200]="customInputFieldError(inputIndex, 'minLength').length === 0"
+                          [class.border-[var(--theme-color-danger)]]="
+                            customInputFieldError(inputIndex, 'minLength').length > 0
+                          "
+                          [class.border-slate-200]="
+                            customInputFieldError(inputIndex, 'minLength').length === 0
+                          "
                           type="number"
                           min="0"
                           max="3000"
                           formControlName="minLength"
                         />
                         @if (customInputFieldError(inputIndex, 'minLength')) {
-                          <span class="mt-1 block text-[10px] font-medium text-[var(--theme-color-danger)]">
+                          <span
+                            class="mt-1 block text-[10px] font-medium text-[var(--theme-color-danger)]"
+                          >
                             {{ customInputFieldError(inputIndex, 'minLength') | t }}
                           </span>
                         }
@@ -745,15 +978,21 @@
                         </span>
                         <input
                           class="h-8 w-full rounded-md border px-2.5 py-1.5 text-[11px] text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/10"
-                          [class.border-[var(--theme-color-danger)]]="customInputFieldError(inputIndex, 'maxLength').length > 0"
-                          [class.border-slate-200]="customInputFieldError(inputIndex, 'maxLength').length === 0"
+                          [class.border-[var(--theme-color-danger)]]="
+                            customInputFieldError(inputIndex, 'maxLength').length > 0
+                          "
+                          [class.border-slate-200]="
+                            customInputFieldError(inputIndex, 'maxLength').length === 0
+                          "
                           type="number"
                           min="0"
                           max="3000"
                           formControlName="maxLength"
                         />
                         @if (customInputFieldError(inputIndex, 'maxLength')) {
-                          <span class="mt-1 block text-[10px] font-medium text-[var(--theme-color-danger)]">
+                          <span
+                            class="mt-1 block text-[10px] font-medium text-[var(--theme-color-danger)]"
+                          >
                             {{ customInputFieldError(inputIndex, 'maxLength') | t }}
                           </span>
                         }
@@ -765,8 +1004,12 @@
                         </span>
                         <input
                           class="h-8 w-full rounded-md border px-2.5 py-1.5 text-[11px] text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/10"
-                          [class.border-[var(--theme-color-danger)]]="customInputFieldError(inputIndex, 'startWith').length > 0"
-                          [class.border-slate-200]="customInputFieldError(inputIndex, 'startWith').length === 0"
+                          [class.border-[var(--theme-color-danger)]]="
+                            customInputFieldError(inputIndex, 'startWith').length > 0
+                          "
+                          [class.border-slate-200]="
+                            customInputFieldError(inputIndex, 'startWith').length === 0
+                          "
                           type="text"
                           maxlength="100"
                           formControlName="startWith"
@@ -776,7 +1019,9 @@
                           {{ 'branchTemplates.customInputStartWithHint' | t }}
                         </span>
                         @if (customInputFieldError(inputIndex, 'startWith')) {
-                          <span class="mt-1 block text-[10px] font-medium text-[var(--theme-color-danger)]">
+                          <span
+                            class="mt-1 block text-[10px] font-medium text-[var(--theme-color-danger)]"
+                          >
                             {{ customInputFieldError(inputIndex, 'startWith') | t }}
                           </span>
                         }
@@ -790,13 +1035,19 @@
                         </span>
                         <input
                           class="h-8 w-full rounded-md border px-2.5 py-1.5 text-[11px] text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/10"
-                          [class.border-[var(--theme-color-danger)]]="customInputFieldError(inputIndex, 'minValue').length > 0"
-                          [class.border-slate-200]="customInputFieldError(inputIndex, 'minValue').length === 0"
+                          [class.border-[var(--theme-color-danger)]]="
+                            customInputFieldError(inputIndex, 'minValue').length > 0
+                          "
+                          [class.border-slate-200]="
+                            customInputFieldError(inputIndex, 'minValue').length === 0
+                          "
                           type="number"
                           formControlName="minValue"
                         />
                         @if (customInputFieldError(inputIndex, 'minValue')) {
-                          <span class="mt-1 block text-[10px] font-medium text-[var(--theme-color-danger)]">
+                          <span
+                            class="mt-1 block text-[10px] font-medium text-[var(--theme-color-danger)]"
+                          >
                             {{ customInputFieldError(inputIndex, 'minValue') | t }}
                           </span>
                         }
@@ -808,13 +1059,19 @@
                         </span>
                         <input
                           class="h-8 w-full rounded-md border px-2.5 py-1.5 text-[11px] text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/10"
-                          [class.border-[var(--theme-color-danger)]]="customInputFieldError(inputIndex, 'maxValue').length > 0"
-                          [class.border-slate-200]="customInputFieldError(inputIndex, 'maxValue').length === 0"
+                          [class.border-[var(--theme-color-danger)]]="
+                            customInputFieldError(inputIndex, 'maxValue').length > 0
+                          "
+                          [class.border-slate-200]="
+                            customInputFieldError(inputIndex, 'maxValue').length === 0
+                          "
                           type="number"
                           formControlName="maxValue"
                         />
                         @if (customInputFieldError(inputIndex, 'maxValue')) {
-                          <span class="mt-1 block text-[10px] font-medium text-[var(--theme-color-danger)]">
+                          <span
+                            class="mt-1 block text-[10px] font-medium text-[var(--theme-color-danger)]"
+                          >
                             {{ customInputFieldError(inputIndex, 'maxValue') | t }}
                           </span>
                         }

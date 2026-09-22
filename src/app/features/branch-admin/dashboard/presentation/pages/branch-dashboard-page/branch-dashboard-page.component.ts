@@ -104,83 +104,82 @@ export class BranchDashboardPageComponent implements OnInit, OnDestroy {
   readonly micIcon = Mic;
   readonly responsesIcon = UsersRound;
   readonly searchIcon = Search;
-  readonly filtersIcon = SlidersHorizontal;
+  readonly slidersIcon = SlidersHorizontal;
   readonly smileIcon = Smile;
   readonly templateIcon = FileText;
   readonly trendIcon = TrendingUp;
 
-  readonly selectedSegmentName = signal('');
   readonly advancedFiltersOpen = signal(true);
-  readonly customInputSegmentsVisible = false;
+  readonly selectedSegmentName = signal<string | null>(null);
   readonly templateDetailsOpen = signal(false);
   readonly templateDetailsLoading = signal(false);
   readonly templateDetailsError = signal<string | null>(null);
   readonly selectedTemplateDetails = signal<BranchTemplate | null>(null);
-  readonly selectedSegment = computed<BranchDashboardCustomInputSegment | null>(() => {
-    const dashboard = this.dashboardStore.dashboard();
-    const segments = dashboard?.customInputSegments ?? [];
-    if (segments.length === 0) {
-      return null;
-    }
 
-    const selectedName = this.selectedSegmentName();
-    return segments.find((segment) => segment.customInputName === selectedName) ?? segments[0];
-  });
-
-  // SVG Radial Gauge Computations
-  readonly averageScore = computed(() => this.dashboardStore.dashboard()?.summary.averageScorePercentage ?? 0);
-  
-  readonly scoreColor = computed(() => {
-    const score = this.averageScore();
-    if (score >= 80) return this.themeColors.color('success');
-    if (score >= 60) return this.themeColors.color('warning');
-    return this.themeColors.color('danger');
-  });
-
-  readonly scoreBg = computed(() => {
-    const score = this.averageScore();
-    if (score >= 80) return this.themeColors.rgba('success', 0.06);
-    if (score >= 60) return this.themeColors.rgba('warning', 0.06);
-    return this.themeColors.rgba('danger', 0.06);
-  });
-
-  readonly scoreTextColorClass = computed(() => {
-    const score = this.averageScore();
-    if (score >= 80) return 'text-emerald-500';
-    if (score >= 60) return 'text-amber-500';
-    return 'text-rose-500';
-  });
-
-  readonly strokeDashArray = 238.7; // 2 * Math.PI * 38
-  readonly strokeDashOffset = computed(() => {
-    const score = this.averageScore();
-    return this.strokeDashArray - (score / 100) * this.strokeDashArray;
-  });
-
-  // Sentiment Distribution Ratios
-  readonly totalResponses = computed(() => this.dashboardStore.dashboard()?.summary.totalResponses ?? 0);
-  
-  readonly satisfiedPercent = computed(() => {
-    const total = this.totalResponses();
-    return total > 0 ? ((this.dashboardStore.dashboard()?.summary.satisfiedResponses ?? 0) / total) * 100 : 0;
-  });
-
-  readonly neutralPercent = computed(() => {
-    const total = this.totalResponses();
-    return total > 0 ? ((this.dashboardStore.dashboard()?.summary.neutralResponses ?? 0) / total) * 100 : 0;
-  });
-
-  readonly unhappyPercent = computed(() => {
-    const total = this.totalResponses();
-    return total > 0 ? ((this.dashboardStore.dashboard()?.summary.unhappyResponses ?? 0) / total) * 100 : 0;
-  });
-
-  // Operational Template scale
-  readonly activeTemplatesCount = computed(() => this.dashboardStore.dashboard()?.summary.activeTemplatesCount ?? 0);
-  readonly templatesWithResponsesCount = computed(() => this.dashboardStore.dashboard()?.summary.templatesWithResponsesCount ?? 0);
+  readonly templatesTotalCount = computed(() => this.branchStore.branch()?.templates.length ?? 0);
+  readonly activeTemplatesCount = computed(
+    () =>
+      this.dashboardStore.dashboard()?.summary.activeTemplatesCount ??
+      this.branchStore
+        .branch()
+        ?.templates.filter((template) => template.status?.toLowerCase() === 'active').length ??
+      0,
+  );
+  readonly inactiveTemplatesCount = computed(() =>
+    Math.max(0, this.templatesTotalCount() - this.activeTemplatesCount()),
+  );
+  readonly templatesWithResponsesCount = computed(
+    () => this.dashboardStore.dashboard()?.summary.templatesWithResponsesCount ?? 0,
+  );
   readonly templateActivityPercent = computed(() => {
     const total = this.activeTemplatesCount();
     return total > 0 ? (this.templatesWithResponsesCount() / total) * 100 : 0;
+  });
+
+  readonly filtersIcon = SlidersHorizontal;
+  readonly strokeDashArray = 238.76;
+  readonly customInputSegmentsVisible = false;
+
+  readonly totalResponses = computed(
+    () => this.dashboardStore.dashboard()?.summary.totalResponses ?? 0,
+  );
+  readonly averageScore = computed(
+    () => this.dashboardStore.dashboard()?.summary.averageScorePercentage ?? 0,
+  );
+  readonly scoreColor = computed(() => {
+    const score = this.averageScore();
+    if (score >= 80) return '#10b981';
+    if (score >= 60) return '#f59e0b';
+    return '#ef4444';
+  });
+  readonly strokeDashOffset = computed(() => {
+    const percent = Math.min(Math.max(this.averageScore(), 0), 100);
+    return this.strokeDashArray - (this.strokeDashArray * percent) / 100;
+  });
+
+  readonly satisfiedPercent = computed(() => {
+    const total = this.totalResponses();
+    const satisfied = this.dashboardStore.dashboard()?.summary.satisfiedResponses ?? 0;
+    return total > 0 ? (satisfied / total) * 100 : 0;
+  });
+  readonly neutralPercent = computed(() => {
+    const total = this.totalResponses();
+    const neutral = this.dashboardStore.dashboard()?.summary.neutralResponses ?? 0;
+    return total > 0 ? (neutral / total) * 100 : 0;
+  });
+  readonly unhappyPercent = computed(() => {
+    const total = this.totalResponses();
+    const unhappy = this.dashboardStore.dashboard()?.summary.unhappyResponses ?? 0;
+    return total > 0 ? (unhappy / total) * 100 : 0;
+  });
+
+  readonly selectedSegment = computed(() => {
+    const name = this.selectedSegmentName();
+    const segments = this.dashboardStore.dashboard()?.customInputSegments ?? [];
+    if (!name) {
+      return segments[0] ?? null;
+    }
+    return segments.find((segment) => segment.customInputName === name) ?? segments[0] ?? null;
   });
 
   readonly filtersForm = this.formBuilder.nonNullable.group({
@@ -211,14 +210,17 @@ export class BranchDashboardPageComponent implements OnInit, OnDestroy {
     effect(() => {
       const segments = this.dashboardStore.dashboard()?.customInputSegments ?? [];
       const selectedName = this.selectedSegmentName();
-      if (segments.length > 0 && !segments.some((segment) => segment.customInputName === selectedName)) {
+      if (
+        segments.length > 0 &&
+        !segments.some((segment) => segment.customInputName === selectedName)
+      ) {
         this.selectedSegmentName.set(segments[0].customInputName);
       }
     });
   }
 
   ngOnInit(): void {
-    if (this.authStore.isBranchScopedActor()) {
+    if (this.authStore.isBranchAdminUserType()) {
       this.branchStore.load();
     }
     this.dashboardStore.load();

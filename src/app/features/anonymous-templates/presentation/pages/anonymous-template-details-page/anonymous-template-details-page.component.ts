@@ -529,6 +529,20 @@ export class AnonymousTemplateDetailsPageComponent implements OnInit {
     return this.localizedText(question.textEn, question.textAr);
   }
 
+  secondaryQuestionText(question: { textEn: string | null; textAr?: string | null }): string {
+    const isArabic = this.i18n.language() === 'ar';
+    if (isArabic) {
+      return (question.textEn ?? '').trim();
+    }
+    return (question.textAr ?? '').trim();
+  }
+
+  hasSecondaryText(question: { textEn: string | null; textAr?: string | null }): boolean {
+    const secondary = this.secondaryQuestionText(question);
+    const primary = this.questionDisplayText(question);
+    return secondary.length > 0 && secondary !== primary;
+  }
+
   questionTypeDisplayName(typeName: string): string {
     const normalizedTypeName = typeName.trim().toLowerCase();
     const isArabic = this.i18n.language() === 'ar';

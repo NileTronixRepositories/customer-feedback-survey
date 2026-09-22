@@ -1,58 +1,72 @@
-<app-modal [title]="'systemResponseDetails.title' | t" [open]="open()" size="lg" (closed)="closed.emit()">
+<app-modal
+  [title]="'systemResponseDetails.title' | t"
+  [open]="open()"
+  size="xl"
+  (closed)="closed.emit()"
+>
   @if (loading()) {
-    <div class="space-y-2">
-      <div class="h-16 animate-pulse rounded-lg bg-slate-50"></div>
-      <div class="h-24 animate-pulse rounded-lg bg-slate-50"></div>
-      <div class="h-32 animate-pulse rounded-lg bg-slate-50"></div>
+    <div class="space-y-2.5 p-1">
+      <div class="h-20 animate-pulse rounded-xl bg-slate-100"></div>
+      <div class="grid grid-cols-3 gap-2.5">
+        <div class="h-16 animate-pulse rounded-xl bg-slate-100"></div>
+        <div class="h-16 animate-pulse rounded-xl bg-slate-100"></div>
+        <div class="h-16 animate-pulse rounded-xl bg-slate-100"></div>
+      </div>
+      <div class="h-20 animate-pulse rounded-xl bg-slate-100"></div>
+      <div class="h-28 animate-pulse rounded-xl bg-slate-100"></div>
     </div>
   } @else if (error()) {
     <div
-      class="rounded-lg border border-rose-100 bg-rose-50 p-3 text-[11px] font-semibold text-rose-700"
+      class="rounded-xl border border-rose-200 bg-rose-50/80 p-3 text-xs font-bold text-rose-800 shadow-xs flex items-center gap-2"
     >
-      {{ error() ?? '' | t }}
+      <svg
+        class="h-4 w-4 text-rose-500 shrink-0"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+        />
+      </svg>
+      <span>{{ error() ?? '' | t }}</span>
     </div>
   } @else if (details(); as response) {
-    <div class="space-y-2 text-[11px]">
-      <header class="rounded-lg border border-slate-200 bg-slate-50/70 px-3 py-2">
+    <div class="space-y-2.5 text-xs">
+      <!-- Survey Header Card -->
+      <header
+        class="overflow-hidden rounded-xl border border-slate-200/90 bg-slate-50/40 px-3.5 py-2.5 shadow-2xs"
+      >
         <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
           <div class="min-w-0">
-            <p class="text-[9px] font-black uppercase tracking-wide text-[var(--theme-color-secondary)]">
-              {{ 'systemResponseDetails.template' | t }}
-            </p>
-            <h3 class="break-words text-[13px] font-black text-slate-950 [overflow-wrap:anywhere]">
+            <div
+              class="inline-flex items-center gap-1 rounded bg-[var(--theme-color-accent-softest)] px-2 py-0.5 text-[10px] font-bold text-[var(--theme-color-secondary)]"
+            >
+              <app-icon [icon]="fileIcon" [size]="11" />
+              <span>{{ 'systemResponseDetails.template' | t }}</span>
+            </div>
+            <h3
+              class="mt-1 break-words text-sm sm:text-base font-black text-slate-900 leading-tight [overflow-wrap:anywhere]"
+            >
               {{ localized(response.templateNameEn, response.templateNameAr) }}
             </h3>
-            <div class="mt-1.5 grid gap-x-3 gap-y-1 font-semibold text-slate-500 sm:grid-cols-2 xl:grid-cols-3">
-              <span>
-                {{ 'systemResponseDetails.branch' | t }}:
-                {{ localized(response.branchNameEn, response.branchNameAr) }}
-              </span>
-              @if (response.branchCode) {
-                <span>
-                  {{ 'systemResponseDetails.branchCode' | t }}:
-                  {{ response.branchCode }}
-                </span>
-              }
-              <span>
-                {{ 'systemResponseDetails.department' | t }}:
-                {{ localized(response.departmentNameEn, response.departmentNameAr) }}
-              </span>
-              <span>
-                {{ 'systemResponseDetails.operator' | t }}:
-                {{ localized(response.operatorNameEn, response.operatorNameAr) }}
-              </span>
-              <span>
-                {{ 'systemResponseDetails.submittedOn' | t }}:
-                {{ response.submittedOnUtc ? (response.submittedOnUtc | date: 'medium') : '-' }}
-              </span>
-            </div>
           </div>
+
+          <!-- Status / Health Badge -->
           <span
-            class="inline-flex w-fit shrink-0 rounded-full px-2.5 py-1 text-[10px] font-black"
+            class="inline-flex w-fit shrink-0 items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-extrabold shadow-2xs"
             [class.bg-slate-100]="!response.score.isScored"
             [class.text-slate-600]="!response.score.isScored"
+            [class.border]="true"
+            [class.border-slate-200]="!response.score.isScored"
             [class.bg-emerald-50]="response.score.isScored && response.score.scorePercentage >= 80"
             [class.text-emerald-700]="
+              response.score.isScored && response.score.scorePercentage >= 80
+            "
+            [class.border-emerald-200]="
               response.score.isScored && response.score.scorePercentage >= 80
             "
             [class.bg-amber-50]="
@@ -65,65 +79,238 @@
               response.score.scorePercentage >= 60 &&
               response.score.scorePercentage < 80
             "
+            [class.border-amber-200]="
+              response.score.isScored &&
+              response.score.scorePercentage >= 60 &&
+              response.score.scorePercentage < 80
+            "
             [class.bg-rose-50]="response.score.isScored && response.score.scorePercentage < 60"
             [class.text-rose-700]="response.score.isScored && response.score.scorePercentage < 60"
+            [class.border-rose-200]="response.score.isScored && response.score.scorePercentage < 60"
           >
+            @if (response.score.isScored) {
+              <span
+                class="h-1.5 w-1.5 rounded-full"
+                [class.bg-emerald-500]="response.score.scorePercentage >= 80"
+                [class.bg-amber-500]="
+                  response.score.scorePercentage >= 60 && response.score.scorePercentage < 80
+                "
+                [class.bg-rose-500]="response.score.scorePercentage < 60"
+              ></span>
+            }
             {{ scoreBadgeLabel(response.score) }}
           </span>
         </div>
+
+        <!-- Meta Details Chips -->
+        <div class="mt-2 flex flex-wrap items-center gap-1.5 text-[11px]">
+          <!-- Branch -->
+          <div
+            class="inline-flex items-center gap-1 rounded-md border border-slate-200/80 bg-white px-2 py-0.5 text-slate-700 shadow-2xs"
+          >
+            <app-icon class="text-slate-400" [icon]="buildingIcon" [size]="12" />
+            <span class="text-slate-400 font-medium"
+              >{{ 'systemResponseDetails.branch' | t }}:</span
+            >
+            <span class="font-bold text-slate-800">{{
+              localized(response.branchNameEn, response.branchNameAr)
+            }}</span>
+          </div>
+
+          <!-- Branch Code -->
+          @if (response.branchCode) {
+            <div
+              class="inline-flex items-center gap-1 rounded-md border border-slate-200/80 bg-white px-2 py-0.5 text-slate-700 shadow-2xs"
+            >
+              <app-icon class="text-slate-400" [icon]="hashIcon" [size]="12" />
+              <span class="text-slate-400 font-medium"
+                >{{ 'systemResponseDetails.branchCode' | t }}:</span
+              >
+              <span class="font-bold text-slate-800">{{ response.branchCode }}</span>
+            </div>
+          }
+
+          <!-- Department -->
+          <div
+            class="inline-flex items-center gap-1 rounded-md border border-slate-200/80 bg-white px-2 py-0.5 text-slate-700 shadow-2xs"
+          >
+            <app-icon class="text-slate-400" [icon]="networkIcon" [size]="12" />
+            <span class="text-slate-400 font-medium"
+              >{{ 'systemResponseDetails.department' | t }}:</span
+            >
+            <span class="font-bold text-slate-800">{{
+              localized(response.departmentNameEn, response.departmentNameAr)
+            }}</span>
+          </div>
+
+          <!-- Operator -->
+          <div
+            class="inline-flex items-center gap-1 rounded-md border border-slate-200/80 bg-white px-2 py-0.5 text-slate-700 shadow-2xs"
+          >
+            <app-icon class="text-slate-400" [icon]="userIcon" [size]="12" />
+            <span class="text-slate-400 font-medium"
+              >{{ 'systemResponseDetails.operator' | t }}:</span
+            >
+            <span class="font-bold text-slate-800">{{
+              localized(response.operatorNameEn, response.operatorNameAr)
+            }}</span>
+          </div>
+
+          <!-- Submitted On -->
+          <div
+            class="inline-flex items-center gap-1 rounded-md border border-slate-200/80 bg-white px-2 py-0.5 text-slate-700 shadow-2xs"
+          >
+            <app-icon class="text-slate-400" [icon]="calendarIcon" [size]="12" />
+            <span class="text-slate-400 font-medium"
+              >{{ 'systemResponseDetails.submittedOn' | t }}:</span
+            >
+            <span class="font-bold text-slate-800">{{
+              response.submittedOnUtc ? (response.submittedOnUtc | date: 'medium') : '-'
+            }}</span>
+          </div>
+        </div>
       </header>
 
-      <section
-        class="grid overflow-hidden rounded-lg border border-slate-200 bg-white sm:grid-cols-3"
-      >
+      <!-- KPI Stat Cards (Compact Horizontal Row) -->
+      <section class="grid grid-cols-3 gap-2">
+        <!-- Actual Score -->
         <div
-          class="flex items-center justify-between border-b border-slate-100 px-3 py-1.5 sm:block sm:border-b-0 sm:border-e"
+          class="flex items-center justify-between rounded-xl border border-slate-200/80 bg-white p-2 sm:p-2.5 shadow-2xs transition-all hover:border-slate-300"
         >
-          <p class="text-[9px] font-black uppercase tracking-wide text-slate-400">{{ 'systemResponseDetails.actualScore' | t }}</p>
-          <p class="text-[13px] font-black text-slate-950 sm:mt-0.5">
-            {{ response.score.isScored ? response.score.actualScore : '-' }}
-          </p>
+          <div>
+            <p class="text-[10px] font-bold uppercase tracking-wide text-slate-400">
+              {{ 'systemResponseDetails.actualScore' | t }}
+            </p>
+            <p class="text-base sm:text-lg font-black text-slate-900 mt-0.5 leading-none">
+              {{ response.score.isScored ? response.score.actualScore : '-' }}
+            </p>
+          </div>
+          <div
+            class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--theme-color-accent-softest)] text-[var(--theme-color-primary)]"
+          >
+            <app-icon [icon]="gaugeIcon" [size]="16" />
+          </div>
         </div>
+
+        <!-- Max Score -->
         <div
-          class="flex items-center justify-between border-b border-slate-100 px-3 py-1.5 sm:block sm:border-b-0 sm:border-e"
+          class="flex items-center justify-between rounded-xl border border-slate-200/80 bg-white p-2 sm:p-2.5 shadow-2xs transition-all hover:border-slate-300"
         >
-          <p class="text-[9px] font-black uppercase tracking-wide text-slate-400">{{ 'systemResponseDetails.maxScore' | t }}</p>
-          <p class="text-[13px] font-black text-slate-950 sm:mt-0.5">
-            {{ response.score.isScored ? response.score.maxScore : '-' }}
-          </p>
+          <div>
+            <p class="text-[10px] font-bold uppercase tracking-wide text-slate-400">
+              {{ 'systemResponseDetails.maxScore' | t }}
+            </p>
+            <p class="text-base sm:text-lg font-black text-slate-900 mt-0.5 leading-none">
+              {{ response.score.isScored ? response.score.maxScore : '-' }}
+            </p>
+          </div>
+          <div
+            class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600"
+          >
+            <app-icon [icon]="checkCircleIcon" [size]="16" />
+          </div>
         </div>
-        <div class="flex items-center justify-between px-3 py-1.5 sm:block">
-          <p class="text-[9px] font-black uppercase tracking-wide text-slate-400">{{ 'systemResponseDetails.percentage' | t }}</p>
-          <p class="text-[13px] font-black text-slate-950 sm:mt-0.5">
-            {{
-              response.score.isScored
-                ? (response.score.scorePercentage | number: '1.0-2') + '%'
-                : ('systemResponseDetails.notScored' | t)
-            }}
-          </p>
+
+        <!-- Percentage -->
+        <div
+          class="flex flex-col justify-between rounded-xl border border-slate-200/80 bg-white p-2 sm:p-2.5 shadow-2xs transition-all hover:border-slate-300"
+        >
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-[10px] font-bold uppercase tracking-wide text-slate-400">
+                {{ 'systemResponseDetails.percentage' | t }}
+              </p>
+              <p
+                class="text-base sm:text-lg font-black mt-0.5 leading-none"
+                [class.text-slate-900]="!response.score.isScored"
+                [class.text-emerald-600]="
+                  response.score.isScored && response.score.scorePercentage >= 80
+                "
+                [class.text-amber-600]="
+                  response.score.isScored &&
+                  response.score.scorePercentage >= 60 &&
+                  response.score.scorePercentage < 80
+                "
+                [class.text-rose-600]="
+                  response.score.isScored && response.score.scorePercentage < 60
+                "
+              >
+                {{
+                  response.score.isScored
+                    ? (response.score.scorePercentage | number: '1.0-2') + '%'
+                    : ('systemResponseDetails.notScored' | t)
+                }}
+              </p>
+            </div>
+            <div
+              class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
+              [class.bg-slate-100]="!response.score.isScored"
+              [class.text-slate-600]="!response.score.isScored"
+              [class.bg-emerald-50]="
+                response.score.isScored && response.score.scorePercentage >= 80
+              "
+              [class.text-emerald-600]="
+                response.score.isScored && response.score.scorePercentage >= 80
+              "
+              [class.bg-amber-50]="
+                response.score.isScored &&
+                response.score.scorePercentage >= 60 &&
+                response.score.scorePercentage < 80
+              "
+              [class.text-amber-600]="
+                response.score.isScored &&
+                response.score.scorePercentage >= 60 &&
+                response.score.scorePercentage < 80
+              "
+              [class.bg-rose-50]="response.score.isScored && response.score.scorePercentage < 60"
+              [class.text-rose-600]="response.score.isScored && response.score.scorePercentage < 60"
+            >
+              <app-icon [icon]="chartIcon" [size]="16" />
+            </div>
+          </div>
         </div>
       </section>
 
-      <section class="rounded-lg border border-slate-200 bg-white">
-        <div class="border-b border-slate-100 px-3 py-1.5">
-          <h4 class="text-xs font-black text-slate-950">{{ 'systemResponseDetails.customInputs' | t }}</h4>
-          <p class="text-[10px] font-semibold text-slate-500">
+      <!-- Custom Inputs Section (Compact) -->
+      <section class="overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-2xs">
+        <div
+          class="flex items-center justify-between border-b border-slate-100 bg-slate-50/50 px-3 py-1.5"
+        >
+          <div class="flex items-center gap-1.5">
+            <app-icon class="text-[var(--theme-color-primary)]" [icon]="fileIcon" [size]="13" />
+            <h4 class="text-xs font-black text-slate-900">
+              {{ 'systemResponseDetails.customInputs' | t }}
+            </h4>
+          </div>
+          <span
+            class="rounded-full bg-slate-100 border border-slate-200/80 px-2 py-0.5 text-[10px] font-bold text-slate-600"
+          >
             {{ response.customInputsCount }} {{ 'systemResponseDetails.submittedFields' | t }}
-          </p>
+          </span>
         </div>
+
         @if (response.customInputs.length === 0) {
-          <p class="px-3 py-3 text-center text-[11px] font-semibold text-slate-500">
+          <p class="px-3 py-3 text-center text-[11px] font-semibold text-slate-400">
             {{ 'systemResponseDetails.noCustomInputs' | t }}
           </p>
         } @else {
-          <dl class="grid gap-2 p-2 sm:grid-cols-2">
+          <dl class="grid gap-2 p-2.5 sm:grid-cols-2">
             @for (input of response.customInputs; track input.customInputId) {
-              <div class="rounded-md bg-slate-50 px-2.5 py-1.5">
-                <dt class="truncate text-[10px] font-black uppercase tracking-wide text-slate-400">
-                  {{ input.name }} - {{ customInputTypeLabel(input.typeName) }}
-                </dt>
+              <div
+                class="rounded-lg border border-slate-100 bg-slate-50/50 p-2 transition-colors hover:border-slate-200 hover:bg-white hover:shadow-2xs"
+              >
+                <div class="flex items-center justify-between gap-1.5">
+                  <dt class="truncate text-[11px] font-bold text-slate-500">
+                    {{ input.name }}
+                  </dt>
+                  <span
+                    class="rounded border border-slate-200/80 bg-white px-1.5 py-0.5 text-[9px] font-bold text-[var(--theme-color-secondary)] shadow-2xs"
+                  >
+                    {{ customInputTypeLabel(input.typeName) }}
+                  </span>
+                </div>
                 <dd
-                  class="break-words text-[11px] font-bold text-slate-900 [overflow-wrap:anywhere]"
+                  class="mt-0.5 break-words text-xs sm:text-sm font-black text-slate-900 [overflow-wrap:anywhere] select-all"
                 >
                   {{ input.displayValue || '-' }}
                 </dd>
@@ -133,113 +320,240 @@
         }
       </section>
 
-      <section class="rounded-lg border border-slate-200 bg-white">
-        <div class="border-b border-slate-100 px-3 py-1.5">
-          <h4 class="text-xs font-black text-slate-950">{{ 'systemResponseDetails.answers' | t }}</h4>
-          <p class="text-[10px] font-semibold text-slate-500">
+      <!-- Answers Section (Responsive Grid, 3 columns on wide screens to minimize vertical scroll) -->
+      <section class="overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-2xs">
+        <div
+          class="flex items-center justify-between border-b border-slate-100 bg-slate-50/50 px-3 py-1.5"
+        >
+          <div class="flex items-center gap-1.5">
+            <app-icon
+              class="text-[var(--theme-color-primary)]"
+              [icon]="listChecksIcon"
+              [size]="13"
+            />
+            <h4 class="text-xs font-black text-slate-900">
+              {{ 'systemResponseDetails.answers' | t }}
+            </h4>
+          </div>
+          <span class="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-600">
             {{ response.answersCount }} {{ 'systemResponseDetails.answersCaptured' | t }}
-          </p>
+          </span>
         </div>
+
         <ng-template #answerNode let-node let-depth="depth">
-          <article class="rounded-lg border border-slate-100 bg-white px-2.5 py-2">
-              <div class="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
-                <div class="min-w-0">
-                  <p
-                    class="break-words text-[11px] font-black text-slate-950 [overflow-wrap:anywhere]"
+          <article
+            class="flex flex-col justify-between rounded-xl border border-slate-200/80 bg-white p-2.5 sm:p-3 shadow-2xs transition-all hover:border-slate-300 hover:shadow-xs"
+          >
+            <div>
+              <!-- Question Header (Order + Type + Follow-up badges) -->
+              <div class="flex flex-wrap items-center gap-1">
+                @if (node.answer.questionOrder > 0) {
+                  <span
+                    class="inline-flex items-center rounded bg-slate-100 border border-slate-200/80 px-1.5 py-0.5 text-[10px] font-black text-slate-700"
                   >
-                    {{ localized(node.answer.questionTextEn, node.answer.questionTextAr) }}
-                  </p>
-                </div>
+                    #{{ node.answer.questionOrder }}
+                  </span>
+                }
                 <span
-                  class="w-fit shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-[9px] font-black text-slate-600"
+                  class="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold text-slate-600"
                 >
                   {{ questionTypeLabel(node.answer) }}
                 </span>
                 @if (depth > 0) {
-                  <span class="w-fit shrink-0 rounded-full bg-emerald-50 px-2 py-0.5 text-[9px] font-black text-emerald-700">
+                  <span
+                    class="rounded bg-emerald-50 px-1.5 py-0.5 text-[10px] font-bold text-emerald-700"
+                  >
                     {{ 'branchTemplates.followUpQuestion' | t }}
                   </span>
                 }
-                @if (node.answer.questionOrder > 0) {
-                  <span class="w-fit shrink-0 rounded-full bg-cyan-50 px-2 py-0.5 text-[9px] font-black text-[var(--theme-color-secondary)]">
-                    {{ node.answer.questionOrder }}
-                  </span>
-                }
               </div>
-              <div
-                class="mt-1.5 rounded-md px-2.5 py-1.5"
-                [class.bg-slate-50]="depth === 0"
-                [class.bg-emerald-50]="depth > 0"
+
+              <!-- Question Text -->
+              <p
+                class="mt-1.5 break-words text-xs font-black text-slate-900 leading-snug [overflow-wrap:anywhere]"
               >
-                @if (node.answer.questionType === 'Voice') {
-                  @if (voiceUrl(node.answer)) {
-                    <p class="mb-1 text-[10px] font-black uppercase tracking-wide text-slate-400">
-                      {{ answerValueLabel(node.answer) }}
-                    </p>
-                    <audio class="h-8 w-full" controls [src]="voiceUrl(node.answer)"></audio>
-                  } @else {
-                    <p class="text-[11px] font-semibold text-slate-500">{{ 'systemResponseDetails.noVoiceFile' | t }}</p>
+                {{ localized(node.answer.questionTextEn, node.answer.questionTextAr) }}
+              </p>
+            </div>
+
+            <!-- Answer Result Box -->
+            <div class="mt-2 rounded-lg border border-slate-100 bg-slate-50/60 p-2">
+              @if (node.answer.questionType === 'SingleChoice') {
+                <div class="flex items-center justify-between gap-1.5">
+                  <div class="flex items-center gap-1.5 min-w-0">
+                    <app-icon
+                      class="text-[var(--theme-color-primary)] shrink-0"
+                      [icon]="checkCircleIcon"
+                      [size]="14"
+                    />
+                    <span
+                      class="text-xs font-extrabold text-slate-900 break-words [overflow-wrap:anywhere]"
+                    >
+                      {{ displayAnswer(node.answer) }}
+                    </span>
+                  </div>
+                  @if (node.answer.selectedOptionValue != null) {
+                    <span
+                      class="shrink-0 rounded border border-slate-200/80 bg-white px-1.5 py-0.5 text-[10px] font-bold text-slate-600 shadow-2xs"
+                    >
+                      {{ 'systemResponseDetails.optionScore' | t }}:
+                      {{ node.answer.selectedOptionValue }}
+                    </span>
                   }
-                } @else if (node.answer.questionType === 'Image') {
-                  <p class="text-[10px] font-black uppercase tracking-wide text-slate-400">
+                </div>
+              } @else if (node.answer.questionType === 'StarRating') {
+                <div class="flex items-center justify-between gap-1.5">
+                  <div class="flex items-center gap-0.5">
+                    @for (slot of scaleSlots; track slot) {
+                      <svg
+                        class="h-4 w-4"
+                        viewBox="0 0 24 24"
+                        [class.text-amber-400]="isStarActive(slot, node.answer.starRatingValue)"
+                        [class.fill-amber-400]="isStarActive(slot, node.answer.starRatingValue)"
+                        [class.text-slate-200]="!isStarActive(slot, node.answer.starRatingValue)"
+                        [class.fill-slate-100]="!isStarActive(slot, node.answer.starRatingValue)"
+                      >
+                        <polygon
+                          points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
+                          stroke="currentColor"
+                          stroke-width="1.5"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        />
+                      </svg>
+                    }
+                  </div>
+                  <span
+                    class="inline-flex items-center rounded border border-amber-200/80 bg-amber-50 px-2 py-0.5 text-[10px] font-black text-amber-800"
+                  >
+                    {{ node.answer.starRatingValue ?? '-' }} / 5
+                  </span>
+                </div>
+              } @else if (node.answer.questionType === 'Smiles') {
+                <div class="flex items-center justify-between gap-1.5">
+                  <div class="flex items-center gap-1">
+                    @for (slot of scaleSlots; track slot) {
+                      <span
+                        class="h-2.5 w-2.5 rounded-full"
+                        [class.bg-emerald-400]="isStarActive(slot, node.answer.smileValue)"
+                        [class.bg-slate-200]="!isStarActive(slot, node.answer.smileValue)"
+                      ></span>
+                    }
+                  </div>
+                  <span
+                    class="inline-flex items-center rounded border border-emerald-200/80 bg-emerald-50 px-2 py-0.5 text-[10px] font-black text-emerald-800"
+                  >
+                    {{ node.answer.smileValue ?? '-' }} / 5
+                  </span>
+                </div>
+              } @else if (node.answer.questionType === 'Complain') {
+                <div class="rounded-lg border border-slate-200/80 bg-white p-2 shadow-2xs">
+                  <p class="mb-0.5 flex items-center gap-1 text-[10px] font-bold text-slate-400">
+                    <app-icon class="text-slate-500" [icon]="messageIcon" [size]="11" />
                     {{ answerValueLabel(node.answer) }}
                   </p>
-                  <p class="mt-0.5 break-words text-[11px] font-semibold text-slate-700 [overflow-wrap:anywhere]">
+                  <p
+                    class="break-words text-xs font-semibold text-slate-800 leading-snug [overflow-wrap:anywhere]"
+                  >
+                    {{ displayAnswer(node.answer) }}
+                  </p>
+                </div>
+              } @else if (node.answer.questionType === 'Voice') {
+                @if (voiceUrl(node.answer)) {
+                  <div class="space-y-1">
+                    <p class="flex items-center gap-1 text-[11px] font-bold text-slate-800">
+                      <app-icon
+                        class="text-[var(--theme-color-primary)]"
+                        [icon]="micIcon"
+                        [size]="12"
+                      />
+                      {{ answerValueLabel(node.answer) }}
+                    </p>
+                    <audio
+                      class="h-7 w-full rounded-lg"
+                      controls
+                      [src]="voiceUrl(node.answer)"
+                    ></audio>
+                  </div>
+                } @else {
+                  <p class="text-[11px] font-semibold text-slate-500">
+                    {{ 'systemResponseDetails.noVoiceFile' | t }}
+                  </p>
+                }
+              } @else if (node.answer.questionType === 'Image') {
+                <div class="space-y-1.5">
+                  <p class="flex items-center gap-1 text-[11px] font-bold text-slate-800">
+                    <app-icon
+                      class="text-[var(--theme-color-primary)]"
+                      [icon]="imageIcon"
+                      [size]="12"
+                    />
+                    {{ answerValueLabel(node.answer) }}
+                  </p>
+                  <p
+                    class="break-words text-[11px] font-semibold text-slate-700 [overflow-wrap:anywhere]"
+                  >
                     {{ displayAnswer(node.answer) }}
                   </p>
                   @if (imageUrl(node.answer)) {
                     <a
-                      class="mt-2 inline-flex rounded-lg bg-white px-2 py-1 text-[11px] font-extrabold text-[var(--theme-color-secondary)] ring-1 ring-cyan-100"
+                      class="inline-flex items-center gap-1 rounded border border-cyan-200 bg-white px-2 py-0.5 text-[11px] font-bold text-[var(--theme-color-secondary)] hover:bg-cyan-50/50"
                       [href]="imageUrl(node.answer)"
                       target="_blank"
                       rel="noopener noreferrer"
                     >
+                      <app-icon [icon]="imageIcon" [size]="11" />
                       {{ 'operatorTemplates.openImageFile' | t }}
                     </a>
                     <img
-                      class="mt-2 max-h-56 w-full rounded-lg object-contain ring-1 ring-slate-100"
+                      class="max-h-24 w-full rounded-lg object-contain ring-1 ring-slate-100"
                       [src]="imageUrl(node.answer)"
                       [alt]="displayAnswer(node.answer)"
                     />
                   }
-                } @else {
-                  <p class="text-[10px] font-black uppercase tracking-wide text-slate-400">
+                </div>
+              } @else {
+                <div>
+                  <p class="text-[10px] font-bold text-slate-400">
                     {{ answerValueLabel(node.answer) }}
                   </p>
                   <p
-                    class="mt-0.5 break-words text-[11px] font-semibold text-slate-700 [overflow-wrap:anywhere]"
+                    class="mt-0.5 break-words text-xs font-semibold text-slate-800 [overflow-wrap:anywhere]"
                   >
                     {{ displayAnswer(node.answer) }}
                   </p>
-                  @if (node.answer.questionType === 'SingleChoice') {
-                    <p class="mt-0.5 text-[10px] font-semibold text-slate-500">
-                      {{ 'systemResponseDetails.optionScore' | t }}: {{ node.answer.selectedOptionValue ?? '-' }}
-                    </p>
-                  }
-                }
-              </div>
-
-              @if (node.children.length > 0) {
-                <div class="ms-4 mt-2 space-y-2 border-s-2 border-dashed border-slate-200 ps-3">
-                  @for (childNode of node.children; track childNode.answer.templateQuestionId || childNode.answer.questionId) {
-                    <ng-container
-                      [ngTemplateOutlet]="answerNode"
-                      [ngTemplateOutletContext]="{ $implicit: childNode, depth: depth + 1 }"
-                    />
-                  }
                 </div>
               }
-            </article>
+            </div>
+
+            <!-- Follow-up child questions -->
+            @if (node.children.length > 0) {
+              <div class="ms-2 mt-2 space-y-2 border-s-2 border-dashed border-slate-200 ps-2">
+                @for (
+                  childNode of node.children;
+                  track childNode.answer.templateQuestionId || childNode.answer.questionId
+                ) {
+                  <ng-container
+                    [ngTemplateOutlet]="answerNode"
+                    [ngTemplateOutletContext]="{ $implicit: childNode, depth: depth + 1 }"
+                  />
+                }
+              </div>
+            }
+          </article>
         </ng-template>
 
-        <div class="grid gap-2 p-2 lg:grid-cols-2">
-          @for (node of answerTree(); track node.answer.templateQuestionId || node.answer.questionId) {
+        <div class="grid gap-2.5 p-2.5 sm:grid-cols-2 lg:grid-cols-3 items-start">
+          @for (
+            node of answerTree();
+            track node.answer.templateQuestionId || node.answer.questionId
+          ) {
             <ng-container
               [ngTemplateOutlet]="answerNode"
               [ngTemplateOutletContext]="{ $implicit: node, depth: 0 }"
             />
           } @empty {
-            <p class="px-3 py-4 text-center text-[11px] font-semibold text-slate-500">
+            <p class="col-span-full px-4 py-4 text-center text-xs font-semibold text-slate-400">
               {{ 'systemResponseDetails.noAnswers' | t }}
             </p>
           }

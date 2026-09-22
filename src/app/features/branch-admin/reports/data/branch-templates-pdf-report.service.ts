@@ -1,6 +1,6 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable, map } from 'rxjs';
+import { Observable, catchError, map } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
 import {
   BranchTemplatesPdfReportDownloadRequest,
@@ -16,6 +16,7 @@ export class BranchTemplatesPdfReportService {
   private readonly http = inject(HttpClient);
   private readonly excelReportService = inject(BranchTemplatesExcelReportService);
   private readonly pdfReportUrl = `${environment.apiBaseUrl}/api/reports/templates/pdf`;
+  private readonly excelReportUrl = `${environment.apiBaseUrl}/api/reports/templates/excel`;
   private readonly previewReportUrl = `${environment.apiBaseUrl}/api/reports/templates`;
 
   download(request: BranchTemplatesPdfReportDownloadRequest): Observable<Blob> {
@@ -38,7 +39,19 @@ export class BranchTemplatesPdfReportService {
   }
 
   downloadExcel(request: BranchTemplatesReportPreviewRequest): Observable<Blob> {
-    return this.preview(request).pipe(map((preview) => this.excelReportService.toBlob(preview)));
+    return this.http
+      .get(this.excelReportUrl, {
+        params: this.toParams(request.query, { includeLanguageQueryParam: true }),
+        headers: new HttpHeaders({
+          'Accept-Language': this.toAcceptLanguage(request.query.language),
+        }),
+        responseType: 'blob',
+      })
+      .pipe(
+        catchError(() =>
+          this.preview(request).pipe(map((preview) => this.excelReportService.toBlob(preview))),
+        ),
+      );
   }
 
   private toParams(

@@ -236,3 +236,40 @@
     padding: 0.75rem 0;
   }
 }
+
+/* Custom Scrollbar for Sidebar Navigation */
+.sidebar-nav {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(var(--on) / 22%) transparent;
+}
+
+.sidebar-nav::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebar-nav::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb {
+  background-color: rgb(var(--on) / 22%);
+  border-radius: 9999px;
+  transition: background-color 0.2s ease;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb:hover {
+  background-color: rgb(var(--on) / 45%);
+}
+
+/* In collapsed mode, hide the scrollbar so it does not crowd icons */
+.sidebar-collapsed .sidebar-nav {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.sidebar-collapsed .sidebar-nav::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+

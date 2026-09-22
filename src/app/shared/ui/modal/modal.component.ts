@@ -7,11 +7,11 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
   imports: [TranslatePipe],
   templateUrl: './modal.component.html',
   styleUrl: './modal.component.css',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ModalComponent {
   readonly open = input(false);
   readonly title = input('');
-  readonly size = input<'md' | 'lg'>('md');
+  readonly size = input<'md' | 'lg' | 'xl'>('md');
   readonly closed = output<void>();
 }

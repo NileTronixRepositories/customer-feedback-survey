@@ -1,8 +1,25 @@
 import { DatePipe, DecimalPipe, NgTemplateOutlet } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, input, output } from '@angular/core';
+import {
+  Building2,
+  Calendar,
+  ChartColumnIncreasing,
+  CheckCircle2,
+  CircleGauge,
+  FileText,
+  Hash,
+  Image as ImageIcon,
+  ListChecks,
+  MessageSquareText,
+  Mic,
+  Network,
+  Star,
+  UserRound,
+} from 'lucide-angular';
 import { environment } from '../../../../../../../environments/environment';
 import { I18nService } from '../../../../../../core/services/i18n.service';
 import { TranslatePipe } from '../../../../../../shared/pipes/translate.pipe';
+import { IconComponent } from '../../../../../../shared/ui/icon/icon.component';
 import { ModalComponent } from '../../../../../../shared/ui/modal/modal.component';
 import {
   SystemResponseAnswer,
@@ -18,13 +35,30 @@ interface SystemAnswerTreeNode {
 @Component({
   selector: 'app-system-response-details-modal',
   standalone: true,
-  imports: [DatePipe, DecimalPipe, ModalComponent, NgTemplateOutlet, TranslatePipe],
+  imports: [DatePipe, DecimalPipe, IconComponent, ModalComponent, NgTemplateOutlet, TranslatePipe],
   templateUrl: './system-response-details-modal.component.html',
   styleUrl: './system-response-details-modal.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SystemResponseDetailsModalComponent {
   private readonly i18n = inject(I18nService);
+
+  readonly buildingIcon = Building2;
+  readonly calendarIcon = Calendar;
+  readonly chartIcon = ChartColumnIncreasing;
+  readonly checkCircleIcon = CheckCircle2;
+  readonly gaugeIcon = CircleGauge;
+  readonly fileIcon = FileText;
+  readonly hashIcon = Hash;
+  readonly imageIcon = ImageIcon;
+  readonly listChecksIcon = ListChecks;
+  readonly messageIcon = MessageSquareText;
+  readonly micIcon = Mic;
+  readonly networkIcon = Network;
+  readonly starIcon = Star;
+  readonly userIcon = UserRound;
+
+  readonly scaleSlots = [1, 2, 3, 4, 5];
 
   readonly open = input(false);
   readonly loading = input(false);
@@ -35,6 +69,10 @@ export class SystemResponseDetailsModalComponent {
     this.toAnswerTree(this.details()?.answers ?? []),
   );
 
+  isStarActive(slot: number, value: number | null | undefined): boolean {
+    return value != null && slot <= value;
+  }
+
   localized(englishText: string, arabicText: string | null | undefined): string {
     if (this.i18n.language() === 'ar') return arabicText || englishText || '-';
     return englishText || arabicText || '-';
@@ -42,15 +80,27 @@ export class SystemResponseDetailsModalComponent {
 
   displayAnswer(answer: SystemResponseAnswer): string {
     if (answer.questionType === 'SingleChoice') {
-      return this.localized(answer.selectedOptionTextEn ?? '', answer.selectedOptionTextAr) || answer.displayValue || '-';
+      return (
+        this.localized(answer.selectedOptionTextEn ?? '', answer.selectedOptionTextAr) ||
+        answer.displayValue ||
+        '-'
+      );
     }
     if (answer.questionType === 'StarRating') return `${answer.starRatingValue ?? '-'} / 5`;
     if (answer.questionType === 'Smiles') return `${answer.smileValue ?? '-'} / 5`;
     if (answer.questionType === 'Complain') return answer.textAnswer || answer.displayValue || '-';
     if (answer.questionType === 'Image') {
-      return answer.imageFileName || answer.displayValue || this.i18n.translate('operatorTemplates.imageFileAnswer');
+      return (
+        answer.imageFileName ||
+        answer.displayValue ||
+        this.i18n.translate('operatorTemplates.imageFileAnswer')
+      );
     }
-    return answer.voiceFileName || answer.displayValue || this.i18n.translate('systemResponseDetails.voiceAnswer');
+    return (
+      answer.voiceFileName ||
+      answer.displayValue ||
+      this.i18n.translate('systemResponseDetails.voiceAnswer')
+    );
   }
 
   answerValueLabel(answer: SystemResponseAnswer): string {
@@ -73,8 +123,10 @@ export class SystemResponseDetailsModalComponent {
   }
 
   questionTypeLabel(answer: SystemResponseAnswer): string {
-    if (answer.questionType === 'SingleChoice') return this.i18n.translate('questions.typeSingleChoice');
-    if (answer.questionType === 'StarRating') return this.i18n.translate('questions.typeStarRating');
+    if (answer.questionType === 'SingleChoice')
+      return this.i18n.translate('questions.typeSingleChoice');
+    if (answer.questionType === 'StarRating')
+      return this.i18n.translate('questions.typeStarRating');
     if (answer.questionType === 'Smiles') return this.i18n.translate('questions.typeSmiles');
     if (answer.questionType === 'Complain') return this.i18n.translate('questions.typeComplain');
     if (answer.questionType === 'Voice') return this.i18n.translate('questions.typeVoice');

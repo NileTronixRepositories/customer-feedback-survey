@@ -63,9 +63,9 @@ export class BranchTemplatesPdfReportPageComponent implements OnInit, OnDestroy 
   readonly branchUserNormalTemplates = signal<readonly BranchTemplatesPdfReportTemplateOption[]>([]);
   readonly normalTemplatesError = signal<string | null>(null);
   readonly minTopWorstQuestionsCount =
-    BRANCH_TEMPLATES_PDF_REPORT_MIN_TOP_WORST_QUESTIONS_COUNT;
+  BRANCH_TEMPLATES_PDF_REPORT_MIN_TOP_WORST_QUESTIONS_COUNT;
   readonly maxTopWorstQuestionsCount =
-    BRANCH_TEMPLATES_PDF_REPORT_MAX_TOP_WORST_QUESTIONS_COUNT;
+  BRANCH_TEMPLATES_PDF_REPORT_MAX_TOP_WORST_QUESTIONS_COUNT;
   readonly minScorePercentage = BRANCH_TEMPLATES_PDF_REPORT_MIN_SCORE_PERCENTAGE;
   readonly maxScorePercentage = BRANCH_TEMPLATES_PDF_REPORT_MAX_SCORE_PERCENTAGE;
 
@@ -143,9 +143,10 @@ export class BranchTemplatesPdfReportPageComponent implements OnInit, OnDestroy 
     const query = this.reportQuery();
     const reportLanguage = query.language ?? this.defaultReportLanguage();
 
-    this.reportStore.downloadExcel({ query }, (blob) =>
-      this.saveBlob(blob, this.excelReportFileName(reportLanguage)),
-    );
+    this.reportStore.downloadExcel({ query }, (blob) => {
+      const isXmlFormat = blob.type.includes('xml') || blob.type.includes('ms-excel');
+      this.saveBlob(blob, this.excelReportFileName(reportLanguage, !isXmlFormat));
+    });
   }
 
   private reportQuery(): BranchTemplatesPdfReportQuery {
@@ -301,11 +302,15 @@ export class BranchTemplatesPdfReportPageComponent implements OnInit, OnDestroy 
       : `customer-survey-report-${timestamp}.pdf`;
   }
 
-  private excelReportFileName(language: BranchTemplatesPdfReportLanguage): string {
+  private excelReportFileName(
+    language: BranchTemplatesPdfReportLanguage,
+    isXlsx: boolean = true,
+  ): string {
     const timestamp = this.fileTimestamp(new Date());
+    const ext = isXlsx ? 'xlsx' : 'xls';
     return language === 'Arabic'
-      ? `customer-survey-report-ar-${timestamp}.xls`
-      : `customer-survey-report-${timestamp}.xls`;
+      ? `customer-survey-report-ar-${timestamp}.${ext}`
+      : `customer-survey-report-${timestamp}.${ext}`;
   }
 
   private defaultReportLanguage(): BranchTemplatesPdfReportLanguage {

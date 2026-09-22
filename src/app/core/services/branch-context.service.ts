@@ -70,8 +70,7 @@ export class BranchContextService {
     }
 
     if (role === 'BRANCH_USER') {
-      return this.loadBranchFromEndpoint(this.myBranchUrl).pipe(
-        switchMap((branch) => (branch ? of(branch) : this.loadBranchFromEndpoint(this.branchUserMyRolesUrl))),
+      return this.loadBranchFromEndpoint(this.branchUserMyRolesUrl).pipe(
         switchMap((branch) => (branch ? of(branch) : this.loadBranchFromTemplatesSelection())),
         switchMap((branch) => this.loadBranchByIdWhenMissing(branch, branchId)),
       );

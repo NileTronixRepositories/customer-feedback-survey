@@ -98,8 +98,9 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly themeColors = inject(ThemeColorService);
   private readonly chartCanvas = viewChild<ElementRef<HTMLCanvasElement>>('trendCanvas');
-  private readonly templatePerformanceSection =
-    viewChild<ElementRef<HTMLElement>>('templatePerformanceSection');
+  private readonly templatePerformanceSection = viewChild<ElementRef<HTMLElement>>(
+    'templatePerformanceSection',
+  );
   readonly backIcon = ArrowLeft;
 
   private trendChart: Chart<'line', (number | null)[], string> | null = null;
@@ -131,7 +132,9 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
   readonly sourceSignal = signal<SurveyDashboardSource>('All');
   readonly selectedBranchId = signal('');
   readonly isSuperAdmin = computed(() => this.authStore.role() === 'SUPER_ADMIN');
-  readonly branchSnapshotVisible = computed(() => this.authStore.isBranchScopedActor());
+  readonly branchSnapshotVisible = computed(
+    () => this.authStore.isBranchAdminUserType() || this.authStore.role() === 'BRANCH_ADMIN',
+  );
   readonly canOpenAuthorizedTemplatesDashboard = computed(() =>
     this.authStore.canAccessBranchDashboard(),
   );
@@ -356,7 +359,9 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
   }
 
   templateKindClass(templateKind: SurveyDashboardTemplateKind): string {
-    return templateKind === 'Anonymous' ? 'bg-violet-50 text-violet-700' : 'bg-cyan-50 text-cyan-700';
+    return templateKind === 'Anonymous'
+      ? 'bg-violet-50 text-violet-700'
+      : 'bg-cyan-50 text-cyan-700';
   }
 
   assignedBranchName(branch: BranchAdminBranchDetails): string {
@@ -384,7 +389,12 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
   }
 
   branchUserRoles(user: BranchAdminBranchUser): string {
-    return user.roles.map((role) => role.name).filter((role) => role.length > 0).join(', ') || '-';
+    return (
+      user.roles
+        .map((role) => role.name)
+        .filter((role) => role.length > 0)
+        .join(', ') || '-'
+    );
   }
 
   questionTypeLabel(type: string): string {
