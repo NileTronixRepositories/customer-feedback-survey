@@ -10,10 +10,10 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CirclePlus, UsersRound } from 'lucide-angular';
 import { AuthStore } from '../../../../../auth/presentation/state/auth.store';
 import { ButtonComponent } from '../../../../../../shared/ui/button/button.component';
-import { CardComponent } from '../../../../../../shared/ui/card/card.component';
 import { IconComponent } from '../../../../../../shared/ui/icon/icon.component';
 import { InputComponent } from '../../../../../../shared/ui/input/input.component';
 import { ModalComponent } from '../../../../../../shared/ui/modal/modal.component';
+import { PageHeaderComponent } from '../../../../../../shared/ui/page-header/page-header.component';
 import { TranslatePipe } from '../../../../../../shared/pipes/translate.pipe';
 import {
   ResetPasswordModalComponent,
@@ -28,10 +28,10 @@ import { UsersStore } from '../../state/users.store';
   standalone: true,
   imports: [
     ButtonComponent,
-    CardComponent,
     IconComponent,
     InputComponent,
     ModalComponent,
+    PageHeaderComponent,
     ReactiveFormsModule,
     ResetPasswordModalComponent,
     TranslatePipe,

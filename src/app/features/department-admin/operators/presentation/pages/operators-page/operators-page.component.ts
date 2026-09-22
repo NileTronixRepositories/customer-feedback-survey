@@ -27,6 +27,7 @@ import {
   ResetPasswordModalComponent,
   ResetPasswordModalValue,
 } from '../../../../../../shared/ui/reset-password-modal/reset-password-modal.component';
+import { PageHeaderComponent } from '../../../../../../shared/ui/page-header/page-header.component';
 import { OperatorListItem, OperatorTemplateSelectionItem } from '../../../domain/operator.model';
 import { OperatorsStore } from '../../state/operators.store';
 
@@ -48,6 +49,7 @@ interface OperatorTemplateBranchGroup {
     IconComponent,
     InputComponent,
     ModalComponent,
+    PageHeaderComponent,
     ReactiveFormsModule,
     ResetPasswordModalComponent,
     TranslatePipe,

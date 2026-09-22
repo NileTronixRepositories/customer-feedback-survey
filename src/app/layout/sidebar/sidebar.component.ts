@@ -26,7 +26,6 @@ import { IconComponent } from '../../shared/ui/icon/icon.component';
 import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 
 interface MenuItem {
-  label: string;
   labelKey: string;
   superAdminLabelKey?: string;
   path: string;
@@ -50,7 +49,6 @@ interface MenuItem {
 
 const MENU_ITEMS: readonly MenuItem[] = [
   {
-    label: 'Dashboard',
     labelKey: 'nav.dashboard',
     superAdminLabelKey: 'nav.branchesDashboard',
     path: '/reports/survey-dashboard',
@@ -60,7 +58,6 @@ const MENU_ITEMS: readonly MenuItem[] = [
     exact: true,
   },
   {
-    label: 'System Dashboard',
     labelKey: 'nav.systemDashboard',
     path: '/reports/system-dashboard',
     icon: Gauge,
@@ -69,7 +66,6 @@ const MENU_ITEMS: readonly MenuItem[] = [
     exact: true,
   },
   {
-    label: 'System Responses History',
     labelKey: 'nav.systemResponsesHistory',
     path: '/reports/system-responses',
     icon: FileClock,
@@ -78,7 +74,6 @@ const MENU_ITEMS: readonly MenuItem[] = [
     exact: true,
   },
   {
-    label: 'Department Reports',
     labelKey: 'nav.reports',
     path: '/reports/department/dashboard',
     icon: ChartSpline,
@@ -87,7 +82,6 @@ const MENU_ITEMS: readonly MenuItem[] = [
     exact: true,
   },
   {
-    label: 'Templates PDF Report',
     labelKey: 'nav.branchTemplatesPdfReport',
     path: '/branch-admin/reports/templates-pdf',
     icon: FileText,
@@ -96,7 +90,6 @@ const MENU_ITEMS: readonly MenuItem[] = [
     exact: true,
   },
   {
-    label: 'Branch users',
     labelKey: 'branchUsers.title',
     path: '/branch-admin/users',
     icon: UsersRound,
@@ -105,7 +98,6 @@ const MENU_ITEMS: readonly MenuItem[] = [
     exact: true,
   },
   {
-    label: 'Authorized Template',
     labelKey: 'nav.protectedTemplates',
     path: '/branch-admin/templates',
     icon: FileText,
@@ -114,7 +106,6 @@ const MENU_ITEMS: readonly MenuItem[] = [
     exact: true,
   },
   {
-    label: 'Anonymous Templates',
     labelKey: 'nav.publicTemplates',
     path: '/anonymous-templates',
     icon: ScanQrCode,
@@ -123,7 +114,6 @@ const MENU_ITEMS: readonly MenuItem[] = [
     exact: true,
   },
   {
-    label: 'Questions',
     labelKey: 'questions.title',
     path: '/branch-admin/questions',
     icon: BadgeQuestionMark,
@@ -132,7 +122,6 @@ const MENU_ITEMS: readonly MenuItem[] = [
     exact: true,
   },
   {
-    label: 'Question groups',
     labelKey: 'questionGroups.title',
     path: '/branch-admin/question-groups',
     icon: ListTree,
@@ -141,14 +130,12 @@ const MENU_ITEMS: readonly MenuItem[] = [
     exact: true,
   },
   {
-    label: 'Branches',
     labelKey: 'nav.branches',
     path: '/branches',
     icon: Building2,
     roles: ['SUPER_ADMIN'],
   },
   {
-    label: 'Branch Areas',
     labelKey: 'branchAreas.navTitle',
     path: '/branch-areas',
     icon: UsersRound,
@@ -157,7 +144,6 @@ const MENU_ITEMS: readonly MenuItem[] = [
     exact: true,
   },
   {
-    label: 'Templates',
     labelKey: 'nav.templates',
     path: '/templates',
     icon: FileText,
@@ -165,14 +151,12 @@ const MENU_ITEMS: readonly MenuItem[] = [
     exact: true,
   },
   {
-    label: 'Departments',
     labelKey: 'nav.departments',
     path: '/departments',
     icon: Network,
     roles: ['SUPER_ADMIN'],
   },
   {
-    label: 'Global question groups',
     labelKey: 'nav.globalQuestionGroups',
     path: '/global-question-groups',
     icon: ListTree,
@@ -180,7 +164,6 @@ const MENU_ITEMS: readonly MenuItem[] = [
     feature: 'globalQuestionGroups',
   },
   {
-    label: 'Global questions',
     labelKey: 'nav.globalQuestions',
     path: '/global-questions',
     icon: BadgeQuestionMark,
@@ -188,33 +171,23 @@ const MENU_ITEMS: readonly MenuItem[] = [
     feature: 'globalQuestions',
   },
   {
-    label: 'Surveys',
     labelKey: 'nav.surveys',
     path: '/survey',
     icon: ClipboardList,
     roles: [],
   },
   {
-    label: 'Operators',
     labelKey: 'operators.title',
     path: '/operators',
     icon: UserCog,
     roles: ['SUPER_ADMIN', 'DEPARTMENT_ADMIN'],
   },
   {
-    label: 'My templates',
     labelKey: 'operatorTemplates.title',
     path: '/operator/templates',
     icon: FileText,
     roles: ['OPERATOR'],
   },
-  // {
-  //   label: 'Users',
-  //   labelKey: 'nav.users',
-  //   path: '/users',
-  //   icon: UsersRound,
-  //   roles: ['SUPER_ADMIN']
-  // },
 ];
 
 @Component({

@@ -10,6 +10,7 @@ import { CardComponent } from '../../../../../../shared/ui/card/card.component';
 import { IconComponent } from '../../../../../../shared/ui/icon/icon.component';
 import { InputComponent } from '../../../../../../shared/ui/input/input.component';
 import { ModalComponent } from '../../../../../../shared/ui/modal/modal.component';
+import { PageHeaderComponent } from '../../../../../../shared/ui/page-header/page-header.component';
 import { AuthStore } from '../../../../../auth/presentation/state/auth.store';
 import { Department } from '../../../domain/department.model';
 import { DepartmentsStore } from '../../state/departments.store';
@@ -25,6 +26,7 @@ import { DepartmentsStore } from '../../state/departments.store';
     IconComponent,
     InputComponent,
     ModalComponent,
+    PageHeaderComponent,
     TranslatePipe,
   ],
   templateUrl: './departments-page.component.html',
@@ -35,8 +37,8 @@ export class DepartmentsPageComponent implements OnInit {
   readonly departmentsStore = inject(DepartmentsStore);
   private readonly authStore = inject(AuthStore);
   private readonly formBuilder = inject(FormBuilder);
-  private readonly i18n = inject(I18nService);
   private readonly router = inject(Router);
+  private readonly i18n = inject(I18nService);
 
   readonly createModalOpen = signal(false);
   readonly editModalOpen = signal(false);

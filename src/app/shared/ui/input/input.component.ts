@@ -45,7 +45,7 @@ export class InputComponent implements ControlValueAccessor {
   readonly inputClasses = computed(() => {
     const size =
       this.size() === 'sm'
-        ? 'h-8 rounded-md px-2.5 py-1.5 text-[11px]'
+        ? 'h-8 rounded-md px-2.5 py-1.5 text-[13px]'
         : 'h-10 rounded-lg px-3 py-2 text-sm';
 
     return [
@@ -56,12 +56,12 @@ export class InputComponent implements ControlValueAccessor {
   });
   readonly labelClasses = computed(() =>
     this.size() === 'sm'
-      ? 'mb-1 block text-[10px] font-semibold text-slate-700'
+      ? 'mb-1 block text-[12px] font-semibold text-slate-700'
       : 'mb-1.5 block text-xs font-semibold text-slate-700',
   );
   readonly feedbackClasses = computed(() =>
     this.size() === 'sm'
-      ? 'mt-1.5 block text-[10px]'
+      ? 'mt-1.5 block text-[12px]'
       : 'mt-2 block text-xs',
   );
   readonly passwordToggleIcon = computed(() => (this.passwordVisible() ? EyeOff : Eye));

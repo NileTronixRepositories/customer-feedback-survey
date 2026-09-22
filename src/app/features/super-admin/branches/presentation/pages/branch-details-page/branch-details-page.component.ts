@@ -3,12 +3,13 @@ import { ChangeDetectionStrategy, Component, OnInit, effect, inject, signal } fr
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { finalize, take } from 'rxjs';
-import { ArrowLeft, KeyRound, Pencil, RotateCcw, Save, Trash2, UserPlus, UserX, X } from 'lucide-angular';
+import { ArrowLeft, Building, KeyRound, Pencil, RotateCcw, Save, Trash2, UserPlus, UserX, X } from 'lucide-angular';
 import { ButtonComponent } from '../../../../../../shared/ui/button/button.component';
 import { CardComponent } from '../../../../../../shared/ui/card/card.component';
 import { IconComponent } from '../../../../../../shared/ui/icon/icon.component';
 import { InputComponent } from '../../../../../../shared/ui/input/input.component';
 import { ModalComponent } from '../../../../../../shared/ui/modal/modal.component';
+import { PageHeaderComponent } from '../../../../../../shared/ui/page-header/page-header.component';
 import {
   ResetPasswordModalComponent,
   ResetPasswordModalValue,
@@ -45,6 +46,7 @@ interface ResetPasswordTarget {
     IconComponent,
     InputComponent,
     ModalComponent,
+    PageHeaderComponent,
     ResetPasswordModalComponent,
     TranslatePipe,
   ],
@@ -64,6 +66,7 @@ export class BranchDetailsPageComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly userPasswordResetService = inject(UserPasswordResetService);
 
+  readonly branchIcon = Building;
   readonly arrowLeftIcon = ArrowLeft;
   readonly cancelIcon = X;
   readonly deactivateIcon = UserX;

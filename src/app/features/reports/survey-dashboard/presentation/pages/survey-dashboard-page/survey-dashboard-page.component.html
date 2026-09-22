@@ -1,61 +1,40 @@
 <div class="w-full space-y-4">
-  <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-    <!-- <div class="back">
+  <app-page-header
+    [title]="'surveyDashboard.title' | t"
+    [description]="'surveyDashboard.eyebrow' | t"
+    [icon]="chartIcon"
+  >
+    @if (canOpenAuthorizedTemplatesDashboard()) {
       <button
-        class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-[10px] font-extrabold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[var(--theme-color-accent)]/20"
+        class="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-cyan-100 bg-cyan-50 px-3 text-[10px] font-extrabold text-[var(--theme-color-secondary)] transition hover:bg-cyan-100 focus:outline-none focus:ring-2 focus:ring-[var(--theme-color-accent)]/20"
         type="button"
-        (click)="goBack()"
+        (click)="openAuthorizedTemplatesDashboard()"
       >
-        <app-icon [icon]="backIcon" [size]="12" [flipRtl]="true" />
-        {{ 'common.back' | t }}
+        <app-icon [icon]="templateIcon" [size]="12" />
+        {{ 'surveyDashboard.authorizedTemplatesDashboard' | t }}
       </button>
-    </div> -->
-    <div class="flex items-center gap-2">
-      <div
-        class="flex h-7 w-7 items-center justify-center rounded-lg bg-[var(--theme-color-accent)]/10 text-[var(--theme-color-accent)]"
-      >
-        <app-icon [icon]="chartIcon" [size]="15" />
-      </div>
-      <div>
-        <p class="text-[10px] font-black uppercase tracking-wide text-slate-400">
-          {{ 'surveyDashboard.eyebrow' | t }}
-        </p>
-        <h1 class="text-sm font-black text-slate-950">{{ 'surveyDashboard.title' | t }}</h1>
-      </div>
-    </div>
-    <div class="flex flex-wrap items-center justify-end gap-2">
-      @if (canOpenAuthorizedTemplatesDashboard()) {
-        <button
-          class="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-cyan-100 bg-cyan-50 px-3 text-[10px] font-extrabold text-[var(--theme-color-secondary)] transition hover:bg-cyan-100 focus:outline-none focus:ring-2 focus:ring-[var(--theme-color-accent)]/20"
-          type="button"
-          (click)="openAuthorizedTemplatesDashboard()"
-        >
-          <app-icon [icon]="templateIcon" [size]="12" />
-          {{ 'surveyDashboard.authorizedTemplatesDashboard' | t }}
-        </button>
-      }
-      @if (canOpenAnonymousTemplatesDashboard()) {
-        <button
-          class="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-violet-100 bg-violet-50 px-3 text-[10px] font-extrabold text-violet-700 transition hover:bg-violet-100 focus:outline-none focus:ring-2 focus:ring-violet-400/20"
-          type="button"
-          (click)="openAnonymousTemplatesDashboard()"
-        >
-          <app-icon [icon]="layersIcon" [size]="12" />
-          {{ 'surveyDashboard.anonymousTemplatesDashboard' | t }}
-        </button>
-      }
+    }
+    @if (canOpenAnonymousTemplatesDashboard()) {
       <button
-        class="filter-toggle-btn"
+        class="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-violet-100 bg-violet-50 px-3 text-[10px] font-extrabold text-violet-700 transition hover:bg-violet-100 focus:outline-none focus:ring-2 focus:ring-violet-400/20"
         type="button"
-        (click)="toggleAdvancedFilters()"
+        (click)="openAnonymousTemplatesDashboard()"
       >
-        <app-icon [icon]="filterIcon" [size]="14" />
-        {{
-          (advancedFiltersOpen() ? 'surveyDashboard.hideFilters' : 'surveyDashboard.showFilters') | t
-        }}
+        <app-icon [icon]="layersIcon" [size]="12" />
+        {{ 'surveyDashboard.anonymousTemplatesDashboard' | t }}
       </button>
-    </div>
-  </div>
+    }
+    <button
+      class="filter-toggle-btn"
+      type="button"
+      (click)="toggleAdvancedFilters()"
+    >
+      <app-icon [icon]="filterIcon" [size]="14" />
+      {{
+        (advancedFiltersOpen() ? 'surveyDashboard.hideFilters' : 'surveyDashboard.showFilters') | t
+      }}
+    </button>
+  </app-page-header>
 
   <div
     class="grid transition-[grid-template-rows,opacity] duration-300 ease-out motion-reduce:transition-none"

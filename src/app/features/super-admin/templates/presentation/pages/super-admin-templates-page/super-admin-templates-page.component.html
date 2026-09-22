@@ -1,23 +1,15 @@
 <div class="w-full space-y-3 text-[11px]">
-  <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-    <div class="min-w-0">
-      <p
-        class="inline-flex items-center gap-1.5 text-[10px] font-extrabold uppercase text-[var(--theme-color-accent)]"
-      >
-        <app-icon [icon]="fileTextIcon" [size]="13" />
-        {{ 'superAdminTemplates.eyebrow' | t }}
-      </p>
-      <h2 class="mt-1 text-sm font-black text-slate-950">{{ 'superAdminTemplates.title' | t }}</h2>
-      <p class="mt-0.5 text-[11px] font-semibold text-slate-500">
-        {{ 'superAdminTemplates.description' | t }}
-      </p>
-    </div>
+  <app-page-header
+    [title]="'superAdminTemplates.title' | t"
+    [description]="'superAdminTemplates.description' | t"
+    [icon]="fileTextIcon"
+  >
     <div
       class="rounded-lg border border-cyan-100 bg-cyan-50 px-3 py-2 text-[11px] font-extrabold text-[var(--theme-color-secondary)]"
     >
       {{ templatesStore.totalItems() }} {{ 'superAdminTemplates.totalItems' | t }}
     </div>
-  </div>
+  </app-page-header>
 
   @if (copiedMessageKey()) {
     <div

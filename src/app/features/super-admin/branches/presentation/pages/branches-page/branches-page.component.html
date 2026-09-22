@@ -1,187 +1,257 @@
-<div class="w-full space-y-5">
-  <div class="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
-    <div class="min-w-0">
-      <h2 class="text-lg font-bold text-slate-900">{{ 'branches.title' | t }}</h2>
-      <p class="mt-1 text-xs text-slate-500">{{ 'branches.description' | t }}</p>
+<!-- HERO SECTION -->
+<div class="branches-hero" [attr.dir]="i18n.isRtl() ? 'rtl' : 'ltr'">
+  <!-- Decorative cityscape illustration -->
+  <div class="branches-illustration" aria-hidden="true">
+    <svg viewBox="0 0 260 180" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <ellipse cx="140" cy="158" rx="110" ry="8" fill="#dff6fa" />
+      <rect x="88" y="55" width="54" height="103" rx="8" fill="#c7eef6" />
+      <rect x="98" y="70" width="12" height="16" rx="3" fill="#75d2e3" />
+      <rect x="118" y="70" width="12" height="16" rx="3" fill="#75d2e3" />
+      <rect x="98" y="96" width="12" height="16" rx="3" fill="#75d2e3" />
+      <rect x="118" y="96" width="12" height="16" rx="3" fill="#75d2e3" />
+      <rect x="98" y="122" width="12" height="16" rx="3" fill="#75d2e3" />
+      <rect x="118" y="122" width="12" height="16" rx="3" fill="#75d2e3" />
+      <rect x="140" y="80" width="55" height="78" rx="7" fill="#d6f3f8" />
+      <rect x="150" y="94" width="13" height="14" rx="3" fill="#64cadc" />
+      <rect x="170" y="94" width="13" height="14" rx="3" fill="#64cadc" />
+      <rect x="150" y="118" width="13" height="14" rx="3" fill="#64cadc" />
+      <rect x="170" y="118" width="13" height="14" rx="3" fill="#64cadc" />
+      <rect x="195" y="108" width="38" height="50" rx="6" fill="#c6edf5" />
+      <rect x="203" y="119" width="21" height="10" rx="3" fill="#4fc2d7" />
+      <rect x="203" y="137" width="21" height="10" rx="3" fill="#4fc2d7" />
+      <rect x="54" y="137" width="5" height="21" rx="2" fill="#259aaa" />
+      <circle cx="56" cy="132" r="15" fill="#53c3cc" />
+      <circle cx="46" cy="136" r="9" fill="#6dd2d6" />
+    </svg>
+  </div>
+
+  <!-- Title & subtitle -->
+  <div class="branches-content">
+    <h1>{{ 'branches.title' | t }}</h1>
+    <p>{{ 'branches.description' | t }}</p>
+  </div>
+
+  <!-- Primary action -->
+  <div class="hero-actions">
+    <app-button (pressed)="createModalOpen.set(true)">
+      <app-icon [icon]="plusIcon" [size]="15" />
+      {{ 'branches.createBranch' | t }}
+    </app-button>
+  </div>
+</div>
+
+@if (branchesStore.success()) {
+  <div
+    class="rounded-lg border border-emerald-100 bg-emerald-50 p-3 text-xs font-semibold text-emerald-700"
+  >
+    {{ branchesStore.success() ?? '' | t }}
+  </div>
+}
+
+@if (branchesStore.error()) {
+  <div
+    class="rounded-lg border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-[var(--theme-color-danger)]"
+  >
+    {{ branchesStore.error() ?? '' | t }}
+  </div>
+}
+
+@if (departmentsStore.success()) {
+  <div
+    class="rounded-lg border border-emerald-100 bg-emerald-50 p-3 text-xs font-semibold text-emerald-700"
+  >
+    {{ departmentsStore.success() ?? '' | t }}
+  </div>
+}
+
+@if (departmentsStore.error()) {
+  <div
+    class="rounded-lg border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-[var(--theme-color-danger)]"
+  >
+    {{ departmentsStore.error() ?? '' | t }}
+  </div>
+}
+
+<!-- الكروت الثلاثة -->
+<div class="grid grid-cols-1 gap-3 md:grid-cols-3 mt-2">
+  <!-- 1. الفروع المنشأة -->
+  <div
+    class="flex flex-col justify-between rounded-xl border border-slate-100 bg-white p-3.5 shadow-xs transition-shadow hover:shadow-sm"
+  >
+    <div class="flex items-start justify-between gap-2">
+      <div class="min-w-0">
+        <h3 class="text-xs font-bold text-slate-900">
+          {{ 'branches.createdBranches' | t }}
+        </h3>
+        <p class="mt-0.5 text-[11px] text-slate-500">
+          {{ 'branches.createdBranchesSubtitle' | t }}
+        </p>
+      </div>
+      <div
+        class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-sky-50 text-sky-600"
+      >
+        <app-icon [icon]="buildingIcon" [size]="17" />
+      </div>
     </div>
 
-    <div class="grid gap-2 sm:flex sm:flex-wrap sm:justify-end">
-      <app-button
-        variant="secondary"
-        [disabled]="branchesStore.branchSelection().length === 0"
-        (pressed)="openCreateDepartment()"
-      >
-        <app-icon [icon]="departmentIcon" [size]="17" />
-        {{ 'departments.createDepartment' | t }}
-      </app-button>
-      <app-button
-        variant="secondary"
-        [disabled]="branchesStore.branchSelection().length === 0"
-        (pressed)="createAdminModalOpen.set(true)"
-      >
-        <app-icon [icon]="userPlusIcon" [size]="17" />
-        {{ 'branches.createBranchAdmin' | t }}
-      </app-button>
-      <app-button (pressed)="createModalOpen.set(true)">
-        <app-icon [icon]="plusIcon" [size]="17" />
-        {{ 'branches.createBranch' | t }}
-      </app-button>
+    <div class="mt-3 flex items-center justify-between rounded-lg bg-slate-50/70 px-2.5 py-1.5">
+      <div class="flex items-center gap-2">
+        <span
+          class="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-sky-100/80 text-xs font-bold text-sky-700"
+        >
+          {{ branchesStore.totalBranches() }}
+        </span>
+        <span class="text-[11px] font-semibold text-slate-700">{{
+          'branches.totalItems' | t
+        }}</span>
+      </div>
+      <span class="text-slate-400">
+        <app-icon [icon]="i18n.isRtl() ? chevronLeftIcon : chevronRightIcon" [size]="14" />
+      </span>
     </div>
   </div>
 
-  @if (branchesStore.success()) {
-    <div
-      class="rounded-lg border border-emerald-100 bg-emerald-50 p-3 text-xs font-semibold text-emerald-700"
-    >
-      {{ branchesStore.success() ?? '' | t }}
-    </div>
-  }
-
-  @if (branchesStore.error()) {
-    <div
-      class="rounded-lg border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-[var(--theme-color-danger)]"
-    >
-      {{ branchesStore.error() ?? '' | t }}
-    </div>
-  }
-
-  @if (departmentsStore.success()) {
-    <div
-      class="rounded-lg border border-emerald-100 bg-emerald-50 p-3 text-xs font-semibold text-emerald-700"
-    >
-      {{ departmentsStore.success() ?? '' | t }}
-    </div>
-  }
-
-  @if (departmentsStore.error()) {
-    <div
-      class="rounded-lg border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-[var(--theme-color-danger)]"
-    >
-      {{ departmentsStore.error() ?? '' | t }}
-    </div>
-  }
-
-  <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-    <app-card
-      [title]="'branches.createdBranches' | t"
-      [subtitle]="'branches.createdBranchesSubtitle' | t"
-    >
-      <div class="flex items-center gap-3">
-        <span
-          class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-cyan-50 text-[var(--theme-color-accent)]"
-        >
-          <app-icon [icon]="buildingIcon" [size]="18" />
-        </span>
-        <p class="font-bold text-slate-900">{{ branchesStore.totalBranches() }}</p>
-      </div>
-    </app-card>
-
-    <app-card
-      [title]="'branches.adminFeatureTitle' | t"
-      [subtitle]="'branches.adminFeatureSubtitle' | t"
-    >
-      <div class="flex items-center gap-3">
-        <span
-          class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-rose-50 text-[var(--theme-color-danger)]"
-        >
-          <app-icon [icon]="userPlusIcon" [size]="18" />
-        </span>
-        <p class="text-xs font-semibold text-slate-700">
+  <!-- 2. إعداد مدير الفرع -->
+  <div
+    class="flex flex-col justify-between rounded-xl border border-slate-100 bg-white p-3.5 shadow-xs transition-shadow hover:shadow-sm"
+  >
+    <div class="flex items-start justify-between gap-2">
+      <div class="min-w-0">
+        <h3 class="text-xs font-bold text-slate-900">
+          {{ 'branches.adminFeatureTitle' | t }}
+        </h3>
+        <p class="mt-0.5 text-[11px] text-slate-500">
           {{ 'branches.adminFeatureDescription' | t }}
         </p>
       </div>
-    </app-card>
+      <div
+        class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-500"
+      >
+        <app-icon [icon]="userPlusIcon" [size]="17" />
+      </div>
+    </div>
 
-    <app-card
-      [title]="'departments.featureTitle' | t"
-      [subtitle]="'departments.featureSubtitle' | t"
-    >
-      <div class="flex items-center gap-3">
-        <span
-          class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-cyan-50 text-[var(--theme-color-accent)]"
-        >
-          <app-icon [icon]="departmentIcon" [size]="18" />
-        </span>
-        <p class="text-xs font-semibold text-slate-700">
+    <div class="mt-3">
+      <button
+        type="button"
+        class="flex w-full items-center justify-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 py-1.5 px-3 text-[11px] font-bold text-emerald-700 shadow-2xs transition-all hover:bg-emerald-100 hover:border-emerald-300 disabled:cursor-not-allowed disabled:opacity-50"
+        [disabled]="branchesStore.branchSelection().length === 0"
+        (click)="createAdminModalOpen.set(true)"
+      >
+        <app-icon [icon]="userPlusIcon" [size]="13" />
+        <span>{{ 'branches.createBranchAdmin' | t }}</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- 3. إعداد الأقسام -->
+  <div
+    class="flex flex-col justify-between rounded-xl border border-slate-100 bg-white p-3.5 shadow-xs transition-shadow hover:shadow-sm"
+  >
+    <div class="flex items-start justify-between gap-2">
+      <div class="min-w-0">
+        <h3 class="text-xs font-bold text-slate-900">
+          {{ 'departments.featureTitle' | t }}
+        </h3>
+        <p class="mt-0.5 text-[11px] text-slate-500">
           {{ 'departments.featureDescription' | t }}
         </p>
       </div>
-    </app-card>
-  </div>
-
-  <app-card [title]="'branches.listTitle' | t" [subtitle]="'branches.listSubtitle' | t">
-    <form
-      class="mb-4 flex flex-wrap items-end gap-3 rounded-xl border border-slate-200/80 bg-slate-50/70 p-3.5 shadow-xs"
-      [formGroup]="searchForm"
-      (ngSubmit)="searchBranches()"
-    >
-      <label class="filter-label flex-1 min-w-[260px] max-w-2xl">
-        <span class="filter-label-text">{{ 'branches.search' | t }}</span>
-        <div class="relative flex items-center">
-          <span class="pointer-events-none absolute inset-y-0 start-0 z-10 flex items-center ps-3.5 text-slate-400">
-            <app-icon [icon]="searchIcon" [size]="16" />
-          </span>
-          <input
-            type="text"
-            class="filter-control filter-control-search w-full"
-            [placeholder]="'branches.searchPlaceholder' | t"
-            formControlName="searchText"
-          />
-        </div>
-      </label>
-
-      <div class="flex items-center gap-2 shrink-0">
-        <app-button type="submit" size="md" [loading]="branchesStore.loading()">
-          <app-icon [icon]="searchIcon" [size]="16" />
-          {{ 'branches.searchAction' | t }}
-        </app-button>
-        <app-button type="button" size="md" variant="secondary" (pressed)="clearBranchSearch()">
-          {{ 'branches.clearSearch' | t }}
-        </app-button>
-      </div>
-    </form>
-
-    <app-branch-table
-      [branches]="branchesStore.branches()"
-      (editBranch)="openEditBranch($event)"
-      (deleteBranch)="deleteBranch($event)"
-      (branchSelected)="openBranchDetails($event)"
-    />
-
-    <div
-      class="mt-4 flex flex-col gap-3 border-t border-slate-100 pt-4 md:flex-row md:items-center md:justify-between"
-    >
-      <p class="text-xs font-semibold text-slate-500">
-        {{ 'branches.paginationSummary' | t }}
-        {{ branchesStore.currentPage() }} / {{ branchesStore.totalPages() }}
-        -
-        {{ branchesStore.totalItems() }} {{ 'branches.totalItems' | t }}
-      </p>
-      <div class="grid grid-cols-2 gap-2 sm:flex">
-        <app-button
-          size="sm"
-          type="button"
-          variant="secondary"
-          [disabled]="!branchesStore.hasPreviousPage() || branchesStore.loading()"
-          (pressed)="goToPreviousBranchesPage()"
-        >
-          <app-icon [icon]="chevronLeftIcon" [size]="15" [flipRtl]="true" />
-          {{ 'branches.previousPage' | t }}
-        </app-button>
-        <app-button
-          size="sm"
-          type="button"
-          variant="secondary"
-          [disabled]="!branchesStore.hasNextPage() || branchesStore.loading()"
-          (pressed)="goToNextBranchesPage()"
-        >
-          {{ 'branches.nextPage' | t }}
-          <app-icon [icon]="chevronRightIcon" [size]="15" [flipRtl]="true" />
-        </app-button>
+      <div
+        class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-50 text-indigo-500"
+      >
+        <app-icon [icon]="departmentIcon" [size]="17" />
       </div>
     </div>
-  </app-card>
+
+    <div class="mt-3">
+      <button
+        type="button"
+        class="flex w-full items-center justify-center gap-1.5 rounded-lg border border-indigo-200 bg-indigo-50 py-1.5 px-3 text-[11px] font-bold text-indigo-700 shadow-2xs transition-all hover:bg-indigo-100 hover:border-indigo-300 disabled:cursor-not-allowed disabled:opacity-50"
+        [disabled]="branchesStore.branchSelection().length === 0"
+        (click)="openCreateDepartment()"
+      >
+        <app-icon [icon]="departmentIcon" [size]="13" />
+        <span>{{ 'departments.createDepartment' | t }}</span>
+      </button>
+    </div>
+  </div>
 </div>
+
+<app-card [title]="'branches.listTitle' | t" [subtitle]="'branches.listSubtitle' | t">
+  <form
+    class="mb-4 flex flex-wrap items-end gap-3 rounded-xl border border-slate-200/80 bg-slate-50/70 p-3.5 shadow-xs"
+    [formGroup]="searchForm"
+    (ngSubmit)="searchBranches()"
+  >
+    <label class="filter-label flex-1 min-w-[260px] max-w-2xl">
+      <span class="filter-label-text">{{ 'branches.search' | t }}</span>
+      <div class="relative flex items-center">
+        <span
+          class="pointer-events-none absolute inset-y-0 start-0 z-10 flex items-center ps-3.5 text-slate-400"
+        >
+          <app-icon [icon]="searchIcon" [size]="16" />
+        </span>
+        <input
+          type="text"
+          class="filter-control filter-control-search w-full"
+          [placeholder]="'branches.searchPlaceholder' | t"
+          formControlName="searchText"
+        />
+      </div>
+    </label>
+
+    <div class="flex items-center gap-2 shrink-0">
+      <app-button type="submit" size="md" [loading]="branchesStore.loading()">
+        <app-icon [icon]="searchIcon" [size]="16" />
+        {{ 'branches.searchAction' | t }}
+      </app-button>
+      <app-button type="button" size="md" variant="secondary" (pressed)="clearBranchSearch()">
+        {{ 'branches.clearSearch' | t }}
+      </app-button>
+    </div>
+  </form>
+
+  <app-branch-table
+    [branches]="branchesStore.branches()"
+    (editBranch)="openEditBranch($event)"
+    (deleteBranch)="deleteBranch($event)"
+    (branchSelected)="openBranchDetails($event)"
+  />
+
+  <div
+    class="mt-4 flex flex-col gap-3 border-t border-slate-100 pt-4 md:flex-row md:items-center md:justify-between"
+  >
+    <p class="text-xs font-semibold text-slate-500">
+      {{ 'branches.paginationSummary' | t }}
+      {{ branchesStore.currentPage() }} / {{ branchesStore.totalPages() }}
+      -
+      {{ branchesStore.totalItems() }} {{ 'branches.totalItems' | t }}
+    </p>
+    <div class="grid grid-cols-2 gap-2 sm:flex">
+      <app-button
+        size="sm"
+        type="button"
+        variant="secondary"
+        [disabled]="!branchesStore.hasPreviousPage() || branchesStore.loading()"
+        (pressed)="goToPreviousBranchesPage()"
+      >
+        <app-icon [icon]="chevronLeftIcon" [size]="15" [flipRtl]="true" />
+        {{ 'branches.previousPage' | t }}
+      </app-button>
+      <app-button
+        size="sm"
+        type="button"
+        variant="secondary"
+        [disabled]="!branchesStore.hasNextPage() || branchesStore.loading()"
+        (pressed)="goToNextBranchesPage()"
+      >
+        {{ 'branches.nextPage' | t }}
+        <app-icon [icon]="chevronRightIcon" [size]="15" [flipRtl]="true" />
+      </app-button>
+    </div>
+  </div>
+</app-card>
 
 <app-modal
   [title]="'branches.detailsTitle' | t"

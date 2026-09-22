@@ -23,6 +23,7 @@ import {
 import { I18nService } from '../../../../../../core/services/i18n.service';
 import { TranslatePipe } from '../../../../../../shared/pipes/translate.pipe';
 import { ButtonComponent } from '../../../../../../shared/ui/button/button.component';
+import { PageHeaderComponent } from '../../../../../../shared/ui/page-header/page-header.component';
 import { IconComponent } from '../../../../../../shared/ui/icon/icon.component';
 import {
   ReportBranchOption,
@@ -43,6 +44,7 @@ import { SystemReportsStore } from '../../state/system-reports.store';
   imports: [
     ButtonComponent,
     DatePipe,
+    PageHeaderComponent,
     DecimalPipe,
     IconComponent,
     ReactiveFormsModule,

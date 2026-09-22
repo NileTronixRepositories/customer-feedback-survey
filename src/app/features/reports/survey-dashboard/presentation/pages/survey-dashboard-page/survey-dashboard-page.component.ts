@@ -36,6 +36,7 @@ import {
 import { I18nService } from '../../../../../../core/services/i18n.service';
 import { ThemeColorService } from '../../../../../../core/theme/theme-color.service';
 import { ButtonComponent } from '../../../../../../shared/ui/button/button.component';
+import { PageHeaderComponent } from '../../../../../../shared/ui/page-header/page-header.component';
 import { IconComponent } from '../../../../../../shared/ui/icon/icon.component';
 import { TranslatePipe } from '../../../../../../shared/pipes/translate.pipe';
 import { BranchResponseDetailsModalComponent } from '../../../../../branch-admin/dashboard/presentation/components/branch-response-details-modal/branch-response-details-modal.component';
@@ -76,6 +77,7 @@ Chart.register(...registerables);
     BranchResponseDetailsModalComponent,
     ButtonComponent,
     DatePipe,
+    PageHeaderComponent,
     DecimalPipe,
     IconComponent,
     ReactiveFormsModule,

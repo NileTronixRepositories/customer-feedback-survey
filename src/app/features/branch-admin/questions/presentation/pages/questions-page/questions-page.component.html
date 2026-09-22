@@ -1,44 +1,34 @@
 <div class="w-full space-y-4">
-  <div
-    class="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/60 sm:flex-row sm:items-center sm:justify-between"
+  <app-page-header
+    [title]="(isGroupScoped() ? 'questionGroups.questionsTitle' : 'questions.title') | t"
+    [description]="(isGroupScoped() ? 'questionGroups.questionsDescription' : 'questions.description') | t"
+    [icon]="questionIcon"
+    [showBackButton]="true"
   >
-    <div class="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-start">
-      <app-back-button />
-      <div class="min-w-0">
-        <h2 class="font-extrabold text-slate-950">
-          {{ (isGroupScoped() ? 'questionGroups.questionsTitle' : 'questions.title') | t }}
-        </h2>
-        <p class="mt-1 text-xs font-medium text-slate-500">
-          {{ (isGroupScoped() ? 'questionGroups.questionsDescription' : 'questions.description') | t }}
-        </p>
-        @if (isGroupScoped()) {
-          <p class="mt-2 w-fit rounded-full bg-cyan-50 px-3 py-1 text-[11px] font-extrabold text-[var(--theme-color-secondary)]">
-            {{ selectedGroupLabel() }}
-          </p>
-        }
-      </div>
-    </div>
-    <div class="flex flex-wrap items-center justify-end gap-2">
-      <button
-        class="filter-toggle-btn"
-        type="button"
-        (click)="toggleAdvancedFilters()"
-      >
-        <app-icon [icon]="filterIcon" [size]="14" />
-        {{
-          advancedFiltersOpen()
-            ? ('branchDashboard.hideFilters' | t)
-            : ('branchDashboard.showFilters' | t)
-        }}
-      </button>
-      @if (canCreate()) {
-        <app-button size="md" type="button" (pressed)="openCreateQuestion()">
-          <app-icon [icon]="plusIcon" [size]="15" />
-          {{ 'questions.createAction' | t }}
-        </app-button>
-      }
-    </div>
-  </div>
+    @if (isGroupScoped()) {
+      <p subtitle-extra class="mt-2 w-fit rounded-full bg-cyan-50 px-3 py-1 text-[11px] font-extrabold text-[var(--theme-color-secondary)]">
+        {{ selectedGroupLabel() }}
+      </p>
+    }
+    <button
+      class="filter-toggle-btn"
+      type="button"
+      (click)="toggleAdvancedFilters()"
+    >
+      <app-icon [icon]="filterIcon" [size]="14" />
+      {{
+        advancedFiltersOpen()
+          ? ('branchDashboard.hideFilters' | t)
+          : ('branchDashboard.showFilters' | t)
+      }}
+    </button>
+    @if (canCreate()) {
+      <app-button size="md" type="button" (pressed)="openCreateQuestion()">
+        <app-icon [icon]="plusIcon" [size]="15" />
+        {{ 'questions.createAction' | t }}
+      </app-button>
+    }
+  </app-page-header>
 
   @if (questionsStore.success()) {
     <div

@@ -19,6 +19,7 @@ import { CardComponent } from '../../../../../../shared/ui/card/card.component';
 import { IconComponent } from '../../../../../../shared/ui/icon/icon.component';
 import { InputComponent } from '../../../../../../shared/ui/input/input.component';
 import { ModalComponent } from '../../../../../../shared/ui/modal/modal.component';
+import { PageHeaderComponent } from '../../../../../../shared/ui/page-header/page-header.component';
 import { I18nService } from '../../../../../../core/services/i18n.service';
 import {
   CreateGlobalQuestionGroupRequest,
@@ -36,6 +37,7 @@ import { GlobalQuestionGroupsStore } from '../../state/global-question-groups.st
     IconComponent,
     InputComponent,
     ModalComponent,
+    PageHeaderComponent,
     ReactiveFormsModule,
     TranslatePipe,
   ],

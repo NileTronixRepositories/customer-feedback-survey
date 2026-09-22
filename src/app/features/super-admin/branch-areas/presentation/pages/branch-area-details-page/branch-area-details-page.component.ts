@@ -13,6 +13,7 @@ import { ActivatedRoute } from '@angular/router';
 import { finalize, take } from 'rxjs';
 import {
   ArrowLeft,
+  MapPin,
   Building2,
   Check,
   KeyRound,
@@ -33,6 +34,7 @@ import { ButtonComponent } from '../../../../../../shared/ui/button/button.compo
 import { CardComponent } from '../../../../../../shared/ui/card/card.component';
 import { IconComponent } from '../../../../../../shared/ui/icon/icon.component';
 import { InputComponent } from '../../../../../../shared/ui/input/input.component';
+import { PageHeaderComponent } from '../../../../../../shared/ui/page-header/page-header.component';
 import {
   ResetPasswordModalComponent,
   ResetPasswordModalValue,
@@ -60,6 +62,7 @@ interface ResetPasswordTarget {
     DatePipe,
     IconComponent,
     InputComponent,
+    PageHeaderComponent,
     ReactiveFormsModule,
     ResetPasswordModalComponent,
     TranslatePipe,
@@ -77,6 +80,7 @@ export class BranchAreaDetailsPageComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly userPasswordResetService = inject(UserPasswordResetService);
 
+  readonly areaIcon = MapPin;
   readonly arrowLeftIcon = ArrowLeft;
   readonly buildingIcon = Building2;
   readonly cancelIcon = X;

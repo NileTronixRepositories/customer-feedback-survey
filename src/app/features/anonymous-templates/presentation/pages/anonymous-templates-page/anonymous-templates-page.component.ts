@@ -1,6 +1,13 @@
 import { DOCUMENT, DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import {
   AbstractControl,
   FormArray,
@@ -44,6 +51,7 @@ import { CardComponent } from '../../../../../shared/ui/card/card.component';
 import { IconComponent } from '../../../../../shared/ui/icon/icon.component';
 import { InputComponent } from '../../../../../shared/ui/input/input.component';
 import { ModalComponent } from '../../../../../shared/ui/modal/modal.component';
+import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
 import { I18nService } from '../../../../../core/services/i18n.service';
 import {
   AnonymousTemplateListItem,
@@ -107,6 +115,7 @@ interface CopyApiErrorResponse {
     IconComponent,
     InputComponent,
     ModalComponent,
+    PageHeaderComponent,
     ReactiveFormsModule,
     TranslatePipe,
   ],
@@ -345,11 +354,7 @@ export class AnonymousTemplatesPageComponent implements OnInit {
       return;
     }
 
-    void this.router.navigate([
-      '/anonymous-templates',
-      template.anonymousTemplateId,
-      'responses',
-    ]);
+    void this.router.navigate(['/anonymous-templates', template.anonymousTemplateId, 'responses']);
   }
 
   openCopyTemplateToBranch(template: AnonymousTemplateListItem): void {
@@ -429,11 +434,7 @@ export class AnonymousTemplatesPageComponent implements OnInit {
 
   deleteSelectedTemplate(): void {
     const template = this.templatePendingDelete();
-    if (
-      !template ||
-      this.anonymousTemplatesStore.deleting() ||
-      !this.canDeleteTemplate(template)
-    ) {
+    if (!template || this.anonymousTemplatesStore.deleting() || !this.canDeleteTemplate(template)) {
       return;
     }
 
@@ -656,7 +657,10 @@ export class AnonymousTemplatesPageComponent implements OnInit {
     return this.localizedText(input.labelEn ?? input.name, input.labelAr, input.name);
   }
 
-  branchDisplayName(template: { branchNameEn: string | null; branchNameAr: string | null }): string {
+  branchDisplayName(template: {
+    branchNameEn: string | null;
+    branchNameAr: string | null;
+  }): string {
     return this.localizedText(template.branchNameEn, template.branchNameAr);
   }
 
@@ -696,10 +700,12 @@ export class AnonymousTemplatesPageComponent implements OnInit {
       return !template.isGlobal;
     }
 
-    return this.authStore.hasPermission('AnonymousTemplates.Delete') ||
+    return (
+      this.authStore.hasPermission('AnonymousTemplates.Delete') ||
       this.authStore.hasPermission('AnonymousTemplates.Update') ||
       this.authStore.hasPermission('AnonymousTemplates.Restore') ||
-      this.authStore.hasPermission('AnonymousTemplates.ViewResponses');
+      this.authStore.hasPermission('AnonymousTemplates.ViewResponses')
+    );
   }
 
   private readCopyErrorMessage(error: unknown): string {
@@ -800,10 +806,7 @@ export class AnonymousTemplatesPageComponent implements OnInit {
       minValue: new FormControl<number | null>(null),
       maxValue: new FormControl<number | null>(null),
       startWith: this.formBuilder.nonNullable.control('', [Validators.maxLength(100)]),
-      order: this.formBuilder.nonNullable.control(order, [
-        Validators.required,
-        Validators.min(1),
-      ]),
+      order: this.formBuilder.nonNullable.control(order, [Validators.required, Validators.min(1)]),
     });
   }
 

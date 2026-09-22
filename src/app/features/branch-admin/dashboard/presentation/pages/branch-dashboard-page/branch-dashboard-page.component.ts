@@ -410,7 +410,7 @@ export class BranchDashboardPageComponent implements OnInit, OnDestroy {
         labels: trend.map((point) => point.period),
         datasets: [
           {
-            label: 'Average Score %',
+            label: `${this.i18n.translate('branchDashboard.avgScore')} %`,
             data: trend.map((point) => point.averageScorePercentage),
             borderColor: this.themeColors.color('accent'),
             backgroundColor: this.themeColors.rgba('accent', 0.14),

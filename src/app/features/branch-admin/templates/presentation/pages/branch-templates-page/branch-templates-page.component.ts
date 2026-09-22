@@ -36,12 +36,12 @@ import {
 import { I18nService } from '../../../../../../core/services/i18n.service';
 import { AuthStore } from '../../../../../auth/presentation/state/auth.store';
 import { TranslatePipe } from '../../../../../../shared/pipes/translate.pipe';
-import { BackButtonComponent } from '../../../../../../shared/ui/back-button/back-button.component';
 import { ButtonComponent } from '../../../../../../shared/ui/button/button.component';
 import { CardComponent } from '../../../../../../shared/ui/card/card.component';
 import { IconComponent } from '../../../../../../shared/ui/icon/icon.component';
 import { InputComponent } from '../../../../../../shared/ui/input/input.component';
 import { ModalComponent } from '../../../../../../shared/ui/modal/modal.component';
+import { PageHeaderComponent } from '../../../../../../shared/ui/page-header/page-header.component';
 import {
   BranchTemplate,
   CreateBranchTemplateCustomInputPayload,
@@ -87,12 +87,12 @@ type CustomInputFormGroup = FormGroup<CustomInputFormControls>;
   standalone: true,
   imports: [
     ButtonComponent,
-    BackButtonComponent,
     CardComponent,
     DatePipe,
     IconComponent,
     InputComponent,
     ModalComponent,
+    PageHeaderComponent,
     ReactiveFormsModule,
     RouterLink,
     TranslatePipe,
@@ -458,7 +458,9 @@ export class BranchTemplatesPageComponent implements OnInit {
       .filter((customInput) => customInput.isActive)
       .sort((first, second) => first.order - second.order)
       .forEach((customInput) =>
-        this.editCustomInputsArray.push(this.createCustomInputGroup(customInput.order, customInput)),
+        this.editCustomInputsArray.push(
+          this.createCustomInputGroup(customInput.order, customInput),
+        ),
       );
   }
 
@@ -932,7 +934,9 @@ export class BranchTemplatesPageComponent implements OnInit {
     return `${field.charAt(0).toUpperCase()}${field.slice(1)}`;
   }
 
-  private validateTemplateDates(form: typeof this.templateForm | typeof this.editTemplateForm): void {
+  private validateTemplateDates(
+    form: typeof this.templateForm | typeof this.editTemplateForm,
+  ): void {
     const activeFrom = form.controls.activeFrom.value;
     const expireTo = form.controls.expireTo.value;
     const expireToControl = form.controls.expireTo;

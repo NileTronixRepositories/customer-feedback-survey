@@ -1,17 +1,14 @@
 <div class="w-full space-y-5">
-  <div class="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
-    <div class="min-w-0">
-      <h2 class="text-lg font-bold text-slate-900">{{ 'departments.title' | t }}</h2>
-      <p class="mt-1 text-xs text-slate-500">{{ 'departments.description' | t }}</p>
-    </div>
-
-    <div class="grid gap-2 sm:flex sm:justify-end">
-      <app-button type="button" size="md" (pressed)="openCreate()">
-        <app-icon [icon]="createIcon" [size]="16" />
-        {{ 'departments.createDepartment' | t }}
-      </app-button>
-    </div>
-  </div>
+  <app-page-header
+    [title]="'departments.title' | t"
+    [description]="'departments.description' | t"
+    [icon]="departmentIcon"
+  >
+    <app-button type="button" size="md" (pressed)="openCreate()">
+      <app-icon [icon]="createIcon" [size]="16" />
+      {{ 'departments.createDepartment' | t }}
+    </app-button>
+  </app-page-header>
 
   @if (departmentsStore.success()) {
     <div class="border border-emerald-100 bg-emerald-50 p-3 text-xs font-semibold text-emerald-700">

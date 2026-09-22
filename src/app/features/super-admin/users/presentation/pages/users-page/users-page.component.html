@@ -1,17 +1,16 @@
-<app-card [title]="'users.adminManagement' | t" [subtitle]="'users.subtitle' | t">
-  <div card-actions class="flex flex-wrap items-center justify-end gap-2">
+<div class="w-full space-y-4">
+  <app-page-header
+    [title]="'users.adminManagement' | t"
+    [description]="'users.subtitle' | t"
+    [icon]="usersIcon"
+  >
     @if (canCreateSuperAdmin()) {
-      <app-button type="button" size="sm" (pressed)="openCreateSuperAdmin()">
+      <app-button type="button" size="md" (pressed)="openCreateSuperAdmin()">
         <app-icon [icon]="createIcon" [size]="15" />
         {{ 'users.createSuperAdmin' | t }}
       </app-button>
     }
-    <div
-      class="flex h-9 w-11 items-center justify-center bg-cyan-50 text-[var(--theme-color-accent)]"
-    >
-      <app-icon [icon]="usersIcon" [size]="20" />
-    </div>
-  </div>
+  </app-page-header>
 
   <div class="space-y-3">
     @if (usersStore.success()) {
@@ -35,7 +34,7 @@
       (resetPasswordRequested)="openResetPassword($event)"
     />
   </div>
-</app-card>
+</div>
 
 <app-reset-password-modal
   [open]="resetPasswordModalOpen()"

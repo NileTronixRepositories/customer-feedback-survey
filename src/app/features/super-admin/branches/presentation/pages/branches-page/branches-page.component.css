@@ -19,3 +19,131 @@
     width: 100%;
   }
 }
+
+/* =============================== */
+/* HERO SECTION                    */
+/* =============================== */
+
+.branches-hero {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 175px 16px 28px; /* right pad = SVG space in RTL */
+  border-radius: 14px;
+  overflow: hidden;
+  background: linear-gradient(270deg, #f8fdff 0%, #ffffff 48%, #fbfdff 100%);
+  isolation: isolate;
+}
+
+:host-context([dir='ltr']) .branches-hero {
+  padding: 16px 28px 16px 175px;
+}
+
+.branches-hero::before,
+.branches-hero::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  z-index: -1;
+}
+
+.branches-hero::before {
+  width: 300px;
+  height: 300px;
+  right: -100px;
+  top: -180px;
+  background: rgba(65, 190, 216, 0.08);
+}
+
+.branches-hero::after {
+  width: 220px;
+  height: 340px;
+  right: 30px;
+  top: -240px;
+  transform: rotate(18deg);
+  background: rgba(45, 186, 211, 0.06);
+}
+
+:host-context([dir='ltr']) .branches-hero::before { right: auto; left: -100px; }
+:host-context([dir='ltr']) .branches-hero::after  { right: auto; left: 30px; }
+
+/* =============================== */
+/* CONTENT                         */
+/* =============================== */
+
+.branches-content {
+  position: relative;
+  z-index: 2;
+  text-align: right;
+  flex: 1;
+  min-width: 0;
+}
+
+:host-context([dir='ltr']) .branches-content {
+  text-align: left;
+}
+
+.branches-content h1 {
+  margin: 0 0 3px;
+  color: #0f1e3a;
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.branches-content p {
+  margin: 0;
+  color: #7b8ba6;
+  font-size: 14px;
+}
+
+/* =============================== */
+/* ACTIONS                         */
+/* =============================== */
+
+.hero-actions {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  flex-shrink: 0;
+}
+
+/* =============================== */
+/* ILLUSTRATION                    */
+/* =============================== */
+
+.branches-illustration {
+  position: absolute;
+  bottom: 0;
+  right: 12px;
+  width: 155px;
+  z-index: 1;
+}
+
+:host-context([dir='ltr']) .branches-illustration {
+  right: auto;
+  left: 12px;
+}
+
+/* =============================== */
+/* RESPONSIVE                      */
+/* =============================== */
+
+@media (max-width: 768px) {
+  .branches-hero {
+    padding: 18px 20px;
+  }
+
+  .branches-illustration {
+    display: none;
+  }
+
+  .branches-content h1 {
+    font-size: 20px;
+  }
+}

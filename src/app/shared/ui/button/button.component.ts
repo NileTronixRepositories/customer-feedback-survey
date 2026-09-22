@@ -22,7 +22,7 @@ export class ButtonComponent {
   readonly classes = computed(() => {
     const base =
       'inline-flex cursor-pointer items-center justify-center gap-1.5 whitespace-nowrap rounded-lg font-extrabold leading-none transition focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60';
-    const size = this.size() === 'sm' ? 'h-8 px-3 text-[11px]' : 'h-9 px-4 text-[12px]';
+    const size = this.size() === 'sm' ? 'h-8 px-3 text-[13px]' : 'h-9 px-4 text-[14px]';
     const width = this.fullWidth() ? 'w-full' : '';
     const variant: Record<ButtonVariant, string> = {
       primary:

@@ -26,6 +26,7 @@ import {
 import { DEFAULT_SINGLE_CHOICE_OPTIONS } from '../../../../../../shared/models/default-question-options.model';
 import { TranslatePipe } from '../../../../../../shared/pipes/translate.pipe';
 import { ButtonComponent } from '../../../../../../shared/ui/button/button.component';
+import { PageHeaderComponent } from '../../../../../../shared/ui/page-header/page-header.component';
 import { CardComponent } from '../../../../../../shared/ui/card/card.component';
 import { IconComponent } from '../../../../../../shared/ui/icon/icon.component';
 import { InputComponent } from '../../../../../../shared/ui/input/input.component';
@@ -79,6 +80,7 @@ type GlobalQuestionOptionFormValue = GlobalQuestionFormValue['options'][number];
     IconComponent,
     InputComponent,
     ModalComponent,
+    PageHeaderComponent,
     ReactiveFormsModule,
     TranslatePipe,
   ],

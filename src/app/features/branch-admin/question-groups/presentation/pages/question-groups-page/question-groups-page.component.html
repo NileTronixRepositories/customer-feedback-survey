@@ -1,35 +1,29 @@
 <div class="w-full space-y-3">
-  <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-    <div class="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-start">
-      <app-back-button />
-      <div class="min-w-0">
-        <h2 class="mt-2 font-bold text-slate-900">{{ 'questionGroups.title' | t }}</h2>
-        <p class="mt-1 text-xs text-slate-500">{{ 'questionGroups.description' | t }}</p>
-      </div>
-    </div>
-    <div class="flex justify-end sm:shrink-0">
-      <div class="flex flex-wrap items-center justify-end gap-2">
-        <button
-          class="filter-toggle-btn"
-          type="button"
-          (click)="toggleAdvancedFilters()"
-        >
-          <app-icon [icon]="filterIcon" [size]="14" />
-          {{
-            advancedFiltersOpen()
-              ? ('branchDashboard.hideFilters' | t)
-              : ('branchDashboard.showFilters' | t)
-          }}
-        </button>
-        @if (canCreate()) {
-          <app-button size="md" type="button" (pressed)="openCreateGroup()">
-            <app-icon [icon]="plusIcon" [size]="15" />
-            {{ 'questionGroups.createAction' | t }}
-          </app-button>
-        }
-      </div>
-    </div>
-  </div>
+  <app-page-header
+    [title]="'questionGroups.title' | t"
+    [description]="'questionGroups.description' | t"
+    [icon]="groupIcon"
+    [showBackButton]="true"
+  >
+    <button
+      class="filter-toggle-btn"
+      type="button"
+      (click)="toggleAdvancedFilters()"
+    >
+      <app-icon [icon]="filterIcon" [size]="14" />
+      {{
+        advancedFiltersOpen()
+          ? ('branchDashboard.hideFilters' | t)
+          : ('branchDashboard.showFilters' | t)
+      }}
+    </button>
+    @if (canCreate()) {
+      <app-button size="md" type="button" (pressed)="openCreateGroup()">
+        <app-icon [icon]="plusIcon" [size]="15" />
+        {{ 'questionGroups.createAction' | t }}
+      </app-button>
+    }
+  </app-page-header>
 
   @if (questionGroupsStore.success()) {
     <div

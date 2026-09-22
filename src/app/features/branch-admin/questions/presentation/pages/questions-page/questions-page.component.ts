@@ -48,11 +48,11 @@ import {
   DefaultQuestionAnswerOption,
 } from '../../../../../../shared/models/default-question-options.model';
 import { TranslatePipe } from '../../../../../../shared/pipes/translate.pipe';
-import { BackButtonComponent } from '../../../../../../shared/ui/back-button/back-button.component';
 import { ButtonComponent } from '../../../../../../shared/ui/button/button.component';
 import { IconComponent } from '../../../../../../shared/ui/icon/icon.component';
 import { InputComponent } from '../../../../../../shared/ui/input/input.component';
 import { ModalComponent } from '../../../../../../shared/ui/modal/modal.component';
+import { PageHeaderComponent } from '../../../../../../shared/ui/page-header/page-header.component';
 import {
   CreateQuestionRequest,
   QuestionListItem,
@@ -121,11 +121,11 @@ type QuestionOptionFormValue = QuestionFormValue['options'][number];
   standalone: true,
   imports: [
     ButtonComponent,
-    BackButtonComponent,
     DatePipe,
     IconComponent,
     InputComponent,
     ModalComponent,
+    PageHeaderComponent,
     QuestionAnswersAccordionComponent,
     ReactiveFormsModule,
     TranslatePipe,

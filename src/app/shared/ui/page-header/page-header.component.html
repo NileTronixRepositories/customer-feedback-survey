@@ -1,0 +1,25 @@
+<div class="ph-root">
+  <div class="ph-start">
+    @if (showBackButton()) {
+      <div class="ph-back">
+        <app-back-button />
+      </div>
+    }
+    @if (icon()) {
+      <div class="ph-icon" aria-hidden="true">
+        <app-icon [icon]="icon()!" [size]="18" />
+      </div>
+    }
+    <div class="ph-text">
+      <h1 class="ph-title">{{ title() }}</h1>
+      @if (description()) {
+        <p class="ph-desc">{{ description() }}</p>
+      }
+      <ng-content select="[subtitle-extra]" />
+    </div>
+  </div>
+
+  <div class="ph-actions">
+    <ng-content />
+  </div>
+</div>

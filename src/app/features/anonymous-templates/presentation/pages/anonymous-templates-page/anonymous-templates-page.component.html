@@ -1,63 +1,68 @@
 <div class="w-full space-y-2 text-[11px]">
-  <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-    <div class="min-w-0">
-      <h2 class="mt-1 text-sm font-bold text-slate-900">{{ 'anonymousTemplates.title' | t }}</h2>
-      <p class="mt-0.5 text-[11px] text-slate-500">{{ 'anonymousTemplates.description' | t }}</p>
-    </div>
-    <div class="flex flex-wrap items-center justify-end gap-2">
-      @if (canCreate()) {
-        <app-button size="sm" type="button" (pressed)="openCreateTemplate()">
-          <app-icon [icon]="plusIcon" [size]="14" />
-          {{ 'anonymousTemplates.createAction' | t }}
-        </app-button>
-      }
-      @if (canViewDashboard()) {
-        <app-button size="sm" type="button" variant="secondary" (pressed)="openDashboard()">
-          <app-icon [icon]="dashboardIcon" [size]="14" />
-          {{ 'anonymousDashboard.title' | t }}
-        </app-button>
-      }
-      @if (canViewBranchResponsesReport()) {
-        <app-button size="sm" type="button" variant="secondary" (pressed)="openBranchResponsesReport()">
-          <app-icon [icon]="responsesIcon" [size]="14" />
-          {{ 'anonymousTemplates.branchResponsesTitle' | t }}
-        </app-button>
-      }
-      <button
-        class="filter-toggle-btn"
+  <app-page-header
+    [title]="'anonymousTemplates.title' | t"
+    [description]="'anonymousTemplates.description' | t"
+    [icon]="qrCodeIcon"
+  >
+    @if (canCreate()) {
+      <app-button size="sm" type="button" (pressed)="openCreateTemplate()">
+        <app-icon [icon]="plusIcon" [size]="14" />
+        {{ 'anonymousTemplates.createAction' | t }}
+      </app-button>
+    }
+    @if (canViewDashboard()) {
+      <app-button size="sm" type="button" variant="secondary" (pressed)="openDashboard()">
+        <app-icon [icon]="dashboardIcon" [size]="14" />
+        {{ 'anonymousDashboard.title' | t }}
+      </app-button>
+    }
+    @if (canViewBranchResponsesReport()) {
+      <app-button
+        size="sm"
         type="button"
-        (click)="toggleAdvancedFilters()"
+        variant="secondary"
+        (pressed)="openBranchResponsesReport()"
       >
-        <app-icon [icon]="filterIcon" [size]="14" />
-        {{
-          advancedFiltersOpen()
-            ? ('branchDashboard.hideFilters' | t)
-            : ('branchDashboard.showFilters' | t)
-        }}
-      </button>
-      <div
-        class="inline-flex h-9 w-fit items-center gap-1.5 rounded-lg border border-cyan-100 bg-cyan-50 px-3 text-xs font-extrabold text-[var(--theme-color-secondary)]"
-      >
-        <app-icon [icon]="scopeIcon()" [size]="15" />
-        {{ scopeLabelKey() | t }}
-      </div>
+        <app-icon [icon]="responsesIcon" [size]="14" />
+        {{ 'anonymousTemplates.branchResponsesTitle' | t }}
+      </app-button>
+    }
+    <button class="filter-toggle-btn" type="button" (click)="toggleAdvancedFilters()">
+      <app-icon [icon]="filterIcon" [size]="14" />
+      {{
+        advancedFiltersOpen()
+          ? ('branchDashboard.hideFilters' | t)
+          : ('branchDashboard.showFilters' | t)
+      }}
+    </button>
+    <div
+      class="inline-flex h-9 w-fit items-center gap-1.5 rounded-lg border border-cyan-100 bg-cyan-50 px-3 text-xs font-extrabold text-[var(--theme-color-secondary)]"
+    >
+      <app-icon [icon]="scopeIcon()" [size]="15" />
+      {{ scopeLabelKey() | t }}
     </div>
-  </div>
+  </app-page-header>
 
   @if (anonymousTemplatesStore.success()) {
-    <div class="rounded-md border border-emerald-100 bg-emerald-50 p-2 text-[11px] font-semibold text-emerald-700">
+    <div
+      class="rounded-md border border-emerald-100 bg-emerald-50 p-2 text-[11px] font-semibold text-emerald-700"
+    >
       {{ anonymousTemplatesStore.success() ?? '' | t }}
     </div>
   }
 
   @if (anonymousTemplatesStore.error()) {
-    <div class="rounded-md border border-rose-100 bg-rose-50 p-2 text-[11px] font-semibold text-[var(--theme-color-danger)]">
+    <div
+      class="rounded-md border border-rose-100 bg-rose-50 p-2 text-[11px] font-semibold text-[var(--theme-color-danger)]"
+    >
       {{ anonymousTemplatesStore.error() ?? '' | t }}
     </div>
   }
 
   @if (!canCreate()) {
-    <div class="rounded-md border border-amber-100 bg-amber-50 p-2 text-[11px] font-semibold text-amber-700">
+    <div
+      class="rounded-md border border-amber-100 bg-amber-50 p-2 text-[11px] font-semibold text-amber-700"
+    >
       {{ 'anonymousTemplates.noCreatePermission' | t }}
     </div>
   }
@@ -71,99 +76,95 @@
       [class.opacity-0]="!advancedFiltersOpen()"
     >
       <div class="min-h-0 overflow-hidden">
-      <form
-        class="mb-3 flex flex-wrap items-end gap-3 transition-[transform,opacity] duration-300 ease-out motion-reduce:transition-none"
-        [formGroup]="searchForm"
-        (ngSubmit)="searchTemplates()"
-        [class.translate-y-0]="advancedFiltersOpen()"
-        [class.-translate-y-2]="!advancedFiltersOpen()"
-        [class.pointer-events-none]="!advancedFiltersOpen()"
-        [attr.aria-hidden]="!advancedFiltersOpen()"
-        [attr.inert]="advancedFiltersOpen() ? null : ''"
-      >
-      <label class="filter-label flex-1 min-w-[200px] sm:max-w-md">
-        <span class="filter-label-text">{{ 'anonymousTemplates.search' | t }}</span>
-        <input
-          class="filter-control"
-          formControlName="searchText"
-          [placeholder]="'anonymousTemplates.searchPlaceholder' | t"
-        />
-      </label>
-
-      @if (showSuperAdminFilters()) {
-        <label class="filter-label flex-1 min-w-[130px]">
-          <span class="filter-label-text">{{ 'common.scope' | t }}</span>
-          <select
-            class="filter-control filter-select"
-            formControlName="scope"
-          >
-            <option value="">{{ 'anonymousTemplates.allScopes' | t }}</option>
-            <option value="1">{{ 'anonymousTemplates.branchScope' | t }}</option>
-            <option value="2">{{ 'anonymousTemplates.globalScope' | t }}</option>
-          </select>
-        </label>
-
-        <label class="filter-label flex-[1.4] min-w-[160px]">
-          <span class="filter-label-text">{{ 'anonymousTemplates.branchFilter' | t }}</span>
-          <select
-            class="filter-control filter-select"
-            formControlName="branchId"
-          >
-            <option value="">{{ branchOptionsLoading() ? ('anonymousTemplates.loading' | t) : ('anonymousTemplates.allBranches' | t) }}</option>
-            @for (branch of branchOptions(); track branch.id) {
-              <option [value]="branch.id">{{ branchOptionDisplayName(branch) }}</option>
-            }
-          </select>
-        </label>
-      }
-
-      <label class="filter-label flex-1 min-w-[120px]">
-        <span class="filter-label-text">{{ 'globalQuestionGroups.isActiveFilter' | t }}</span>
-        <select
-          class="filter-control filter-select"
-          formControlName="isActive"
+        <form
+          class="mb-3 flex flex-wrap items-end gap-3 transition-[transform,opacity] duration-300 ease-out motion-reduce:transition-none"
+          [formGroup]="searchForm"
+          (ngSubmit)="searchTemplates()"
+          [class.translate-y-0]="advancedFiltersOpen()"
+          [class.-translate-y-2]="!advancedFiltersOpen()"
+          [class.pointer-events-none]="!advancedFiltersOpen()"
+          [attr.aria-hidden]="!advancedFiltersOpen()"
+          [attr.inert]="advancedFiltersOpen() ? null : ''"
         >
-          <option value="">{{ 'anonymousTemplates.allTemplates' | t }}</option>
-          <option value="true">{{ 'common.active' | t }}</option>
-          <option value="false">{{ 'branches.inactive' | t }}</option>
-        </select>
-      </label>
+          <label class="filter-label flex-1 min-w-[200px] sm:max-w-md">
+            <span class="filter-label-text">{{ 'anonymousTemplates.search' | t }}</span>
+            <input
+              class="filter-control"
+              formControlName="searchText"
+              [placeholder]="'anonymousTemplates.searchPlaceholder' | t"
+            />
+          </label>
 
-      <label class="filter-label w-24 sm:w-28">
-        <span class="filter-label-text">{{ 'globalQuestionGroups.pageSize' | t }}</span>
-        <select
-          class="filter-control filter-select"
-          formControlName="pageSize"
-        >
-          <option value="10">10</option>
-          <option value="25">25</option>
-          <option value="50">50</option>
-          <option value="100">100</option>
-        </select>
-      </label>
+          @if (showSuperAdminFilters()) {
+            <label class="filter-label flex-1 min-w-[130px]">
+              <span class="filter-label-text">{{ 'common.scope' | t }}</span>
+              <select class="filter-control filter-select" formControlName="scope">
+                <option value="">{{ 'anonymousTemplates.allScopes' | t }}</option>
+                <option value="1">{{ 'anonymousTemplates.branchScope' | t }}</option>
+                <option value="2">{{ 'anonymousTemplates.globalScope' | t }}</option>
+              </select>
+            </label>
 
-      <label class="filter-label flex-1 min-w-[130px]">
-        <span class="filter-label-text">{{ 'globalQuestionGroups.orderSort' | t }}</span>
-        <select
-          class="filter-control filter-select"
-          formControlName="orderSort"
-        >
-          <option value="">{{ 'globalQuestionGroups.defaultSort' | t }}</option>
-          <option value="Newest">{{ 'globalQuestionGroups.newest' | t }}</option>
-          <option value="Oldest">{{ 'globalQuestionGroups.oldest' | t }}</option>
-        </select>
-      </label>
+            <label class="filter-label flex-[1.4] min-w-[160px]">
+              <span class="filter-label-text">{{ 'anonymousTemplates.branchFilter' | t }}</span>
+              <select class="filter-control filter-select" formControlName="branchId">
+                <option value="">
+                  {{
+                    branchOptionsLoading()
+                      ? ('anonymousTemplates.loading' | t)
+                      : ('anonymousTemplates.allBranches' | t)
+                  }}
+                </option>
+                @for (branch of branchOptions(); track branch.id) {
+                  <option [value]="branch.id">{{ branchOptionDisplayName(branch) }}</option>
+                }
+              </select>
+            </label>
+          }
 
-      <div class="flex items-center gap-2 pt-1 sm:pt-0 shrink-0 self-end">
-        <app-button size="md" type="submit" [loading]="anonymousTemplatesStore.loading()">
-          <app-icon [icon]="searchIcon" [size]="14" />
-          {{ 'branches.searchAction' | t }}
-        </app-button>
-        <app-button size="md" type="button" variant="secondary" (pressed)="clearTemplateSearch()">
-          {{ 'branches.clearSearch' | t }}
-        </app-button>
-      </div>
-    </form>
+          <label class="filter-label flex-1 min-w-[120px]">
+            <span class="filter-label-text">{{ 'globalQuestionGroups.isActiveFilter' | t }}</span>
+            <select class="filter-control filter-select" formControlName="isActive">
+              <option value="">{{ 'anonymousTemplates.allTemplates' | t }}</option>
+              <option value="true">{{ 'common.active' | t }}</option>
+              <option value="false">{{ 'branches.inactive' | t }}</option>
+            </select>
+          </label>
+
+          <label class="filter-label w-24 sm:w-28">
+            <span class="filter-label-text">{{ 'globalQuestionGroups.pageSize' | t }}</span>
+            <select class="filter-control filter-select" formControlName="pageSize">
+              <option value="10">10</option>
+              <option value="25">25</option>
+              <option value="50">50</option>
+              <option value="100">100</option>
+            </select>
+          </label>
+
+          <label class="filter-label flex-1 min-w-[130px]">
+            <span class="filter-label-text">{{ 'globalQuestionGroups.orderSort' | t }}</span>
+            <select class="filter-control filter-select" formControlName="orderSort">
+              <option value="">{{ 'globalQuestionGroups.defaultSort' | t }}</option>
+              <option value="Newest">{{ 'globalQuestionGroups.newest' | t }}</option>
+              <option value="Oldest">{{ 'globalQuestionGroups.oldest' | t }}</option>
+            </select>
+          </label>
+
+          <div class="flex items-center gap-2 pt-1 sm:pt-0 shrink-0 self-end">
+            <app-button size="md" type="submit" [loading]="anonymousTemplatesStore.loading()">
+              <app-icon [icon]="searchIcon" [size]="14" />
+              {{ 'branches.searchAction' | t }}
+            </app-button>
+            <app-button
+              size="md"
+              type="button"
+              variant="secondary"
+              (pressed)="clearTemplateSearch()"
+            >
+              {{ 'branches.clearSearch' | t }}
+            </app-button>
+          </div>
+        </form>
       </div>
     </div>
 
@@ -188,20 +189,35 @@
           <tbody class="divide-y divide-slate-100 bg-white">
             @if (anonymousTemplatesStore.loading()) {
               <tr>
-                <td class="px-2.5 py-6 text-center text-[11px] font-semibold text-slate-500" colspan="11">
-                  <span class="mx-auto mb-2 block h-5 w-5 animate-spin rounded-full border-2 border-[var(--theme-color-accent)]/30 border-t-[var(--theme-color-accent)]"></span>
+                <td
+                  class="px-2.5 py-6 text-center text-[11px] font-semibold text-slate-500"
+                  colspan="11"
+                >
+                  <span
+                    class="mx-auto mb-2 block h-5 w-5 animate-spin rounded-full border-2 border-[var(--theme-color-accent)]/30 border-t-[var(--theme-color-accent)]"
+                  ></span>
                   {{ 'anonymousTemplates.loading' | t }}
                 </td>
               </tr>
             } @else {
-              @for (template of anonymousTemplatesStore.templates(); track template.anonymousTemplateId) {
-                <tr class="align-top transition hover:bg-slate-50" [class.bg-slate-50]="!template.isActive">
+              @for (
+                template of anonymousTemplatesStore.templates();
+                track template.anonymousTemplateId
+              ) {
+                <tr
+                  class="align-top transition hover:bg-slate-50"
+                  [class.bg-slate-50]="!template.isActive"
+                >
                   <td class="px-2.5 py-2">
-                    <p class="break-words text-[11px] font-bold text-slate-900 [overflow-wrap:anywhere]">
+                    <p
+                      class="break-words text-[11px] font-bold text-slate-900 [overflow-wrap:anywhere]"
+                    >
                       {{ templateDisplayName(template) }}
                     </p>
                     @if (template.description) {
-                      <p class="mt-0.5 line-clamp-1 break-words text-[10px] text-slate-500 [overflow-wrap:anywhere]">
+                      <p
+                        class="mt-0.5 line-clamp-1 break-words text-[10px] text-slate-500 [overflow-wrap:anywhere]"
+                      >
                         {{ template.description }}
                       </p>
                     }
@@ -222,7 +238,9 @@
                   </td>
                   <td class="px-2.5 py-2">
                     <div class="flex flex-col gap-1">
-                      <span class="w-fit rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-600">
+                      <span
+                        class="w-fit rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-600"
+                      >
                         {{ template.statusName }}
                       </span>
                       <span
@@ -240,11 +258,17 @@
                     {{ template.activeFrom ? (template.activeFrom | date: 'mediumDate') : '-' }}
                   </td>
                   <td class="px-2.5 py-2 text-[11px] text-slate-700">
-                    {{ template.expireTo ? (template.expireTo | date: 'mediumDate') : ('anonymousTemplates.openEnded' | t) }}
+                    {{
+                      template.expireTo
+                        ? (template.expireTo | date: 'mediumDate')
+                        : ('anonymousTemplates.openEnded' | t)
+                    }}
                   </td>
                   <td class="px-2.5 py-2">
                     <div class="flex flex-col gap-1 text-[10px] font-bold text-slate-600">
-                      <span class="w-fit rounded-full bg-cyan-50 px-2 py-0.5 text-[var(--theme-color-secondary)]">
+                      <span
+                        class="w-fit rounded-full bg-cyan-50 px-2 py-0.5 text-[var(--theme-color-secondary)]"
+                      >
                         {{ template.questionsCount }} {{ 'anonymousTemplates.questionsShort' | t }}
                       </span>
                       <span class="w-fit rounded-full bg-slate-50 px-2 py-0.5">
@@ -259,7 +283,10 @@
                     {{ template.createdOnUtc ? (template.createdOnUtc | date: 'mediumDate') : '-' }}
                   </td>
                   <td class="px-2.5 py-2">
-                    <p class="max-w-40 truncate text-[10px] font-semibold text-slate-500" [title]="template.publicUrl">
+                    <p
+                      class="max-w-40 truncate text-[10px] font-semibold text-slate-500"
+                      [title]="template.publicUrl"
+                    >
                       {{ template.publicUrl || '-' }}
                     </p>
                   </td>
@@ -321,7 +348,9 @@
                         type="button"
                         variant="secondary"
                         [disabled]="!template.publicUrl"
-                        (pressed)="copyTemplatePublicUrl(template.anonymousTemplateId, template.publicUrl)"
+                        (pressed)="
+                          copyTemplatePublicUrl(template.anonymousTemplateId, template.publicUrl)
+                        "
                       >
                         <app-icon [icon]="copyIcon" [size]="14" />
                         @if (copiedTemplateId() === template.anonymousTemplateId) {
@@ -366,7 +395,10 @@
                 </tr>
               } @empty {
                 <tr>
-                  <td class="px-2.5 py-6 text-center text-[11px] font-semibold text-slate-500" colspan="11">
+                  <td
+                    class="px-2.5 py-6 text-center text-[11px] font-semibold text-slate-500"
+                    colspan="11"
+                  >
                     <app-icon class="mx-auto mb-2 text-slate-300" [icon]="qrCodeIcon" [size]="24" />
                     {{ 'common.noRecords' | t }}
                   </td>
@@ -378,7 +410,9 @@
       </div>
     </div>
 
-    <div class="mt-3 flex flex-col gap-2 border-t border-slate-100 pt-3 md:flex-row md:items-center md:justify-between">
+    <div
+      class="mt-3 flex flex-col gap-2 border-t border-slate-100 pt-3 md:flex-row md:items-center md:justify-between"
+    >
       <p class="text-[11px] font-semibold text-slate-500">
         {{ 'branches.paginationSummary' | t }}
         {{ anonymousTemplatesStore.currentPage() }} / {{ anonymousTemplatesStore.totalPages() }}
@@ -390,7 +424,9 @@
           size="sm"
           type="button"
           variant="secondary"
-          [disabled]="!anonymousTemplatesStore.hasPreviousPage() || anonymousTemplatesStore.loading()"
+          [disabled]="
+            !anonymousTemplatesStore.hasPreviousPage() || anonymousTemplatesStore.loading()
+          "
           (pressed)="goToPreviousTemplatesPage()"
         >
           <app-icon [icon]="chevronLeftIcon" [size]="15" [flipRtl]="true" />
@@ -427,7 +463,9 @@
             <p class="text-[10px] font-extrabold uppercase text-slate-500">
               {{ 'superAdminTemplates.sourceTemplate' | t }}
             </p>
-            <p class="mt-1 break-words text-[12px] font-black text-slate-950 [overflow-wrap:anywhere]">
+            <p
+              class="mt-1 break-words text-[12px] font-black text-slate-950 [overflow-wrap:anywhere]"
+            >
               {{ templateDisplayName(template) }}
             </p>
             <p class="mt-1 text-[11px] font-semibold text-slate-500">
@@ -438,21 +476,33 @@
             <p class="text-[10px] font-extrabold uppercase text-slate-500">
               {{ 'superAdminTemplates.sourceBranch' | t }}
             </p>
-            <p class="mt-1 break-words text-[12px] font-black text-slate-950 [overflow-wrap:anywhere]">
-              {{ template.isGlobal ? ('anonymousTemplates.globalScope' | t) : branchDisplayName(template) }}
+            <p
+              class="mt-1 break-words text-[12px] font-black text-slate-950 [overflow-wrap:anywhere]"
+            >
+              {{
+                template.isGlobal
+                  ? ('anonymousTemplates.globalScope' | t)
+                  : branchDisplayName(template)
+              }}
             </p>
           </div>
         </div>
 
         <label class="flex min-w-0 flex-col gap-1">
-          <span class="text-[10px] font-bold text-slate-500">{{ 'superAdminTemplates.targetBranch' | t }}</span>
+          <span class="text-[10px] font-bold text-slate-500">{{
+            'superAdminTemplates.targetBranch' | t
+          }}</span>
           <select
             class="h-9 rounded-lg border border-slate-200 bg-white px-3 text-[12px] font-semibold text-slate-700 outline-none transition focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15"
             formControlName="branchId"
             [disabled]="branchOptionsLoading() || copyingTemplate()"
           >
             <option value="">
-              {{ branchOptionsLoading() ? ('superAdminTemplates.loadingBranches' | t) : ('superAdminTemplates.selectTargetBranch' | t) }}
+              {{
+                branchOptionsLoading()
+                  ? ('superAdminTemplates.loadingBranches' | t)
+                  : ('superAdminTemplates.selectTargetBranch' | t)
+              }}
             </option>
             @for (branch of branchOptions(); track branch.id) {
               <option [value]="branch.id">{{ branchOptionDisplayName(branch) }}</option>
@@ -466,13 +516,17 @@
         </label>
 
         @if (copyError()) {
-          <div class="rounded-md border border-rose-100 bg-rose-50 p-2 text-[11px] font-semibold text-[var(--theme-color-danger)]">
+          <div
+            class="rounded-md border border-rose-100 bg-rose-50 p-2 text-[11px] font-semibold text-[var(--theme-color-danger)]"
+          >
             {{ copyError() ?? '' | t }}
           </div>
         }
 
         @if (copySuccess()) {
-          <div class="rounded-md border border-emerald-100 bg-emerald-50 p-2 text-[11px] font-semibold text-emerald-700">
+          <div
+            class="rounded-md border border-emerald-100 bg-emerald-50 p-2 text-[11px] font-semibold text-emerald-700"
+          >
             {{ copySuccess() ?? '' | t }}
           </div>
         }
@@ -482,7 +536,9 @@
             <p class="text-[10px] font-extrabold uppercase text-slate-500">
               {{ 'superAdminTemplates.newTemplateId' | t }}
             </p>
-            <p class="mt-1 break-words text-[11px] font-black text-slate-950 [overflow-wrap:anywhere]">
+            <p
+              class="mt-1 break-words text-[11px] font-black text-slate-950 [overflow-wrap:anywhere]"
+            >
               {{ result.templateId || '-' }}
             </p>
 
@@ -501,11 +557,15 @@
                     {{ result.publicUrl }}
                   </a>
                 } @else {
-                  <p class="mt-1 text-[11px] font-semibold text-slate-500">{{ 'superAdminTemplates.noPublicUrl' | t }}</p>
+                  <p class="mt-1 text-[11px] font-semibold text-slate-500">
+                    {{ 'superAdminTemplates.noPublicUrl' | t }}
+                  </p>
                 }
               </div>
               @if (result.qrCode) {
-                <div class="flex flex-col items-center gap-1 rounded-lg border border-cyan-100 bg-white p-2">
+                <div
+                  class="flex flex-col items-center gap-1 rounded-lg border border-cyan-100 bg-white p-2"
+                >
                   <app-icon [icon]="qrCodeIcon" [size]="14" />
                   <img
                     class="h-20 w-20 rounded-md object-contain"
@@ -519,7 +579,12 @@
         }
 
         <div class="flex justify-end gap-2 border-t border-slate-100 pt-3">
-          <app-button size="sm" type="button" variant="secondary" (pressed)="closeCopyTemplateToBranch()">
+          <app-button
+            size="sm"
+            type="button"
+            variant="secondary"
+            (pressed)="closeCopyTemplateToBranch()"
+          >
             {{ 'common.cancel' | t }}
           </app-button>
           <app-button
@@ -608,7 +673,12 @@
           </div>
         </div>
         <div class="grid grid-cols-1 gap-2 sm:flex sm:flex-wrap sm:justify-end">
-          <app-button size="sm" type="button" variant="secondary" (pressed)="closeRestoreTemplate()">
+          <app-button
+            size="sm"
+            type="button"
+            variant="secondary"
+            (pressed)="closeRestoreTemplate()"
+          >
             {{ 'common.cancel' | t }}
           </app-button>
           <app-button
@@ -631,454 +701,527 @@
     (closed)="closeCreateTemplate()"
     size="lg"
   >
-      <p class="mb-2 text-[11px] font-semibold text-slate-500">
-        {{ 'anonymousTemplates.createSubtitle' | t }}
-      </p>
-      <form class="space-y-2" [formGroup]="templateForm" (ngSubmit)="createTemplate()">
-        <div class="grid gap-2 md:grid-cols-2">
-          <app-input
-            size="sm"
-            [label]="'branchTemplates.nameEn' | t"
-            [placeholder]="'anonymousTemplates.nameEnPlaceholder' | t"
-            formControlName="nameEn"
-            [error]="templateFieldError('nameEn') | t"
-          />
-          <app-input
-            size="sm"
-            [label]="'branchTemplates.nameAr' | t"
-            [placeholder]="'anonymousTemplates.nameArPlaceholder' | t"
-            formControlName="nameAr"
-            [error]="templateFieldError('nameAr') | t"
-          />
-        </div>
-
+    <p class="mb-2 text-[11px] font-semibold text-slate-500">
+      {{ 'anonymousTemplates.createSubtitle' | t }}
+    </p>
+    <form class="space-y-2" [formGroup]="templateForm" (ngSubmit)="createTemplate()">
+      <div class="grid gap-2 md:grid-cols-2">
         <app-input
           size="sm"
-          [label]="'branchTemplates.templateDescription' | t"
-          [placeholder]="'anonymousTemplates.descriptionPlaceholder' | t"
-          formControlName="description"
-          [error]="templateFieldError('description') | t"
+          [label]="'branchTemplates.nameEn' | t"
+          [placeholder]="'anonymousTemplates.nameEnPlaceholder' | t"
+          formControlName="nameEn"
+          [error]="templateFieldError('nameEn') | t"
         />
+        <app-input
+          size="sm"
+          [label]="'branchTemplates.nameAr' | t"
+          [placeholder]="'anonymousTemplates.nameArPlaceholder' | t"
+          formControlName="nameAr"
+          [error]="templateFieldError('nameAr') | t"
+        />
+      </div>
 
-        <div class="grid gap-2 md:grid-cols-2">
-          <label class="block">
-            <span class="mb-1 block text-[10px] font-semibold text-slate-700">
-              {{ 'branchTemplates.activeFrom' | t }}
-            </span>
-            <input
-              class="h-8 w-full rounded-md border px-2.5 py-1.5 text-[11px] text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/10 disabled:bg-slate-100"
-              [class.border-[var(--theme-color-danger)]]="templateFieldError('activeFrom').length > 0"
-              [class.border-slate-200]="templateFieldError('activeFrom').length === 0"
-              type="datetime-local"
-              formControlName="activeFrom"
-            />
-            @if (templateFieldError('activeFrom')) {
-              <span class="mt-2 block text-xs font-medium text-[var(--theme-color-danger)]">
-                {{ templateFieldError('activeFrom') | t }}
-              </span>
-            }
-          </label>
+      <app-input
+        size="sm"
+        [label]="'branchTemplates.templateDescription' | t"
+        [placeholder]="'anonymousTemplates.descriptionPlaceholder' | t"
+        formControlName="description"
+        [error]="templateFieldError('description') | t"
+      />
 
-          <label class="block">
-            <span class="mb-1 block text-[10px] font-semibold text-slate-700">
-              {{ 'branchTemplates.expireTo' | t }}
+      <div class="grid gap-2 md:grid-cols-2">
+        <label class="block">
+          <span class="mb-1 block text-[10px] font-semibold text-slate-700">
+            {{ 'branchTemplates.activeFrom' | t }}
+          </span>
+          <input
+            class="h-8 w-full rounded-md border px-2.5 py-1.5 text-[11px] text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/10 disabled:bg-slate-100"
+            [class.border-[var(--theme-color-danger)]]="templateFieldError('activeFrom').length > 0"
+            [class.border-slate-200]="templateFieldError('activeFrom').length === 0"
+            type="datetime-local"
+            formControlName="activeFrom"
+          />
+          @if (templateFieldError('activeFrom')) {
+            <span class="mt-2 block text-xs font-medium text-[var(--theme-color-danger)]">
+              {{ templateFieldError('activeFrom') | t }}
             </span>
-            <input
-              class="h-8 w-full rounded-md border px-2.5 py-1.5 text-[11px] text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/10 disabled:bg-slate-100"
-              [class.border-[var(--theme-color-danger)]]="templateFieldError('expireTo').length > 0"
-              [class.border-slate-200]="templateFieldError('expireTo').length === 0"
-              type="datetime-local"
-              formControlName="expireTo"
-            />
-            <span class="mt-1 block text-[10px] text-slate-500">
-              {{ 'branchTemplates.expireToHint' | t }}
+          }
+        </label>
+
+        <label class="block">
+          <span class="mb-1 block text-[10px] font-semibold text-slate-700">
+            {{ 'branchTemplates.expireTo' | t }}
+          </span>
+          <input
+            class="h-8 w-full rounded-md border px-2.5 py-1.5 text-[11px] text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/10 disabled:bg-slate-100"
+            [class.border-[var(--theme-color-danger)]]="templateFieldError('expireTo').length > 0"
+            [class.border-slate-200]="templateFieldError('expireTo').length === 0"
+            type="datetime-local"
+            formControlName="expireTo"
+          />
+          <span class="mt-1 block text-[10px] text-slate-500">
+            {{ 'branchTemplates.expireToHint' | t }}
+          </span>
+          @if (templateFieldError('expireTo')) {
+            <span class="mt-2 block text-xs font-medium text-[var(--theme-color-danger)]">
+              {{ templateFieldError('expireTo') | t }}
             </span>
-            @if (templateFieldError('expireTo')) {
-              <span class="mt-2 block text-xs font-medium text-[var(--theme-color-danger)]">
-                {{ templateFieldError('expireTo') | t }}
-              </span>
-            }
-          </label>
+          }
+        </label>
+      </div>
+
+      <section
+        class="space-y-2 rounded-md border border-slate-100 bg-slate-50/70 p-2"
+        formArrayName="customInputs"
+      >
+        <div class="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p class="text-[11px] font-bold text-slate-900">
+              {{ 'branchTemplates.customInputsTitle' | t }}
+            </p>
+            <p class="mt-0.5 text-[10px] font-semibold text-slate-500">
+              {{ 'anonymousTemplates.customInputsSubtitle' | t }}
+            </p>
+          </div>
+          <app-button type="button" size="sm" variant="secondary" (pressed)="addCustomInput()">
+            <app-icon [icon]="plusIcon" [size]="14" />
+            {{ 'branchTemplates.addCustomInput' | t }}
+          </app-button>
         </div>
 
-        <section
-          class="space-y-2 rounded-md border border-slate-100 bg-slate-50/70 p-2"
-          formArrayName="customInputs"
-        >
-          <div class="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p class="text-[11px] font-bold text-slate-900">
-                {{ 'branchTemplates.customInputsTitle' | t }}
-              </p>
-              <p class="mt-0.5 text-[10px] font-semibold text-slate-500">
-                {{ 'anonymousTemplates.customInputsSubtitle' | t }}
-              </p>
-            </div>
-            <app-button type="button" size="sm" variant="secondary" (pressed)="addCustomInput()">
-              <app-icon [icon]="plusIcon" [size]="14" />
-              {{ 'branchTemplates.addCustomInput' | t }}
-            </app-button>
+        @if (customInputsArray.length === 0) {
+          <div
+            class="rounded-md border border-dashed border-slate-200 bg-white p-2 text-center text-[10px] font-semibold text-slate-500"
+          >
+            {{ 'branchTemplates.noCustomInputs' | t }}
           </div>
+        } @else {
+          <div class="space-y-2">
+            @for (
+              inputGroup of customInputsArray.controls;
+              track inputGroup;
+              let inputIndex = $index
+            ) {
+              <div
+                class="rounded-md border border-slate-200 bg-white p-2 shadow-sm shadow-slate-200/50"
+                [formGroupName]="inputIndex"
+              >
+                <div class="mb-2 flex items-center justify-between gap-2">
+                  <p class="text-[11px] font-bold text-slate-800">
+                    {{ 'branchTemplates.customInputItem' | t }} {{ inputIndex + 1 }}
+                  </p>
+                  <app-button
+                    type="button"
+                    size="sm"
+                    variant="danger"
+                    (pressed)="removeCustomInput(inputIndex)"
+                  >
+                    <app-icon [icon]="deleteIcon" [size]="14" />
+                    {{ 'common.delete' | t }}
+                  </app-button>
+                </div>
 
-          @if (customInputsArray.length === 0) {
-            <div class="rounded-md border border-dashed border-slate-200 bg-white p-2 text-center text-[10px] font-semibold text-slate-500">
-              {{ 'branchTemplates.noCustomInputs' | t }}
-            </div>
-          } @else {
-            <div class="space-y-2">
-              @for (inputGroup of customInputsArray.controls; track inputGroup; let inputIndex = $index) {
-                <div
-                  class="rounded-md border border-slate-200 bg-white p-2 shadow-sm shadow-slate-200/50"
-                  [formGroupName]="inputIndex"
-                >
-                  <div class="mb-2 flex items-center justify-between gap-2">
-                    <p class="text-[11px] font-bold text-slate-800">
-                      {{ 'branchTemplates.customInputItem' | t }} {{ inputIndex + 1 }}
-                    </p>
-                    <app-button
-                      type="button"
-                      size="sm"
-                      variant="danger"
-                      (pressed)="removeCustomInput(inputIndex)"
+                <div class="grid gap-2 md:grid-cols-3">
+                  <label class="block">
+                    <span class="mb-1 block text-[10px] font-semibold text-slate-700">
+                      {{ 'branchTemplates.customInputName' | t }}
+                    </span>
+                    <input
+                      class="h-8 w-full rounded-md border px-2.5 py-1.5 text-[11px] text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/10"
+                      [class.border-[var(--theme-color-danger)]]="
+                        customInputFieldError(inputIndex, 'name').length > 0
+                      "
+                      [class.border-slate-200]="
+                        customInputFieldError(inputIndex, 'name').length === 0
+                      "
+                      formControlName="name"
+                      [placeholder]="'branchTemplates.customInputNamePlaceholder' | t"
+                    />
+                    @if (customInputFieldError(inputIndex, 'name')) {
+                      <span class="mt-2 block text-xs font-medium text-[var(--theme-color-danger)]">
+                        {{ customInputFieldError(inputIndex, 'name') | t }}
+                      </span>
+                    }
+                  </label>
+
+                  <label class="block">
+                    <span class="mb-1 block text-[10px] font-semibold text-slate-700">
+                      {{ 'branchTemplates.customInputLabelEn' | t }}
+                    </span>
+                    <input
+                      class="h-8 w-full rounded-md border px-2.5 py-1.5 text-[11px] text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/10"
+                      [class.border-[var(--theme-color-danger)]]="
+                        customInputFieldError(inputIndex, 'labelEn').length > 0
+                      "
+                      [class.border-slate-200]="
+                        customInputFieldError(inputIndex, 'labelEn').length === 0
+                      "
+                      formControlName="labelEn"
+                      [placeholder]="'branchTemplates.customInputLabelEnPlaceholder' | t"
+                    />
+                    @if (customInputFieldError(inputIndex, 'labelEn')) {
+                      <span class="mt-2 block text-xs font-medium text-[var(--theme-color-danger)]">
+                        {{ customInputFieldError(inputIndex, 'labelEn') | t }}
+                      </span>
+                    }
+                  </label>
+
+                  <label class="block">
+                    <span class="mb-1 block text-[10px] font-semibold text-slate-700">
+                      {{ 'branchTemplates.customInputLabelAr' | t }}
+                    </span>
+                    <input
+                      class="h-8 w-full rounded-md border px-2.5 py-1.5 text-[11px] text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/10"
+                      [class.border-[var(--theme-color-danger)]]="
+                        customInputFieldError(inputIndex, 'labelAr').length > 0
+                      "
+                      [class.border-slate-200]="
+                        customInputFieldError(inputIndex, 'labelAr').length === 0
+                      "
+                      formControlName="labelAr"
+                      [placeholder]="'branchTemplates.customInputLabelArPlaceholder' | t"
+                    />
+                    @if (customInputFieldError(inputIndex, 'labelAr')) {
+                      <span class="mt-2 block text-xs font-medium text-[var(--theme-color-danger)]">
+                        {{ customInputFieldError(inputIndex, 'labelAr') | t }}
+                      </span>
+                    }
+                  </label>
+                </div>
+
+                <div class="mt-2 grid gap-2 md:grid-cols-3">
+                  <label class="block">
+                    <span class="mb-1 block text-[10px] font-semibold text-slate-700">
+                      {{ 'branchTemplates.customInputType' | t }}
+                    </span>
+                    <select
+                      class="h-8 w-full rounded-md border border-slate-200 bg-white px-2.5 text-[11px] font-semibold text-slate-700 shadow-sm outline-none transition focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/10"
+                      formControlName="type"
+                      (change)="changeCustomInputType(inputGroup)"
                     >
-                      <app-icon [icon]="deleteIcon" [size]="14" />
-                      {{ 'common.delete' | t }}
-                    </app-button>
-                  </div>
+                      <option value="1">{{ 'branchTemplates.customInputTypeString' | t }}</option>
+                      <option value="2">{{ 'branchTemplates.customInputTypeInteger' | t }}</option>
+                    </select>
+                  </label>
 
-                  <div class="grid gap-2 md:grid-cols-3">
-                    <label class="block">
-                      <span class="mb-1 block text-[10px] font-semibold text-slate-700">
-                        {{ 'branchTemplates.customInputName' | t }}
+                  <label class="block">
+                    <span class="mb-1 block text-[10px] font-semibold text-slate-700">
+                      {{ 'branchTemplates.customInputOrder' | t }}
+                    </span>
+                    <input
+                      class="h-8 w-full rounded-md border px-2.5 py-1.5 text-[11px] text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/10"
+                      [class.border-[var(--theme-color-danger)]]="
+                        customInputFieldError(inputIndex, 'order').length > 0
+                      "
+                      [class.border-slate-200]="
+                        customInputFieldError(inputIndex, 'order').length === 0
+                      "
+                      type="number"
+                      min="1"
+                      formControlName="order"
+                    />
+                    @if (customInputFieldError(inputIndex, 'order')) {
+                      <span class="mt-2 block text-xs font-medium text-[var(--theme-color-danger)]">
+                        {{ customInputFieldError(inputIndex, 'order') | t }}
                       </span>
-                      <input
-                        class="h-8 w-full rounded-md border px-2.5 py-1.5 text-[11px] text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/10"
-                        [class.border-[var(--theme-color-danger)]]="customInputFieldError(inputIndex, 'name').length > 0"
-                        [class.border-slate-200]="customInputFieldError(inputIndex, 'name').length === 0"
-                        formControlName="name"
-                        [placeholder]="'branchTemplates.customInputNamePlaceholder' | t"
-                      />
-                      @if (customInputFieldError(inputIndex, 'name')) {
-                        <span class="mt-2 block text-xs font-medium text-[var(--theme-color-danger)]">
-                          {{ customInputFieldError(inputIndex, 'name') | t }}
-                        </span>
-                      }
-                    </label>
+                    }
+                  </label>
 
-                    <label class="block">
-                      <span class="mb-1 block text-[10px] font-semibold text-slate-700">
-                        {{ 'branchTemplates.customInputLabelEn' | t }}
-                      </span>
-                      <input
-                        class="h-8 w-full rounded-md border px-2.5 py-1.5 text-[11px] text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/10"
-                        [class.border-[var(--theme-color-danger)]]="customInputFieldError(inputIndex, 'labelEn').length > 0"
-                        [class.border-slate-200]="customInputFieldError(inputIndex, 'labelEn').length === 0"
-                        formControlName="labelEn"
-                        [placeholder]="'branchTemplates.customInputLabelEnPlaceholder' | t"
-                      />
-                      @if (customInputFieldError(inputIndex, 'labelEn')) {
-                        <span class="mt-2 block text-xs font-medium text-[var(--theme-color-danger)]">
-                          {{ customInputFieldError(inputIndex, 'labelEn') | t }}
-                        </span>
-                      }
-                    </label>
+                  <label
+                    class="flex h-8 items-center gap-2 self-end rounded-md border border-slate-200 bg-white px-2.5 text-[11px] font-semibold text-slate-700 shadow-sm"
+                  >
+                    <input
+                      class="h-4 w-4 rounded border-slate-300 text-[var(--theme-color-accent)] focus:ring-[var(--theme-color-accent)]"
+                      type="checkbox"
+                      formControlName="isRequired"
+                    />
+                    {{ 'branchTemplates.customInputIsRequired' | t }}
+                  </label>
+                </div>
 
-                    <label class="block">
-                      <span class="mb-1 block text-[10px] font-semibold text-slate-700">
-                        {{ 'branchTemplates.customInputLabelAr' | t }}
-                      </span>
-                      <input
-                        class="h-8 w-full rounded-md border px-2.5 py-1.5 text-[11px] text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/10"
-                        [class.border-[var(--theme-color-danger)]]="customInputFieldError(inputIndex, 'labelAr').length > 0"
-                        [class.border-slate-200]="customInputFieldError(inputIndex, 'labelAr').length === 0"
-                        formControlName="labelAr"
-                        [placeholder]="'branchTemplates.customInputLabelArPlaceholder' | t"
-                      />
-                      @if (customInputFieldError(inputIndex, 'labelAr')) {
-                        <span class="mt-2 block text-xs font-medium text-[var(--theme-color-danger)]">
-                          {{ customInputFieldError(inputIndex, 'labelAr') | t }}
-                        </span>
-                      }
-                    </label>
-                  </div>
-
+                @if (inputGroup.controls.type.value === '1') {
                   <div class="mt-2 grid gap-2 md:grid-cols-3">
                     <label class="block">
                       <span class="mb-1 block text-[10px] font-semibold text-slate-700">
-                        {{ 'branchTemplates.customInputType' | t }}
-                      </span>
-                      <select
-                        class="h-8 w-full rounded-md border border-slate-200 bg-white px-2.5 text-[11px] font-semibold text-slate-700 shadow-sm outline-none transition focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/10"
-                        formControlName="type"
-                        (change)="changeCustomInputType(inputGroup)"
-                      >
-                        <option value="1">{{ 'branchTemplates.customInputTypeString' | t }}</option>
-                        <option value="2">{{ 'branchTemplates.customInputTypeInteger' | t }}</option>
-                      </select>
-                    </label>
-
-                    <label class="block">
-                      <span class="mb-1 block text-[10px] font-semibold text-slate-700">
-                        {{ 'branchTemplates.customInputOrder' | t }}
+                        {{ 'branchTemplates.customInputMinLength' | t }}
                       </span>
                       <input
                         class="h-8 w-full rounded-md border px-2.5 py-1.5 text-[11px] text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/10"
-                        [class.border-[var(--theme-color-danger)]]="customInputFieldError(inputIndex, 'order').length > 0"
-                        [class.border-slate-200]="customInputFieldError(inputIndex, 'order').length === 0"
+                        [class.border-[var(--theme-color-danger)]]="
+                          customInputFieldError(inputIndex, 'minLength').length > 0
+                        "
+                        [class.border-slate-200]="
+                          customInputFieldError(inputIndex, 'minLength').length === 0
+                        "
                         type="number"
-                        min="1"
-                        formControlName="order"
+                        min="0"
+                        max="3000"
+                        formControlName="minLength"
                       />
-                      @if (customInputFieldError(inputIndex, 'order')) {
-                        <span class="mt-2 block text-xs font-medium text-[var(--theme-color-danger)]">
-                          {{ customInputFieldError(inputIndex, 'order') | t }}
+                      @if (customInputFieldError(inputIndex, 'minLength')) {
+                        <span
+                          class="mt-2 block text-xs font-medium text-[var(--theme-color-danger)]"
+                        >
+                          {{ customInputFieldError(inputIndex, 'minLength') | t }}
                         </span>
                       }
                     </label>
 
-                    <label class="flex h-8 items-center gap-2 self-end rounded-md border border-slate-200 bg-white px-2.5 text-[11px] font-semibold text-slate-700 shadow-sm">
+                    <label class="block">
+                      <span class="mb-1 block text-[10px] font-semibold text-slate-700">
+                        {{ 'branchTemplates.customInputMaxLength' | t }}
+                      </span>
                       <input
-                        class="h-4 w-4 rounded border-slate-300 text-[var(--theme-color-accent)] focus:ring-[var(--theme-color-accent)]"
-                        type="checkbox"
-                        formControlName="isRequired"
+                        class="h-8 w-full rounded-md border px-2.5 py-1.5 text-[11px] text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/10"
+                        [class.border-[var(--theme-color-danger)]]="
+                          customInputFieldError(inputIndex, 'maxLength').length > 0
+                        "
+                        [class.border-slate-200]="
+                          customInputFieldError(inputIndex, 'maxLength').length === 0
+                        "
+                        type="number"
+                        min="0"
+                        max="3000"
+                        formControlName="maxLength"
                       />
-                      {{ 'branchTemplates.customInputIsRequired' | t }}
+                      @if (customInputFieldError(inputIndex, 'maxLength')) {
+                        <span
+                          class="mt-2 block text-xs font-medium text-[var(--theme-color-danger)]"
+                        >
+                          {{ customInputFieldError(inputIndex, 'maxLength') | t }}
+                        </span>
+                      }
+                    </label>
+
+                    <label class="block">
+                      <span class="mb-1 block text-[10px] font-semibold text-slate-700">
+                        {{ 'branchTemplates.customInputStartWith' | t }}
+                      </span>
+                      <input
+                        class="h-8 w-full rounded-md border px-2.5 py-1.5 text-[11px] text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/10"
+                        [class.border-[var(--theme-color-danger)]]="
+                          customInputFieldError(inputIndex, 'startWith').length > 0
+                        "
+                        [class.border-slate-200]="
+                          customInputFieldError(inputIndex, 'startWith').length === 0
+                        "
+                        type="text"
+                        maxlength="100"
+                        formControlName="startWith"
+                        [placeholder]="'branchTemplates.customInputStartWithPlaceholder' | t"
+                      />
+                      <span class="mt-1 block text-[10px] font-semibold text-slate-500">
+                        {{ 'branchTemplates.customInputStartWithHint' | t }}
+                      </span>
+                      @if (customInputFieldError(inputIndex, 'startWith')) {
+                        <span
+                          class="mt-2 block text-xs font-medium text-[var(--theme-color-danger)]"
+                        >
+                          {{ customInputFieldError(inputIndex, 'startWith') | t }}
+                        </span>
+                      }
                     </label>
                   </div>
-
-                  @if (inputGroup.controls.type.value === '1') {
-                    <div class="mt-2 grid gap-2 md:grid-cols-3">
-                      <label class="block">
-                        <span class="mb-1 block text-[10px] font-semibold text-slate-700">
-                          {{ 'branchTemplates.customInputMinLength' | t }}
-                        </span>
-                        <input
-                          class="h-8 w-full rounded-md border px-2.5 py-1.5 text-[11px] text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/10"
-                          [class.border-[var(--theme-color-danger)]]="customInputFieldError(inputIndex, 'minLength').length > 0"
-                          [class.border-slate-200]="customInputFieldError(inputIndex, 'minLength').length === 0"
-                          type="number"
-                          min="0"
-                          max="3000"
-                          formControlName="minLength"
-                        />
-                        @if (customInputFieldError(inputIndex, 'minLength')) {
-                          <span class="mt-2 block text-xs font-medium text-[var(--theme-color-danger)]">
-                            {{ customInputFieldError(inputIndex, 'minLength') | t }}
-                          </span>
-                        }
-                      </label>
-
-                      <label class="block">
-                        <span class="mb-1 block text-[10px] font-semibold text-slate-700">
-                          {{ 'branchTemplates.customInputMaxLength' | t }}
-                        </span>
-                        <input
-                          class="h-8 w-full rounded-md border px-2.5 py-1.5 text-[11px] text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/10"
-                          [class.border-[var(--theme-color-danger)]]="customInputFieldError(inputIndex, 'maxLength').length > 0"
-                          [class.border-slate-200]="customInputFieldError(inputIndex, 'maxLength').length === 0"
-                          type="number"
-                          min="0"
-                          max="3000"
-                          formControlName="maxLength"
-                        />
-                        @if (customInputFieldError(inputIndex, 'maxLength')) {
-                          <span class="mt-2 block text-xs font-medium text-[var(--theme-color-danger)]">
-                            {{ customInputFieldError(inputIndex, 'maxLength') | t }}
-                          </span>
-                        }
-                      </label>
-
-                      <label class="block">
-                        <span class="mb-1 block text-[10px] font-semibold text-slate-700">
-                          {{ 'branchTemplates.customInputStartWith' | t }}
-                        </span>
-                        <input
-                          class="h-8 w-full rounded-md border px-2.5 py-1.5 text-[11px] text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/10"
-                          [class.border-[var(--theme-color-danger)]]="customInputFieldError(inputIndex, 'startWith').length > 0"
-                          [class.border-slate-200]="customInputFieldError(inputIndex, 'startWith').length === 0"
-                          type="text"
-                          maxlength="100"
-                          formControlName="startWith"
-                          [placeholder]="'branchTemplates.customInputStartWithPlaceholder' | t"
-                        />
-                        <span class="mt-1 block text-[10px] font-semibold text-slate-500">
-                          {{ 'branchTemplates.customInputStartWithHint' | t }}
-                        </span>
-                        @if (customInputFieldError(inputIndex, 'startWith')) {
-                          <span class="mt-2 block text-xs font-medium text-[var(--theme-color-danger)]">
-                            {{ customInputFieldError(inputIndex, 'startWith') | t }}
-                          </span>
-                        }
-                      </label>
-                    </div>
-                  } @else {
-                    <div class="mt-2 grid gap-2 md:grid-cols-2">
-                      <label class="block">
-                        <span class="mb-1 block text-[10px] font-semibold text-slate-700">
-                          {{ 'branchTemplates.customInputMinValue' | t }}
-                        </span>
-                        <input
-                          class="h-8 w-full rounded-md border px-2.5 py-1.5 text-[11px] text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/10"
-                          [class.border-[var(--theme-color-danger)]]="customInputFieldError(inputIndex, 'minValue').length > 0"
-                          [class.border-slate-200]="customInputFieldError(inputIndex, 'minValue').length === 0"
-                          type="number"
-                          formControlName="minValue"
-                        />
-                        @if (customInputFieldError(inputIndex, 'minValue')) {
-                          <span class="mt-2 block text-xs font-medium text-[var(--theme-color-danger)]">
-                            {{ customInputFieldError(inputIndex, 'minValue') | t }}
-                          </span>
-                        }
-                      </label>
-
-                      <label class="block">
-                        <span class="mb-1 block text-[10px] font-semibold text-slate-700">
-                          {{ 'branchTemplates.customInputMaxValue' | t }}
-                        </span>
-                        <input
-                          class="h-8 w-full rounded-md border px-2.5 py-1.5 text-[11px] text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/10"
-                          [class.border-[var(--theme-color-danger)]]="customInputFieldError(inputIndex, 'maxValue').length > 0"
-                          [class.border-slate-200]="customInputFieldError(inputIndex, 'maxValue').length === 0"
-                          type="number"
-                          formControlName="maxValue"
-                        />
-                        @if (customInputFieldError(inputIndex, 'maxValue')) {
-                          <span class="mt-2 block text-xs font-medium text-[var(--theme-color-danger)]">
-                            {{ customInputFieldError(inputIndex, 'maxValue') | t }}
-                          </span>
-                        }
-                      </label>
-                    </div>
-                  }
-                </div>
-              }
-            </div>
-          }
-        </section>
-
-        <div class="grid grid-cols-1 gap-2 sm:flex sm:flex-wrap sm:justify-end">
-          <app-button size="sm" type="button" variant="secondary" (pressed)="resetForm()">
-            {{ 'anonymousTemplates.resetForm' | t }}
-          </app-button>
-          <app-button size="sm" type="submit" [disabled]="!canCreate()" [loading]="anonymousTemplatesStore.creating()">
-            <app-icon [icon]="plusIcon" [size]="14" />
-            {{ 'anonymousTemplates.createAction' | t }}
-          </app-button>
-        </div>
-      </form>
-  </app-modal>
-
-    <app-card
-      [title]="'anonymousTemplates.createdResultTitle' | t"
-      [subtitle]="'anonymousTemplates.createdResultSubtitle' | t"
-    >
-      @if (anonymousTemplatesStore.createdTemplate(); as template) {
-        <div class="space-y-2">
-          <div class="rounded-md border border-emerald-100 bg-emerald-50 p-2">
-            <div class="flex items-start gap-2">
-              <span class="rounded-md bg-white p-1.5 text-emerald-700">
-                <app-icon [icon]="fileTextIcon" [size]="15" />
-              </span>
-              <div class="min-w-0">
-                <p class="break-words text-xs font-bold text-slate-900 [overflow-wrap:anywhere]">
-                  {{ templateDisplayName(template) }}
-                </p>
-                <div class="mt-2 flex flex-wrap gap-1.5">
-                  <span class="rounded-full bg-white px-2 py-0.5 text-[10px] font-bold text-emerald-700">
-                    {{ template.statusName }}
-                  </span>
-                  <span class="rounded-full bg-white px-2 py-0.5 text-[10px] font-bold text-[var(--theme-color-secondary)]">
-                    {{ template.scopeName }}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="rounded-md border border-slate-100 bg-slate-50 p-2">
-            <div class="mb-1.5 flex items-center gap-1.5 text-[11px] font-bold text-slate-900">
-              <app-icon [icon]="linkIcon" [size]="14" />
-              {{ 'anonymousTemplates.publicUrl' | t }}
-            </div>
-            <p class="break-words rounded-md bg-white p-1.5 text-[10px] font-semibold text-slate-700 [overflow-wrap:anywhere]">
-              {{ template.publicUrl || '-' }}
-            </p>
-            <div class="mt-2 flex flex-wrap justify-end gap-2">
-              <app-button
-                type="button"
-                size="sm"
-                variant="secondary"
-                [disabled]="!template.publicUrl"
-                (pressed)="copyPublicUrl(template.publicUrl)"
-              >
-                <app-icon [icon]="copyIcon" [size]="14" />
-                @if (copiedPublicUrl()) {
-                  {{ 'anonymousTemplates.copied' | t }}
                 } @else {
-                  {{ 'anonymousTemplates.copyUrl' | t }}
+                  <div class="mt-2 grid gap-2 md:grid-cols-2">
+                    <label class="block">
+                      <span class="mb-1 block text-[10px] font-semibold text-slate-700">
+                        {{ 'branchTemplates.customInputMinValue' | t }}
+                      </span>
+                      <input
+                        class="h-8 w-full rounded-md border px-2.5 py-1.5 text-[11px] text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/10"
+                        [class.border-[var(--theme-color-danger)]]="
+                          customInputFieldError(inputIndex, 'minValue').length > 0
+                        "
+                        [class.border-slate-200]="
+                          customInputFieldError(inputIndex, 'minValue').length === 0
+                        "
+                        type="number"
+                        formControlName="minValue"
+                      />
+                      @if (customInputFieldError(inputIndex, 'minValue')) {
+                        <span
+                          class="mt-2 block text-xs font-medium text-[var(--theme-color-danger)]"
+                        >
+                          {{ customInputFieldError(inputIndex, 'minValue') | t }}
+                        </span>
+                      }
+                    </label>
+
+                    <label class="block">
+                      <span class="mb-1 block text-[10px] font-semibold text-slate-700">
+                        {{ 'branchTemplates.customInputMaxValue' | t }}
+                      </span>
+                      <input
+                        class="h-8 w-full rounded-md border px-2.5 py-1.5 text-[11px] text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/10"
+                        [class.border-[var(--theme-color-danger)]]="
+                          customInputFieldError(inputIndex, 'maxValue').length > 0
+                        "
+                        [class.border-slate-200]="
+                          customInputFieldError(inputIndex, 'maxValue').length === 0
+                        "
+                        type="number"
+                        formControlName="maxValue"
+                      />
+                      @if (customInputFieldError(inputIndex, 'maxValue')) {
+                        <span
+                          class="mt-2 block text-xs font-medium text-[var(--theme-color-danger)]"
+                        >
+                          {{ customInputFieldError(inputIndex, 'maxValue') | t }}
+                        </span>
+                      }
+                    </label>
+                  </div>
                 }
-              </app-button>
-            </div>
-          </div>
-
-          <div class="rounded-md border border-slate-100 bg-white p-2">
-            <div class="mb-2 flex items-center justify-between gap-2">
-              <div class="flex items-center gap-1.5 text-[11px] font-bold text-slate-900">
-                <app-icon [icon]="qrCodeIcon" [size]="14" />
-                {{ 'anonymousTemplates.qrCode' | t }}
-              </div>
-              <app-button
-                type="button"
-                size="sm"
-                variant="secondary"
-                [disabled]="!template.qrCode"
-                (pressed)="downloadQrCode(template.qrCode)"
-              >
-                <app-icon [icon]="downloadIcon" [size]="14" />
-                <!-- {{ 'anonymousTemplates.downloadQr' | t }} -->
-              </app-button>
-            </div>
-
-            @if (template.qrCode) {
-              <img
-                class="mx-auto h-36 w-36 rounded-md border border-slate-100 bg-white object-contain p-1.5"
-                [src]="template.qrCode"
-                [alt]="'anonymousTemplates.qrCodeAlt' | t"
-              />
-            } @else {
-              <div class="rounded-md border border-dashed border-slate-200 p-4 text-center text-[11px] font-semibold text-slate-500">
-                {{ 'anonymousTemplates.noQrCode' | t }}
               </div>
             }
           </div>
+        }
+      </section>
 
-          @if (template.customInputs.length > 0) {
-            <div class="rounded-md border border-slate-100 bg-slate-50 p-2">
-              <p class="text-[11px] font-bold text-slate-900">
-                {{ 'branchTemplates.customInputsTitle' | t }}
+      <div class="grid grid-cols-1 gap-2 sm:flex sm:flex-wrap sm:justify-end">
+        <app-button size="sm" type="button" variant="secondary" (pressed)="resetForm()">
+          {{ 'anonymousTemplates.resetForm' | t }}
+        </app-button>
+        <app-button
+          size="sm"
+          type="submit"
+          [disabled]="!canCreate()"
+          [loading]="anonymousTemplatesStore.creating()"
+        >
+          <app-icon [icon]="plusIcon" [size]="14" />
+          {{ 'anonymousTemplates.createAction' | t }}
+        </app-button>
+      </div>
+    </form>
+  </app-modal>
+
+  <app-card
+    [title]="'anonymousTemplates.createdResultTitle' | t"
+    [subtitle]="'anonymousTemplates.createdResultSubtitle' | t"
+  >
+    @if (anonymousTemplatesStore.createdTemplate(); as template) {
+      <div class="space-y-2">
+        <div class="rounded-md border border-emerald-100 bg-emerald-50 p-2">
+          <div class="flex items-start gap-2">
+            <span class="rounded-md bg-white p-1.5 text-emerald-700">
+              <app-icon [icon]="fileTextIcon" [size]="15" />
+            </span>
+            <div class="min-w-0">
+              <p class="break-words text-xs font-bold text-slate-900 [overflow-wrap:anywhere]">
+                {{ templateDisplayName(template) }}
               </p>
-              <div class="mt-1.5 grid gap-1.5 sm:grid-cols-2">
-                @for (customInput of template.customInputs; track customInput.customInputId) {
-                  <div class="rounded-md bg-white p-1.5">
-                    <div class="flex items-center justify-between gap-2">
-                      <p class="break-words text-[11px] font-bold text-slate-900 [overflow-wrap:anywhere]">
-                        {{ customInputDisplayLabel(customInput) }}
-                      </p>
-                      <span class="rounded-full bg-slate-50 px-2 py-0.5 text-[10px] font-bold text-slate-500">
-                        {{ customInput.typeName }}
-                      </span>
-                    </div>
-                  </div>
-                }
+              <div class="mt-2 flex flex-wrap gap-1.5">
+                <span
+                  class="rounded-full bg-white px-2 py-0.5 text-[10px] font-bold text-emerald-700"
+                >
+                  {{ template.statusName }}
+                </span>
+                <span
+                  class="rounded-full bg-white px-2 py-0.5 text-[10px] font-bold text-[var(--theme-color-secondary)]"
+                >
+                  {{ template.scopeName }}
+                </span>
               </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="rounded-md border border-slate-100 bg-slate-50 p-2">
+          <div class="mb-1.5 flex items-center gap-1.5 text-[11px] font-bold text-slate-900">
+            <app-icon [icon]="linkIcon" [size]="14" />
+            {{ 'anonymousTemplates.publicUrl' | t }}
+          </div>
+          <p
+            class="break-words rounded-md bg-white p-1.5 text-[10px] font-semibold text-slate-700 [overflow-wrap:anywhere]"
+          >
+            {{ template.publicUrl || '-' }}
+          </p>
+          <div class="mt-2 flex flex-wrap justify-end gap-2">
+            <app-button
+              type="button"
+              size="sm"
+              variant="secondary"
+              [disabled]="!template.publicUrl"
+              (pressed)="copyPublicUrl(template.publicUrl)"
+            >
+              <app-icon [icon]="copyIcon" [size]="14" />
+              @if (copiedPublicUrl()) {
+                {{ 'anonymousTemplates.copied' | t }}
+              } @else {
+                {{ 'anonymousTemplates.copyUrl' | t }}
+              }
+            </app-button>
+          </div>
+        </div>
+
+        <div class="rounded-md border border-slate-100 bg-white p-2">
+          <div class="mb-2 flex items-center justify-between gap-2">
+            <div class="flex items-center gap-1.5 text-[11px] font-bold text-slate-900">
+              <app-icon [icon]="qrCodeIcon" [size]="14" />
+              {{ 'anonymousTemplates.qrCode' | t }}
+            </div>
+            <app-button
+              type="button"
+              size="sm"
+              variant="secondary"
+              [disabled]="!template.qrCode"
+              (pressed)="downloadQrCode(template.qrCode)"
+            >
+              <app-icon [icon]="downloadIcon" [size]="14" />
+              <!-- {{ 'anonymousTemplates.downloadQr' | t }} -->
+            </app-button>
+          </div>
+
+          @if (template.qrCode) {
+            <img
+              class="mx-auto h-36 w-36 rounded-md border border-slate-100 bg-white object-contain p-1.5"
+              [src]="template.qrCode"
+              [alt]="'anonymousTemplates.qrCodeAlt' | t"
+            />
+          } @else {
+            <div
+              class="rounded-md border border-dashed border-slate-200 p-4 text-center text-[11px] font-semibold text-slate-500"
+            >
+              {{ 'anonymousTemplates.noQrCode' | t }}
             </div>
           }
         </div>
-      } @else {
-        <div class="rounded-md border border-dashed border-slate-200 bg-slate-50 p-4 text-center text-[11px] font-semibold text-slate-500">
-          <app-icon class="mx-auto mb-1.5 text-slate-300" [icon]="qrCodeIcon" [size]="22" />
-          {{ 'anonymousTemplates.noCreatedTemplate' | t }}
-        </div>
-      }
-    </app-card>
+
+        @if (template.customInputs.length > 0) {
+          <div class="rounded-md border border-slate-100 bg-slate-50 p-2">
+            <p class="text-[11px] font-bold text-slate-900">
+              {{ 'branchTemplates.customInputsTitle' | t }}
+            </p>
+            <div class="mt-1.5 grid gap-1.5 sm:grid-cols-2">
+              @for (customInput of template.customInputs; track customInput.customInputId) {
+                <div class="rounded-md bg-white p-1.5">
+                  <div class="flex items-center justify-between gap-2">
+                    <p
+                      class="break-words text-[11px] font-bold text-slate-900 [overflow-wrap:anywhere]"
+                    >
+                      {{ customInputDisplayLabel(customInput) }}
+                    </p>
+                    <span
+                      class="rounded-full bg-slate-50 px-2 py-0.5 text-[10px] font-bold text-slate-500"
+                    >
+                      {{ customInput.typeName }}
+                    </span>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    } @else {
+      <div
+        class="rounded-md border border-dashed border-slate-200 bg-slate-50 p-4 text-center text-[11px] font-semibold text-slate-500"
+      >
+        <app-icon class="mx-auto mb-1.5 text-slate-300" [icon]="qrCodeIcon" [size]="22" />
+        {{ 'anonymousTemplates.noCreatedTemplate' | t }}
+      </div>
+    }
+  </app-card>
 </div>

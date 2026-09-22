@@ -7,6 +7,7 @@ import {
   ChevronRight,
   CirclePlus,
   Eye,
+  MapPin,
   RotateCcw,
   Search,
   ShieldCheck,
@@ -19,6 +20,7 @@ import { ButtonComponent } from '../../../../../../shared/ui/button/button.compo
 import { CardComponent } from '../../../../../../shared/ui/card/card.component';
 import { IconComponent } from '../../../../../../shared/ui/icon/icon.component';
 import { InputComponent } from '../../../../../../shared/ui/input/input.component';
+import { PageHeaderComponent } from '../../../../../../shared/ui/page-header/page-header.component';
 import { TranslatePipe } from '../../../../../../shared/pipes/translate.pipe';
 import {
   BranchAreaBranch,
@@ -35,6 +37,7 @@ import { BranchAreasStore } from '../../state/branch-areas.store';
     CardComponent,
     DatePipe,
     IconComponent,
+    PageHeaderComponent,
     ReactiveFormsModule,
     RouterLink,
     TranslatePipe,
@@ -49,6 +52,7 @@ export class BranchAreasPageComponent implements OnInit {
   private readonly formBuilder = inject(FormBuilder);
   private readonly i18n = inject(I18nService);
 
+  readonly areaIcon = MapPin;
   readonly chevronLeftIcon = ChevronLeft;
   readonly chevronRightIcon = ChevronRight;
   readonly createIcon = CirclePlus;

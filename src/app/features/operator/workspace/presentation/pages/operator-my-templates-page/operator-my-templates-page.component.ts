@@ -44,6 +44,7 @@ import {
 import { TranslatePipe } from '../../../../../../shared/pipes/translate.pipe';
 import { ButtonComponent } from '../../../../../../shared/ui/button/button.component';
 import { IconComponent } from '../../../../../../shared/ui/icon/icon.component';
+import { PageHeaderComponent } from '../../../../../../shared/ui/page-header/page-header.component';
 import {
   OperatorAssignedTemplate,
   OperatorAssignedTemplateCustomInput,
@@ -188,7 +189,7 @@ const ALL_BRANCHES_FILTER_ID = 'all';
 @Component({
   selector: 'app-operator-my-templates-page',
   standalone: true,
-  imports: [ButtonComponent, DatePipe, IconComponent, TranslatePipe],
+  imports: [ButtonComponent, DatePipe, IconComponent, PageHeaderComponent, TranslatePipe],
   templateUrl: './operator-my-templates-page.component.html',
   styleUrl: './operator-my-templates-page.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

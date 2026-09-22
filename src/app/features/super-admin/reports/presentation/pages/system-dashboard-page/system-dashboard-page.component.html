@@ -1,35 +1,29 @@
 <div class="w-full min-w-0 max-w-full space-y-4 overflow-x-hidden">
-  <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-    <div class="flex min-w-0 items-center gap-2">
-      <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-[var(--theme-color-accent)]/10 text-[var(--theme-color-accent)]">
-        <app-icon [icon]="barChartIcon" [size]="15" />
-      </div>
-      <p class="truncate text-[10px] font-black uppercase tracking-wide text-slate-400">
-        {{ 'systemDashboard.eyebrow' | t }}
-      </p>
-    </div>
-    <div class="grid grid-cols-2 gap-2 sm:flex sm:items-center">
-      <a
-        class="filter-toggle-btn"
-        routerLink="/reports/system-responses"
-      >
-        <app-icon [icon]="barChartIcon" [size]="14" />
-        {{ 'systemDashboard.allResponses' | t }}
-      </a>
-      <button
-        class="filter-toggle-btn"
-        type="button"
-        (click)="toggleAdvancedFilters()"
-      >
-        <app-icon [icon]="filtersIcon" [size]="14" />
-        {{
-          advancedFiltersOpen()
-            ? ('systemDashboard.hideFilters' | t)
-            : ('systemDashboard.showFilters' | t)
-        }}
-      </button>
-    </div>
-  </div>
+  <app-page-header
+    [title]="'systemDashboard.title' | t"
+    [description]="'systemDashboard.eyebrow' | t"
+    [icon]="barChartIcon"
+  >
+    <a
+      class="filter-toggle-btn"
+      routerLink="/reports/system-responses"
+    >
+      <app-icon [icon]="barChartIcon" [size]="14" />
+      {{ 'systemDashboard.allResponses' | t }}
+    </a>
+    <button
+      class="filter-toggle-btn"
+      type="button"
+      (click)="toggleAdvancedFilters()"
+    >
+      <app-icon [icon]="filtersIcon" [size]="14" />
+      {{
+        advancedFiltersOpen()
+          ? ('systemDashboard.hideFilters' | t)
+          : ('systemDashboard.showFilters' | t)
+      }}
+    </button>
+  </app-page-header>
 
   <div
     class="grid transition-[grid-template-rows,opacity] duration-300 ease-out motion-reduce:transition-none"

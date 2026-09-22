@@ -47,7 +47,7 @@ import { BranchesStore } from '../../state/branches.store';
 export class BranchesPageComponent implements OnInit {
   readonly branchesStore = inject(BranchesStore);
   readonly departmentsStore = inject(DepartmentsStore);
-  private readonly i18n = inject(I18nService);
+  readonly i18n = inject(I18nService);
   private readonly formBuilder = inject(FormBuilder);
   private readonly router = inject(Router);
 

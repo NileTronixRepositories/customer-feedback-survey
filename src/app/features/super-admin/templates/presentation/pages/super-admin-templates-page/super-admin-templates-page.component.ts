@@ -16,6 +16,7 @@ import {
 import { I18nService } from '../../../../../../core/services/i18n.service';
 import { TranslatePipe } from '../../../../../../shared/pipes/translate.pipe';
 import { ButtonComponent } from '../../../../../../shared/ui/button/button.component';
+import { PageHeaderComponent } from '../../../../../../shared/ui/page-header/page-header.component';
 import { IconComponent } from '../../../../../../shared/ui/icon/icon.component';
 import { BranchesService } from '../../../../branches/data/branches.service';
 import { BranchSelection } from '../../../../branches/domain/branch.model';
@@ -29,7 +30,7 @@ import { SuperAdminTemplatesStore } from '../../state/super-admin-templates.stor
 @Component({
   selector: 'app-super-admin-templates-page',
   standalone: true,
-  imports: [ButtonComponent, DatePipe, IconComponent, ReactiveFormsModule, TranslatePipe],
+  imports: [ButtonComponent, DatePipe, IconComponent, PageHeaderComponent, ReactiveFormsModule, TranslatePipe],
   templateUrl: './super-admin-templates-page.component.html',
   styleUrl: './super-admin-templates-page.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
