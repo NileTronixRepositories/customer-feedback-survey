@@ -23,7 +23,8 @@ import { ModalComponent } from '../../../../../../shared/ui/modal/modal.componen
 import { TranslatePipe } from '../../../../../../shared/pipes/translate.pipe';
 import { DepartmentsStore } from '../../../../departments/presentation/state/departments.store';
 import { BranchTableComponent } from '../../components/branch-table/branch-table.component';
-import { Branch } from '../../../domain/branch.model';
+import { CreateBranchAdminModalComponent } from '../../components/create-branch-admin-modal/create-branch-admin-modal.component';
+import { Branch, CreateBranchAdminPayload } from '../../../domain/branch.model';
 import { BranchesStore } from '../../state/branches.store';
 
 @Component({
@@ -39,6 +40,7 @@ import { BranchesStore } from '../../state/branches.store';
     ModalComponent,
     TranslatePipe,
     BranchTableComponent,
+    CreateBranchAdminModalComponent,
   ],
   templateUrl: './branches-page.component.html',
   styleUrl: './branches-page.component.css',
@@ -84,16 +86,6 @@ export class BranchesPageComponent implements OnInit {
     nameAr: ['', Validators.required],
     code: ['', Validators.required],
     address: ['', Validators.required],
-  });
-
-  readonly branchAdminForm = this.formBuilder.nonNullable.group({
-    branchId: ['', Validators.required],
-    nameEn: ['', Validators.required],
-    nameAr: ['', Validators.required],
-    userName: ['', Validators.required],
-    email: ['', [Validators.required, Validators.email]],
-    phoneNumber: ['', Validators.required],
-    password: ['', [Validators.required, Validators.minLength(6)]],
   });
 
   readonly departmentForm = this.formBuilder.nonNullable.group({
@@ -195,22 +187,6 @@ export class BranchesPageComponent implements OnInit {
     return this.i18n.translate('branches.fieldRequired');
   }
 
-  branchAdminFieldError(field: keyof typeof this.branchAdminForm.controls): string {
-    const control = this.branchAdminForm.controls[field];
-    if (!control.touched || control.valid) {
-      return '';
-    }
-
-    if (field === 'email' && control.hasError('email')) {
-      return this.i18n.translate('auth.emailInvalid');
-    }
-    if (field === 'password' && control.hasError('minlength')) {
-      return this.i18n.translate('auth.passwordLength');
-    }
-
-    return this.i18n.translate('branches.fieldRequired');
-  }
-
   departmentFieldError(field: keyof typeof this.departmentForm.controls): string {
     const control = this.departmentForm.controls[field];
     if (!control.touched || control.valid) {
@@ -244,15 +220,8 @@ export class BranchesPageComponent implements OnInit {
     this.createModalOpen.set(false);
   }
 
-  createBranchAdmin(): void {
-    this.branchAdminForm.markAllAsTouched();
-    if (this.branchAdminForm.invalid || this.branchesStore.creatingAdmin()) {
-      return;
-    }
-
-    this.branchesStore.createBranchAdmin(this.branchAdminForm.getRawValue());
-    this.branchAdminForm.reset();
-    this.createAdminModalOpen.set(false);
+  createBranchAdmin(payload: CreateBranchAdminPayload): void {
+    this.branchesStore.createBranchAdmin(payload, () => this.createAdminModalOpen.set(false));
   }
 
   openCreateDepartment(): void {

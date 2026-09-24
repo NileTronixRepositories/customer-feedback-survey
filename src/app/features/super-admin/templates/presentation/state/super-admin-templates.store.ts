@@ -179,7 +179,7 @@ export class SuperAdminTemplatesStore {
           this.load();
           onAssigned?.();
         },
-        error: (error: unknown) => this.copyErrorSignal.set(this.readCopyErrorMessage(error)),
+        error: (error: unknown) => this.copyErrorSignal.set(this.readAssignErrorMessage(error)),
       });
   }
 
@@ -234,6 +234,21 @@ export class SuperAdminTemplatesStore {
     }
 
     return 'superAdminTemplates.copyError';
+  }
+
+  private readAssignErrorMessage(error: unknown): string {
+    if (!(error instanceof HttpErrorResponse)) return 'superAdminTemplates.assignError';
+    if (error.status === 401) return 'anonymousTemplates.unauthorized';
+    if (error.status === 403) return 'anonymousTemplates.forbidden';
+
+    const backendMessage = this.readProblemDetailsMessage(error.error);
+    if (backendMessage) return backendMessage;
+    if (error.status === 404) return 'superAdminTemplates.assignNotFound';
+    if (error.status === 409) return 'superAdminTemplates.assignAlreadyExists';
+    if (error.status === 400 || error.status === 422) {
+      return 'superAdminTemplates.assignValidationError';
+    }
+    return 'superAdminTemplates.assignError';
   }
 
   private readProblemDetailsMessage(errorBody: unknown): string | null {

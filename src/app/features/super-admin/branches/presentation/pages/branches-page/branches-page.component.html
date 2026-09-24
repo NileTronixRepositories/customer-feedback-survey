@@ -693,88 +693,10 @@
   </form>
 </app-modal>
 
-<app-modal
-  [title]="'branches.createBranchAdmin' | t"
+<app-create-branch-admin-modal
   [open]="createAdminModalOpen()"
+  [loading]="branchesStore.creatingAdmin()"
+  [branches]="branchesStore.branchSelection()"
   (closed)="createAdminModalOpen.set(false)"
->
-  <form class="space-y-4" [formGroup]="branchAdminForm" (ngSubmit)="createBranchAdmin()">
-    <label class="block">
-      <span class="mb-2 block text-xs font-semibold text-slate-700">{{
-        'branches.selectBranch' | t
-      }}</span>
-      <select
-        class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none transition focus:border-[var(--theme-color-accent)] focus:ring-4 focus:ring-[var(--theme-color-accent)]/10"
-        formControlName="branchId"
-      >
-        <option value="">{{ 'branches.selectBranchPlaceholder' | t }}</option>
-        @for (branch of branchesStore.branchSelection(); track branch.id) {
-          <option [value]="branch.id">{{ branchOptionDisplayName(branch) }}</option>
-        }
-      </select>
-      @if (branchAdminFieldError('branchId')) {
-        <span class="mt-2 block text-xs font-medium text-[var(--theme-color-danger)]">{{
-          branchAdminFieldError('branchId')
-        }}</span>
-      }
-    </label>
-
-    <div class="grid gap-3 md:grid-cols-2">
-      <app-input
-        [label]="'branches.adminNameEn' | t"
-        [placeholder]="'branches.adminNameEnPlaceholder' | t"
-        formControlName="nameEn"
-        [error]="branchAdminFieldError('nameEn')"
-      />
-      <app-input
-        [label]="'branches.adminNameAr' | t"
-        [placeholder]="'branches.adminNameArPlaceholder' | t"
-        formControlName="nameAr"
-        [error]="branchAdminFieldError('nameAr')"
-      />
-    </div>
-
-    <app-input
-      [label]="'branches.userName' | t"
-      [placeholder]="'branches.userNamePlaceholder' | t"
-      formControlName="userName"
-      [error]="branchAdminFieldError('userName')"
-    />
-
-    <div class="grid gap-3 md:grid-cols-2">
-      <app-input
-        [label]="'common.email' | t"
-        type="email"
-        [placeholder]="'branches.emailPlaceholder' | t"
-        formControlName="email"
-        [error]="branchAdminFieldError('email')"
-      />
-      <app-input
-        [label]="'branches.phoneNumber' | t"
-        [placeholder]="'branches.phoneNumberPlaceholder' | t"
-        formControlName="phoneNumber"
-        [error]="branchAdminFieldError('phoneNumber')"
-      />
-    </div>
-
-    <app-input
-      [label]="'common.password' | t"
-      type="password"
-      [placeholder]="'auth.passwordPlaceholder' | t"
-      formControlName="password"
-      [error]="branchAdminFieldError('password')"
-    />
-
-    <div
-      class="sticky bottom-0 -mx-4 -mb-4 mt-4 flex items-center justify-end gap-2 border-t border-slate-100 bg-white/95 px-4 py-3 backdrop-blur-sm sm:-mx-5 sm:-mb-5 sm:px-5 z-10"
-    >
-      <app-button type="button" variant="secondary" (pressed)="createAdminModalOpen.set(false)">
-        {{ 'common.cancel' | t }}
-      </app-button>
-      <app-button type="submit" [loading]="branchesStore.creatingAdmin()">
-        <app-icon [icon]="userPlusIcon" [size]="17" />
-        {{ 'branches.createBranchAdmin' | t }}
-      </app-button>
-    </div>
-  </form>
-</app-modal>
+  (submitted)="createBranchAdmin($event)"
+/>

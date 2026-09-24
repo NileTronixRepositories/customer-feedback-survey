@@ -9,7 +9,19 @@ import {
   output,
   signal,
 } from '@angular/core';
-import { ArrowLeft, Ban, ChevronUp, GitBranch, Plus, RotateCcw, Trash2 } from 'lucide-angular';
+import {
+  ArrowLeft,
+  Ban,
+  Check,
+  ChevronDown,
+  ChevronUp,
+  Search,
+  X,
+  GitBranch,
+  Plus,
+  RotateCcw,
+  Trash2,
+} from 'lucide-angular';
 import { I18nService } from '../../../../../../core/services/i18n.service';
 import {
   QUESTION_ANSWER_TYPE,
@@ -43,8 +55,10 @@ interface ConditionalLogicQuestionInput extends BranchTemplateQuestionSelectionI
   groupIsSelectable: boolean;
 }
 
-interface ConditionalLogicQuestion
-  extends Omit<ConditionalLogicQuestionInput, 'templateQuestionId'> {
+interface ConditionalLogicQuestion extends Omit<
+  ConditionalLogicQuestionInput,
+  'templateQuestionId'
+> {
   templateQuestionId: string;
   persistedTemplateQuestionId: string | null;
   answerType: QuestionAnswerType | null;
@@ -116,10 +130,17 @@ export class BranchTemplateConditionalLogicComponent {
   readonly blockedIcon = Ban;
   readonly branchIcon = GitBranch;
   readonly backIcon = ArrowLeft;
+  readonly checkIcon = Check;
   readonly chevronUpIcon = ChevronUp;
   readonly plusIcon = Plus;
   readonly resetIcon = RotateCcw;
   readonly trashIcon = Trash2;
+  readonly cancelIcon = X;
+  readonly chevronDownIcon = ChevronDown;
+  readonly searchIcon = Search;
+
+  readonly activePickerTriggerKey = signal<string | null>(null);
+  readonly pickerSearchText = signal<string>('');
 
   readonly originalConditions = signal<readonly QuestionCondition[]>([]);
   readonly draftConditions = signal<readonly QuestionCondition[]>([]);
@@ -156,9 +177,7 @@ export class BranchTemplateConditionalLogicComponent {
     const focusedQuestion = this.focusedQuestion();
     const focusedPath = this.focusedQuestionPath();
     const focusedDepth = Math.max(focusedPath.length - 1, 0);
-    const parentPath = focusedPath
-      .slice(0, -1)
-      .map((question) => question.templateQuestionId);
+    const parentPath = focusedPath.slice(0, -1).map((question) => question.templateQuestionId);
 
     return focusedQuestion
       ? [this.toTreeNode(focusedQuestion, focusedDepth, parentPath)]
@@ -249,6 +268,9 @@ export class BranchTemplateConditionalLogicComponent {
   }
 
   isCandidateGroupExpanded(triggerKey: string, groupId: string): boolean {
+    if (this.pickerSearchText().trim().length > 0) {
+      return true;
+    }
     return this.expandedCandidateGroupsByTrigger()[triggerKey]?.includes(groupId) ?? false;
   }
 
@@ -310,7 +332,95 @@ export class BranchTemplateConditionalLogicComponent {
     );
   }
 
+  toggleTriggerPicker(triggerKey: string): void {
+    if (this.activePickerTriggerKey() === triggerKey) {
+      this.activePickerTriggerKey.set(null);
+    } else {
+      this.activePickerTriggerKey.set(triggerKey);
+      this.pickerSearchText.set('');
+    }
+  }
+
+  isTriggerPickerOpen(triggerKey: string): boolean {
+    return this.activePickerTriggerKey() === triggerKey;
+  }
+
+  closeTriggerPicker(): void {
+    this.activePickerTriggerKey.set(null);
+    this.pickerSearchText.set('');
+  }
+
+  updatePickerSearchText(event: Event): void {
+    const input = event.target;
+    this.pickerSearchText.set(input instanceof HTMLInputElement ? input.value : '');
+  }
+
+  filteredCandidateGroups(
+    trigger: ConditionTreeTriggerView,
+  ): readonly ConditionalLogicQuestionGroup[] {
+    const query = this.pickerSearchText().trim().toLowerCase();
+    if (!query) {
+      return trigger.childCandidateGroups;
+    }
+
+    return trigger.childCandidateGroups
+      .map((group) => {
+        const matchingQuestions = group.questions.filter((question) => {
+          const en = (question.textEn ?? '').toLowerCase();
+          const ar = (question.textAr ?? '').toLowerCase();
+          const groupEn = (group.nameEn ?? '').toLowerCase();
+          const groupAr = (group.nameAr ?? '').toLowerCase();
+          return (
+            en.includes(query) ||
+            ar.includes(query) ||
+            groupEn.includes(query) ||
+            groupAr.includes(query)
+          );
+        });
+
+        return {
+          ...group,
+          questions: matchingQuestions,
+        };
+      })
+      .filter((group) => group.questions.length > 0);
+  }
+
+  isCandidateAlreadyAdded(
+    trigger: ConditionTreeTriggerView,
+    child: ConditionalLogicQuestion,
+  ): boolean {
+    return trigger.conditions.some(
+      (c: ConditionTreeConditionView) =>
+        c.condition.childTemplateQuestionId === child.templateQuestionId,
+    );
+  }
+
+  addConditionWithQuestion(
+    parent: ConditionalLogicQuestion,
+    trigger: ConditionTreeTriggerView,
+    child: ConditionalLogicQuestion,
+  ): void {
+    const nextCondition: QuestionCondition = {
+      conditionId: '',
+      parentTemplateQuestionId: parent.templateQuestionId,
+      childTemplateQuestionId: child.templateQuestionId,
+      triggerType: trigger.triggerType,
+      triggerTypeName: triggerTypeName(trigger.triggerType),
+      selectedQuestionOptionId: trigger.selectedQuestionOptionId,
+      triggerValue: trigger.triggerValue,
+      order: this.nextOrder(parent.templateQuestionId, trigger),
+    };
+
+    if (!this.isSelectedQuestion(child.templateQuestionId)) {
+      this.relatedQuestionSelected.emit(this.toQuestionInput(child));
+    }
+
+    this.draftConditions.update((conditions) => [...conditions, nextCondition]);
+  }
+
   clearConditions(): void {
+    this.closeTriggerPicker();
     this.draftConditions.set([]);
     this.selectedChildByTrigger.set({});
     this.expandedCandidateGroupsByTrigger.set({});
@@ -333,16 +443,13 @@ export class BranchTemplateConditionalLogicComponent {
     if (!parentQuestionId) {
       const existingQuestionIndex = currentPath.indexOf(questionId);
       this.focusedQuestionPathIds.set(
-        existingQuestionIndex >= 0
-          ? currentPath.slice(0, existingQuestionIndex + 1)
-          : [questionId],
+        existingQuestionIndex >= 0 ? currentPath.slice(0, existingQuestionIndex + 1) : [questionId],
       );
       return;
     }
 
     const parentIndex = currentPath.indexOf(parentQuestionId);
-    const basePath =
-      parentIndex >= 0 ? currentPath.slice(0, parentIndex + 1) : [parentQuestionId];
+    const basePath = parentIndex >= 0 ? currentPath.slice(0, parentIndex + 1) : [parentQuestionId];
     const existingQuestionIndex = basePath.indexOf(questionId);
 
     this.focusedQuestionPathIds.set(
@@ -432,8 +539,9 @@ export class BranchTemplateConditionalLogicComponent {
 
   private persistedSelectedQuestions(): readonly ConditionalLogicQuestion[] {
     return (
-      this.templatesStore.questionsSelection()?.groups
-        .flatMap((group) =>
+      this.templatesStore
+        .questionsSelection()
+        ?.groups.flatMap((group) =>
           group.questions.map((question) => ({
             ...question,
             groupId: group.groupId,
@@ -456,8 +564,7 @@ export class BranchTemplateConditionalLogicComponent {
         .map((question) => this.toLogicQuestion(question))
         .sort(
           (first, second) =>
-            (first.order ?? Number.MAX_SAFE_INTEGER) -
-            (second.order ?? Number.MAX_SAFE_INTEGER),
+            (first.order ?? Number.MAX_SAFE_INTEGER) - (second.order ?? Number.MAX_SAFE_INTEGER),
         ) ?? []
     );
   }
@@ -479,8 +586,7 @@ export class BranchTemplateConditionalLogicComponent {
       .map((question) => this.toLogicQuestion(question))
       .sort(
         (first, second) =>
-          (first.order ?? Number.MAX_SAFE_INTEGER) -
-          (second.order ?? Number.MAX_SAFE_INTEGER),
+          (first.order ?? Number.MAX_SAFE_INTEGER) - (second.order ?? Number.MAX_SAFE_INTEGER),
       );
   }
 
@@ -673,24 +779,12 @@ export class BranchTemplateConditionalLogicComponent {
 
   private childCandidates(
     parent: ConditionalLogicQuestion,
-    triggerType: QuestionConditionTriggerType,
-    selectedQuestionOptionId: string | null,
-    triggerValue: number | null,
+    _triggerType: QuestionConditionTriggerType,
+    _selectedQuestionOptionId: string | null,
+    _triggerValue: number | null,
   ): readonly ConditionalLogicQuestion[] {
     return this.availableChildQuestions().filter((child) => {
       if (child.templateQuestionId === parent.templateQuestionId) {
-        return false;
-      }
-
-      if (
-        this.hasDuplicateCondition(
-          parent.templateQuestionId,
-          child.templateQuestionId,
-          triggerType,
-          selectedQuestionOptionId,
-          triggerValue,
-        )
-      ) {
         return false;
       }
 
@@ -750,9 +844,14 @@ export class BranchTemplateConditionalLogicComponent {
   private normalizeIncomingConditions(
     conditions: readonly QuestionCondition[],
   ): readonly QuestionCondition[] {
-    const questionIds = new Set(this.selectedQuestions().map((question) => question.templateQuestionId));
+    const questionIds = new Set(
+      this.selectedQuestions().map((question) => question.templateQuestionId),
+    );
     const parentTypes = new Map(
-      this.selectedQuestions().map((question) => [question.templateQuestionId, question.answerType]),
+      this.selectedQuestions().map((question) => [
+        question.templateQuestionId,
+        question.answerType,
+      ]),
     );
 
     return conditions
@@ -761,13 +860,18 @@ export class BranchTemplateConditionalLogicComponent {
           questionIds.has(condition.parentTemplateQuestionId) &&
           questionIds.has(condition.childTemplateQuestionId) &&
           condition.parentTemplateQuestionId !== condition.childTemplateQuestionId &&
-          this.isValidParentTrigger(parentTypes.get(condition.parentTemplateQuestionId) ?? null, condition),
+          this.isValidParentTrigger(
+            parentTypes.get(condition.parentTemplateQuestionId) ?? null,
+            condition,
+          ),
       )
       .sort((first, second) => first.order - second.order);
   }
 
   private normalizedDraftConditions(): readonly QuestionCondition[] {
-    const questionIds = new Set(this.selectedQuestions().map((question) => question.templateQuestionId));
+    const questionIds = new Set(
+      this.selectedQuestions().map((question) => question.templateQuestionId),
+    );
     const orderByTrigger = new Map<string, number>();
 
     return this.draftConditions()

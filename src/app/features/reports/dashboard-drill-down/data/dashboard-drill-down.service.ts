@@ -228,6 +228,8 @@ export class DashboardDrillDownService {
         this.readString(item, 'textAnswer') ||
         this.readString(item, 'selectedOptionTextEn') ||
         this.readDisplayValue(item['stringValue'] ?? item['integerValue']),
+      selectedOptionTextEn: this.readNullableString(item, 'selectedOptionTextEn'),
+      selectedOptionTextAr: this.readNullableString(item, 'selectedOptionTextAr'),
       type: this.readString(item, customInput ? 'typeName' : 'questionTypeName'),
       voiceUrl:
         this.readNullableString(item, 'voiceFileUrl') ?? this.readNullableString(item, 'voiceUrl'),

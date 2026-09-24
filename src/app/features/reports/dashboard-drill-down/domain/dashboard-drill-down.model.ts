@@ -72,6 +72,8 @@ export interface DashboardResponseDetailItem {
   labelEn: string;
   labelAr: string | null;
   value: string;
+  selectedOptionTextEn: string | null;
+  selectedOptionTextAr: string | null;
   type: string;
   voiceUrl: string | null;
   imageUrl: string | null;

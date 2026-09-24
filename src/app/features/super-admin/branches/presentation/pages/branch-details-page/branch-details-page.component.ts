@@ -47,7 +47,9 @@ import {
   BranchDetailsBranchAdmin,
   BranchDetailsDepartment,
   BranchDetailsDepartmentAdmin,
+  CreateBranchAdminPayload,
 } from '../../../domain/branch.model';
+import { CreateBranchAdminModalComponent } from '../../components/create-branch-admin-modal/create-branch-admin-modal.component';
 import { BranchesStore } from '../../state/branches.store';
 
 interface ResetPasswordTarget {
@@ -70,6 +72,7 @@ interface ResetPasswordTarget {
     PageHeaderComponent,
     ResetPasswordModalComponent,
     TranslatePipe,
+    CreateBranchAdminModalComponent,
   ],
   templateUrl: './branch-details-page.component.html',
   styleUrl: './branch-details-page.component.css',
@@ -107,8 +110,10 @@ export class BranchDetailsPageComponent implements OnInit {
   readonly saveIcon = Save;
   readonly deleteIcon = Trash2;
   readonly userPlusIcon = UserPlus;
+  readonly activeTab = signal<'all' | 'personnel' | 'departments' | 'surveys'>('all');
   readonly editMode = signal(false);
   readonly branchAdminDetailsModalOpen = signal(false);
+  readonly createBranchAdminModalOpen = signal(false);
   readonly departmentDetailsModalOpen = signal(false);
   readonly createDepartmentAdminModalOpen = signal(false);
   readonly selectedBranchAdmin = signal<BranchDetailsBranchAdmin | null>(null);
@@ -306,6 +311,18 @@ export class BranchDetailsPageComponent implements OnInit {
 
     this.branchAdminsStore.deleteBranchAdmin(admin.branchAdminId, () => {
       this.closeBranchAdminDetails();
+      this.branchesStore.loadDetails(branch.id);
+    });
+  }
+
+  createBranchAdmin(payload: CreateBranchAdminPayload): void {
+    const branch = this.branchesStore.selectedBranchDetails();
+    if (!branch || this.branchesStore.creatingAdmin()) {
+      return;
+    }
+
+    this.branchesStore.createBranchAdmin(payload, () => {
+      this.createBranchAdminModalOpen.set(false);
       this.branchesStore.loadDetails(branch.id);
     });
   }

@@ -21,6 +21,7 @@ import {
   AlertTriangle,
   BarChart3,
   Building2,
+  Check,
   ChevronLeft,
   ChevronRight,
   Copy,
@@ -44,8 +45,6 @@ import { finalize, take } from 'rxjs';
 import { AuthStore } from '../../../../auth/presentation/state/auth.store';
 import { BranchesService } from '../../../../super-admin/branches/data/branches.service';
 import { BranchSelection } from '../../../../super-admin/branches/domain/branch.model';
-import { SuperAdminTemplatesService } from '../../../../super-admin/templates/data/super-admin-templates.service';
-import { SuperAdminTemplateCopyResult } from '../../../../super-admin/templates/domain/super-admin-template.model';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 import { ButtonComponent } from '../../../../../shared/ui/button/button.component';
 import { CardComponent } from '../../../../../shared/ui/card/card.component';
@@ -54,7 +53,9 @@ import { InputComponent } from '../../../../../shared/ui/input/input.component';
 import { ModalComponent } from '../../../../../shared/ui/modal/modal.component';
 import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
 import { I18nService } from '../../../../../core/services/i18n.service';
+import { AnonymousTemplatesService } from '../../../data/anonymous-templates.service';
 import {
+  AnonymousTemplate,
   AnonymousTemplateListItem,
   AnonymousTemplateCustomInputType,
   AnonymousTemplateScope,
@@ -93,14 +94,14 @@ interface CustomInputFormControls {
 
 type CustomInputFormGroup = FormGroup<CustomInputFormControls>;
 
-interface CopyApiErrorItem {
+interface AssignmentApiErrorItem {
   code?: string;
   message?: string;
   messageName?: string;
 }
 
-interface CopyApiErrorResponse {
-  errors?: readonly CopyApiErrorItem[];
+interface AssignmentApiErrorResponse {
+  errors?: readonly AssignmentApiErrorItem[];
   title?: string;
   detail?: string;
   message?: string;
@@ -127,8 +128,8 @@ interface CopyApiErrorResponse {
 export class AnonymousTemplatesPageComponent implements OnInit {
   readonly anonymousTemplatesStore = inject(AnonymousTemplatesStore);
   private readonly authStore = inject(AuthStore);
+  private readonly anonymousTemplatesService = inject(AnonymousTemplatesService);
   private readonly branchesService = inject(BranchesService);
-  private readonly superAdminTemplatesService = inject(SuperAdminTemplatesService);
   private readonly document = inject(DOCUMENT);
   private readonly formBuilder = inject(FormBuilder);
   private readonly i18n = inject(I18nService);
@@ -139,6 +140,7 @@ export class AnonymousTemplatesPageComponent implements OnInit {
   readonly chevronLeftIcon = ChevronLeft;
   readonly chevronRightIcon = ChevronRight;
   readonly copyIcon = Copy;
+  readonly checkIcon = Check;
   readonly downloadIcon = Download;
   readonly editIcon = Edit;
   readonly detailsIcon = Eye;
@@ -161,12 +163,14 @@ export class AnonymousTemplatesPageComponent implements OnInit {
   readonly copiedTemplateId = signal<string | null>(null);
   readonly branchOptions = signal<readonly BranchSelection[]>([]);
   readonly branchOptionsLoading = signal(false);
-  readonly copyModalOpen = signal(false);
-  readonly copyError = signal<string | null>(null);
-  readonly copySuccess = signal<string | null>(null);
-  readonly copyResult = signal<SuperAdminTemplateCopyResult | null>(null);
-  readonly copyingTemplate = signal(false);
-  readonly templatePendingCopy = signal<AnonymousTemplateListItem | null>(null);
+  readonly assignmentModalOpen = signal(false);
+  readonly assignmentError = signal<string | null>(null);
+  readonly assignmentSuccess = signal<string | null>(null);
+  readonly assignmentResult = signal<AnonymousTemplate | null>(null);
+  readonly assigningTemplate = signal(false);
+  readonly templatePendingAssignment = signal<AnonymousTemplateListItem | null>(null);
+  readonly assignmentLogo = signal<File | null>(null);
+  readonly assignmentLogoError = signal<string | null>(null);
   readonly createModalOpen = signal(false);
   readonly deleteModalOpen = signal(false);
   readonly restoreModalOpen = signal(false);
@@ -183,7 +187,11 @@ export class AnonymousTemplatesPageComponent implements OnInit {
   readonly canViewResponses = computed(() =>
     this.authStore.canManageAnonymousTemplates('ViewResponses'),
   );
-  readonly canCopyToBranch = computed(() => this.authStore.role() === 'SUPER_ADMIN');
+  readonly canAssignToBranch = computed(
+    () =>
+      this.authStore.role() === 'SUPER_ADMIN' &&
+      this.authStore.hasPermission('AnonymousTemplates.AssignGlobalToBranch'),
+  );
   readonly canViewDashboard = computed(
     () =>
       this.authStore.isBranchScopedActor() &&
@@ -216,8 +224,10 @@ export class AnonymousTemplatesPageComponent implements OnInit {
     orderSort: [''],
   });
 
-  readonly copyForm = this.formBuilder.nonNullable.group({
+  readonly assignmentForm = this.formBuilder.nonNullable.group({
     branchId: ['', [Validators.required]],
+    activeFrom: [this.toDateTimeLocalValue(new Date()), [Validators.required]],
+    expireTo: [''],
   });
 
   readonly templateForm = this.formBuilder.nonNullable.group({
@@ -359,64 +369,104 @@ export class AnonymousTemplatesPageComponent implements OnInit {
     void this.router.navigate(['/anonymous-templates', template.anonymousTemplateId, 'responses']);
   }
 
-  openCopyTemplateToBranch(template: AnonymousTemplateListItem): void {
-    if (!this.canCopyTemplateToBranch(template)) {
+  openAssignTemplateToBranch(template: AnonymousTemplateListItem): void {
+    if (!this.canAssignTemplateToBranch(template)) {
       return;
     }
 
-    this.templatePendingCopy.set(template);
-    this.copyForm.reset({ branchId: '' });
-    this.copyError.set(null);
-    this.copySuccess.set(null);
-    this.copyResult.set(null);
-    this.copyModalOpen.set(true);
+    this.templatePendingAssignment.set(template);
+    this.assignmentForm.reset({
+      branchId: '',
+      activeFrom: this.toDateTimeLocalValue(new Date()),
+      expireTo: '',
+    });
+    this.assignmentLogo.set(null);
+    this.assignmentLogoError.set(null);
+    this.assignmentError.set(null);
+    this.assignmentSuccess.set(null);
+    this.assignmentResult.set(null);
+    this.assignmentModalOpen.set(true);
   }
 
-  closeCopyTemplateToBranch(): void {
-    if (this.copyingTemplate()) {
+  closeAssignTemplateToBranch(): void {
+    if (this.assigningTemplate()) {
       return;
     }
 
-    this.templatePendingCopy.set(null);
-    this.copyForm.reset({ branchId: '' });
-    this.copyModalOpen.set(false);
-    this.copyError.set(null);
-    this.copySuccess.set(null);
-    this.copyResult.set(null);
+    this.templatePendingAssignment.set(null);
+    this.assignmentForm.reset({ branchId: '', activeFrom: '', expireTo: '' });
+    this.assignmentLogo.set(null);
+    this.assignmentLogoError.set(null);
+    this.assignmentModalOpen.set(false);
+    this.assignmentError.set(null);
+    this.assignmentSuccess.set(null);
+    this.assignmentResult.set(null);
   }
 
-  copySelectedTemplateToBranch(): void {
-    this.copyForm.markAllAsTouched();
-    const template = this.templatePendingCopy();
+  assignSelectedTemplateToBranch(): void {
+    this.assignmentForm.markAllAsTouched();
+    const template = this.templatePendingAssignment();
 
-    if (!template || this.copyForm.invalid || this.copyingTemplate()) {
+    if (!template || this.assignmentForm.invalid || this.assigningTemplate()) {
       return;
     }
 
-    this.copyingTemplate.set(true);
-    this.copyError.set(null);
-    this.copySuccess.set(null);
-    this.copyResult.set(null);
+    const value = this.assignmentForm.getRawValue();
+    const activeFrom = this.toIsoDateTime(value.activeFrom);
+    const expireTo = value.expireTo ? this.toIsoDateTime(value.expireTo) : null;
+    if (!activeFrom || (value.expireTo && !expireTo)) {
+      this.assignmentError.set('superAdminTemplates.assignValidationError');
+      return;
+    }
+    if (expireTo && new Date(expireTo).getTime() <= new Date(activeFrom).getTime()) {
+      this.assignmentError.set('branchTemplates.expireToAfterActiveFrom');
+      return;
+    }
 
-    this.superAdminTemplatesService
-      .copyToBranch({
-        templateId: template.anonymousTemplateId,
-        branchId: this.copyForm.controls.branchId.value,
+    this.assigningTemplate.set(true);
+    this.assignmentError.set(null);
+    this.assignmentSuccess.set(null);
+    this.assignmentResult.set(null);
+
+    this.anonymousTemplatesService
+      .assignGlobalToBranch(template.anonymousTemplateId, {
+        branchId: value.branchId,
+        activeFrom,
+        expireTo,
+        logo: this.assignmentLogo(),
       })
       .pipe(
         take(1),
-        finalize(() => this.copyingTemplate.set(false)),
+        finalize(() => this.assigningTemplate.set(false)),
       )
       .subscribe({
         next: (result) => {
-          this.copyResult.set(result);
-          this.copySuccess.set('superAdminTemplates.copySuccess');
+          this.assignmentResult.set(result);
+          this.assignmentSuccess.set('superAdminTemplates.assignSuccess');
           this.anonymousTemplatesStore.load();
         },
         error: (error: unknown) => {
-          this.copyError.set(this.readCopyErrorMessage(error));
+          this.assignmentError.set(this.readAssignmentErrorMessage(error));
         },
       });
+  }
+
+  onAssignmentLogoSelected(event: Event): void {
+    const file = (event.target as HTMLInputElement).files?.[0] ?? null;
+    this.assignmentLogoError.set(null);
+    this.assignmentLogo.set(null);
+    if (!file) {
+      return;
+    }
+    if (!/\.(?:jpe?g|png|webp)$/i.test(file.name)) {
+      this.assignmentLogoError.set('superAdminTemplates.logoTypeError');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      this.assignmentLogoError.set('superAdminTemplates.logoSizeError');
+      return;
+    }
+    this.assignmentLogo.set(file);
   }
 
   openDeleteTemplate(template: AnonymousTemplateListItem): void {
@@ -503,8 +553,13 @@ export class AnonymousTemplatesPageComponent implements OnInit {
     return template.isActive ? 'common.active' : 'branches.inactive';
   }
 
-  canCopyTemplateToBranch(template: AnonymousTemplateListItem): boolean {
-    return this.canCopyToBranch() && template.anonymousTemplateId.length > 0;
+  canAssignTemplateToBranch(template: AnonymousTemplateListItem): boolean {
+    return (
+      this.canAssignToBranch() &&
+      template.isGlobal &&
+      !template.isArchived &&
+      template.anonymousTemplateId.length > 0
+    );
   }
 
   resetForm(): void {
@@ -680,7 +735,7 @@ export class AnonymousTemplatesPageComponent implements OnInit {
     return this.localizedText(template.branchNameEn, template.branchNameAr);
   }
 
-  copyResultQrCodeSrc(result: SuperAdminTemplateCopyResult): string {
+  assignmentResultQrCodeSrc(result: AnonymousTemplate): string {
     if (!result.qrCode) {
       return '';
     }
@@ -707,6 +762,11 @@ export class AnonymousTemplatesPageComponent implements OnInit {
     return englishText || arabicText || fallback;
   }
 
+  private toIsoDateTime(value: string): string | null {
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? null : date.toISOString();
+  }
+
   private canUseTemplateAction(template: AnonymousTemplateListItem): boolean {
     if (this.authStore.role() === 'SUPER_ADMIN') {
       return true;
@@ -724,9 +784,9 @@ export class AnonymousTemplatesPageComponent implements OnInit {
     );
   }
 
-  private readCopyErrorMessage(error: unknown): string {
+  private readAssignmentErrorMessage(error: unknown): string {
     if (!(error instanceof HttpErrorResponse)) {
-      return 'superAdminTemplates.copyError';
+      return 'superAdminTemplates.assignError';
     }
 
     if (error.status === 401) {
@@ -736,26 +796,26 @@ export class AnonymousTemplatesPageComponent implements OnInit {
       return 'anonymousTemplates.forbidden';
     }
 
-    const backendMessage = this.readCopyProblemDetailsMessage(error.error);
+    const backendMessage = this.readAssignmentProblemDetailsMessage(error.error);
     if (backendMessage) {
       return backendMessage;
     }
 
     if (error.status === 404) {
-      return 'superAdminTemplates.copyNotFound';
+      return 'superAdminTemplates.assignNotFound';
     }
     if (error.status === 409) {
-      return 'superAdminTemplates.copyAlreadyExists';
+      return 'superAdminTemplates.assignAlreadyExists';
     }
     if (error.status === 400 || error.status === 422) {
-      return 'superAdminTemplates.copyValidationError';
+      return 'superAdminTemplates.assignValidationError';
     }
 
-    return 'superAdminTemplates.copyError';
+    return 'superAdminTemplates.assignError';
   }
 
-  private readCopyProblemDetailsMessage(errorBody: unknown): string | null {
-    if (!this.isCopyApiErrorResponse(errorBody)) {
+  private readAssignmentProblemDetailsMessage(errorBody: unknown): string | null {
+    if (!this.isAssignmentApiErrorResponse(errorBody)) {
       return null;
     }
 
@@ -771,7 +831,7 @@ export class AnonymousTemplatesPageComponent implements OnInit {
     );
   }
 
-  private isCopyApiErrorResponse(errorBody: unknown): errorBody is CopyApiErrorResponse {
+  private isAssignmentApiErrorResponse(errorBody: unknown): errorBody is AssignmentApiErrorResponse {
     return typeof errorBody === 'object' && errorBody !== null;
   }
 

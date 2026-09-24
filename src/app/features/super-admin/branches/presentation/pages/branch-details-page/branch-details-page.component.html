@@ -7,6 +7,10 @@
   >
     @if (branchesStore.selectedBranchDetails(); as branch) {
       <div class="flex flex-wrap items-center gap-2">
+        <app-button type="button" (pressed)="createBranchAdminModalOpen.set(true)">
+          <app-icon [icon]="userPlusIcon" [size]="17" />
+          {{ 'branches.createBranchAdmin' | t }}
+        </app-button>
         @if (!editMode()) {
           <app-button type="button" variant="secondary" (pressed)="enableEdit()">
             <app-icon [icon]="editIcon" [size]="17" />
@@ -108,20 +112,20 @@
 
     <!-- Executive Identity Hero Card -->
     <div
-      class="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-6 shadow-xs"
+      class="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-4 sm:p-5 shadow-xs"
     >
-      <div class="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-        <div class="flex items-start gap-4">
+      <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div class="flex items-start sm:items-center gap-3.5">
           <!-- Squircle Avatar with Brand Gradient -->
           <div
-            class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#148496] via-[#0f5b67] to-[#0a3a42] text-white shadow-md shadow-[#148496]/20 ring-4 ring-[#148496]/10"
+            class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#148496] via-[#0f5b67] to-[#0a3a42] text-white shadow-sm shadow-[#148496]/20 ring-2 ring-[#148496]/10"
           >
-            <app-icon [icon]="branchIcon" [size]="28" />
+            <app-icon [icon]="branchIcon" [size]="24" />
           </div>
 
           <!-- Main Info -->
-          <div class="min-w-0 space-y-1.5">
-            <div class="flex flex-wrap items-center gap-2.5">
+          <div class="min-w-0 space-y-1">
+            <div class="flex flex-wrap items-center gap-2">
               <span
                 class="rounded-md bg-slate-100 px-2 py-0.5 font-mono text-xs font-semibold tracking-wider text-slate-700"
               >
@@ -149,20 +153,20 @@
               </span>
             </div>
 
-            <h1 class="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
+            <h1 class="text-lg font-black tracking-tight text-slate-900 sm:text-xl">
               {{ localizedDisplayName(branch) }}
             </h1>
 
-            <div class="flex flex-wrap items-center gap-x-5 gap-y-1.5 pt-0.5 text-xs text-slate-500">
+            <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500 font-medium">
               @if (branch.address) {
                 <span class="inline-flex items-center gap-1.5">
-                  <app-icon [icon]="mapPinIcon" [size]="14" class="text-slate-400" />
+                  <app-icon [icon]="mapPinIcon" [size]="13" class="text-slate-400" />
                   {{ branch.address }}
                 </span>
               }
               @if (branch.createdOnUtc) {
                 <span class="inline-flex items-center gap-1.5">
-                  <app-icon [icon]="calendarIcon" [size]="14" class="text-slate-400" />
+                  <app-icon [icon]="calendarIcon" [size]="13" class="text-slate-400" />
                   {{ branch.createdOnUtc | date: 'mediumDate' }}
                 </span>
               }
@@ -213,531 +217,724 @@
       </app-card>
     }
 
-    <!-- 4-Column Executive KPI Grid -->
-    <section class="grid grid-cols-2 gap-3.5 sm:gap-4 lg:grid-cols-4">
+    <!-- ==================== 4-Column Compact KPI Metric Strip ==================== -->
+    <section class="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
       <!-- KPI 1: Branch Admins -->
       <div
-        class="group relative overflow-hidden rounded-xl border border-slate-200/80 bg-white p-4 shadow-xs transition hover:border-[#148496]/40 hover:shadow-sm"
+        role="button"
+        tabindex="0"
+        (click)="activeTab.set('personnel')"
+        (keydown.enter)="activeTab.set('personnel')"
+        class="flex items-center justify-between gap-3 rounded-xl border border-slate-200/80 bg-white px-3.5 py-2.5 shadow-2xs transition cursor-pointer hover:border-[#148496]/50 hover:shadow-xs focus:outline-none focus:ring-2 focus:ring-[#148496]/20"
       >
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-semibold text-slate-500">{{ 'branches.branchAdminsCount' | t }}</span>
-          <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-cyan-50 text-[#148496]">
-            <app-icon [icon]="shieldCheckIcon" [size]="18" />
-          </div>
+        <div class="min-w-0">
+          <p class="text-[11px] font-bold text-slate-500 truncate">{{ 'branches.branchAdminsCount' | t }}</p>
+          <p class="mt-0.5 text-xl font-black tracking-tight text-slate-900">{{ branch.summary.branchAdminsCount }}</p>
         </div>
-        <p class="mt-2 text-2xl font-bold tracking-tight text-slate-900">
-          {{ branch.summary.branchAdminsCount }}
-        </p>
+        <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-cyan-50 text-[#148496]">
+          <app-icon [icon]="shieldCheckIcon" [size]="16" />
+        </div>
       </div>
 
       <!-- KPI 2: Departments -->
       <div
-        class="group relative overflow-hidden rounded-xl border border-slate-200/80 bg-white p-4 shadow-xs transition hover:border-[#148496]/40 hover:shadow-sm"
+        role="button"
+        tabindex="0"
+        (click)="activeTab.set('departments')"
+        (keydown.enter)="activeTab.set('departments')"
+        class="flex items-center justify-between gap-3 rounded-xl border border-slate-200/80 bg-white px-3.5 py-2.5 shadow-2xs transition cursor-pointer hover:border-[#148496]/50 hover:shadow-xs focus:outline-none focus:ring-2 focus:ring-[#148496]/20"
       >
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-semibold text-slate-500">{{ 'branches.departmentsCount' | t }}</span>
-          <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-teal-50 text-[#0f5b67]">
-            <app-icon [icon]="layersIcon" [size]="18" />
-          </div>
+        <div class="min-w-0">
+          <p class="text-[11px] font-bold text-slate-500 truncate">{{ 'branches.departmentsCount' | t }}</p>
+          <p class="mt-0.5 text-xl font-black tracking-tight text-slate-900">{{ branch.summary.departmentsCount }}</p>
         </div>
-        <p class="mt-2 text-2xl font-bold tracking-tight text-slate-900">
-          {{ branch.summary.departmentsCount }}
-        </p>
+        <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-teal-50 text-[#0f5b67]">
+          <app-icon [icon]="layersIcon" [size]="16" />
+        </div>
       </div>
 
       <!-- KPI 3: Branch Users -->
       <div
-        class="group relative overflow-hidden rounded-xl border border-slate-200/80 bg-white p-4 shadow-xs transition hover:border-[#148496]/40 hover:shadow-sm"
+        role="button"
+        tabindex="0"
+        (click)="activeTab.set('personnel')"
+        (keydown.enter)="activeTab.set('personnel')"
+        class="flex items-center justify-between gap-3 rounded-xl border border-slate-200/80 bg-white px-3.5 py-2.5 shadow-2xs transition cursor-pointer hover:border-[#148496]/50 hover:shadow-xs focus:outline-none focus:ring-2 focus:ring-[#148496]/20"
       >
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-semibold text-slate-500">{{ 'branches.branchUsersCount' | t }}</span>
-          <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-sky-50 text-sky-700">
-            <app-icon [icon]="usersIcon" [size]="18" />
-          </div>
+        <div class="min-w-0">
+          <p class="text-[11px] font-bold text-slate-500 truncate">{{ 'branches.branchUsersCount' | t }}</p>
+          <p class="mt-0.5 text-xl font-black tracking-tight text-slate-900">{{ branch.summary.branchUsersCount }}</p>
         </div>
-        <p class="mt-2 text-2xl font-bold tracking-tight text-slate-900">
-          {{ branch.summary.branchUsersCount }}
-        </p>
+        <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-sky-50 text-sky-700">
+          <app-icon [icon]="usersIcon" [size]="16" />
+        </div>
       </div>
 
       <!-- KPI 4: Questions -->
       <div
-        class="group relative overflow-hidden rounded-xl border border-slate-200/80 bg-white p-4 shadow-xs transition hover:border-[#148496]/40 hover:shadow-sm"
+        role="button"
+        tabindex="0"
+        (click)="activeTab.set('surveys')"
+        (keydown.enter)="activeTab.set('surveys')"
+        class="flex items-center justify-between gap-3 rounded-xl border border-slate-200/80 bg-white px-3.5 py-2.5 shadow-2xs transition cursor-pointer hover:border-[#148496]/50 hover:shadow-xs focus:outline-none focus:ring-2 focus:ring-[#148496]/20"
       >
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-semibold text-slate-500">{{ 'branches.questionsCount' | t }}</span>
-          <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-50 text-amber-700">
-            <app-icon [icon]="questionIcon" [size]="18" />
-          </div>
+        <div class="min-w-0">
+          <p class="text-[11px] font-bold text-slate-500 truncate">{{ 'branches.questionsCount' | t }}</p>
+          <p class="mt-0.5 text-xl font-black tracking-tight text-slate-900">{{ branch.summary.questionsCount }}</p>
         </div>
-        <p class="mt-2 text-2xl font-bold tracking-tight text-slate-900">
-          {{ branch.summary.questionsCount }}
-        </p>
+        <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-50 text-amber-700">
+          <app-icon [icon]="questionIcon" [size]="16" />
+        </div>
       </div>
     </section>
 
-    <!-- 12-Column Asymmetric Master-Detail Grid -->
-    <div class="grid gap-6 lg:grid-cols-12">
-      <!-- Operations & Content Stream (7 cols) -->
-      <div class="space-y-6 lg:col-span-7">
-        <!-- Departments Card -->
-        <app-card [title]="'common.departments' | t">
-          <div class="space-y-3">
-            @for (department of branch.departments; track department.departmentId) {
-              <div
-                role="button"
-                tabindex="0"
-                class="group relative rounded-xl border border-slate-200/70 bg-white p-4 transition-all hover:border-[#148496]/50 hover:shadow-xs focus:outline-none focus:ring-2 focus:ring-[#148496]/30"
-                (click)="openDepartmentDetails(department)"
-                (keydown.enter)="openDepartmentDetails(department)"
-                (keydown.space)="$event.preventDefault(); openDepartmentDetails(department)"
-              >
-                <!-- Department Header Row -->
-                <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                  <div class="flex items-center gap-3">
-                    <div
-                      class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-teal-50 text-[#0f5b67] transition group-hover:bg-[#148496]/10"
-                    >
-                      <app-icon [icon]="layersIcon" [size]="20" />
-                    </div>
-                    <div class="min-w-0">
-                      <div class="flex items-center gap-2">
-                        <p class="font-bold text-slate-900 transition group-hover:text-[#148496]">
-                          {{ codedDisplayName(department) }}
-                        </p>
-                        <!-- Status Badge -->
-                        <span
-                          class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold"
-                          [class.bg-emerald-50]="department.isActive"
-                          [class.text-emerald-700]="department.isActive"
-                          [class.bg-slate-100]="!department.isActive"
-                          [class.text-slate-500]="!department.isActive"
-                        >
-                          <span
-                            class="h-1.5 w-1.5 rounded-full"
-                            [class.bg-emerald-500]="department.isActive"
-                            [class.bg-slate-400]="!department.isActive"
-                          ></span>
-                          {{ (department.isActive ? 'common.active' : 'branches.inactive') | t }}
-                        </span>
-                      </div>
-                      <p class="mt-0.5 text-xs text-slate-500">
-                        {{ 'branches.operatorsCount' | t }}:
-                        <span class="font-semibold text-slate-700">{{ department.operatorsCount }}</span>
-                      </p>
-                    </div>
-                  </div>
+    <!-- ==================== Quick Navigation / Tab Bar ==================== -->
+    <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200/70 pb-1">
+      <div class="flex flex-wrap items-center gap-1.5 p-1 bg-slate-100/90 rounded-xl border border-slate-200/60">
+        <!-- Tab: All -->
+        <button
+          type="button"
+          (click)="activeTab.set('all')"
+          class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-black transition-all duration-200 cursor-pointer shadow-2xs"
+          [class.bg-slate-900]="activeTab() === 'all'"
+          [class.text-white]="activeTab() === 'all'"
+          [class.border]="activeTab() === 'all'"
+          [class.border-slate-800]="activeTab() === 'all'"
+          [class.shadow-xs]="activeTab() === 'all'"
+          [class.text-slate-600]="activeTab() !== 'all'"
+          [class.hover:text-slate-900]="activeTab() !== 'all'"
+          [class.hover:bg-slate-200/60]="activeTab() !== 'all'"
+        >
+          <app-icon [icon]="layersIcon" [size]="13" />
+          <span>{{ 'branches.tabAll' | t }}</span>
+        </button>
 
-                  <!-- Create Department Admin Action -->
-                  @if (department.isActive) {
-                    <div class="shrink-0">
-                      <app-button
-                        type="button"
-                        size="sm"
-                        variant="secondary"
-                        (pressed)="$event.stopPropagation(); openCreateDepartmentAdmin(department)"
-                      >
-                        <app-icon [icon]="userPlusIcon" [size]="14" />
-                        {{ 'departmentAdmins.createDepartmentAdmin' | t }}
-                      </app-button>
-                    </div>
-                  }
-                </div>
+        <!-- Tab: Personnel -->
+        <button
+          type="button"
+          (click)="activeTab.set('personnel')"
+          class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-black transition-all duration-200 cursor-pointer shadow-2xs"
+          [class.bg-slate-900]="activeTab() === 'personnel'"
+          [class.text-white]="activeTab() === 'personnel'"
+          [class.border]="activeTab() === 'personnel'"
+          [class.border-slate-800]="activeTab() === 'personnel'"
+          [class.shadow-xs]="activeTab() === 'personnel'"
+          [class.text-slate-600]="activeTab() !== 'personnel'"
+          [class.hover:text-slate-900]="activeTab() !== 'personnel'"
+          [class.hover:bg-slate-200/60]="activeTab() !== 'personnel'"
+        >
+          <app-icon [icon]="shieldCheckIcon" [size]="13" />
+          <span>{{ 'branches.tabPersonnel' | t }}</span>
+          <span
+            class="rounded-full px-1.5 py-0.2 text-[10px] font-black transition-colors"
+            [class.bg-white/20]="activeTab() === 'personnel'"
+            [class.text-white]="activeTab() === 'personnel'"
+            [class.bg-slate-200/80]="activeTab() !== 'personnel'"
+            [class.text-slate-600]="activeTab() !== 'personnel'"
+          >
+            {{ branch.summary.branchAdminsCount + branch.summary.branchUsersCount }}
+          </span>
+        </button>
 
-                <!-- Nested Department Admins List -->
-                @if (department.departmentAdmins.length > 0) {
-                  <div class="mt-3.5 space-y-2 rounded-lg border border-slate-100 bg-slate-50/70 p-2.5">
-                    <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                      {{ 'branches.branchAdmins' | t }} ({{ department.departmentAdmins.length }})
-                    </p>
-                    @for (admin of department.departmentAdmins; track admin.departmentAdminId) {
+        <!-- Tab: Departments -->
+        <button
+          type="button"
+          (click)="activeTab.set('departments')"
+          class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-black transition-all duration-200 cursor-pointer shadow-2xs"
+          [class.bg-slate-900]="activeTab() === 'departments'"
+          [class.text-white]="activeTab() === 'departments'"
+          [class.border]="activeTab() === 'departments'"
+          [class.border-slate-800]="activeTab() === 'departments'"
+          [class.shadow-xs]="activeTab() === 'departments'"
+          [class.text-slate-600]="activeTab() !== 'departments'"
+          [class.hover:text-slate-900]="activeTab() !== 'departments'"
+          [class.hover:bg-slate-200/60]="activeTab() !== 'departments'"
+        >
+          <app-icon [icon]="branchIcon" [size]="13" />
+          <span>{{ 'branches.tabDepartments' | t }}</span>
+          <span
+            class="rounded-full px-1.5 py-0.2 text-[10px] font-black transition-colors"
+            [class.bg-white/20]="activeTab() === 'departments'"
+            [class.text-white]="activeTab() === 'departments'"
+            [class.bg-slate-200/80]="activeTab() !== 'departments'"
+            [class.text-slate-600]="activeTab() !== 'departments'"
+          >
+            {{ branch.summary.departmentsCount }}
+          </span>
+        </button>
+
+        <!-- Tab: Templates & Questions -->
+        <button
+          type="button"
+          (click)="activeTab.set('surveys')"
+          class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-black transition-all duration-200 cursor-pointer shadow-2xs"
+          [class.bg-slate-900]="activeTab() === 'surveys'"
+          [class.text-white]="activeTab() === 'surveys'"
+          [class.border]="activeTab() === 'surveys'"
+          [class.border-slate-800]="activeTab() === 'surveys'"
+          [class.shadow-xs]="activeTab() === 'surveys'"
+          [class.text-slate-600]="activeTab() !== 'surveys'"
+          [class.hover:text-slate-900]="activeTab() !== 'surveys'"
+          [class.hover:bg-slate-200/60]="activeTab() !== 'surveys'"
+        >
+          <app-icon [icon]="fileTextIcon" [size]="13" />
+          <span>{{ 'branches.tabSurveys' | t }}</span>
+          <span
+            class="rounded-full px-1.5 py-0.2 text-[10px] font-black transition-colors"
+            [class.bg-white/20]="activeTab() === 'surveys'"
+            [class.text-white]="activeTab() === 'surveys'"
+            [class.bg-slate-200/80]="activeTab() !== 'surveys'"
+            [class.text-slate-600]="activeTab() !== 'surveys'"
+          >
+            {{ branch.summary.templatesCount }}
+          </span>
+        </button>
+      </div>
+
+      <div class="text-[11px] font-semibold text-slate-400 hidden sm:block">
+        {{ 'branches.name' | t }}: {{ localizedDisplayName(branch) }}
+      </div>
+    </div>
+
+    <!-- ==================== Harmonious Symmetrical Content Grid ==================== -->
+    <div class="space-y-4">
+      <!-- Row 1: Personnel & Governance (Branch Admins & Branch Users) -->
+      @if (activeTab() === 'all' || activeTab() === 'personnel') {
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <!-- Card A: Branch Admins -->
+          <section class="rounded-xl border border-slate-200/80 bg-white p-3.5 shadow-2xs flex flex-col">
+            <div class="mb-3 flex items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
+              <div class="flex items-center gap-2 min-w-0">
+                <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-cyan-50 text-[#148496]">
+                  <app-icon [icon]="shieldCheckIcon" [size]="14" />
+                </span>
+                <h2 class="text-xs font-black text-slate-900 truncate">
+                  {{ 'branches.branchAdmins' | t }}
+                </h2>
+                <span class="rounded-full bg-cyan-50 px-2 py-0.5 text-[10px] font-bold text-[#148496] border border-cyan-100/60">
+                  {{ branch.branchAdmins.length }}
+                </span>
+              </div>
+            </div>
+
+            <div class="space-y-2 flex-1">
+              @for (admin of branch.branchAdmins; track admin.branchAdminId) {
+                <div
+                  class="rounded-xl border border-slate-200/70 bg-white p-2.5 sm:p-3 shadow-2xs transition hover:border-[#148496]/50 hover:shadow-xs"
+                >
+                  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5">
+                    <div class="flex items-start gap-2.5 min-w-0">
+                      <!-- Squircle Avatar with Initials -->
                       <div
-                        class="flex flex-col gap-2 rounded-md border border-slate-200/50 bg-white p-2.5 sm:flex-row sm:items-center sm:justify-between"
+                        class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-[#148496] to-[#0f5b67] text-xs font-black text-white shadow-2xs mt-0.5 sm:mt-0"
                       >
-                        <div class="flex items-center gap-2.5 min-w-0">
-                          <div
-                            class="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-[#148496]/10 text-xs font-bold text-[#148496]"
-                          >
-                            {{ userInitials(admin.nameEn || admin.userName) }}
-                          </div>
-                          <div class="min-w-0">
-                            <p class="truncate text-xs font-bold text-slate-800">
-                              {{ localizedDisplayName(admin) }}
-                            </p>
-                            <p class="truncate text-[11px] text-slate-500">
-                              {{ admin.email }}
-                            </p>
-                          </div>
-                        </div>
+                        {{ userInitials(admin.nameEn || admin.userName) }}
+                      </div>
 
-                        <!-- Department Admin Actions & Status -->
-                        <div class="flex flex-wrap items-center gap-1.5 sm:justify-end">
+                      <!-- Details -->
+                      <div class="min-w-0">
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                          <button
+                            type="button"
+                            class="text-start focus:outline-none"
+                            (click)="openBranchAdminDetails(admin)"
+                          >
+                            <span class="text-xs font-black text-slate-900 hover:text-[#148496] transition truncate">
+                              {{ localizedDisplayName(admin) }}
+                            </span>
+                          </button>
+                          @if (admin.userName) {
+                            <span class="rounded bg-slate-100/80 px-1.5 py-0.2 text-[10px] font-semibold text-slate-500">
+                              @{{ admin.userName }}
+                            </span>
+                          }
+                          <!-- Status Dot Pill -->
                           <span
-                            class="inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold"
+                            class="inline-flex items-center gap-1 rounded-full px-1.5 py-0.2 text-[9px] font-bold"
                             [class.bg-emerald-50]="admin.isActive"
                             [class.text-emerald-700]="admin.isActive"
                             [class.bg-slate-100]="!admin.isActive"
                             [class.text-slate-500]="!admin.isActive"
                           >
+                            <span
+                              class="h-1.5 w-1.5 rounded-full"
+                              [class.bg-emerald-500]="admin.isActive"
+                              [class.bg-slate-400]="!admin.isActive"
+                            ></span>
                             {{ (admin.isActive ? 'common.active' : 'branches.inactive') | t }}
                           </span>
-                          @if (
-                            admin.isActive &&
-                            canResetPassword('DEPARTMENT_ADMIN', admin.applicationUserId)
-                          ) {
-                            <app-button
-                              type="button"
-                              size="sm"
-                              variant="secondary"
-                              [loading]="
-                                resettingPassword() &&
-                                resetPasswordTarget()?.applicationUserId === admin.applicationUserId
-                              "
-                              (pressed)="
-                                openResetPassword(
-                                  'DEPARTMENT_ADMIN',
-                                  admin.applicationUserId,
-                                  localizedDisplayName(admin),
-                                  $event
-                                )
-                              "
-                            >
-                              <app-icon [icon]="resetPasswordIcon" [size]="13" />
-                              {{ 'users.resetPassword' | t }}
-                            </app-button>
+                        </div>
+
+                        <!-- Meta Line: Email & Phone inline -->
+                        <div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px] text-slate-500 font-medium">
+                          @if (admin.email) {
+                            <span class="inline-flex items-center gap-1 truncate max-w-[200px]">
+                              <app-icon [icon]="mailIcon" [size]="11" class="shrink-0 text-slate-400" />
+                              <span class="truncate">{{ admin.email }}</span>
+                            </span>
                           }
-                          @if (canDeactivateDepartmentAdmin(admin)) {
-                            <app-button
-                              type="button"
-                              size="sm"
-                              variant="danger"
-                              [loading]="departmentAdminsStore.deactivating()"
-                              (pressed)="deactivateDepartmentAdmin(admin, $event)"
-                            >
-                              <app-icon [icon]="deactivateIcon" [size]="13" />
-                              {{ 'departmentAdmins.deactivateAction' | t }}
-                            </app-button>
-                          }
-                          @if (canRestoreDepartmentAdmin(admin)) {
-                            <app-button
-                              type="button"
-                              size="sm"
-                              variant="secondary"
-                              [loading]="departmentAdminsStore.restoring()"
-                              (pressed)="restoreDepartmentAdmin(admin, $event)"
-                            >
-                              <app-icon [icon]="restoreIcon" [size]="13" />
-                              {{ 'common.restore' | t }}
-                            </app-button>
+                          @if (admin.phoneNumber) {
+                            <span class="inline-flex items-center gap-1">
+                              <app-icon [icon]="phoneIcon" [size]="11" class="shrink-0 text-slate-400" />
+                              <span>{{ admin.phoneNumber }}</span>
+                            </span>
                           }
                         </div>
                       </div>
+                    </div>
+
+                    <!-- Actions toolbar -->
+                    <div class="flex items-center gap-1 sm:justify-end shrink-0 self-end sm:self-center">
+                      @if (admin.isActive && canResetPassword('BRANCH_ADMIN', admin.applicationUserId)) {
+                        <button
+                          type="button"
+                          class="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2 py-1 text-[11px] font-bold text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition shadow-2xs"
+                          [disabled]="resettingPassword() && resetPasswordTarget()?.applicationUserId === admin.applicationUserId"
+                          (click)="openResetPassword('BRANCH_ADMIN', admin.applicationUserId, localizedDisplayName(admin), $event)"
+                          [title]="'users.resetPassword' | t"
+                        >
+                          <app-icon [icon]="resetPasswordIcon" [size]="12" />
+                          <span class="hidden sm:inline">{{ 'users.resetPassword' | t }}</span>
+                        </button>
+                      }
+                      @if (canDeactivateBranchAdmin(admin)) {
+                        <button
+                          type="button"
+                          class="inline-flex items-center gap-1 rounded-lg border border-rose-200/80 bg-rose-50/70 px-2 py-1 text-[11px] font-bold text-rose-700 hover:bg-rose-100 transition shadow-2xs"
+                          [disabled]="branchAdminsStore.deactivating()"
+                          (click)="deactivateBranchAdmin(admin, $event)"
+                          [title]="'branchAdmins.deactivateAction' | t"
+                        >
+                          <app-icon [icon]="deactivateIcon" [size]="12" />
+                          <span class="hidden sm:inline">{{ 'branchAdmins.deactivateAction' | t }}</span>
+                        </button>
+                      }
+                      @if (canRestoreBranchAdmin(admin)) {
+                        <button
+                          type="button"
+                          class="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2 py-1 text-[11px] font-bold text-slate-700 hover:bg-slate-50 transition shadow-2xs"
+                          [disabled]="branchAdminsStore.restoring()"
+                          (click)="restoreBranchAdmin(admin, $event)"
+                          [title]="'common.restore' | t"
+                        >
+                          <app-icon [icon]="restoreIcon" [size]="12" />
+                          <span class="hidden sm:inline">{{ 'common.restore' | t }}</span>
+                        </button>
+                      }
+                    </div>
+                  </div>
+                </div>
+              } @empty {
+                <div class="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 py-5 text-center">
+                  <div class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+                    <app-icon [icon]="shieldCheckIcon" [size]="16" />
+                  </div>
+                  <p class="mt-1.5 text-xs font-semibold text-slate-500">{{ 'common.noRecords' | t }}</p>
+                </div>
+              }
+            </div>
+          </section>
+
+          <!-- Card B: Branch Users -->
+          <section class="rounded-xl border border-slate-200/80 bg-white p-3.5 shadow-2xs flex flex-col">
+            <div class="mb-3 flex items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
+              <div class="flex items-center gap-2 min-w-0">
+                <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-sky-50 text-sky-700">
+                  <app-icon [icon]="usersIcon" [size]="14" />
+                </span>
+                <h2 class="text-xs font-black text-slate-900 truncate">
+                  {{ 'branches.branchUsers' | t }}
+                </h2>
+                <span class="rounded-full bg-sky-50 px-2 py-0.5 text-[10px] font-bold text-sky-700 border border-sky-100/60">
+                  {{ branch.branchUsers.length }}
+                </span>
+              </div>
+            </div>
+
+            <div class="space-y-2 flex-1">
+              @for (user of branch.branchUsers; track user.branchUserId) {
+                <div
+                  class="rounded-xl border border-slate-200/70 bg-white p-2.5 sm:p-3 shadow-2xs transition hover:border-[#148496]/50 hover:shadow-xs"
+                >
+                  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5">
+                    <div class="flex items-start gap-2.5 min-w-0">
+                      <div
+                        class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-sky-50 text-xs font-black text-sky-700 mt-0.5 sm:mt-0"
+                      >
+                        {{ userInitials(user.nameEn || user.userName) }}
+                      </div>
+                      <div class="min-w-0">
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                          <span class="text-xs font-black text-slate-900 truncate">{{ localizedDisplayName(user) }}</span>
+                          @if (user.userName) {
+                            <span class="rounded bg-slate-100/80 px-1.5 py-0.2 text-[10px] font-semibold text-slate-500">
+                              @{{ user.userName }}
+                            </span>
+                          }
+                        </div>
+                        @if (user.email) {
+                          <div class="mt-0.5 flex items-center gap-1 text-[11px] font-medium text-slate-500 truncate">
+                            <app-icon [icon]="mailIcon" [size]="11" class="shrink-0 text-slate-400" />
+                            <span class="truncate">{{ user.email }}</span>
+                          </div>
+                        }
+                        @if (user.roles.length > 0) {
+                          <div class="mt-1 flex flex-wrap gap-1">
+                            @for (role of user.roles; track role.roleId) {
+                              <span
+                                class="rounded-md bg-slate-100 px-1.5 py-0.5 text-[9px] font-bold text-slate-600 border border-slate-200/40"
+                              >
+                                {{ role.name }}
+                              </span>
+                            }
+                          </div>
+                        }
+                      </div>
+                    </div>
+
+                    @if (canResetPassword('BRANCH_USER', user.applicationUserId)) {
+                      <div class="shrink-0 self-end sm:self-center">
+                        <button
+                          type="button"
+                          class="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2 py-1 text-[11px] font-bold text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition shadow-2xs"
+                          [disabled]="resettingPassword() && resetPasswordTarget()?.applicationUserId === user.applicationUserId"
+                          (click)="openResetPassword('BRANCH_USER', user.applicationUserId, localizedDisplayName(user), $event)"
+                          [title]="'users.resetPassword' | t"
+                        >
+                          <app-icon [icon]="resetPasswordIcon" [size]="12" />
+                          <span class="hidden sm:inline">{{ 'users.resetPassword' | t }}</span>
+                        </button>
+                      </div>
                     }
+                  </div>
+                </div>
+              } @empty {
+                <div class="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 py-5 text-center">
+                  <div class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+                    <app-icon [icon]="usersIcon" [size]="16" />
+                  </div>
+                  <p class="mt-1.5 text-xs font-semibold text-slate-500">{{ 'common.noRecords' | t }}</p>
+                </div>
+              }
+            </div>
+          </section>
+        </div>
+      }
+
+      <!-- Row 2: Structure & Survey Content (Departments & Templates) -->
+      @if (activeTab() === 'all' || activeTab() === 'departments' || activeTab() === 'surveys') {
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <!-- Card C: Departments -->
+          @if (activeTab() === 'all' || activeTab() === 'departments') {
+            <section
+              class="rounded-xl border border-slate-200/80 bg-white p-3.5 shadow-2xs flex flex-col"
+              [class.lg:col-span-2]="activeTab() === 'departments'"
+            >
+              <div class="mb-3 flex items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
+                <div class="flex items-center gap-2 min-w-0">
+                  <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-teal-50 text-[#0f5b67]">
+                    <app-icon [icon]="layersIcon" [size]="14" />
+                  </span>
+                  <h2 class="text-xs font-black text-slate-900 truncate">
+                    {{ 'common.departments' | t }}
+                  </h2>
+                  <span class="rounded-full bg-teal-50 px-2 py-0.5 text-[10px] font-bold text-[#0f5b67] border border-teal-100/60">
+                    {{ branch.departments.length }}
+                  </span>
+                </div>
+              </div>
+
+              <div class="space-y-2 flex-1">
+                @for (department of branch.departments; track department.departmentId) {
+                  <div
+                    role="button"
+                    tabindex="0"
+                    class="group relative rounded-xl border border-slate-200/70 bg-white p-2.5 sm:p-3 transition-all hover:border-[#148496]/50 hover:shadow-xs focus:outline-none focus:ring-2 focus:ring-[#148496]/30"
+                    (click)="openDepartmentDetails(department)"
+                    (keydown.enter)="openDepartmentDetails(department)"
+                    (keydown.space)="$event.preventDefault(); openDepartmentDetails(department)"
+                  >
+                    <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                      <div class="flex items-center gap-2.5 min-w-0">
+                        <div
+                          class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-teal-50 text-[#0f5b67] transition group-hover:bg-[#148496]/10"
+                        >
+                          <app-icon [icon]="layersIcon" [size]="16" />
+                        </div>
+                        <div class="min-w-0">
+                          <div class="flex items-center gap-2 flex-wrap">
+                            <p class="font-bold text-xs text-slate-900 transition group-hover:text-[#148496] truncate">
+                              {{ codedDisplayName(department) }}
+                            </p>
+                            <span
+                              class="inline-flex items-center gap-1 rounded-full px-1.5 py-0.2 text-[9px] font-semibold"
+                              [class.bg-emerald-50]="department.isActive"
+                              [class.text-emerald-700]="department.isActive"
+                              [class.bg-slate-100]="!department.isActive"
+                              [class.text-slate-500]="!department.isActive"
+                            >
+                              <span
+                                class="h-1.5 w-1.5 rounded-full"
+                                [class.bg-emerald-500]="department.isActive"
+                                [class.bg-slate-400]="!department.isActive"
+                              ></span>
+                              {{ (department.isActive ? 'common.active' : 'branches.inactive') | t }}
+                            </span>
+                          </div>
+                          <p class="mt-0.5 text-[11px] text-slate-500">
+                            {{ 'branches.operatorsCount' | t }}:
+                            <span class="font-bold text-slate-700">{{ department.operatorsCount }}</span>
+                          </p>
+                        </div>
+                      </div>
+
+                      @if (department.isActive) {
+                        <div class="shrink-0 self-end sm:self-center">
+                          <button
+                            type="button"
+                            class="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2 py-1 text-[11px] font-bold text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition shadow-2xs"
+                            (click)="$event.stopPropagation(); openCreateDepartmentAdmin(department)"
+                          >
+                            <app-icon [icon]="userPlusIcon" [size]="12" />
+                            <span>{{ 'departmentAdmins.createDepartmentAdmin' | t }}</span>
+                          </button>
+                        </div>
+                      }
+                    </div>
+
+                    <!-- Nested Department Admins List (compact) -->
+                    @if (department.departmentAdmins.length > 0) {
+                      <div class="mt-2 space-y-1 rounded-lg border border-slate-100 bg-slate-50/70 p-2">
+                        <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                          {{ 'branches.branchAdmins' | t }} ({{ department.departmentAdmins.length }})
+                        </p>
+                        @for (admin of department.departmentAdmins; track admin.departmentAdminId) {
+                          <div
+                            class="flex flex-col gap-1.5 rounded-md border border-slate-200/50 bg-white p-2 sm:flex-row sm:items-center sm:justify-between"
+                          >
+                            <div class="flex items-center gap-2 min-w-0">
+                              <div
+                                class="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-[#148496]/10 text-[10px] font-bold text-[#148496]"
+                              >
+                                {{ userInitials(admin.nameEn || admin.userName) }}
+                              </div>
+                              <div class="min-w-0">
+                                <p class="truncate text-xs font-bold text-slate-800">
+                                  {{ localizedDisplayName(admin) }}
+                                </p>
+                                <p class="truncate text-[10px] text-slate-500">
+                                  {{ admin.email }}
+                                </p>
+                              </div>
+                            </div>
+
+                            <div class="flex flex-wrap items-center gap-1 sm:justify-end shrink-0">
+                              <span
+                                class="inline-flex rounded-full px-1.5 py-0.2 text-[9px] font-semibold"
+                                [class.bg-emerald-50]="admin.isActive"
+                                [class.text-emerald-700]="admin.isActive"
+                                [class.bg-slate-100]="!admin.isActive"
+                                [class.text-slate-500]="!admin.isActive"
+                              >
+                                {{ (admin.isActive ? 'common.active' : 'branches.inactive') | t }}
+                              </span>
+                              @if (
+                                admin.isActive &&
+                                canResetPassword('DEPARTMENT_ADMIN', admin.applicationUserId)
+                              ) {
+                                <button
+                                  type="button"
+                                  class="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-white px-1.5 py-0.5 text-[10px] font-bold text-slate-600 hover:bg-slate-50 transition"
+                                  [disabled]="resettingPassword() && resetPasswordTarget()?.applicationUserId === admin.applicationUserId"
+                                  (click)="openResetPassword('DEPARTMENT_ADMIN', admin.applicationUserId, localizedDisplayName(admin), $event)"
+                                >
+                                  <app-icon [icon]="resetPasswordIcon" [size]="11" />
+                                </button>
+                              }
+                              @if (canDeactivateDepartmentAdmin(admin)) {
+                                <button
+                                  type="button"
+                                  class="inline-flex items-center gap-1 rounded-md border border-rose-200 bg-rose-50/70 px-1.5 py-0.5 text-[10px] font-bold text-rose-700 hover:bg-rose-100 transition"
+                                  [disabled]="departmentAdminsStore.deactivating()"
+                                  (click)="deactivateDepartmentAdmin(admin, $event)"
+                                >
+                                  <app-icon [icon]="deactivateIcon" [size]="11" />
+                                </button>
+                              }
+                              @if (canRestoreDepartmentAdmin(admin)) {
+                                <button
+                                  type="button"
+                                  class="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-white px-1.5 py-0.5 text-[10px] font-bold text-slate-700 hover:bg-slate-50 transition"
+                                  [disabled]="departmentAdminsStore.restoring()"
+                                  (click)="restoreDepartmentAdmin(admin, $event)"
+                                >
+                                  <app-icon [icon]="restoreIcon" [size]="11" />
+                                </button>
+                              }
+                            </div>
+                          </div>
+                        }
+                      </div>
+                    }
+                  </div>
+                } @empty {
+                  <div
+                    class="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 py-5 text-center"
+                  >
+                    <div class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+                      <app-icon [icon]="layersIcon" [size]="16" />
+                    </div>
+                    <p class="mt-1.5 text-xs font-semibold text-slate-600">{{ 'common.noRecords' | t }}</p>
+                    <p class="text-[10px] text-slate-400">{{ 'branches.departmentsCount' | t }}: 0</p>
                   </div>
                 }
               </div>
-            } @empty {
-              <div
-                class="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 py-8 text-center"
-              >
-                <div class="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-400">
-                  <app-icon [icon]="layersIcon" [size]="24" />
-                </div>
-                <p class="mt-2 text-sm font-semibold text-slate-700">{{ 'common.noRecords' | t }}</p>
-                <p class="mt-0.5 text-xs text-slate-400">{{ 'branches.departmentsCount' | t }}: 0</p>
-              </div>
-            }
-          </div>
-        </app-card>
+            </section>
+          }
 
-        <!-- Templates Card -->
-        <app-card [title]="'branches.templates' | t">
-          <div class="space-y-3">
-            @for (template of branch.templates; track template.templateId) {
-              <div
-                class="rounded-xl border border-slate-200/70 bg-white p-4 transition hover:border-[#148496]/40 hover:shadow-xs"
-              >
-                <div class="flex items-start gap-3">
-                  <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-cyan-50 text-[#148496]">
-                    <app-icon [icon]="fileTextIcon" [size]="18" />
-                  </div>
-                  <div class="min-w-0 flex-1">
-                    <div class="flex flex-wrap items-center justify-between gap-2">
-                      <p class="font-bold text-slate-900">{{ localizedDisplayName(template) }}</p>
-                      <span
-                        class="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-700"
-                      >
-                        {{ template.questionsCount }} {{ 'branches.questionsCount' | t }}
-                      </span>
-                    </div>
-                    @if (template.description) {
-                      <p class="mt-1 text-xs text-slate-500">{{ template.description }}</p>
-                    }
-                  </div>
+          <!-- Card D: Templates -->
+          @if (activeTab() === 'all' || activeTab() === 'surveys') {
+            <section
+              class="rounded-xl border border-slate-200/80 bg-white p-3.5 shadow-2xs flex flex-col"
+              [class.lg:col-span-1]="activeTab() === 'all' || activeTab() === 'surveys'"
+            >
+              <div class="mb-3 flex items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
+                <div class="flex items-center gap-2 min-w-0">
+                  <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-cyan-50 text-[#148496]">
+                    <app-icon [icon]="fileTextIcon" [size]="14" />
+                  </span>
+                  <h2 class="text-xs font-black text-slate-900 truncate">
+                    {{ 'branches.templates' | t }}
+                  </h2>
+                  <span class="rounded-full bg-cyan-50 px-2 py-0.5 text-[10px] font-bold text-[#148496] border border-cyan-100/60">
+                    {{ branch.templates.length }}
+                  </span>
                 </div>
               </div>
-            } @empty {
-              <div
-                class="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 py-6 text-center"
-              >
-                <div class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-400">
-                  <app-icon [icon]="fileTextIcon" [size]="20" />
-                </div>
-                <p class="mt-2 text-sm font-semibold text-slate-600">{{ 'common.noRecords' | t }}</p>
-              </div>
-            }
-          </div>
-        </app-card>
 
-        <!-- Question Groups Card -->
-        <app-card [title]="'branches.questionGroups' | t">
-          <div class="grid gap-3.5 sm:grid-cols-2">
-            @for (group of branch.questionGroups; track group.groupId) {
-              <div class="rounded-xl border border-slate-200/70 bg-white p-4 transition hover:border-[#148496]/40">
-                <div class="flex items-center gap-2">
-                  <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-50 text-amber-700">
-                    <app-icon [icon]="questionIcon" [size]="16" />
-                  </div>
-                  <p class="font-bold text-slate-900">{{ localizedDisplayName(group) }}</p>
-                </div>
-                <div class="mt-3 space-y-1.5">
-                  @for (question of group.questions; track question.questionId) {
-                    <div class="rounded-lg bg-slate-50 p-2.5 border border-slate-100">
-                      <p class="text-xs font-semibold text-slate-700">
-                        {{ questionDisplayText(question) }}
-                      </p>
-                      <span
-                        class="mt-1 inline-block rounded bg-slate-200/60 px-1.5 py-0.5 text-[10px] font-medium text-slate-600"
-                      >
-                        {{ question.type }}
-                      </span>
-                    </div>
-                  } @empty {
-                    <p class="text-xs text-slate-400">{{ 'common.noRecords' | t }}</p>
-                  }
-                </div>
-              </div>
-            } @empty {
-              <div
-                class="col-span-full flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 py-6 text-center"
-              >
-                <div class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-400">
-                  <app-icon [icon]="questionIcon" [size]="20" />
-                </div>
-                <p class="mt-2 text-sm font-semibold text-slate-600">{{ 'common.noRecords' | t }}</p>
-              </div>
-            }
-          </div>
-        </app-card>
-      </div>
-
-      <!-- Personnel & Governance Stream (5 cols) -->
-      <div class="space-y-6 lg:col-span-5">
-        <!-- Branch Admins Card -->
-        <app-card [title]="'branches.branchAdmins' | t">
-          <div class="space-y-3">
-            @for (admin of branch.branchAdmins; track admin.branchAdminId) {
-              <div
-                class="rounded-xl border border-slate-200/70 bg-white p-4 transition-all hover:border-[#148496]/50 hover:shadow-xs"
-              >
-                <div class="flex items-start gap-3">
-                  <!-- Squircle Avatar with Initials -->
+              <div class="space-y-2 flex-1">
+                @for (template of branch.templates; track template.templateId) {
                   <div
-                    class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#148496] to-[#0f5b67] text-xs font-bold text-white shadow-xs"
+                    class="flex items-center justify-between gap-3 rounded-xl border border-slate-200/70 bg-white p-2.5 shadow-2xs transition hover:border-[#148496]/50 hover:shadow-xs"
                   >
-                    {{ userInitials(admin.nameEn || admin.userName) }}
-                  </div>
-
-                  <!-- Details -->
-                  <div class="min-w-0 flex-1">
-                    <button
-                      type="button"
-                      class="text-start focus:outline-none"
-                      (click)="openBranchAdminDetails(admin)"
-                    >
-                      <p class="font-bold text-slate-900 transition hover:text-[#148496]">
-                        {{ localizedDisplayName(admin) }}
-                      </p>
-                    </button>
-
-                    <div class="mt-1 space-y-0.5 text-xs text-slate-500">
-                      <div class="flex items-center gap-1.5 truncate">
-                        <app-icon [icon]="mailIcon" [size]="12" class="shrink-0 text-slate-400" />
-                        <span class="truncate">{{ admin.email }}</span>
+                    <div class="flex items-center gap-2.5 min-w-0">
+                      <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-cyan-50 text-[#148496]">
+                        <app-icon [icon]="fileTextIcon" [size]="16" />
                       </div>
-                      @if (admin.phoneNumber) {
-                        <div class="flex items-center gap-1.5">
-                          <app-icon [icon]="phoneIcon" [size]="12" class="shrink-0 text-slate-400" />
-                          <span>{{ admin.phoneNumber }}</span>
-                        </div>
-                      }
-                    </div>
-
-                    <div class="mt-2.5 flex items-center justify-between gap-2 border-t border-slate-100 pt-2.5">
-                      <!-- Status Pill with dot -->
-                      <span
-                        class="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-semibold"
-                        [class.bg-emerald-50]="admin.isActive"
-                        [class.text-emerald-700]="admin.isActive"
-                        [class.bg-slate-100]="!admin.isActive"
-                        [class.text-slate-500]="!admin.isActive"
-                      >
-                        <span
-                          class="h-1.5 w-1.5 rounded-full"
-                          [class.bg-emerald-500]="admin.isActive"
-                          [class.bg-slate-400]="!admin.isActive"
-                        ></span>
-                        {{ (admin.isActive ? 'common.active' : 'branches.inactive') | t }}
-                      </span>
-
-                      <!-- Action Toolbar -->
-                      <div class="flex flex-wrap items-center gap-1.5">
-                        @if (
-                          admin.isActive && canResetPassword('BRANCH_ADMIN', admin.applicationUserId)
-                        ) {
-                          <app-button
-                            type="button"
-                            size="sm"
-                            variant="secondary"
-                            [loading]="
-                              resettingPassword() &&
-                              resetPasswordTarget()?.applicationUserId === admin.applicationUserId
-                            "
-                            (pressed)="
-                              openResetPassword(
-                                'BRANCH_ADMIN',
-                                admin.applicationUserId,
-                                localizedDisplayName(admin),
-                                $event
-                              )
-                            "
-                          >
-                            <app-icon [icon]="resetPasswordIcon" [size]="13" />
-                            {{ 'users.resetPassword' | t }}
-                          </app-button>
-                        }
-                        @if (canDeactivateBranchAdmin(admin)) {
-                          <app-button
-                            type="button"
-                            size="sm"
-                            variant="danger"
-                            [loading]="branchAdminsStore.deactivating()"
-                            (pressed)="deactivateBranchAdmin(admin, $event)"
-                          >
-                            <app-icon [icon]="deactivateIcon" [size]="13" />
-                            {{ 'branchAdmins.deactivateAction' | t }}
-                          </app-button>
-                        }
-                        @if (canRestoreBranchAdmin(admin)) {
-                          <app-button
-                            type="button"
-                            size="sm"
-                            variant="secondary"
-                            [loading]="branchAdminsStore.restoring()"
-                            (pressed)="restoreBranchAdmin(admin, $event)"
-                          >
-                            <app-icon [icon]="restoreIcon" [size]="13" />
-                            {{ 'common.restore' | t }}
-                          </app-button>
-                        }
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            } @empty {
-              <div
-                class="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 py-6 text-center"
-              >
-                <div class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-400">
-                  <app-icon [icon]="shieldCheckIcon" [size]="20" />
-                </div>
-                <p class="mt-2 text-sm font-semibold text-slate-600">{{ 'common.noRecords' | t }}</p>
-              </div>
-            }
-          </div>
-        </app-card>
-
-        <!-- Branch Users Card -->
-        <app-card [title]="'branches.branchUsers' | t">
-          <div class="space-y-3">
-            @for (user of branch.branchUsers; track user.branchUserId) {
-              <div
-                class="rounded-xl border border-slate-200/70 bg-white p-4 transition hover:border-[#148496]/40 hover:shadow-xs"
-              >
-                <div class="flex items-start gap-3">
-                  <!-- Squircle Avatar -->
-                  <div
-                    class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-sky-50 text-xs font-bold text-sky-700"
-                  >
-                    {{ userInitials(user.nameEn || user.userName) }}
-                  </div>
-
-                  <div class="min-w-0 flex-1">
-                    <div class="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
                       <div class="min-w-0">
-                        <p class="font-bold text-slate-900">{{ localizedDisplayName(user) }}</p>
-                        <p class="mt-0.5 truncate text-xs text-slate-500">
-                          {{ user.userName }} &bull; {{ user.email }}
-                        </p>
-                      </div>
-
-                      @if (canResetPassword('BRANCH_USER', user.applicationUserId)) {
-                        <div class="shrink-0">
-                          <app-button
-                            type="button"
-                            size="sm"
-                            variant="secondary"
-                            [loading]="
-                              resettingPassword() &&
-                              resetPasswordTarget()?.applicationUserId === user.applicationUserId
-                            "
-                            (pressed)="
-                              openResetPassword(
-                                'BRANCH_USER',
-                                user.applicationUserId,
-                                localizedDisplayName(user),
-                                $event
-                              )
-                            "
-                          >
-                            <app-icon [icon]="resetPasswordIcon" [size]="13" />
-                            {{ 'users.resetPassword' | t }}
-                          </app-button>
-                        </div>
-                      }
-                    </div>
-
-                    @if (user.roles.length > 0) {
-                      <div class="mt-2.5 flex flex-wrap gap-1.5">
-                        @for (role of user.roles; track role.roleId) {
-                          <span
-                            class="rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-600"
-                          >
-                            {{ role.name }}
-                          </span>
+                        <p class="font-bold text-xs text-slate-900 truncate">{{ localizedDisplayName(template) }}</p>
+                        @if (template.description) {
+                          <p class="text-[11px] text-slate-400 truncate max-w-[240px]">{{ template.description }}</p>
                         }
                       </div>
+                    </div>
+                    <span
+                      class="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-700 shrink-0"
+                    >
+                      {{ template.questionsCount }} {{ 'branches.questionsCount' | t }}
+                    </span>
+                  </div>
+                } @empty {
+                  <div
+                    class="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 py-5 text-center"
+                  >
+                    <div class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+                      <app-icon [icon]="fileTextIcon" [size]="16" />
+                    </div>
+                    <p class="mt-1.5 text-xs font-semibold text-slate-600">{{ 'common.noRecords' | t }}</p>
+                  </div>
+                }
+              </div>
+            </section>
+          }
+        </div>
+      }
+
+      <!-- Row 3: Question Groups (Full Width or 2-col) -->
+      @if (activeTab() === 'all' || activeTab() === 'surveys') {
+        <section class="rounded-xl border border-slate-200/80 bg-white p-3.5 shadow-2xs">
+          <div class="mb-3 flex items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
+            <div class="flex items-center gap-2 min-w-0">
+              <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-amber-50 text-amber-700">
+                <app-icon [icon]="questionIcon" [size]="14" />
+              </span>
+              <h2 class="text-xs font-black text-slate-900 truncate">
+                {{ 'branches.questionGroups' | t }}
+              </h2>
+              <span class="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-700 border border-amber-100/60">
+                {{ branch.questionGroups.length }}
+              </span>
+            </div>
+          </div>
+
+          <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            @for (group of branch.questionGroups; track group.groupId) {
+              <div
+                class="rounded-xl border border-slate-200/70 bg-white p-3 shadow-2xs transition hover:border-[#148496]/50 hover:shadow-xs flex flex-col justify-between"
+              >
+                <div>
+                  <div class="flex items-center justify-between gap-2 border-b border-slate-100 pb-2">
+                    <div class="flex items-center gap-2 min-w-0">
+                      <div class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-amber-50 text-amber-700">
+                        <app-icon [icon]="questionIcon" [size]="14" />
+                      </div>
+                      <p class="text-xs font-bold text-slate-900 truncate">{{ localizedDisplayName(group) }}</p>
+                    </div>
+                    <span class="rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold text-slate-600 shrink-0">
+                      {{ group.questions.length }}
+                    </span>
+                  </div>
+
+                  <div class="mt-2 space-y-1">
+                    @for (question of group.questions; track question.questionId) {
+                      <div class="flex items-center justify-between gap-2 rounded-lg bg-slate-50/80 px-2.5 py-1.5 border border-slate-100">
+                        <p class="text-[11px] font-semibold text-slate-700 truncate min-w-0">
+                          {{ questionDisplayText(question) }}
+                        </p>
+                        <span
+                          class="shrink-0 rounded px-1.5 py-0.2 text-[9px] font-bold"
+                          [class.bg-blue-50]="question.type.toLowerCase().includes('single')"
+                          [class.text-blue-700]="question.type.toLowerCase().includes('single')"
+                          [class.bg-amber-50]="question.type.toLowerCase().includes('star')"
+                          [class.text-amber-700]="question.type.toLowerCase().includes('star')"
+                          [class.bg-rose-50]="question.type.toLowerCase().includes('complain')"
+                          [class.text-rose-700]="question.type.toLowerCase().includes('complain')"
+                          [class.bg-slate-200/60]="!question.type.toLowerCase().includes('single') && !question.type.toLowerCase().includes('star') && !question.type.toLowerCase().includes('complain')"
+                          [class.text-slate-600]="!question.type.toLowerCase().includes('single') && !question.type.toLowerCase().includes('star') && !question.type.toLowerCase().includes('complain')"
+                        >
+                          {{ question.type }}
+                        </span>
+                      </div>
+                    } @empty {
+                      <p class="text-xs text-slate-400 py-1">{{ 'common.noRecords' | t }}</p>
                     }
                   </div>
                 </div>
               </div>
             } @empty {
               <div
-                class="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 py-6 text-center"
+                class="col-span-full flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 py-5 text-center"
               >
-                <div class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-400">
-                  <app-icon [icon]="usersIcon" [size]="20" />
+                <div class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+                  <app-icon [icon]="questionIcon" [size]="16" />
                 </div>
-                <p class="mt-2 text-sm font-semibold text-slate-600">{{ 'common.noRecords' | t }}</p>
+                <p class="mt-1.5 text-xs font-semibold text-slate-600">{{ 'common.noRecords' | t }}</p>
               </div>
             }
           </div>
-        </app-card>
-      </div>
+        </section>
+      }
     </div>
   }
 </div>
+
+<app-create-branch-admin-modal
+  [open]="createBranchAdminModalOpen()"
+  [loading]="branchesStore.creatingAdmin()"
+  [selectedBranch]="branchesStore.selectedBranchDetails()"
+  (closed)="createBranchAdminModalOpen.set(false)"
+  (submitted)="createBranchAdmin($event)"
+/>
 
 <app-modal
   [title]="'branchAdmins.detailsTitle' | t"

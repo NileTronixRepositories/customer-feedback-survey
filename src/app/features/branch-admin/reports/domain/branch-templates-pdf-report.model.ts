@@ -4,8 +4,7 @@ export const BRANCH_TEMPLATES_PDF_REPORT_SCORE_CALCULATION_MODES = [
   'LowestConditionLevel',
 ] as const;
 export const BRANCH_TEMPLATES_PDF_REPORT_LANGUAGES = ['Arabic', 'English'] as const;
-export const BRANCH_TEMPLATES_PDF_REPORT_MIN_TOP_WORST_QUESTIONS_COUNT = 1;
-export const BRANCH_TEMPLATES_PDF_REPORT_MAX_TOP_WORST_QUESTIONS_COUNT = 50;
+export const BRANCH_TEMPLATES_REPORT_QUESTION_COUNTS = [5, 10, 20] as const;
 export const BRANCH_TEMPLATES_PDF_REPORT_MIN_SCORE_PERCENTAGE = 0;
 export const BRANCH_TEMPLATES_PDF_REPORT_MAX_SCORE_PERCENTAGE = 100;
 export const BRANCH_TEMPLATES_PDF_REPORT_DEFAULT_WORST_QUESTIONS_MAX_SCORE_PERCENTAGE = 40;
@@ -27,7 +26,16 @@ export interface BranchTemplatesPdfReportQuery {
   topWorstQuestionsCount?: number;
   worstQuestionsMaxScorePercentage?: number;
   bestQuestionsMinScorePercentage?: number;
-  language?: BranchTemplatesPdfReportLanguage;
+}
+
+export interface BranchTemplatesReportExportRequest {
+  query: BranchTemplatesPdfReportQuery;
+  language: BranchTemplatesPdfReportLanguage;
+}
+
+export interface BranchTemplatesReportFile {
+  blob: Blob;
+  fileName: string | null;
 }
 
 export interface BranchTemplatesPdfReportTemplateOption {
@@ -37,12 +45,40 @@ export interface BranchTemplatesPdfReportTemplateOption {
   nameAr: string | null;
 }
 
-export interface BranchTemplatesPdfReportDownloadRequest {
-  query: BranchTemplatesPdfReportQuery;
+export interface BranchTemplatesPdfReportTemplateSelection {
+  id: string;
+  kind: BranchTemplatesPdfReportTemplateKind;
+}
+
+export function branchTemplatesPdfReportTemplateKey(
+  template: BranchTemplatesPdfReportTemplateSelection,
+): string {
+  return `${template.kind}:${template.id}`;
+}
+
+export function parseBranchTemplatesPdfReportTemplateKey(
+  templateKey: string,
+): BranchTemplatesPdfReportTemplateSelection | undefined {
+  const separatorIndex = templateKey.indexOf(':');
+  if (separatorIndex <= 0) {
+    return undefined;
+  }
+
+  const kind = templateKey.slice(0, separatorIndex);
+  const id = templateKey.slice(separatorIndex + 1).trim();
+  if (!id || (kind !== 'Normal' && kind !== 'Anonymous')) {
+    return undefined;
+  }
+
+  return {
+    id,
+    kind,
+  };
 }
 
 export interface BranchTemplatesReportPreviewRequest {
   query: BranchTemplatesPdfReportQuery;
+  language: BranchTemplatesPdfReportLanguage;
 }
 
 export type BranchTemplatesReportSection = Readonly<Record<string, unknown>>;

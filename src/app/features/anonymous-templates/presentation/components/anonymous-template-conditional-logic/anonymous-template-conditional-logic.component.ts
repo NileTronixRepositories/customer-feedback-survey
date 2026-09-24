@@ -9,7 +9,19 @@ import {
   output,
   signal,
 } from '@angular/core';
-import { ArrowLeft, Ban, GitBranch, Plus, RotateCcw, Trash2 } from 'lucide-angular';
+import {
+  ArrowLeft,
+  Ban,
+  Check,
+  ChevronDown,
+  ChevronUp,
+  GitBranch,
+  Plus,
+  RotateCcw,
+  Search,
+  Trash2,
+  X,
+} from 'lucide-angular';
 import { I18nService } from '../../../../../core/services/i18n.service';
 import {
   QUESTION_ANSWER_TYPE,
@@ -36,11 +48,22 @@ import {
 } from '../../../domain/anonymous-template.model';
 import { AnonymousTemplatesStore } from '../../state/anonymous-templates.store';
 
-interface AnonymousConditionalLogicQuestion
-  extends Omit<AnonymousTemplateQuestionSelectionItem, 'anonymousTemplateQuestionId'> {
+interface AnonymousConditionalLogicQuestion extends Omit<
+  AnonymousTemplateQuestionSelectionItem,
+  'anonymousTemplateQuestionId'
+> {
   anonymousTemplateQuestionId: string;
   persistedAnonymousTemplateQuestionId: string | null;
   answerType: QuestionAnswerType | null;
+}
+
+interface AnonymousConditionalLogicQuestionGroup {
+  groupId: string;
+  nameEn: string;
+  nameAr: string | null;
+  isGlobal: boolean;
+  scopeName: string;
+  questions: readonly AnonymousConditionalLogicQuestion[];
 }
 
 interface ConditionTriggerBaseView {
@@ -52,6 +75,7 @@ interface ConditionTriggerBaseView {
   selectedQuestionOptionId: string | null;
   triggerValue: number | null;
   childCandidates: readonly AnonymousConditionalLogicQuestion[];
+  childCandidateGroups: readonly AnonymousConditionalLogicQuestionGroup[];
   selectedChildTemplateQuestionId: string;
 }
 
@@ -99,13 +123,22 @@ export class AnonymousTemplateConditionalLogicComponent {
   readonly blockedIcon = Ban;
   readonly branchIcon = GitBranch;
   readonly backIcon = ArrowLeft;
+  readonly checkIcon = Check;
+  readonly chevronDownIcon = ChevronDown;
+  readonly chevronUpIcon = ChevronUp;
   readonly plusIcon = Plus;
   readonly resetIcon = RotateCcw;
+  readonly searchIcon = Search;
   readonly trashIcon = Trash2;
+  readonly cancelIcon = X;
+
+  readonly activePickerTriggerKey = signal<string | null>(null);
+  readonly pickerSearchText = signal<string>('');
 
   readonly originalConditions = signal<readonly QuestionCondition[]>([]);
   readonly draftConditions = signal<readonly QuestionCondition[]>([]);
   readonly selectedChildByTrigger = signal<Record<string, string>>({});
+  readonly expandedCandidateGroupsByTrigger = signal<Record<string, readonly string[]>>({});
   readonly focusedQuestionPathIds = signal<readonly string[]>([]);
   private readonly initializedKey = signal('');
 
@@ -159,9 +192,11 @@ export class AnonymousTemplateConditionalLogicComponent {
     effect(() => {
       const selection = this.anonymousTemplatesStore.questionsSelection();
       if (!selection) {
+        this.closeTriggerPicker();
         this.originalConditions.set([]);
         this.draftConditions.set([]);
         this.selectedChildByTrigger.set({});
+        this.expandedCandidateGroupsByTrigger.set({});
         this.focusedQuestionPathIds.set([]);
         this.initializedKey.set('');
         return;
@@ -182,9 +217,11 @@ export class AnonymousTemplateConditionalLogicComponent {
       const conditions = this.normalizeIncomingConditions(
         this.toQuestionConditions(this.conditions()),
       );
+      this.closeTriggerPicker();
       this.originalConditions.set(conditions);
       this.draftConditions.set(conditions);
       this.selectedChildByTrigger.set({});
+      this.expandedCandidateGroupsByTrigger.set({});
       this.focusedQuestionPathIds.set([]);
       this.initializedKey.set(selectionKey);
     });
@@ -205,10 +242,110 @@ export class AnonymousTemplateConditionalLogicComponent {
     }));
   }
 
-  addCondition(
+  toggleTriggerPicker(triggerKey: string): void {
+    if (this.activePickerTriggerKey() === triggerKey) {
+      this.activePickerTriggerKey.set(null);
+    } else {
+      this.activePickerTriggerKey.set(triggerKey);
+      this.pickerSearchText.set('');
+    }
+  }
+
+  isTriggerPickerOpen(triggerKey: string): boolean {
+    return this.activePickerTriggerKey() === triggerKey;
+  }
+
+  closeTriggerPicker(): void {
+    this.activePickerTriggerKey.set(null);
+    this.pickerSearchText.set('');
+  }
+
+  updatePickerSearchText(event: Event): void {
+    const input = event.target;
+    this.pickerSearchText.set(input instanceof HTMLInputElement ? input.value : '');
+  }
+
+  toggleCandidateGroup(triggerKey: string, groupId: string): void {
+    const currentExpanded = this.expandedCandidateGroupsByTrigger()[triggerKey] ?? [];
+    const isExpanded = currentExpanded.includes(groupId);
+    this.expandedCandidateGroupsByTrigger.update((records) => ({
+      ...records,
+      [triggerKey]: isExpanded
+        ? currentExpanded.filter((id) => id !== groupId)
+        : [...currentExpanded, groupId],
+    }));
+  }
+
+  isCandidateGroupExpanded(triggerKey: string, groupId: string): boolean {
+    const currentExpanded = this.expandedCandidateGroupsByTrigger()[triggerKey] ?? [];
+    return currentExpanded.includes(groupId) || this.pickerSearchText().trim().length > 0;
+  }
+
+  filteredCandidateGroups(
+    trigger: ConditionTreeTriggerView,
+  ): readonly AnonymousConditionalLogicQuestionGroup[] {
+    const query = this.pickerSearchText().trim().toLowerCase();
+    if (!query) {
+      return trigger.childCandidateGroups;
+    }
+
+    return trigger.childCandidateGroups
+      .map((group) => {
+        const matchingQuestions = group.questions.filter((question) => {
+          const en = (question.textEn ?? '').toLowerCase();
+          const ar = (question.textAr ?? '').toLowerCase();
+          const groupEn = (group.nameEn ?? '').toLowerCase();
+          const groupAr = (group.nameAr ?? '').toLowerCase();
+          return (
+            en.includes(query) ||
+            ar.includes(query) ||
+            groupEn.includes(query) ||
+            groupAr.includes(query)
+          );
+        });
+
+        return {
+          ...group,
+          questions: matchingQuestions,
+        };
+      })
+      .filter((group) => group.questions.length > 0);
+  }
+
+  isCandidateAlreadyAdded(
+    trigger: ConditionTreeTriggerView,
+    child: AnonymousConditionalLogicQuestion,
+  ): boolean {
+    return trigger.conditions.some(
+      (c: ConditionTreeConditionView) =>
+        c.condition.childTemplateQuestionId === child.anonymousTemplateQuestionId,
+    );
+  }
+
+  addConditionWithQuestion(
     parent: AnonymousConditionalLogicQuestion,
-    trigger: ConditionTriggerBaseView,
+    trigger: ConditionTreeTriggerView,
+    child: AnonymousConditionalLogicQuestion,
   ): void {
+    const nextCondition: QuestionCondition = {
+      conditionId: '',
+      parentTemplateQuestionId: parent.anonymousTemplateQuestionId,
+      childTemplateQuestionId: child.anonymousTemplateQuestionId,
+      triggerType: trigger.triggerType,
+      triggerTypeName: triggerTypeName(trigger.triggerType),
+      selectedQuestionOptionId: trigger.selectedQuestionOptionId,
+      triggerValue: trigger.triggerValue,
+      order: this.nextOrder(parent.anonymousTemplateQuestionId, trigger),
+    };
+
+    if (!this.isSelectedQuestion(child.anonymousTemplateQuestionId)) {
+      this.relatedQuestionSelected.emit(this.toQuestionInput(child));
+    }
+
+    this.draftConditions.update((conditions) => [...conditions, nextCondition]);
+  }
+
+  addCondition(parent: AnonymousConditionalLogicQuestion, trigger: ConditionTriggerBaseView): void {
     const childTemplateQuestionId = this.selectedChildByTrigger()[trigger.key] ?? '';
     const child = trigger.childCandidates.find(
       (candidate) => candidate.anonymousTemplateQuestionId === childTemplateQuestionId,
@@ -248,13 +385,17 @@ export class AnonymousTemplateConditionalLogicComponent {
   }
 
   clearConditions(): void {
+    this.closeTriggerPicker();
     this.draftConditions.set([]);
     this.selectedChildByTrigger.set({});
+    this.expandedCandidateGroupsByTrigger.set({});
   }
 
   resetConditions(): void {
+    this.closeTriggerPicker();
     this.draftConditions.set(this.originalConditions());
     this.selectedChildByTrigger.set({});
+    this.expandedCandidateGroupsByTrigger.set({});
   }
 
   focusQuestion(
@@ -309,6 +450,21 @@ export class AnonymousTemplateConditionalLogicComponent {
   questionText(question: AnonymousConditionalLogicQuestion): string {
     const isArabic = this.i18n.language() === 'ar';
     return this.localizedText(question.textEn, question.textAr ?? '', isArabic) || '-';
+  }
+
+  questionSecondaryText(question: AnonymousConditionalLogicQuestion): string {
+    const isArabic = this.i18n.language() === 'ar';
+    return this.secondaryLocalizedText(question.textEn, question.textAr ?? '', isArabic);
+  }
+
+  candidateGroupName(group: AnonymousConditionalLogicQuestionGroup): string {
+    const isArabic = this.i18n.language() === 'ar';
+    return this.localizedText(group.nameEn, group.nameAr ?? '', isArabic) || '-';
+  }
+
+  candidateGroupSecondaryName(group: AnonymousConditionalLogicQuestionGroup): string {
+    const isArabic = this.i18n.language() === 'ar';
+    return this.secondaryLocalizedText(group.nameEn, group.nameAr ?? '', isArabic);
   }
 
   groupDisplayName(question: AnonymousConditionalLogicQuestion): string {
@@ -524,6 +680,13 @@ export class AnonymousTemplateConditionalLogicComponent {
       )
       .sort((first, second) => first.order - second.order);
 
+    const childCandidates = this.childCandidates(
+      parent,
+      triggerType,
+      selectedQuestionOptionId,
+      triggerValue,
+    );
+
     return {
       key,
       label,
@@ -533,31 +696,20 @@ export class AnonymousTemplateConditionalLogicComponent {
       selectedQuestionOptionId,
       triggerValue,
       conditions,
-      childCandidates: this.childCandidates(parent, triggerType, selectedQuestionOptionId, triggerValue),
+      childCandidates,
+      childCandidateGroups: this.toCandidateGroups(childCandidates),
       selectedChildTemplateQuestionId: this.selectedChildByTrigger()[key] ?? '',
     };
   }
 
   private childCandidates(
     parent: AnonymousConditionalLogicQuestion,
-    triggerType: QuestionConditionTriggerType,
-    selectedQuestionOptionId: string | null,
-    triggerValue: number | null,
+    _triggerType: QuestionConditionTriggerType,
+    _selectedQuestionOptionId: string | null,
+    _triggerValue: number | null,
   ): readonly AnonymousConditionalLogicQuestion[] {
     return this.availableChildQuestions().filter((child) => {
       if (child.anonymousTemplateQuestionId === parent.anonymousTemplateQuestionId) {
-        return false;
-      }
-
-      if (
-        this.hasDuplicateCondition(
-          parent.anonymousTemplateQuestionId,
-          child.anonymousTemplateQuestionId,
-          triggerType,
-          selectedQuestionOptionId,
-          triggerValue,
-        )
-      ) {
         return false;
       }
 
@@ -833,4 +985,43 @@ export class AnonymousTemplateConditionalLogicComponent {
     return englishText || arabicText;
   }
 
+  private secondaryLocalizedText(
+    englishText: string,
+    arabicText: string,
+    isArabic: boolean,
+  ): string {
+    if (isArabic) {
+      return englishText;
+    }
+    return arabicText;
+  }
+
+  private toCandidateGroups(
+    candidates: readonly AnonymousConditionalLogicQuestion[],
+  ): readonly AnonymousConditionalLogicQuestionGroup[] {
+    const groups = new Map<string, AnonymousConditionalLogicQuestionGroup>();
+
+    candidates.forEach((question) => {
+      const groupId = question.groupId || 'ungrouped';
+      const currentGroup = groups.get(groupId);
+      if (currentGroup) {
+        groups.set(groupId, {
+          ...currentGroup,
+          questions: [...currentGroup.questions, question],
+        });
+        return;
+      }
+
+      groups.set(groupId, {
+        groupId,
+        nameEn: question.groupNameEn,
+        nameAr: question.groupNameAr,
+        isGlobal: question.isGlobal,
+        scopeName: question.scopeName,
+        questions: [question],
+      });
+    });
+
+    return [...groups.values()];
+  }
 }

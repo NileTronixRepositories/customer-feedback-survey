@@ -15,14 +15,15 @@ import {
   BRANCH_TEMPLATES_PDF_REPORT_DEFAULT_BEST_QUESTIONS_MIN_SCORE_PERCENTAGE,
   BRANCH_TEMPLATES_PDF_REPORT_DEFAULT_WORST_QUESTIONS_MAX_SCORE_PERCENTAGE,
   BRANCH_TEMPLATES_PDF_REPORT_MAX_SCORE_PERCENTAGE,
-  BRANCH_TEMPLATES_PDF_REPORT_MAX_TOP_WORST_QUESTIONS_COUNT,
   BRANCH_TEMPLATES_PDF_REPORT_MIN_SCORE_PERCENTAGE,
-  BRANCH_TEMPLATES_PDF_REPORT_MIN_TOP_WORST_QUESTIONS_COUNT,
+  BRANCH_TEMPLATES_REPORT_QUESTION_COUNTS,
   BranchTemplatesPdfReportLanguage,
   BranchTemplatesPdfReportQuery,
   BranchTemplatesPdfReportScoreCalculationMode,
   BranchTemplatesPdfReportTemplateKind,
   BranchTemplatesPdfReportTemplateOption,
+  branchTemplatesPdfReportTemplateKey,
+  parseBranchTemplatesPdfReportTemplateKey,
 } from '../../../domain/branch-templates-pdf-report.model';
 import { BranchTemplatesPdfReportStore } from '../../state/branch-templates-pdf-report.store';
 
@@ -62,10 +63,7 @@ export class BranchTemplatesPdfReportPageComponent implements OnInit, OnDestroy 
   readonly templateKindFilter = signal<TemplateKindFilter>('');
   readonly branchUserNormalTemplates = signal<readonly BranchTemplatesPdfReportTemplateOption[]>([]);
   readonly normalTemplatesError = signal<string | null>(null);
-  readonly minTopWorstQuestionsCount =
-  BRANCH_TEMPLATES_PDF_REPORT_MIN_TOP_WORST_QUESTIONS_COUNT;
-  readonly maxTopWorstQuestionsCount =
-  BRANCH_TEMPLATES_PDF_REPORT_MAX_TOP_WORST_QUESTIONS_COUNT;
+  readonly questionCountOptions = BRANCH_TEMPLATES_REPORT_QUESTION_COUNTS;
   readonly minScorePercentage = BRANCH_TEMPLATES_PDF_REPORT_MIN_SCORE_PERCENTAGE;
   readonly maxScorePercentage = BRANCH_TEMPLATES_PDF_REPORT_MAX_SCORE_PERCENTAGE;
 
@@ -78,7 +76,6 @@ export class BranchTemplatesPdfReportPageComponent implements OnInit, OnDestroy 
     topWorstQuestionsCount: [DEFAULT_TOP_WORST_QUESTIONS_COUNT],
     worstQuestionsMaxScorePercentage: [DEFAULT_WORST_QUESTIONS_MAX_SCORE_PERCENTAGE],
     bestQuestionsMinScorePercentage: [DEFAULT_BEST_QUESTIONS_MIN_SCORE_PERCENTAGE],
-    language: [this.defaultReportLanguage()],
   });
 
   readonly normalTemplates = computed<readonly BranchTemplatesPdfReportTemplateOption[]>(() =>
@@ -123,35 +120,44 @@ export class BranchTemplatesPdfReportPageComponent implements OnInit, OnDestroy 
   }
 
   downloadReport(): void {
-    if (this.reportStore.downloading()) {
+    if (this.reportStore.downloading() || this.reportStore.excelDownloading()) {
       return;
     }
 
     const query = this.reportQuery();
-    const reportLanguage = query.language ?? this.defaultReportLanguage();
+    const reportLanguage = this.defaultReportLanguage();
 
-    this.reportStore.download({ query }, (blob) =>
-      this.saveBlob(blob, this.reportFileName(reportLanguage)),
+    this.reportStore.downloadPdf({ query, language: reportLanguage }, (file) =>
+      this.saveBlob(file.blob, file.fileName ?? this.reportFileName(reportLanguage)),
     );
   }
 
   downloadExcelReport(): void {
-    if (this.reportStore.excelDownloading()) {
+    if (
+      this.reportStore.excelDownloading() ||
+      this.reportStore.downloading() ||
+      !this.hasSelectedTemplate()
+    ) {
       return;
     }
 
     const query = this.reportQuery();
-    const reportLanguage = query.language ?? this.defaultReportLanguage();
+    const reportLanguage = this.defaultReportLanguage();
 
-    this.reportStore.downloadExcel({ query }, (blob) => {
-      const isXmlFormat = blob.type.includes('xml') || blob.type.includes('ms-excel');
-      this.saveBlob(blob, this.excelReportFileName(reportLanguage, !isXmlFormat));
+    this.reportStore.downloadExcel({ query, language: reportLanguage }, (file) => {
+      this.saveBlob(file.blob, file.fileName ?? this.excelReportFileName(reportLanguage));
     });
+  }
+
+  hasSelectedTemplate(): boolean {
+    return parseBranchTemplatesPdfReportTemplateKey(
+      this.filtersForm.controls.templateKey.value,
+    ) !== undefined;
   }
 
   private reportQuery(): BranchTemplatesPdfReportQuery {
     const value = this.filtersForm.getRawValue();
-    const selectedTemplate = this.selectedTemplate(value.templateKey);
+    const selectedTemplate = parseBranchTemplatesPdfReportTemplateKey(value.templateKey);
 
     return {
       fromDate: value.fromDate,
@@ -166,7 +172,6 @@ export class BranchTemplatesPdfReportPageComponent implements OnInit, OnDestroy 
       bestQuestionsMinScorePercentage: this.toOptionalPercentage(
         value.bestQuestionsMinScorePercentage,
       ),
-      language: value.language,
     };
   }
 
@@ -180,7 +185,6 @@ export class BranchTemplatesPdfReportPageComponent implements OnInit, OnDestroy 
       topWorstQuestionsCount: DEFAULT_TOP_WORST_QUESTIONS_COUNT,
       worstQuestionsMaxScorePercentage: DEFAULT_WORST_QUESTIONS_MAX_SCORE_PERCENTAGE,
       bestQuestionsMinScorePercentage: DEFAULT_BEST_QUESTIONS_MIN_SCORE_PERCENTAGE,
-      language: this.defaultReportLanguage(),
     });
     this.templateKindFilter.set('');
     this.reportStore.clearError();
@@ -192,7 +196,7 @@ export class BranchTemplatesPdfReportPageComponent implements OnInit, OnDestroy 
   }
 
   templateValue(template: BranchTemplatesPdfReportTemplateOption): string {
-    return `${template.kind}:${template.id}`;
+    return branchTemplatesPdfReportTemplateKey(template);
   }
 
   templateLabel(template: BranchTemplatesPdfReportTemplateOption): string {
@@ -207,10 +211,6 @@ export class BranchTemplatesPdfReportPageComponent implements OnInit, OnDestroy 
     );
 
     return `${name} (${kind})`;
-  }
-
-  private selectedTemplate(templateKey: string): BranchTemplatesPdfReportTemplateOption | undefined {
-    return this.templateOptions().find((template) => this.templateValue(template) === templateKey);
   }
 
   private toOptionalPositiveInteger(value: string | number | null | undefined): number | undefined {
@@ -302,15 +302,11 @@ export class BranchTemplatesPdfReportPageComponent implements OnInit, OnDestroy 
       : `customer-survey-report-${timestamp}.pdf`;
   }
 
-  private excelReportFileName(
-    language: BranchTemplatesPdfReportLanguage,
-    isXlsx: boolean = true,
-  ): string {
+  private excelReportFileName(language: BranchTemplatesPdfReportLanguage): string {
     const timestamp = this.fileTimestamp(new Date());
-    const ext = isXlsx ? 'xlsx' : 'xls';
     return language === 'Arabic'
-      ? `customer-survey-report-ar-${timestamp}.${ext}`
-      : `customer-survey-report-${timestamp}.${ext}`;
+      ? `customer-survey-report-ar-${timestamp}.xlsx`
+      : `customer-survey-report-${timestamp}.xlsx`;
   }
 
   private defaultReportLanguage(): BranchTemplatesPdfReportLanguage {

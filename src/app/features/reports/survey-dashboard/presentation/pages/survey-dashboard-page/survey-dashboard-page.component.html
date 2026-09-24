@@ -33,7 +33,8 @@
       >
         <app-icon [icon]="filterIcon" [size]="14" />
         {{
-          (advancedFiltersOpen() ? 'surveyDashboard.hideFilters' : 'surveyDashboard.showFilters') | t
+          (advancedFiltersOpen() ? 'surveyDashboard.hideFilters' : 'surveyDashboard.showFilters')
+            | t
         }}
       </button>
     </div>
@@ -48,14 +49,8 @@
     [class.opacity-0]="!advancedFiltersOpen()"
   >
     <div class="min-h-0 overflow-hidden">
-      <section
-        class="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs"
-      >
-        <form
-          [formGroup]="filtersForm"
-          (ngSubmit)="applyFilters()"
-          class="space-y-4"
-        >
+      <section class="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs">
+        <form [formGroup]="filtersForm" (ngSubmit)="applyFilters()" class="space-y-4">
           <!-- Primary Filter Bar -->
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3 items-end">
             <!-- Source -->
@@ -90,12 +85,13 @@
             }
 
             <!-- Template -->
-            <label class="filter-label" [class.lg:col-span-3]="isSuperAdmin()" [class.lg:col-span-4]="!isSuperAdmin()">
+            <label
+              class="filter-label"
+              [class.lg:col-span-3]="isSuperAdmin()"
+              [class.lg:col-span-4]="!isSuperAdmin()"
+            >
               <span class="filter-label-text">{{ 'surveyDashboard.template' | t }}</span>
-              <select
-                class="filter-control filter-select"
-                formControlName="templateId"
-              >
+              <select class="filter-control filter-select" formControlName="templateId">
                 <option value="">
                   {{
                     templatesSelectionDisabled()
@@ -112,34 +108,25 @@
             <!-- Date From -->
             <label class="filter-label lg:col-span-2">
               <span class="filter-label-text">{{ 'surveyDashboard.from' | t }}</span>
-              <input
-                class="filter-control"
-                type="date"
-                formControlName="from"
-              />
+              <input class="filter-control" type="date" formControlName="from" />
             </label>
 
             <!-- Date To -->
             <label class="filter-label lg:col-span-2">
               <span class="filter-label-text">{{ 'surveyDashboard.to' | t }}</span>
-              <input
-                class="filter-control"
-                type="date"
-                formControlName="to"
-              />
+              <input class="filter-control" type="date" formControlName="to" />
             </label>
           </div>
 
           <!-- Advanced Calculation Options (Collapsible) -->
           @if (calculationOptionsOpen()) {
-            <div class="pt-3 border-t border-slate-100 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 items-end bg-slate-50/50 p-3 rounded-xl">
+            <div
+              class="pt-3 border-t border-slate-100 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 items-end bg-slate-50/50 p-3 rounded-xl"
+            >
               <!-- Group By -->
               <label class="filter-label">
                 <span class="filter-label-text">{{ 'surveyDashboard.group' | t }}</span>
-                <select
-                  class="filter-control filter-select"
-                  formControlName="groupBy"
-                >
+                <select class="filter-control filter-select" formControlName="groupBy">
                   <option value="Day">{{ 'surveyDashboard.day' | t }}</option>
                   <option value="Month">{{ 'surveyDashboard.month' | t }}</option>
                 </select>
@@ -147,10 +134,14 @@
 
               <!-- Calculation Mode -->
               <label class="filter-label">
-                <span class="filter-label-text">{{ 'surveyDashboard.scoreCalculationMode' | t }}</span>
+                <span class="filter-label-text">{{
+                  'surveyDashboard.scoreCalculationMode' | t
+                }}</span>
                 <select class="filter-control filter-select" formControlName="scoreCalculationMode">
                   <option value="RootQuestions">{{ 'surveyDashboard.rootQuestions' | t }}</option>
-                  <option value="LowestConditionLevel">{{ 'surveyDashboard.lowestConditionLevel' | t }}</option>
+                  <option value="LowestConditionLevel">
+                    {{ 'surveyDashboard.lowestConditionLevel' | t }}
+                  </option>
                 </select>
               </label>
 
@@ -191,7 +182,9 @@
           }
 
           <!-- Filter Action Buttons & Advanced Toggle -->
-          <div class="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-slate-100">
+          <div
+            class="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-slate-100"
+          >
             <button
               type="button"
               class="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-[var(--theme-color-secondary)] transition focus:outline-none"
@@ -199,7 +192,9 @@
             >
               <app-icon [icon]="slidersIcon" [size]="14" />
               <span>{{ 'surveyDashboard.advancedOptions' | t }}</span>
-              <span class="text-[10px] text-slate-400">({{ calculationOptionsOpen() ? '▲' : '▼' }})</span>
+              <span class="text-[10px] text-slate-400"
+                >({{ calculationOptionsOpen() ? '▲' : '▼' }})</span
+              >
             </button>
 
             <div class="flex items-center gap-2">
@@ -240,57 +235,81 @@
         {{ branchStore.error() ?? '' | t }}
       </section>
     } @else if (branchStore.branch(); as branch) {
-      <section class="rounded-2xl border border-slate-200/80 bg-white shadow-xs overflow-hidden">
+      <section
+        class="rounded-2xl border border-slate-200/80 bg-white shadow-xs overflow-hidden transition-all duration-200"
+      >
+        <!-- Header Strip -->
         <div
-          class="flex flex-col gap-2 bg-slate-50/70 p-3 lg:flex-row lg:items-center lg:justify-between"
+          class="flex flex-col gap-3 bg-gradient-to-r from-slate-50/90 via-white to-slate-50/50 p-3 sm:px-4 sm:py-3 lg:flex-row lg:items-center lg:justify-between border-b border-slate-100"
         >
-          <div class="min-w-0">
-            <div class="flex flex-wrap items-center gap-2.5">
-              <span
-                class="flex h-8 w-8 items-center justify-center rounded-xl bg-cyan-50 text-[var(--theme-color-accent)]"
-              >
-                <app-icon [icon]="branchIcon" [size]="16" />
-              </span>
-              <div class="min-w-0">
-                <p class="text-[9px] font-black uppercase tracking-wider text-slate-400">
+          <div class="min-w-0 flex items-start sm:items-center gap-3">
+            <span
+              class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-cyan-50 text-[var(--theme-color-secondary)] border border-cyan-100/60 shadow-2xs"
+            >
+              <app-icon [icon]="branchIcon" [size]="18" />
+            </span>
+            <div class="min-w-0">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="text-[10px] font-black uppercase tracking-wider text-slate-400">
                   {{ 'surveyDashboard.branchData' | t }}
-                </p>
-                <h2 class="truncate text-sm font-black text-slate-950">
-                  {{ assignedBranchName(branch) }}
-                </h2>
+                </span>
+                <span
+                  class="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-bold"
+                  [class.bg-emerald-50]="branch.isActive"
+                  [class.text-emerald-700]="branch.isActive"
+                  [class.border]="true"
+                  [class.border-emerald-200/60]="branch.isActive"
+                  [class.bg-slate-100]="!branch.isActive"
+                  [class.text-slate-500]="!branch.isActive"
+                  [class.border-slate-200]="!branch.isActive"
+                >
+                  <span
+                    class="h-1.5 w-1.5 rounded-full"
+                    [class.bg-emerald-500]="branch.isActive"
+                    [class.bg-slate-400]="!branch.isActive"
+                  ></span>
+                  {{ (branch.isActive ? 'common.active' : 'branches.inactive') | t }}
+                </span>
+              </div>
+              <h2 class="truncate text-sm sm:text-base font-black text-slate-900 mt-0.5">
+                {{ assignedBranchName(branch) }}
+              </h2>
+              <div class="mt-1.5 flex flex-wrap items-center gap-1.5 text-[11px] font-semibold text-slate-600">
+                @if (branch.code) {
+                  <span class="inline-flex items-center gap-1 rounded-lg bg-white px-2 py-0.5 border border-slate-200/70 shadow-2xs">
+                    <app-icon class="text-slate-400" [icon]="hashIcon" [size]="11" />
+                    <span class="text-slate-400">{{ 'surveyDashboard.branchCode' | t }}:</span>
+                    <span class="font-bold text-slate-800">{{ branch.code }}</span>
+                  </span>
+                }
+                @if (branch.address) {
+                  <span class="inline-flex items-center gap-1 rounded-lg bg-white px-2 py-0.5 border border-slate-200/70 shadow-2xs">
+                    <app-icon class="text-slate-400" [icon]="mapPinIcon" [size]="11" />
+                    <span class="text-slate-400">{{ 'branches.address' | t }}:</span>
+                    <span class="font-bold text-slate-800 truncate max-w-[220px] sm:max-w-none">{{ branch.address }}</span>
+                  </span>
+                }
+                @if (branch.createdOnUtc) {
+                  <span class="inline-flex items-center gap-1 rounded-lg bg-white px-2 py-0.5 border border-slate-200/70 shadow-2xs">
+                    <app-icon class="text-slate-400" [icon]="calendarIcon" [size]="11" />
+                    <span class="text-slate-400">{{ 'branches.createdOn' | t }}:</span>
+                    <span class="font-bold text-slate-800">{{ branch.createdOnUtc | date: 'mediumDate' }}</span>
+                  </span>
+                }
               </div>
             </div>
-            <div class="mt-2 flex flex-wrap gap-1.5 text-[11px] font-bold text-slate-600">
-              <span class="rounded-lg bg-white px-2.5 py-0.5 border border-slate-200/60 shadow-2xs">
-                {{ 'surveyDashboard.branchCode' | t }}: {{ branch.code || '-' }}
-              </span>
-              <span class="rounded-lg bg-white px-2.5 py-0.5 border border-slate-200/60 shadow-2xs">
-                {{ 'branches.address' | t }}: {{ branch.address || '-' }}
-              </span>
-              <span class="rounded-lg bg-white px-2.5 py-0.5 border border-slate-200/60 shadow-2xs">
-                {{ 'branches.createdOn' | t }}:
-                {{ branch.createdOnUtc ? (branch.createdOnUtc | date: 'mediumDate') : '-' }}
-              </span>
-            </div>
           </div>
-          <div class="flex items-center gap-2">
-            <span
-              class="w-fit rounded-lg px-2.5 py-1 text-[11px] font-black"
-              [class.bg-emerald-50]="branch.isActive"
-              [class.text-emerald-700]="branch.isActive"
-              [class.bg-slate-100]="!branch.isActive"
-              [class.text-slate-500]="!branch.isActive"
-            >
-              {{ (branch.isActive ? 'common.active' : 'branches.inactive') | t }}
-            </span>
+
+          <div class="flex items-center gap-2 self-end lg:self-center">
             <button
-              class="flex h-8 w-8 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[var(--theme-color-accent)]/15"
+              class="flex h-8.5 w-8.5 items-center justify-center rounded-xl border border-slate-200/80 bg-white text-slate-600 shadow-2xs transition-all hover:bg-slate-50 hover:text-slate-900 hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-[var(--theme-color-secondary)]/20"
               type="button"
               [attr.aria-expanded]="branchSnapshotExpanded()"
               (click)="toggleBranchSnapshot()"
+              [title]="branchSnapshotExpanded() ? ('common.collapse' | t) : ('common.expand' | t)"
             >
               <span
-                class="transition-transform duration-200"
+                class="transition-transform duration-200 ease-out"
                 [class.rotate-180]="branchSnapshotExpanded()"
               >
                 <app-icon [icon]="chevronDownIcon" [size]="16" />
@@ -299,6 +318,7 @@
           </div>
         </div>
 
+        <!-- Collapsible Content Area -->
         <div
           class="grid transition-[grid-template-rows,opacity] duration-200 ease-out motion-reduce:transition-none"
           [class.grid-rows-[1fr]]="branchSnapshotExpanded()"
@@ -307,94 +327,208 @@
           [class.opacity-0]="!branchSnapshotExpanded()"
         >
           <div class="min-h-0 overflow-hidden">
-            <div class="grid gap-2 border-t border-slate-100 p-3 sm:grid-cols-2 xl:grid-cols-5">
-              <div class="rounded-xl border border-slate-100 bg-slate-50/70 p-2.5">
-                <p class="text-[10px] font-black uppercase text-slate-400">
-                  {{ 'branches.branchAdminsCount' | t }}
-                </p>
-                <p class="mt-0.5 text-lg font-black text-slate-950">
-                  {{ branch.summary.branchAdminsCount }}
-                </p>
+            <!-- 5 Compact Summary Stat Cards Strip -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 bg-slate-50/50 p-2.5 sm:p-3 border-b border-slate-100">
+              <!-- 1. Branch Admins -->
+              <div class="flex items-center justify-between gap-2 rounded-xl border border-slate-200/70 bg-white px-3 py-2 shadow-2xs transition hover:border-slate-300 hover:shadow-xs">
+                <div class="min-w-0">
+                  <p class="text-[10px] font-bold text-slate-500 truncate">
+                    {{ 'branches.branchAdminsCount' | t }}
+                  </p>
+                  <p class="mt-0.5 text-base font-black tracking-tight text-slate-900">
+                    {{ branch.summary.branchAdminsCount }}
+                  </p>
+                </div>
+                <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-cyan-50 text-[var(--theme-color-secondary)]">
+                  <app-icon [icon]="shieldCheckIcon" [size]="14" />
+                </span>
               </div>
-              <div class="rounded-xl border border-slate-100 bg-slate-50/70 p-2.5">
-                <p class="text-[10px] font-black uppercase text-slate-400">
-                  {{ 'branches.branchUsersCount' | t }}
-                </p>
-                <p class="mt-0.5 text-lg font-black text-slate-950">
-                  {{ branch.summary.branchUsersCount }}
-                </p>
+
+              <!-- 2. Branch Users -->
+              <div class="flex items-center justify-between gap-2 rounded-xl border border-slate-200/70 bg-white px-3 py-2 shadow-2xs transition hover:border-slate-300 hover:shadow-xs">
+                <div class="min-w-0">
+                  <p class="text-[10px] font-bold text-slate-500 truncate">
+                    {{ 'branches.branchUsersCount' | t }}
+                  </p>
+                  <p class="mt-0.5 text-base font-black tracking-tight text-slate-900">
+                    {{ branch.summary.branchUsersCount }}
+                  </p>
+                </div>
+                <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
+                  <app-icon [icon]="responsesIcon" [size]="14" />
+                </span>
               </div>
-              <div class="rounded-xl border border-slate-100 bg-slate-50/70 p-2.5">
-                <p class="text-[10px] font-black uppercase text-slate-400">
-                  {{ 'branches.templatesCount' | t }}
-                </p>
-                <p class="mt-0.5 text-lg font-black text-slate-950">
-                  {{ branch.summary.templatesCount }}
-                </p>
+
+              <!-- 3. Templates -->
+              <div class="flex items-center justify-between gap-2 rounded-xl border border-slate-200/70 bg-white px-3 py-2 shadow-2xs transition hover:border-slate-300 hover:shadow-xs">
+                <div class="min-w-0">
+                  <p class="text-[10px] font-bold text-slate-500 truncate">
+                    {{ 'branches.templatesCount' | t }}
+                  </p>
+                  <p class="mt-0.5 text-base font-black tracking-tight text-slate-900">
+                    {{ branch.summary.templatesCount }}
+                  </p>
+                </div>
+                <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+                  <app-icon [icon]="templateIcon" [size]="14" />
+                </span>
               </div>
-              <div class="rounded-xl border border-slate-100 bg-slate-50/70 p-2.5">
-                <p class="text-[10px] font-black uppercase text-slate-400">
-                  {{ 'branches.questionGroupsCount' | t }}
-                </p>
-                <p class="mt-0.5 text-lg font-black text-slate-950">
-                  {{ branch.summary.questionGroupsCount }}
-                </p>
+
+              <!-- 4. Question Groups -->
+              <div class="flex items-center justify-between gap-2 rounded-xl border border-slate-200/70 bg-white px-3 py-2 shadow-2xs transition hover:border-slate-300 hover:shadow-xs">
+                <div class="min-w-0">
+                  <p class="text-[10px] font-bold text-slate-500 truncate">
+                    {{ 'branches.questionGroupsCount' | t }}
+                  </p>
+                  <p class="mt-0.5 text-base font-black tracking-tight text-slate-900">
+                    {{ branch.summary.questionGroupsCount }}
+                  </p>
+                </div>
+                <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-violet-50 text-violet-600">
+                  <app-icon [icon]="layersIcon" [size]="14" />
+                </span>
               </div>
-              <div class="rounded-xl border border-slate-100 bg-slate-50/70 p-2.5">
-                <p class="text-[10px] font-black uppercase text-slate-400">
-                  {{ 'branches.questionsCount' | t }}
-                </p>
-                <p class="mt-0.5 text-lg font-black text-slate-950">
-                  {{ branch.summary.questionsCount }}
-                </p>
+
+              <!-- 5. Questions -->
+              <div class="col-span-2 sm:col-span-1 flex items-center justify-between gap-2 rounded-xl border border-slate-200/70 bg-white px-3 py-2 shadow-2xs transition hover:border-slate-300 hover:shadow-xs">
+                <div class="min-w-0">
+                  <p class="text-[10px] font-bold text-slate-500 truncate">
+                    {{ 'branches.questionsCount' | t }}
+                  </p>
+                  <p class="mt-0.5 text-base font-black tracking-tight text-slate-900">
+                    {{ branch.summary.questionsCount }}
+                  </p>
+                </div>
+                <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-amber-50 text-amber-600">
+                  <app-icon [icon]="questionsIcon" [size]="14" />
+                </span>
               </div>
             </div>
 
-            <div class="grid gap-3 border-t border-slate-100 p-3 xl:grid-cols-2">
-              <article class="rounded-xl border border-slate-100 bg-slate-50/60 p-3">
-                <div class="mb-2 flex items-center gap-2">
-                  <app-icon class="text-[var(--theme-color-accent)]" [icon]="responsesIcon" [size]="15" />
-                  <h3 class="text-xs font-black text-slate-950">
-                    {{ 'branches.branchAdmins' | t }}
-                  </h3>
+            <!-- Admins and Users Compact Panels -->
+            <div class="grid gap-3 p-3 sm:p-4 lg:grid-cols-2">
+              <!-- Branch Admins Column -->
+              <article class="flex flex-col rounded-xl border border-slate-200/70 bg-slate-50/40 p-3">
+                <div class="mb-2.5 flex items-center justify-between gap-2">
+                  <div class="flex items-center gap-2">
+                    <span class="flex h-6 w-6 items-center justify-center rounded-lg bg-cyan-50 text-[var(--theme-color-secondary)]">
+                      <app-icon [icon]="shieldCheckIcon" [size]="13" />
+                    </span>
+                    <h3 class="text-xs font-black text-slate-900">
+                      {{ 'branches.branchAdmins' | t }}
+                    </h3>
+                  </div>
+                  <span class="rounded-full bg-cyan-50 px-2 py-0.5 text-[10px] font-bold text-[var(--theme-color-secondary)] border border-cyan-100/60">
+                    {{ branch.branchAdmins.length }}
+                  </span>
                 </div>
-                <div class="space-y-2">
+
+                <div class="space-y-1.5">
                   @for (admin of branch.branchAdmins; track admin.branchAdminId) {
-                    <div class="rounded-lg bg-white p-2.5 text-[11px] border border-slate-100 shadow-2xs">
-                      <p class="font-black text-slate-900">{{ branchAdminName(admin) }}</p>
-                      <p class="mt-1 font-bold text-slate-500">
-                        {{ 'branches.userName' | t }}: {{ admin.userName || '-' }}
-                      </p>
-                      <p class="mt-0.5 font-bold text-slate-500">
-                        {{ 'common.email' | t }}: {{ admin.email || '-' }}
-                      </p>
+                    <div
+                      class="group flex items-center justify-between gap-3 rounded-lg border border-slate-200/60 bg-white p-2.5 shadow-2xs transition hover:border-slate-300 hover:shadow-xs"
+                    >
+                      <div class="flex items-center gap-2.5 min-w-0">
+                        <div
+                          class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-cyan-50 text-xs font-black text-[var(--theme-color-secondary)] border border-cyan-100/60"
+                        >
+                          {{ userInitials(admin.nameEn || admin.userName) }}
+                        </div>
+                        <div class="min-w-0">
+                          <div class="flex items-center gap-1.5 flex-wrap">
+                            <span class="text-xs font-bold text-slate-900 truncate">
+                              {{ branchAdminName(admin) }}
+                            </span>
+                            @if (admin.userName) {
+                              <span class="rounded bg-slate-100/80 px-1.5 py-0.2 text-[10px] font-semibold text-slate-500">
+                                @{{ admin.userName }}
+                              </span>
+                            }
+                          </div>
+                          @if (admin.email) {
+                            <div class="mt-0.5 flex items-center gap-1 text-[11px] font-medium text-slate-500">
+                              <app-icon class="text-slate-400 shrink-0" [icon]="mailIcon" [size]="11" />
+                              <span class="truncate">{{ admin.email }}</span>
+                            </div>
+                          }
+                        </div>
+                      </div>
+                      <span class="shrink-0 rounded-md bg-cyan-50/80 px-2 py-0.5 text-[10px] font-bold text-[var(--theme-color-secondary)] border border-cyan-100/60">
+                        {{ 'common.branchAdmin' | t }}
+                      </span>
                     </div>
                   } @empty {
-                    <p class="text-xs font-medium text-slate-400 p-2">-</p>
+                    <div class="flex items-center justify-center py-4 text-xs font-medium text-slate-400">
+                      -
+                    </div>
                   }
                 </div>
               </article>
 
-              <article class="rounded-xl border border-slate-100 bg-slate-50/60 p-3">
-                <div class="mb-2 flex items-center gap-2">
-                  <app-icon class="text-[var(--theme-color-accent)]" [icon]="userCogIcon" [size]="15" />
-                  <h3 class="text-xs font-black text-slate-950">
-                    {{ 'branches.branchUsers' | t }}
-                  </h3>
+              <!-- Branch Users Column -->
+              <article class="flex flex-col rounded-xl border border-slate-200/70 bg-slate-50/40 p-3">
+                <div class="mb-2.5 flex items-center justify-between gap-2">
+                  <div class="flex items-center gap-2">
+                    <span class="flex h-6 w-6 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
+                      <app-icon [icon]="userCogIcon" [size]="13" />
+                    </span>
+                    <h3 class="text-xs font-black text-slate-900">
+                      {{ 'branches.branchUsers' | t }}
+                    </h3>
+                  </div>
+                  <span class="rounded-full bg-indigo-50 px-2 py-0.5 text-[10px] font-bold text-indigo-600 border border-indigo-100/60">
+                    {{ branch.branchUsers.length }}
+                  </span>
                 </div>
-                <div class="space-y-2">
+
+                <div class="space-y-1.5">
                   @for (user of branch.branchUsers; track user.branchUserId) {
-                    <div class="rounded-lg bg-white p-2.5 text-[11px] border border-slate-100 shadow-2xs">
-                      <p class="font-black text-slate-900">{{ branchUserName(user) }}</p>
-                      <p class="mt-1 font-bold text-slate-500">
-                        {{ 'branches.userName' | t }}: {{ user.userName || '-' }}
-                      </p>
-                      <p class="mt-0.5 font-bold text-slate-500">
-                        {{ 'branches.roles' | t }}: {{ branchUserRoles(user) }}
-                      </p>
+                    <div
+                      class="group flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 rounded-lg border border-slate-200/60 bg-white p-2.5 shadow-2xs transition hover:border-slate-300 hover:shadow-xs"
+                    >
+                      <div class="flex items-start sm:items-center gap-2.5 min-w-0">
+                        <div
+                          class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-indigo-50 text-xs font-black text-indigo-600 border border-indigo-100/60"
+                        >
+                          {{ userInitials(user.nameEn || user.userName) }}
+                        </div>
+                        <div class="min-w-0">
+                          <div class="flex items-center gap-1.5 flex-wrap">
+                            <span class="text-xs font-bold text-slate-900 truncate">
+                              {{ branchUserName(user) }}
+                            </span>
+                            @if (user.userName) {
+                              <span class="rounded bg-slate-100/80 px-1.5 py-0.2 text-[10px] font-semibold text-slate-500">
+                                @{{ user.userName }}
+                              </span>
+                            }
+                          </div>
+                          @if (user.email) {
+                            <div class="mt-0.5 flex items-center gap-1 text-[11px] font-medium text-slate-500">
+                              <app-icon class="text-slate-400 shrink-0" [icon]="mailIcon" [size]="11" />
+                              <span class="truncate">{{ user.email }}</span>
+                            </div>
+                          }
+                        </div>
+                      </div>
+
+                      <!-- Roles as Badges -->
+                      <div class="flex flex-wrap items-center gap-1 shrink-0">
+                        @for (role of branchUserRoleList(user); track role) {
+                          <span
+                            class="inline-flex items-center rounded-md bg-slate-100 px-1.5 py-0.5 text-[9px] font-bold text-slate-600 border border-slate-200/50"
+                          >
+                            {{ role }}
+                          </span>
+                        } @empty {
+                          <span class="text-[10px] text-slate-400">-</span>
+                        }
+                      </div>
                     </div>
                   } @empty {
-                    <p class="text-xs font-medium text-slate-400 p-2">-</p>
+                    <div class="flex items-center justify-center py-4 text-xs font-medium text-slate-400">
+                      -
+                    </div>
                   }
                 </div>
               </article>
@@ -431,23 +565,34 @@
       </div>
     </section>
   } @else if (store.dashboard(); as dashboard) {
-
     <!-- Executive Context Strip -->
-    <section class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200/80 bg-white/90 px-4 py-3 shadow-xs">
+    <section
+      class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200/80 bg-white/90 px-4 py-3 shadow-xs"
+    >
       <div class="flex flex-wrap items-center gap-2 text-xs">
         <!-- Period Badge -->
-        <div class="inline-flex items-center gap-1.5 rounded-xl bg-slate-50 border border-slate-200/70 px-3 py-1.5 font-bold text-slate-700 shadow-2xs">
+        <div
+          class="inline-flex items-center gap-1.5 rounded-xl bg-slate-50 border border-slate-200/70 px-3 py-1.5 font-bold text-slate-700 shadow-2xs"
+        >
           <app-icon class="text-slate-400" [icon]="calendarIcon" [size]="13" />
           <span class="text-slate-400 font-semibold">{{ 'surveyDashboard.period' | t }}:</span>
           <span class="font-black text-slate-900">
             {{ dashboard.period.from ? (dashboard.period.from | date: 'mediumDate') : '-' }} -
             {{ dashboard.period.to ? (dashboard.period.to | date: 'mediumDate') : '-' }}
           </span>
-          <span class="text-[10px] text-slate-400 font-medium">({{ dashboard.period.groupBy === 'Month' ? ('surveyDashboard.month' | t) : ('surveyDashboard.day' | t) }})</span>
+          <span class="text-[10px] text-slate-400 font-medium"
+            >({{
+              dashboard.period.groupBy === 'Month'
+                ? ('surveyDashboard.month' | t)
+                : ('surveyDashboard.day' | t)
+            }})</span
+          >
         </div>
 
         <!-- Scope Badge -->
-        <div class="inline-flex items-center gap-1.5 rounded-xl bg-slate-50 border border-slate-200/70 px-3 py-1.5 font-bold text-slate-700 shadow-2xs">
+        <div
+          class="inline-flex items-center gap-1.5 rounded-xl bg-slate-50 border border-slate-200/70 px-3 py-1.5 font-bold text-slate-700 shadow-2xs"
+        >
           <app-icon class="text-[var(--theme-color-accent)]" [icon]="branchIcon" [size]="13" />
           <span class="text-slate-400 font-semibold">{{ 'surveyDashboard.scope' | t }}:</span>
           <span class="font-black text-slate-900">
@@ -482,14 +627,19 @@
           {{ 'surveyDashboard.topQuestions' | t }}: {{ dashboard.appliedFilters.topQuestionsCount }}
         </span>
         <span class="rounded-lg bg-slate-100 px-2 py-1 text-[10px] font-bold text-slate-600">
-          {{ 'surveyDashboard.criticalScore' | t }}: {{ dashboard.appliedFilters.criticalScoreThreshold }}%
+          {{ 'surveyDashboard.criticalScore' | t }}:
+          {{ dashboard.appliedFilters.criticalScoreThreshold }}%
         </span>
       </div>
     </section>
 
     @if (store.isEmpty()) {
-      <section class="rounded-2xl border border-dashed border-slate-200 bg-white p-12 text-center shadow-xs">
-        <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-50 text-slate-300">
+      <section
+        class="rounded-2xl border border-dashed border-slate-200 bg-white p-12 text-center shadow-xs"
+      >
+        <div
+          class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-50 text-slate-300"
+        >
           <app-icon [icon]="chartIcon" [size]="32" />
         </div>
         <p class="mt-4 text-base font-black text-slate-900">
@@ -498,45 +648,47 @@
       </section>
     } @else {
       <!-- ==================== TIER 1: PRIMARY HERO KPI METRICS ==================== -->
-      <section class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <section class="grid gap-2.5 sm:grid-cols-2 xl:grid-cols-4">
         <!-- 1. Overall Satisfaction Score -->
         <article
-          class="relative overflow-hidden rounded-2xl border bg-white p-4 shadow-xs transition hover:shadow-md"
-          [class.border-emerald-200]="(dashboard.summary.averageScorePercentage ?? 0) >= 80"
-          [class.border-amber-200]="(dashboard.summary.averageScorePercentage ?? 0) >= 60 && (dashboard.summary.averageScorePercentage ?? 0) < 80"
-          [class.border-rose-200]="(dashboard.summary.averageScorePercentage ?? 0) < 60"
+          class="relative overflow-hidden rounded-xl border border-slate-200/80 bg-white p-3 shadow-2xs transition hover:border-slate-300 hover:shadow-xs"
         >
           <div class="flex items-start justify-between gap-2">
-            <p class="text-xs font-black uppercase tracking-wider text-slate-400">
-              {{ 'surveyDashboard.averageScore' | t }}
-            </p>
+            <div class="min-w-0">
+              <p class="text-[11px] font-bold text-slate-500 truncate">
+                {{ 'surveyDashboard.averageScore' | t }}
+              </p>
+              <p class="mt-0.5 text-2xl font-black tracking-tight text-slate-900">
+                {{ scoreLabel(dashboard.summary.averageScorePercentage) }}
+              </p>
+            </div>
             <span
-              class="flex h-9 w-9 items-center justify-center rounded-xl"
+              class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
               [class.bg-emerald-50]="(dashboard.summary.averageScorePercentage ?? 0) >= 80"
               [class.text-emerald-600]="(dashboard.summary.averageScorePercentage ?? 0) >= 80"
-              [class.bg-amber-50]="(dashboard.summary.averageScorePercentage ?? 0) >= 60 && (dashboard.summary.averageScorePercentage ?? 0) < 80"
-              [class.text-amber-600]="(dashboard.summary.averageScorePercentage ?? 0) >= 60 && (dashboard.summary.averageScorePercentage ?? 0) < 80"
+              [class.bg-amber-50]="
+                (dashboard.summary.averageScorePercentage ?? 0) >= 60 &&
+                (dashboard.summary.averageScorePercentage ?? 0) < 80
+              "
+              [class.text-amber-600]="
+                (dashboard.summary.averageScorePercentage ?? 0) >= 60 &&
+                (dashboard.summary.averageScorePercentage ?? 0) < 80
+              "
               [class.bg-rose-50]="(dashboard.summary.averageScorePercentage ?? 0) < 60"
               [class.text-rose-600]="(dashboard.summary.averageScorePercentage ?? 0) < 60"
             >
-              <app-icon [icon]="trendIcon" [size]="18" />
+              <app-icon [icon]="trendIcon" [size]="16" />
             </span>
           </div>
 
-          <div class="mt-2 flex items-baseline gap-2">
-            <span class="text-3xl font-black text-slate-950">
-              {{ scoreLabel(dashboard.summary.averageScorePercentage) }}
-            </span>
-          </div>
-
-          <div class="mt-3 flex flex-wrap gap-1.5 text-[10px] font-black">
-            <span class="rounded-lg bg-emerald-50 px-2 py-0.5 text-emerald-700">
+          <div class="mt-2 flex flex-wrap gap-1 text-[9px] font-bold">
+            <span class="rounded-md bg-emerald-50 px-1.5 py-0.5 text-emerald-700">
               {{ dashboard.summary.satisfiedResponses }} {{ 'surveyDashboard.satisfied' | t }}
             </span>
-            <span class="rounded-lg bg-amber-50 px-2 py-0.5 text-amber-700">
+            <span class="rounded-md bg-amber-50 px-1.5 py-0.5 text-amber-700">
               {{ dashboard.summary.neutralResponses }} {{ 'surveyDashboard.neutral' | t }}
             </span>
-            <span class="rounded-lg bg-rose-50 px-2 py-0.5 text-rose-700">
+            <span class="rounded-md bg-rose-50 px-1.5 py-0.5 text-rose-700">
               {{ dashboard.summary.unhappyResponses }} {{ 'surveyDashboard.unhappy' | t }}
             </span>
           </div>
@@ -544,74 +696,77 @@
 
         <!-- 2. Total Responses -->
         <button
-          class="group rounded-2xl border border-slate-200/80 bg-white p-4 text-start shadow-xs transition hover:border-[var(--theme-color-accent)] hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-color-accent)]/20"
+          class="group rounded-xl border border-slate-200/80 bg-white p-3 text-start shadow-2xs transition hover:border-slate-300 hover:shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-300"
           type="button"
           [disabled]="!hasNavigation(dashboard.summaryActions.allResponses)"
           (click)="openNavigation(dashboard.summaryActions.allResponses)"
         >
           <div class="flex items-start justify-between gap-2">
-            <p class="text-xs font-black uppercase tracking-wider text-slate-400">
-              {{ 'surveyDashboard.totalResponses' | t }}
-            </p>
-            <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-cyan-50 text-[var(--theme-color-secondary)] transition group-hover:bg-cyan-100">
-              <app-icon [icon]="responsesIcon" [size]="18" />
+            <div class="min-w-0">
+              <p class="text-[11px] font-bold text-slate-500 truncate">
+                {{ 'surveyDashboard.totalResponses' | t }}
+              </p>
+              <p class="mt-0.5 text-2xl font-black tracking-tight text-slate-900">
+                {{ dashboard.summary.totalResponses }}
+              </p>
+            </div>
+            <span
+              class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-cyan-50 text-[var(--theme-color-secondary)] transition group-hover:bg-cyan-100"
+            >
+              <app-icon [icon]="responsesIcon" [size]="16" />
             </span>
           </div>
 
-          <div class="mt-2 flex items-baseline gap-2">
-            <span class="text-3xl font-black text-slate-950">
-              {{ dashboard.summary.totalResponses }}
-            </span>
-          </div>
-
-          <p class="mt-3 text-[11px] font-bold text-slate-500">
-            <span class="text-slate-900 font-black">{{ dashboard.summary.scoredResponses }}</span> {{ 'surveyDashboard.scored' | t }}
+          <p class="mt-2 text-[10px] font-medium text-slate-500 truncate">
+            <span class="font-bold text-slate-900">{{ dashboard.summary.scoredResponses }}</span>
+            {{ 'surveyDashboard.scored' | t }}
             <span class="text-slate-300 mx-1">/</span>
-            <span class="text-slate-900 font-black">{{ dashboard.summary.unscoredResponses }}</span> {{ 'surveyDashboard.unscored' | t }}
+            <span class="font-bold text-slate-900">{{ dashboard.summary.unscoredResponses }}</span>
+            {{ 'surveyDashboard.unscored' | t }}
           </p>
         </button>
 
         <!-- 3. Complaints Alert -->
         <button
-          class="group rounded-2xl border p-4 text-start shadow-xs transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-300"
-          [class.border-rose-200]="dashboard.summary.complaintsCount > 0"
-          [class.bg-rose-50/30]="dashboard.summary.complaintsCount > 0"
-          [class.border-slate-200/80]="dashboard.summary.complaintsCount === 0"
-          [class.bg-white]="dashboard.summary.complaintsCount === 0"
-          [class.hover:border-rose-300]="dashboard.summary.complaintsCount > 0"
-          [class.hover:bg-rose-50/50]="dashboard.summary.complaintsCount > 0"
+          class="group rounded-xl border border-slate-200/80 bg-white p-3 text-start shadow-2xs transition hover:border-slate-300 hover:shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-300"
           type="button"
           [disabled]="!hasNavigation(dashboard.summaryActions.complaints)"
           (click)="openNavigation(dashboard.summaryActions.complaints)"
         >
           <div class="flex items-start justify-between gap-2">
-            <p class="text-xs font-black uppercase tracking-wider" [class.text-rose-600]="dashboard.summary.complaintsCount > 0" [class.text-slate-400]="dashboard.summary.complaintsCount === 0">
-              {{ 'surveyDashboard.complaints' | t }}
-            </p>
+            <div class="min-w-0">
+              <p class="text-[11px] font-bold text-slate-500 truncate">
+                {{ 'surveyDashboard.complaints' | t }}
+              </p>
+              <p
+                class="mt-0.5 text-2xl font-black tracking-tight"
+                [class.text-rose-600]="dashboard.summary.complaintsCount > 0"
+                [class.text-slate-900]="dashboard.summary.complaintsCount === 0"
+              >
+                {{ dashboard.summary.complaintsCount }}
+              </p>
+            </div>
             <span
-              class="flex h-9 w-9 items-center justify-center rounded-xl"
-              [class.bg-rose-100]="dashboard.summary.complaintsCount > 0"
+              class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
+              [class.bg-rose-50]="dashboard.summary.complaintsCount > 0"
               [class.text-rose-600]="dashboard.summary.complaintsCount > 0"
               [class.bg-slate-100]="dashboard.summary.complaintsCount === 0"
               [class.text-slate-400]="dashboard.summary.complaintsCount === 0"
             >
-              <app-icon [icon]="complaintIcon" [size]="18" />
+              <app-icon [icon]="complaintIcon" [size]="16" />
             </span>
           </div>
 
-          <div class="mt-2 flex items-baseline gap-2">
-            <span class="text-3xl font-black" [class.text-rose-600]="dashboard.summary.complaintsCount > 0" [class.text-slate-950]="dashboard.summary.complaintsCount === 0">
-              {{ dashboard.summary.complaintsCount }}
-            </span>
-          </div>
-
-          <div class="mt-3">
+          <div class="mt-2 truncate">
             @if (dashboard.summary.complaintsCount > 0) {
-              <span class="inline-flex items-center gap-1 rounded-md bg-rose-100 px-2 py-0.5 text-[10px] font-black text-rose-700">
+              <span
+                class="inline-flex items-center gap-1 rounded-md bg-rose-50 px-1.5 py-0.5 text-[9px] font-bold text-rose-700 border border-rose-200/60"
+              >
+                <span class="h-1.5 w-1.5 rounded-full bg-rose-500"></span>
                 {{ 'surveyDashboard.requiresFollowUp' | t }}
               </span>
             } @else {
-              <span class="text-[11px] font-bold text-slate-500">
+              <span class="text-[10px] font-medium text-slate-400">
                 {{ 'surveyDashboard.healthy' | t }}
               </span>
             }
@@ -620,88 +775,112 @@
 
         <!-- 4. Voice Audio Feedback -->
         <button
-          class="group rounded-2xl border border-slate-200/80 bg-white p-4 text-start shadow-xs transition hover:border-cyan-300 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-200"
+          class="group rounded-xl border border-slate-200/80 bg-white p-3 text-start shadow-2xs transition hover:border-slate-300 hover:shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-300"
           type="button"
           [disabled]="!hasNavigation(dashboard.summaryActions.voiceAnswers)"
           (click)="openNavigation(dashboard.summaryActions.voiceAnswers)"
         >
           <div class="flex items-start justify-between gap-2">
-            <p class="text-xs font-black uppercase tracking-wider text-slate-400">
-              {{ 'surveyDashboard.voiceAnswers' | t }}
-            </p>
-            <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-cyan-50 text-cyan-600 transition group-hover:bg-cyan-100">
-              <app-icon [icon]="micIcon" [size]="18" />
+            <div class="min-w-0">
+              <p class="text-[11px] font-bold text-slate-500 truncate">
+                {{ 'surveyDashboard.voiceAnswers' | t }}
+              </p>
+              <p class="mt-0.5 text-2xl font-black tracking-tight text-slate-900">
+                {{ dashboard.summary.voiceAnswersCount }}
+              </p>
+            </div>
+            <span
+              class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-cyan-50 text-cyan-600 transition group-hover:bg-cyan-100"
+            >
+              <app-icon [icon]="micIcon" [size]="16" />
             </span>
           </div>
 
-          <div class="mt-2 flex items-baseline gap-2">
-            <span class="text-3xl font-black text-slate-950">
-              {{ dashboard.summary.voiceAnswersCount }}
-            </span>
-          </div>
-
-          <p class="mt-3 text-[11px] font-bold text-slate-500">
+          <p class="mt-2 text-[10px] font-medium text-slate-500 truncate">
             {{ 'surveyDashboard.audioFeedbackCaptured' | t }}
           </p>
         </button>
       </section>
 
       <!-- ==================== TIER 2: SECONDARY OPERATIONAL STRIP ==================== -->
-      <section class="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <section class="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
         <!-- Authorized Templates -->
-        <div class="rounded-xl border border-slate-200/70 bg-slate-50/70 p-3 shadow-2xs">
-          <p class="text-[10px] font-black uppercase tracking-wider text-slate-400 truncate">
+        <div
+          class="rounded-xl border border-slate-200/70 bg-slate-50/60 px-3 py-2 shadow-2xs transition hover:bg-slate-50/90"
+        >
+          <p class="text-[10px] font-bold text-slate-400 truncate">
             {{ 'surveyDashboard.internalResponses' | t }}
           </p>
-          <p class="mt-1 text-xl font-black text-slate-900">
-            {{ dashboard.summary.internalResponses }}
-          </p>
-          <p class="mt-1 text-[10px] font-bold text-slate-500 truncate">
-            {{ 'surveyDashboard.activeInternalTemplates' | t }}: {{ dashboard.summary.activeInternalTemplatesCount }}
-          </p>
+          <div class="mt-0.5 flex items-baseline justify-between gap-2">
+            <span class="text-base font-black text-slate-900">
+              {{ dashboard.summary.internalResponses }}
+            </span>
+            <span class="text-[10px] font-medium text-slate-500 truncate">
+              {{ 'surveyDashboard.activeInternalTemplates' | t }}:
+              <strong class="text-slate-700 font-bold">{{
+                dashboard.summary.activeInternalTemplatesCount
+              }}</strong>
+            </span>
+          </div>
         </div>
 
         <!-- Anonymous Templates -->
-        <div class="rounded-xl border border-slate-200/70 bg-slate-50/70 p-3 shadow-2xs">
-          <p class="text-[10px] font-black uppercase tracking-wider text-slate-400 truncate">
+        <div
+          class="rounded-xl border border-slate-200/70 bg-slate-50/60 px-3 py-2 shadow-2xs transition hover:bg-slate-50/90"
+        >
+          <p class="text-[10px] font-bold text-slate-400 truncate">
             {{ 'surveyDashboard.anonymousResponses' | t }}
           </p>
-          <p class="mt-1 text-xl font-black text-slate-900">
-            {{ dashboard.summary.anonymousResponses }}
-          </p>
-          <p class="mt-1 text-[10px] font-bold text-slate-500 truncate">
-            {{ 'surveyDashboard.activeAnonymousTemplates' | t }}: {{ dashboard.summary.activeAnonymousTemplatesCount }}
-          </p>
+          <div class="mt-0.5 flex items-baseline justify-between gap-2">
+            <span class="text-base font-black text-slate-900">
+              {{ dashboard.summary.anonymousResponses }}
+            </span>
+            <span class="text-[10px] font-medium text-slate-500 truncate">
+              {{ 'surveyDashboard.activeAnonymousTemplates' | t }}:
+              <strong class="text-slate-700 font-bold">{{
+                dashboard.summary.activeAnonymousTemplatesCount
+              }}</strong>
+            </span>
+          </div>
         </div>
 
         <!-- Templates With Responses -->
-        <div class="rounded-xl border border-slate-200/70 bg-slate-50/70 p-3 shadow-2xs">
-          <p class="text-[10px] font-black uppercase tracking-wider text-slate-400 truncate">
+        <div
+          class="rounded-xl border border-slate-200/70 bg-slate-50/60 px-3 py-2 shadow-2xs transition hover:bg-slate-50/90"
+        >
+          <p class="text-[10px] font-bold text-slate-400 truncate">
             {{ 'surveyDashboard.templatesWithResponses' | t }}
           </p>
-          <p class="mt-1 text-xl font-black text-slate-900">
-            {{ dashboard.summary.templatesWithResponsesCount }}
-          </p>
-          <p class="mt-1 text-[10px] font-bold text-slate-500 truncate">
-            {{ 'surveyDashboard.internalAnonymousCoverage' | t }}
-          </p>
+          <div class="mt-0.5 flex items-baseline justify-between gap-2">
+            <span class="text-base font-black text-slate-900">
+              {{ dashboard.summary.templatesWithResponsesCount }}
+            </span>
+            <span class="text-[10px] font-medium text-slate-500 truncate">
+              {{ 'surveyDashboard.internalAnonymousCoverage' | t }}
+            </span>
+          </div>
         </div>
 
         <!-- Branches Coverage (If SuperAdmin or single branch view) -->
-        <div class="rounded-xl border border-slate-200/70 bg-slate-50/70 p-3 shadow-2xs">
-          <p class="text-[10px] font-black uppercase tracking-wider text-slate-400 truncate">
+        <div
+          class="rounded-xl border border-slate-200/70 bg-slate-50/60 px-3 py-2 shadow-2xs transition hover:bg-slate-50/90"
+        >
+          <p class="text-[10px] font-bold text-slate-400 truncate">
             {{ 'surveyDashboard.branches' | t }}
           </p>
-          <p class="mt-1 text-xl font-black text-slate-900">
-            @if (isSuperAdmin()) {
-              {{ dashboard.summary.branchesWithResponsesCount }} / {{ dashboard.summary.branchesCount }}
-            } @else {
-              1 / 1
-            }
-          </p>
-          <p class="mt-1 text-[10px] font-bold text-slate-500 truncate">
-            {{ 'surveyDashboard.branchesWithResponses' | t }}
-          </p>
+          <div class="mt-0.5 flex items-baseline justify-between gap-2">
+            <span class="text-base font-black text-slate-900">
+              @if (isSuperAdmin()) {
+                {{ dashboard.summary.branchesWithResponsesCount }} /
+                {{ dashboard.summary.branchesCount }}
+              } @else {
+                1 / 1
+              }
+            </span>
+            <span class="text-[10px] font-medium text-slate-500 truncate">
+              {{ 'surveyDashboard.branchesWithResponses' | t }}
+            </span>
+          </div>
         </div>
       </section>
 
@@ -713,7 +892,9 @@
           <article class="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs">
             <div class="mb-3 flex items-center justify-between">
               <div class="flex items-center gap-2">
-                <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
+                <span
+                  class="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600"
+                >
                   <app-icon [icon]="chartIcon" [size]="15" />
                 </span>
                 <h2 class="text-sm font-black text-slate-950">
@@ -741,7 +922,9 @@
           <!-- Source Breakdown Card -->
           <article class="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs">
             <div class="mb-3 flex items-center gap-2">
-              <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-violet-50 text-violet-600">
+              <span
+                class="flex h-7 w-7 items-center justify-center rounded-lg bg-violet-50 text-violet-600"
+              >
                 <app-icon [icon]="layersIcon" [size]="15" />
               </span>
               <h2 class="text-sm font-black text-slate-950">
@@ -811,10 +994,14 @@
         </div>
 
         <!-- Left Column: Satisfaction Trend Line Chart (7 Cols) -->
-        <article class="lg:col-span-7 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs">
+        <article
+          class="lg:col-span-7 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs"
+        >
           <div class="mb-3 flex items-center justify-between">
             <div class="flex items-center gap-2">
-              <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-cyan-50 text-[var(--theme-color-accent)]">
+              <span
+                class="flex h-7 w-7 items-center justify-center rounded-lg bg-cyan-50 text-[var(--theme-color-accent)]"
+              >
                 <app-icon [icon]="trendIcon" [size]="15" />
               </span>
               <h2 class="text-sm font-black text-slate-950">
@@ -822,7 +1009,11 @@
               </h2>
             </div>
             <span class="text-[11px] font-bold text-slate-400">
-              {{ dashboard.period.groupBy === 'Month' ? ('surveyDashboard.month' | t) : ('surveyDashboard.day' | t) }}
+              {{
+                dashboard.period.groupBy === 'Month'
+                  ? ('surveyDashboard.month' | t)
+                  : ('surveyDashboard.day' | t)
+              }}
             </span>
           </div>
 
@@ -831,7 +1022,9 @@
               <canvas #trendCanvas></canvas>
             </div>
           } @else {
-            <div class="flex h-[360px] flex-col items-center justify-center rounded-xl bg-slate-50/70 p-8 text-center text-xs font-bold text-slate-400">
+            <div
+              class="flex h-[360px] flex-col items-center justify-center rounded-xl bg-slate-50/70 p-8 text-center text-xs font-bold text-slate-400"
+            >
               <app-icon class="text-slate-300 mb-2" [icon]="chartIcon" [size]="28" />
               {{ 'surveyDashboard.noTrendData' | t }}
             </div>
@@ -959,7 +1152,12 @@
             [class.hover:bg-slate-50]="activeTableTab() !== 'all'"
             [class.hover:text-slate-900]="activeTableTab() !== 'all'"
             (click)="setTableTab('all')"
-            [title]="(activeTableTab() === 'all' ? 'surveyDashboard.collapseAll' : 'surveyDashboard.allTables') | t"
+            [title]="
+              (activeTableTab() === 'all'
+                ? 'surveyDashboard.collapseAll'
+                : 'surveyDashboard.allTables'
+              ) | t
+            "
           >
             <span
               class="transition-transform duration-300"
@@ -968,7 +1166,12 @@
               <app-icon [icon]="layersIcon" [size]="13" />
             </span>
             <span>
-              {{ (activeTableTab() === 'all' ? 'surveyDashboard.collapseAll' : 'surveyDashboard.allTables') | t }}
+              {{
+                (activeTableTab() === 'all'
+                  ? 'surveyDashboard.collapseAll'
+                  : 'surveyDashboard.allTables'
+                ) | t
+              }}
             </span>
             <span
               class="inline-flex h-4 w-4 items-center justify-center rounded-full transition-transform duration-300"
@@ -982,10 +1185,7 @@
         </div>
 
         <!-- ==================== TAB CONTENT: TEMPLATES ==================== -->
-        <div
-          class="table-accordion-item"
-          [class.is-expanded]="isSectionActive('templates')"
-        >
+        <div class="table-accordion-item" [class.is-expanded]="isSectionActive('templates')">
           <div class="table-accordion-content">
             <article
               #templatePerformanceSection
@@ -1004,7 +1204,9 @@
                 (keydown.space)="$event.preventDefault(); toggleTableSection('templates')"
               >
                 <div class="flex items-center gap-2">
-                  <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
+                  <span
+                    class="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600"
+                  >
                     <app-icon [icon]="templateIcon" [size]="15" />
                   </span>
                   <h2 class="text-sm font-black text-slate-950">
@@ -1030,198 +1232,228 @@
                 [class.is-collapsed]="isSectionCollapsed('templates')"
               >
                 <div class="min-h-0 overflow-hidden">
+                  <!-- Mobile View -->
+                  <div class="space-y-3 lg:hidden">
+                    @for (
+                      template of dashboard.templatePerformance;
+                      track template.source + template.templateId
+                    ) {
+                      <article
+                        class="cursor-pointer rounded-xl border border-slate-100 bg-slate-50/70 p-3.5 transition hover:bg-slate-50 shadow-2xs"
+                        tabindex="0"
+                        (click)="openTemplateDetails(template)"
+                        (keydown.enter)="openTemplateDetails(template)"
+                        (keydown.space)="$event.preventDefault(); openTemplateDetails(template)"
+                      >
+                        <div class="flex items-start justify-between gap-3">
+                          <div class="min-w-0">
+                            <div class="mb-2 flex flex-wrap gap-1.5">
+                              <span
+                                class="rounded-md px-2 py-0.5 text-[10px] font-black {{
+                                  sourceClass(template.source)
+                                }}"
+                              >
+                                {{ sourceLabel(template.source) }}
+                              </span>
+                              <span
+                                class="rounded-md px-2 py-0.5 text-[10px] font-black {{
+                                  riskClass(template.riskLevel)
+                                }}"
+                              >
+                                {{ riskLabel(template.riskLevel) }}
+                              </span>
+                            </div>
+                            <p
+                              class="break-words text-xs font-black text-slate-950 [overflow-wrap:anywhere]"
+                            >
+                              {{ localized(template.templateNameEn, template.templateNameAr) }}
+                            </p>
+                            <p
+                              class="mt-1 break-words text-[11px] font-semibold text-slate-500 [overflow-wrap:anywhere]"
+                            >
+                              {{ localized(template.branchNameEn, template.branchNameAr) }}
+                            </p>
+                          </div>
+                          <span
+                            class="shrink-0 rounded-lg px-2.5 py-1 text-[11px] font-black {{
+                              scoreClass(template.averageScorePercentage)
+                            }}"
+                          >
+                            {{ scoreLabel(template.averageScorePercentage) }}
+                          </span>
+                        </div>
 
-            <!-- Mobile View -->
-            <div class="space-y-3 lg:hidden">
-              @for (
-                template of dashboard.templatePerformance;
-                track template.source + template.templateId
-              ) {
-                <article
-                  class="cursor-pointer rounded-xl border border-slate-100 bg-slate-50/70 p-3.5 transition hover:bg-slate-50 shadow-2xs"
-                  tabindex="0"
-                  (click)="openTemplateDetails(template)"
-                  (keydown.enter)="openTemplateDetails(template)"
-                  (keydown.space)="$event.preventDefault(); openTemplateDetails(template)"
-                >
-                  <div class="flex items-start justify-between gap-3">
-                    <div class="min-w-0">
-                      <div class="mb-2 flex flex-wrap gap-1.5">
-                        <span
-                          class="rounded-md px-2 py-0.5 text-[10px] font-black {{
-                            sourceClass(template.source)
-                          }}"
-                        >
-                          {{ sourceLabel(template.source) }}
-                        </span>
-                        <span
-                          class="rounded-md px-2 py-0.5 text-[10px] font-black {{
-                            riskClass(template.riskLevel)
-                          }}"
-                        >
-                          {{ riskLabel(template.riskLevel) }}
-                        </span>
-                      </div>
-                      <p class="break-words text-xs font-black text-slate-950 [overflow-wrap:anywhere]">
-                        {{ localized(template.templateNameEn, template.templateNameAr) }}
-                      </p>
-                      <p class="mt-1 break-words text-[11px] font-semibold text-slate-500 [overflow-wrap:anywhere]">
-                        {{ localized(template.branchNameEn, template.branchNameAr) }}
-                      </p>
-                    </div>
-                    <span
-                      class="shrink-0 rounded-lg px-2.5 py-1 text-[11px] font-black {{
-                        scoreClass(template.averageScorePercentage)
-                      }}"
-                    >
-                      {{ scoreLabel(template.averageScorePercentage) }}
-                    </span>
-                  </div>
+                        <div class="mt-3 grid grid-cols-3 gap-2">
+                          <div class="rounded-lg bg-white p-2 border border-slate-100">
+                            <p class="text-[10px] font-black uppercase text-slate-400">
+                              {{ 'surveyDashboard.responses' | t }}
+                            </p>
+                            <p class="mt-1 font-black text-slate-900">
+                              {{ template.responsesCount }}
+                            </p>
+                          </div>
+                          <div class="rounded-lg bg-white p-2 border border-slate-100">
+                            <p class="text-[10px] font-black uppercase text-slate-400">
+                              {{ 'surveyDashboard.complaints' | t }}
+                            </p>
+                            <p
+                              class="mt-1 font-black"
+                              [class.text-rose-600]="template.complaintsCount > 0"
+                              [class.text-slate-900]="template.complaintsCount === 0"
+                            >
+                              {{ template.complaintsCount }}
+                            </p>
+                          </div>
+                          <div class="rounded-lg bg-white p-2 border border-slate-100">
+                            <p class="text-[10px] font-black uppercase text-slate-400">
+                              {{ 'surveyDashboard.voice' | t }}
+                            </p>
+                            <p class="mt-1 font-black text-slate-900">
+                              {{ template.voiceAnswersCount }}
+                            </p>
+                          </div>
+                        </div>
 
-                  <div class="mt-3 grid grid-cols-3 gap-2">
-                    <div class="rounded-lg bg-white p-2 border border-slate-100">
-                      <p class="text-[10px] font-black uppercase text-slate-400">
-                        {{ 'surveyDashboard.responses' | t }}
-                      </p>
-                      <p class="mt-1 font-black text-slate-900">{{ template.responsesCount }}</p>
-                    </div>
-                    <div class="rounded-lg bg-white p-2 border border-slate-100">
-                      <p class="text-[10px] font-black uppercase text-slate-400">
-                        {{ 'surveyDashboard.complaints' | t }}
-                      </p>
-                      <p class="mt-1 font-black" [class.text-rose-600]="template.complaintsCount > 0" [class.text-slate-900]="template.complaintsCount === 0">
-                        {{ template.complaintsCount }}
-                      </p>
-                    </div>
-                    <div class="rounded-lg bg-white p-2 border border-slate-100">
-                      <p class="text-[10px] font-black uppercase text-slate-400">
-                        {{ 'surveyDashboard.voice' | t }}
-                      </p>
-                      <p class="mt-1 font-black text-slate-900">{{ template.voiceAnswersCount }}</p>
-                    </div>
-                  </div>
-
-                  @if (hasNavigation(template.detailsNavigation)) {
-                    <button
-                      class="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-700 transition hover:bg-slate-50"
-                      type="button"
-                      (click)="$event.stopPropagation(); openNavigation(template.detailsNavigation)"
-                    >
-                      <app-icon [icon]="detailsIcon" [size]="14" />
-                      {{ 'surveyDashboard.openResponses' | t }}
-                    </button>
-                  }
-                </article>
-              } @empty {
-                <p class="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-6 text-center text-xs font-bold text-slate-500">
-                  {{ 'surveyDashboard.noTemplatePerformance' | t }}
-                </p>
-              }
-            </div>
-
-            <!-- Desktop Table -->
-            <div class="hidden overflow-x-auto rounded-xl border border-slate-100 lg:block">
-              <table class="w-full min-w-[54rem]">
-                <thead class="bg-slate-50/80 text-[11px] font-black uppercase tracking-wider text-slate-500">
-                  <tr>
-                    <th class="px-3.5 py-3 text-start">{{ 'surveyDashboard.source' | t }}</th>
-                    <th class="px-3.5 py-3 text-start">{{ 'surveyDashboard.template' | t }}</th>
-                    <th class="px-3.5 py-3 text-start">{{ 'surveyDashboard.branch' | t }}</th>
-                    <th class="px-3.5 py-3 text-start">{{ 'surveyDashboard.responses' | t }}</th>
-                    <th class="px-3.5 py-3 text-start">{{ 'surveyDashboard.score' | t }}</th>
-                    <th class="px-3.5 py-3 text-start">{{ 'surveyDashboard.complaints' | t }}</th>
-                    <th class="px-3.5 py-3 text-start">{{ 'surveyDashboard.voice' | t }}</th>
-                    <th class="px-3.5 py-3 text-start">{{ 'surveyDashboard.risk' | t }}</th>
-                    <th class="px-3.5 py-3 text-start">{{ 'surveyDashboard.action' | t }}</th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-100 text-xs">
-                  @for (
-                    template of dashboard.templatePerformance;
-                    track template.source + template.templateId
-                  ) {
-                    <tr
-                      class="cursor-pointer transition hover:bg-slate-50/80"
-                      tabindex="0"
-                      (click)="openTemplateDetails(template)"
-                      (keydown.enter)="openTemplateDetails(template)"
-                      (keydown.space)="$event.preventDefault(); openTemplateDetails(template)"
-                    >
-                      <td class="px-3.5 py-3">
-                        <span
-                          class="rounded-md px-2 py-0.5 text-[10px] font-black {{
-                            sourceClass(template.source)
-                          }}"
-                        >
-                          {{ sourceLabel(template.source) }}
-                        </span>
-                      </td>
-                      <td class="px-3.5 py-3">
-                        <p
-                          class="max-w-[16rem] truncate font-black text-slate-950 hover:text-[var(--theme-color-secondary)] transition"
-                          [title]="localized(template.templateNameEn, template.templateNameAr)"
-                        >
-                          {{ localized(template.templateNameEn, template.templateNameAr) }}
-                        </p>
-                      </td>
-                      <td class="px-3.5 py-3 font-semibold text-slate-600">
-                        {{ localized(template.branchNameEn, template.branchNameAr) }}
-                      </td>
-                      <td class="px-3.5 py-3 font-black text-slate-800">
-                        {{ template.responsesCount }}
-                      </td>
-                      <td class="px-3.5 py-3">
-                        <span
-                          class="rounded-lg px-2.5 py-1 text-[11px] font-black {{
-                            scoreClass(template.averageScorePercentage)
-                          }}"
-                        >
-                          {{ scoreLabel(template.averageScorePercentage) }}
-                        </span>
-                      </td>
-                      <td class="px-3.5 py-3 font-black" [class.text-rose-600]="template.complaintsCount > 0" [class.text-slate-800]="template.complaintsCount === 0">
-                        {{ template.complaintsCount }}
-                      </td>
-                      <td class="px-3.5 py-3 font-black text-slate-800">
-                        {{ template.voiceAnswersCount }}
-                      </td>
-                      <td class="px-3.5 py-3">
-                        <span
-                          class="rounded-md px-2 py-0.5 text-[10px] font-black {{
-                            riskClass(template.riskLevel)
-                          }}"
-                        >
-                          {{ riskLabel(template.riskLevel) }}
-                        </span>
-                      </td>
-                      <td class="px-3.5 py-3">
                         @if (hasNavigation(template.detailsNavigation)) {
                           <button
-                            class="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-black text-slate-700 transition hover:bg-slate-50 hover:border-slate-300"
+                            class="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-700 transition hover:bg-slate-50"
                             type="button"
                             (click)="
                               $event.stopPropagation(); openNavigation(template.detailsNavigation)
                             "
                           >
-                            <app-icon [icon]="detailsIcon" [size]="13" />
+                            <app-icon [icon]="detailsIcon" [size]="14" />
                             {{ 'surveyDashboard.openResponses' | t }}
                           </button>
                         }
-                      </td>
-                    </tr>
-                  } @empty {
-                    <tr>
-                      <td
-                        class="px-3.5 py-8 text-center text-xs font-bold text-slate-500"
-                        colspan="9"
+                      </article>
+                    } @empty {
+                      <p
+                        class="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-6 text-center text-xs font-bold text-slate-500"
                       >
                         {{ 'surveyDashboard.noTemplatePerformance' | t }}
-                      </td>
-                    </tr>
-                  }
-                </tbody>
-              </table>
-            </div>
+                      </p>
+                    }
+                  </div>
+
+                  <!-- Desktop Table -->
+                  <div class="hidden overflow-x-auto rounded-xl border border-slate-100 lg:block">
+                    <table class="w-full min-w-[54rem]">
+                      <thead
+                        class="bg-slate-50/80 text-[11px] font-black uppercase tracking-wider text-slate-500"
+                      >
+                        <tr>
+                          <th class="px-3.5 py-3 text-start">{{ 'surveyDashboard.source' | t }}</th>
+                          <th class="px-3.5 py-3 text-start">
+                            {{ 'surveyDashboard.template' | t }}
+                          </th>
+                          <th class="px-3.5 py-3 text-start">{{ 'surveyDashboard.branch' | t }}</th>
+                          <th class="px-3.5 py-3 text-start">
+                            {{ 'surveyDashboard.responses' | t }}
+                          </th>
+                          <th class="px-3.5 py-3 text-start">{{ 'surveyDashboard.score' | t }}</th>
+                          <th class="px-3.5 py-3 text-start">
+                            {{ 'surveyDashboard.complaints' | t }}
+                          </th>
+                          <th class="px-3.5 py-3 text-start">{{ 'surveyDashboard.voice' | t }}</th>
+                          <th class="px-3.5 py-3 text-start">{{ 'surveyDashboard.risk' | t }}</th>
+                          <th class="px-3.5 py-3 text-start">{{ 'surveyDashboard.action' | t }}</th>
+                        </tr>
+                      </thead>
+                      <tbody class="divide-y divide-slate-100 text-xs">
+                        @for (
+                          template of dashboard.templatePerformance;
+                          track template.source + template.templateId
+                        ) {
+                          <tr
+                            class="cursor-pointer transition hover:bg-slate-50/80"
+                            tabindex="0"
+                            (click)="openTemplateDetails(template)"
+                            (keydown.enter)="openTemplateDetails(template)"
+                            (keydown.space)="$event.preventDefault(); openTemplateDetails(template)"
+                          >
+                            <td class="px-3.5 py-3">
+                              <span
+                                class="rounded-md px-2 py-0.5 text-[10px] font-black {{
+                                  sourceClass(template.source)
+                                }}"
+                              >
+                                {{ sourceLabel(template.source) }}
+                              </span>
+                            </td>
+                            <td class="px-3.5 py-3">
+                              <p
+                                class="max-w-[16rem] truncate font-black text-slate-950 hover:text-[var(--theme-color-secondary)] transition"
+                                [title]="
+                                  localized(template.templateNameEn, template.templateNameAr)
+                                "
+                              >
+                                {{ localized(template.templateNameEn, template.templateNameAr) }}
+                              </p>
+                            </td>
+                            <td class="px-3.5 py-3 font-semibold text-slate-600">
+                              {{ localized(template.branchNameEn, template.branchNameAr) }}
+                            </td>
+                            <td class="px-3.5 py-3 font-black text-slate-800">
+                              {{ template.responsesCount }}
+                            </td>
+                            <td class="px-3.5 py-3">
+                              <span
+                                class="rounded-lg px-2.5 py-1 text-[11px] font-black {{
+                                  scoreClass(template.averageScorePercentage)
+                                }}"
+                              >
+                                {{ scoreLabel(template.averageScorePercentage) }}
+                              </span>
+                            </td>
+                            <td
+                              class="px-3.5 py-3 font-black"
+                              [class.text-rose-600]="template.complaintsCount > 0"
+                              [class.text-slate-800]="template.complaintsCount === 0"
+                            >
+                              {{ template.complaintsCount }}
+                            </td>
+                            <td class="px-3.5 py-3 font-black text-slate-800">
+                              {{ template.voiceAnswersCount }}
+                            </td>
+                            <td class="px-3.5 py-3">
+                              <span
+                                class="rounded-md px-2 py-0.5 text-[10px] font-black {{
+                                  riskClass(template.riskLevel)
+                                }}"
+                              >
+                                {{ riskLabel(template.riskLevel) }}
+                              </span>
+                            </td>
+                            <td class="px-3.5 py-3">
+                              @if (hasNavigation(template.detailsNavigation)) {
+                                <button
+                                  class="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-black text-slate-700 transition hover:bg-slate-50 hover:border-slate-300"
+                                  type="button"
+                                  (click)="
+                                    $event.stopPropagation();
+                                    openNavigation(template.detailsNavigation)
+                                  "
+                                >
+                                  <app-icon [icon]="detailsIcon" [size]="13" />
+                                  {{ 'surveyDashboard.openResponses' | t }}
+                                </button>
+                              }
+                            </td>
+                          </tr>
+                        } @empty {
+                          <tr>
+                            <td
+                              class="px-3.5 py-8 text-center text-xs font-bold text-slate-500"
+                              colspan="9"
+                            >
+                              {{ 'surveyDashboard.noTemplatePerformance' | t }}
+                            </td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
             </article>
@@ -1229,14 +1461,9 @@
         </div>
 
         <!-- ==================== TAB CONTENT: LOWEST RATED QUESTIONS ==================== -->
-        <div
-          class="table-accordion-item"
-          [class.is-expanded]="isSectionActive('questions')"
-        >
+        <div class="table-accordion-item" [class.is-expanded]="isSectionActive('questions')">
           <div class="table-accordion-content">
-            <article
-              class="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs"
-            >
+            <article class="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs">
               <div
                 class="flex cursor-pointer select-none items-center justify-between rounded-xl p-1 -m-1 transition hover:bg-slate-50/70"
                 [class.mb-3]="!isSectionCollapsed('questions')"
@@ -1246,7 +1473,9 @@
                 (keydown.space)="$event.preventDefault(); toggleTableSection('questions')"
               >
                 <div class="flex items-center gap-2">
-                  <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-50 text-amber-600">
+                  <span
+                    class="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-50 text-amber-600"
+                  >
                     <app-icon [icon]="questionsIcon" [size]="15" />
                   </span>
                   <h2 class="text-sm font-black text-slate-950">
@@ -1272,179 +1501,204 @@
                 [class.is-collapsed]="isSectionCollapsed('questions')"
               >
                 <div class="min-h-0 overflow-hidden">
-
-            <!-- Mobile View -->
-            <div class="space-y-3 lg:hidden">
-              @for (
-                question of dashboard.lowestRatedQuestions;
-                track question.source + question.questionId
-              ) {
-                <article class="rounded-xl border border-slate-100 bg-slate-50/70 p-3.5 shadow-2xs">
-                  <div class="flex items-start justify-between gap-3">
-                    <div class="min-w-0">
-                      <span
-                        class="mb-2 inline-flex rounded-md px-2 py-0.5 text-[10px] font-black {{
-                          sourceClass(question.source)
-                        }}"
+                  <!-- Mobile View -->
+                  <div class="space-y-3 lg:hidden">
+                    @for (
+                      question of dashboard.lowestRatedQuestions;
+                      track question.source + question.questionId
+                    ) {
+                      <article
+                        class="rounded-xl border border-slate-100 bg-slate-50/70 p-3.5 shadow-2xs"
                       >
-                        {{ sourceLabel(question.source) }}
-                      </span>
-                      <p class="break-words text-xs font-black text-slate-950 [overflow-wrap:anywhere]">
-                        {{ localized(question.questionTextEn, question.questionTextAr) }}
-                      </p>
-                      <p class="mt-1 break-words text-[11px] font-semibold text-slate-500 [overflow-wrap:anywhere]">
-                        {{ localized(question.templateNameEn, question.templateNameAr) }}
-                      </p>
-                      <p class="mt-0.5 break-words text-[11px] font-semibold text-slate-400 [overflow-wrap:anywhere]">
-                        {{ localized(question.branchNameEn, question.branchNameAr) }}
-                      </p>
-                    </div>
-                    <span
-                      class="shrink-0 rounded-lg px-2.5 py-1 text-[11px] font-black {{
-                        scoreClass(question.averageScorePercentage)
-                      }}"
-                    >
-                      {{ scoreLabel(question.averageScorePercentage) }}
-                    </span>
-                  </div>
+                        <div class="flex items-start justify-between gap-3">
+                          <div class="min-w-0">
+                            <span
+                              class="mb-2 inline-flex rounded-md px-2 py-0.5 text-[10px] font-black {{
+                                sourceClass(question.source)
+                              }}"
+                            >
+                              {{ sourceLabel(question.source) }}
+                            </span>
+                            <p
+                              class="break-words text-xs font-black text-slate-950 [overflow-wrap:anywhere]"
+                            >
+                              {{ localized(question.questionTextEn, question.questionTextAr) }}
+                            </p>
+                            <p
+                              class="mt-1 break-words text-[11px] font-semibold text-slate-500 [overflow-wrap:anywhere]"
+                            >
+                              {{ localized(question.templateNameEn, question.templateNameAr) }}
+                            </p>
+                            <p
+                              class="mt-0.5 break-words text-[11px] font-semibold text-slate-400 [overflow-wrap:anywhere]"
+                            >
+                              {{ localized(question.branchNameEn, question.branchNameAr) }}
+                            </p>
+                          </div>
+                          <span
+                            class="shrink-0 rounded-lg px-2.5 py-1 text-[11px] font-black {{
+                              scoreClass(question.averageScorePercentage)
+                            }}"
+                          >
+                            {{ scoreLabel(question.averageScorePercentage) }}
+                          </span>
+                        </div>
 
-                  <div class="mt-3 grid grid-cols-3 gap-2">
-                    <div class="rounded-lg bg-white p-2 border border-slate-100">
-                      <p class="text-[10px] font-black uppercase text-slate-400">
-                        {{ 'surveyDashboard.type' | t }}
-                      </p>
-                      <p class="mt-1 break-words font-black text-slate-900 [overflow-wrap:anywhere]">
-                        {{ question.questionTypeName || question.questionType }}
-                      </p>
-                    </div>
-                    <div class="rounded-lg bg-white p-2 border border-slate-100">
-                      <p class="text-[10px] font-black uppercase text-slate-400">
-                        {{ 'surveyDashboard.answers' | t }}
-                      </p>
-                      <p class="mt-1 font-black text-slate-900">{{ question.answersCount }}</p>
-                    </div>
-                    <div class="rounded-lg bg-white p-2 border border-slate-100">
-                      <p class="text-[10px] font-black uppercase text-slate-400">
-                        {{ 'surveyDashboard.avgValue' | t }}
-                      </p>
-                      <p class="mt-1 font-black text-slate-900">
-                        {{
-                          question.averageValue === null
-                            ? ('surveyDashboard.noData' | t)
-                            : (question.averageValue | number: '1.0-2')
-                        }}
-                      </p>
-                    </div>
-                  </div>
+                        <div class="mt-3 grid grid-cols-3 gap-2">
+                          <div class="rounded-lg bg-white p-2 border border-slate-100">
+                            <p class="text-[10px] font-black uppercase text-slate-400">
+                              {{ 'surveyDashboard.type' | t }}
+                            </p>
+                            <p
+                              class="mt-1 break-words font-black text-slate-900 [overflow-wrap:anywhere]"
+                            >
+                              {{ question.questionTypeName || question.questionType }}
+                            </p>
+                          </div>
+                          <div class="rounded-lg bg-white p-2 border border-slate-100">
+                            <p class="text-[10px] font-black uppercase text-slate-400">
+                              {{ 'surveyDashboard.answers' | t }}
+                            </p>
+                            <p class="mt-1 font-black text-slate-900">
+                              {{ question.answersCount }}
+                            </p>
+                          </div>
+                          <div class="rounded-lg bg-white p-2 border border-slate-100">
+                            <p class="text-[10px] font-black uppercase text-slate-400">
+                              {{ 'surveyDashboard.avgValue' | t }}
+                            </p>
+                            <p class="mt-1 font-black text-slate-900">
+                              {{
+                                question.averageValue === null
+                                  ? ('surveyDashboard.noData' | t)
+                                  : (question.averageValue | number: '1.0-2')
+                              }}
+                            </p>
+                          </div>
+                        </div>
 
-                  @if (hasNavigation(question.detailsNavigation)) {
-                    <button
-                      class="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-700 transition hover:bg-slate-50"
-                      type="button"
-                      (click)="openNavigation(question.detailsNavigation)"
-                    >
-                      <app-icon [icon]="detailsIcon" [size]="14" />
-                      {{ 'surveyDashboard.openResponses' | t }}
-                    </button>
-                  }
-                </article>
-              } @empty {
-                <p class="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-6 text-center text-xs font-bold text-slate-500">
-                  {{ 'surveyDashboard.noRatedQuestions' | t }}
-                </p>
-              }
-            </div>
-
-            <!-- Desktop Table -->
-            <div class="hidden overflow-x-auto rounded-xl border border-slate-100 lg:block">
-              <table class="w-full min-w-[54rem]">
-                <thead class="bg-slate-50/80 text-[11px] font-black uppercase tracking-wider text-slate-500">
-                  <tr>
-                    <th class="px-3.5 py-3 text-start">{{ 'surveyDashboard.source' | t }}</th>
-                    <th class="px-3.5 py-3 text-start">{{ 'surveyDashboard.question' | t }}</th>
-                    <th class="px-3.5 py-3 text-start">{{ 'surveyDashboard.template' | t }}</th>
-                    <th class="px-3.5 py-3 text-start">{{ 'surveyDashboard.branch' | t }}</th>
-                    <th class="px-3.5 py-3 text-start">{{ 'surveyDashboard.type' | t }}</th>
-                    <th class="px-3.5 py-3 text-start">{{ 'surveyDashboard.answers' | t }}</th>
-                    <th class="px-3.5 py-3 text-start">{{ 'surveyDashboard.avgValue' | t }}</th>
-                    <th class="px-3.5 py-3 text-start">{{ 'surveyDashboard.avgScore' | t }}</th>
-                    <th class="px-3.5 py-3 text-start">{{ 'surveyDashboard.action' | t }}</th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-100 text-xs">
-                  @for (
-                    question of dashboard.lowestRatedQuestions;
-                    track question.source + question.questionId
-                  ) {
-                    <tr class="transition hover:bg-slate-50/80">
-                      <td class="px-3.5 py-3">
-                        <span
-                          class="rounded-md px-2 py-0.5 text-[10px] font-black {{
-                            sourceClass(question.source)
-                          }}"
-                        >
-                          {{ sourceLabel(question.source) }}
-                        </span>
-                      </td>
-                      <td class="px-3.5 py-3">
-                        <p class="line-clamp-2 max-w-[18rem] font-black text-slate-950">
-                          {{ localized(question.questionTextEn, question.questionTextAr) }}
-                        </p>
-                      </td>
-                      <td class="px-3.5 py-3 font-semibold text-slate-600">
-                        {{ localized(question.templateNameEn, question.templateNameAr) }}
-                      </td>
-                      <td class="px-3.5 py-3 font-semibold text-slate-600">
-                        {{ localized(question.branchNameEn, question.branchNameAr) }}
-                      </td>
-                      <td class="px-3.5 py-3 font-bold text-slate-600">
-                        {{ question.questionTypeName || question.questionType }}
-                      </td>
-                      <td class="px-3.5 py-3 font-black text-slate-800">
-                        {{ question.answersCount }}
-                      </td>
-                      <td class="px-3.5 py-3 font-black text-slate-800">
-                        {{
-                          question.averageValue === null
-                            ? ('surveyDashboard.noData' | t)
-                            : (question.averageValue | number: '1.0-2')
-                        }}
-                      </td>
-                      <td class="px-3.5 py-3">
-                        <span
-                          class="rounded-lg px-2.5 py-1 text-[11px] font-black {{
-                            scoreClass(question.averageScorePercentage)
-                          }}"
-                        >
-                          {{ scoreLabel(question.averageScorePercentage) }}
-                        </span>
-                      </td>
-                      <td class="px-3.5 py-3">
                         @if (hasNavigation(question.detailsNavigation)) {
                           <button
-                            class="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-black text-slate-700 transition hover:bg-slate-50 hover:border-slate-300"
+                            class="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-700 transition hover:bg-slate-50"
                             type="button"
                             (click)="openNavigation(question.detailsNavigation)"
                           >
-                            <app-icon [icon]="detailsIcon" [size]="13" />
+                            <app-icon [icon]="detailsIcon" [size]="14" />
                             {{ 'surveyDashboard.openResponses' | t }}
                           </button>
                         }
-                      </td>
-                    </tr>
-                  } @empty {
-                    <tr>
-                      <td
-                        class="px-3.5 py-8 text-center text-xs font-bold text-slate-500"
-                        colspan="9"
+                      </article>
+                    } @empty {
+                      <p
+                        class="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-6 text-center text-xs font-bold text-slate-500"
                       >
                         {{ 'surveyDashboard.noRatedQuestions' | t }}
-                      </td>
-                    </tr>
-                  }
-                </tbody>
-              </table>
-            </div>
+                      </p>
+                    }
+                  </div>
+
+                  <!-- Desktop Table -->
+                  <div class="hidden overflow-x-auto rounded-xl border border-slate-100 lg:block">
+                    <table class="w-full min-w-[54rem]">
+                      <thead
+                        class="bg-slate-50/80 text-[11px] font-black uppercase tracking-wider text-slate-500"
+                      >
+                        <tr>
+                          <th class="px-3.5 py-3 text-start">{{ 'surveyDashboard.source' | t }}</th>
+                          <th class="px-3.5 py-3 text-start">
+                            {{ 'surveyDashboard.question' | t }}
+                          </th>
+                          <th class="px-3.5 py-3 text-start">
+                            {{ 'surveyDashboard.template' | t }}
+                          </th>
+                          <th class="px-3.5 py-3 text-start">{{ 'surveyDashboard.branch' | t }}</th>
+                          <th class="px-3.5 py-3 text-start">{{ 'surveyDashboard.type' | t }}</th>
+                          <th class="px-3.5 py-3 text-start">
+                            {{ 'surveyDashboard.answers' | t }}
+                          </th>
+                          <th class="px-3.5 py-3 text-start">
+                            {{ 'surveyDashboard.avgValue' | t }}
+                          </th>
+                          <th class="px-3.5 py-3 text-start">
+                            {{ 'surveyDashboard.avgScore' | t }}
+                          </th>
+                          <th class="px-3.5 py-3 text-start">{{ 'surveyDashboard.action' | t }}</th>
+                        </tr>
+                      </thead>
+                      <tbody class="divide-y divide-slate-100 text-xs">
+                        @for (
+                          question of dashboard.lowestRatedQuestions;
+                          track question.source + question.questionId
+                        ) {
+                          <tr class="transition hover:bg-slate-50/80">
+                            <td class="px-3.5 py-3">
+                              <span
+                                class="rounded-md px-2 py-0.5 text-[10px] font-black {{
+                                  sourceClass(question.source)
+                                }}"
+                              >
+                                {{ sourceLabel(question.source) }}
+                              </span>
+                            </td>
+                            <td class="px-3.5 py-3">
+                              <p class="line-clamp-2 max-w-[18rem] font-black text-slate-950">
+                                {{ localized(question.questionTextEn, question.questionTextAr) }}
+                              </p>
+                            </td>
+                            <td class="px-3.5 py-3 font-semibold text-slate-600">
+                              {{ localized(question.templateNameEn, question.templateNameAr) }}
+                            </td>
+                            <td class="px-3.5 py-3 font-semibold text-slate-600">
+                              {{ localized(question.branchNameEn, question.branchNameAr) }}
+                            </td>
+                            <td class="px-3.5 py-3 font-bold text-slate-600">
+                              {{ question.questionTypeName || question.questionType }}
+                            </td>
+                            <td class="px-3.5 py-3 font-black text-slate-800">
+                              {{ question.answersCount }}
+                            </td>
+                            <td class="px-3.5 py-3 font-black text-slate-800">
+                              {{
+                                question.averageValue === null
+                                  ? ('surveyDashboard.noData' | t)
+                                  : (question.averageValue | number: '1.0-2')
+                              }}
+                            </td>
+                            <td class="px-3.5 py-3">
+                              <span
+                                class="rounded-lg px-2.5 py-1 text-[11px] font-black {{
+                                  scoreClass(question.averageScorePercentage)
+                                }}"
+                              >
+                                {{ scoreLabel(question.averageScorePercentage) }}
+                              </span>
+                            </td>
+                            <td class="px-3.5 py-3">
+                              @if (hasNavigation(question.detailsNavigation)) {
+                                <button
+                                  class="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-black text-slate-700 transition hover:bg-slate-50 hover:border-slate-300"
+                                  type="button"
+                                  (click)="openNavigation(question.detailsNavigation)"
+                                >
+                                  <app-icon [icon]="detailsIcon" [size]="13" />
+                                  {{ 'surveyDashboard.openResponses' | t }}
+                                </button>
+                              }
+                            </td>
+                          </tr>
+                        } @empty {
+                          <tr>
+                            <td
+                              class="px-3.5 py-8 text-center text-xs font-bold text-slate-500"
+                              colspan="9"
+                            >
+                              {{ 'surveyDashboard.noRatedQuestions' | t }}
+                            </td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
             </article>
@@ -1452,14 +1706,9 @@
         </div>
 
         <!-- ==================== TAB CONTENT: CRITICAL RESPONSES ==================== -->
-        <div
-          class="table-accordion-item"
-          [class.is-expanded]="isSectionActive('critical')"
-        >
+        <div class="table-accordion-item" [class.is-expanded]="isSectionActive('critical')">
           <div class="table-accordion-content">
-            <article
-              class="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs"
-            >
+            <article class="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs">
               <div
                 class="flex cursor-pointer select-none items-center justify-between rounded-xl p-1 -m-1 transition hover:bg-slate-50/70"
                 [class.mb-3]="!isSectionCollapsed('critical')"
@@ -1469,7 +1718,9 @@
                 (keydown.space)="$event.preventDefault(); toggleTableSection('critical')"
               >
                 <div class="flex items-center gap-2">
-                  <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-rose-50 text-rose-600">
+                  <span
+                    class="flex h-7 w-7 items-center justify-center rounded-lg bg-rose-50 text-rose-600"
+                  >
                     <app-icon [icon]="complaintIcon" [size]="15" />
                   </span>
                   <h2 class="text-sm font-black text-slate-950">
@@ -1478,7 +1729,8 @@
                 </div>
                 <div class="flex items-center gap-2.5">
                   <span class="text-xs font-bold text-slate-400">
-                    {{ dashboard.criticalResponses.length }} {{ 'surveyDashboard.criticalResponses' | t }}
+                    {{ dashboard.criticalResponses.length }}
+                    {{ 'surveyDashboard.criticalResponses' | t }}
                   </span>
                   <span
                     class="flex h-6 w-6 items-center justify-center rounded-lg border border-slate-200/80 bg-white text-slate-400 shadow-2xs transition-transform duration-300 hover:text-slate-600"
@@ -1495,217 +1747,262 @@
                 [class.is-collapsed]="isSectionCollapsed('critical')"
               >
                 <div class="min-h-0 overflow-hidden">
-
-            <!-- Mobile View -->
-            <div class="space-y-3 lg:hidden">
-              @for (
-                response of dashboard.criticalResponses;
-                track response.source + response.responseId
-              ) {
-                <article class="rounded-xl border border-slate-100 bg-slate-50/70 p-3.5 shadow-2xs">
-                  <div class="flex items-start justify-between gap-3">
-                    <div class="min-w-0">
-                      <span
-                        class="mb-2 inline-flex rounded-md px-2 py-0.5 text-[10px] font-black {{
-                          sourceClass(response.source)
-                        }}"
+                  <!-- Mobile View -->
+                  <div class="space-y-3 lg:hidden">
+                    @for (
+                      response of dashboard.criticalResponses;
+                      track response.source + response.responseId
+                    ) {
+                      <article
+                        class="rounded-xl border border-slate-100 bg-slate-50/70 p-3.5 shadow-2xs"
                       >
-                        {{ sourceLabel(response.source) }}
-                      </span>
-                      <p class="break-words text-xs font-black text-slate-950 [overflow-wrap:anywhere]">
-                        {{ localized(response.templateNameEn, response.templateNameAr) }}
-                      </p>
-                      <p class="mt-1 break-words text-[11px] font-semibold text-slate-500 [overflow-wrap:anywhere]">
-                        {{ localized(response.branchNameEn, response.branchNameAr) }}
-                      </p>
-                      <p class="mt-0.5 text-[11px] font-semibold text-slate-400">
-                        {{ response.submittedOnUtc ? (response.submittedOnUtc | date: 'medium') : '-' }}
-                      </p>
-                    </div>
-                    <span
-                      class="shrink-0 rounded-lg px-2.5 py-1 text-[11px] font-black {{
-                        scoreClass(response.scorePercentage)
-                      }}"
-                    >
-                      {{ scoreLabel(response.scorePercentage) }}
-                    </span>
-                  </div>
+                        <div class="flex items-start justify-between gap-3">
+                          <div class="min-w-0">
+                            <span
+                              class="mb-2 inline-flex rounded-md px-2 py-0.5 text-[10px] font-black {{
+                                sourceClass(response.source)
+                              }}"
+                            >
+                              {{ sourceLabel(response.source) }}
+                            </span>
+                            <p
+                              class="break-words text-xs font-black text-slate-950 [overflow-wrap:anywhere]"
+                            >
+                              {{ localized(response.templateNameEn, response.templateNameAr) }}
+                            </p>
+                            <p
+                              class="mt-1 break-words text-[11px] font-semibold text-slate-500 [overflow-wrap:anywhere]"
+                            >
+                              {{ localized(response.branchNameEn, response.branchNameAr) }}
+                            </p>
+                            <p class="mt-0.5 text-[11px] font-semibold text-slate-400">
+                              {{
+                                response.submittedOnUtc
+                                  ? (response.submittedOnUtc | date: 'medium')
+                                  : '-'
+                              }}
+                            </p>
+                          </div>
+                          <span
+                            class="shrink-0 rounded-lg px-2.5 py-1 text-[11px] font-black {{
+                              scoreClass(response.scorePercentage)
+                            }}"
+                          >
+                            {{ scoreLabel(response.scorePercentage) }}
+                          </span>
+                        </div>
 
-                  <div class="mt-3 flex flex-wrap gap-1.5">
-                    <span
-                      class="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-black"
-                      [class.bg-cyan-50]="response.hasVoice"
-                      [class.text-cyan-700]="response.hasVoice"
-                      [class.bg-slate-100]="!response.hasVoice"
-                      [class.text-slate-500]="!response.hasVoice"
-                    >
-                      <app-icon [icon]="micIcon" [size]="12" />
-                      {{ 'surveyDashboard.voice' | t }}:
-                      {{ (response.hasVoice ? 'surveyDashboard.yes' : 'surveyDashboard.no') | t }}
-                    </span>
-                    <span
-                      class="rounded-md px-2 py-0.5 text-[10px] font-black"
-                      [class.bg-rose-50]="response.hasComplaint"
-                      [class.text-rose-700]="response.hasComplaint"
-                      [class.bg-slate-100]="!response.hasComplaint"
-                      [class.text-slate-500]="!response.hasComplaint"
-                    >
-                      {{ 'surveyDashboard.complaint' | t }}:
-                      {{ (response.hasComplaint ? 'surveyDashboard.yes' : 'surveyDashboard.no') | t }}
-                    </span>
-                  </div>
+                        <div class="mt-3 flex flex-wrap gap-1.5">
+                          <span
+                            class="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-black"
+                            [class.bg-cyan-50]="response.hasVoice"
+                            [class.text-cyan-700]="response.hasVoice"
+                            [class.bg-slate-100]="!response.hasVoice"
+                            [class.text-slate-500]="!response.hasVoice"
+                          >
+                            <app-icon [icon]="micIcon" [size]="12" />
+                            {{ 'surveyDashboard.voice' | t }}:
+                            {{
+                              (response.hasVoice ? 'surveyDashboard.yes' : 'surveyDashboard.no') | t
+                            }}
+                          </span>
+                          <span
+                            class="rounded-md px-2 py-0.5 text-[10px] font-black"
+                            [class.bg-rose-50]="response.hasComplaint"
+                            [class.text-rose-700]="response.hasComplaint"
+                            [class.bg-slate-100]="!response.hasComplaint"
+                            [class.text-slate-500]="!response.hasComplaint"
+                          >
+                            {{ 'surveyDashboard.complaint' | t }}:
+                            {{
+                              (response.hasComplaint ? 'surveyDashboard.yes' : 'surveyDashboard.no')
+                                | t
+                            }}
+                          </span>
+                        </div>
 
-                  <div class="mt-3 space-y-2">
-                    <div class="rounded-lg bg-white p-2.5 border border-slate-100">
-                      <p class="text-[10px] font-black uppercase text-slate-400">
-                        {{ 'surveyDashboard.complaint' | t }}
-                      </p>
-                      <p class="mt-1 break-words text-[11px] font-semibold text-slate-700 [overflow-wrap:anywhere]">
-                        {{ response.complaintText || '-' }}
-                      </p>
-                    </div>
-                    <div class="rounded-lg bg-white p-2.5 border border-slate-100">
-                      <p class="text-[10px] font-black uppercase text-slate-400">
-                        {{ 'surveyDashboard.operator' | t }}
-                      </p>
-                      <p class="mt-1 break-words text-[11px] font-semibold text-slate-700 [overflow-wrap:anywhere]">
-                        {{ localized(response.operatorNameEn, response.operatorNameAr) }}
-                      </p>
-                    </div>
-                    <div class="rounded-lg bg-white p-2.5 border border-slate-100">
-                      <p class="text-[10px] font-black uppercase text-slate-400">
-                        {{ 'surveyDashboard.customInputs' | t }}
-                      </p>
-                      <p class="mt-1 break-words text-[11px] font-semibold text-slate-700 [overflow-wrap:anywhere]">
-                        {{ customInputPreviewText(response.customInputsPreview) }}
-                      </p>
-                    </div>
-                  </div>
+                        <div class="mt-3 space-y-2">
+                          <div class="rounded-lg bg-white p-2.5 border border-slate-100">
+                            <p class="text-[10px] font-black uppercase text-slate-400">
+                              {{ 'surveyDashboard.complaint' | t }}
+                            </p>
+                            <p
+                              class="mt-1 break-words text-[11px] font-semibold text-slate-700 [overflow-wrap:anywhere]"
+                            >
+                              {{ response.complaintText || '-' }}
+                            </p>
+                          </div>
+                          <div class="rounded-lg bg-white p-2.5 border border-slate-100">
+                            <p class="text-[10px] font-black uppercase text-slate-400">
+                              {{ 'surveyDashboard.operator' | t }}
+                            </p>
+                            <p
+                              class="mt-1 break-words text-[11px] font-semibold text-slate-700 [overflow-wrap:anywhere]"
+                            >
+                              {{ localized(response.operatorNameEn, response.operatorNameAr) }}
+                            </p>
+                          </div>
+                          <div class="rounded-lg bg-white p-2.5 border border-slate-100">
+                            <p class="text-[10px] font-black uppercase text-slate-400">
+                              {{ 'surveyDashboard.customInputs' | t }}
+                            </p>
+                            <p
+                              class="mt-1 break-words text-[11px] font-semibold text-slate-700 [overflow-wrap:anywhere]"
+                            >
+                              {{ customInputPreviewText(response.customInputsPreview) }}
+                            </p>
+                          </div>
+                        </div>
 
-                  @if (hasNavigation(response.detailsNavigation)) {
-                    <button
-                      class="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-700 transition hover:bg-slate-50"
-                      type="button"
-                      (click)="openNavigation(response.detailsNavigation)"
-                    >
-                      <app-icon [icon]="detailsIcon" [size]="14" />
-                      {{ 'surveyDashboard.details' | t }}
-                    </button>
-                  }
-                </article>
-              } @empty {
-                <p class="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-6 text-center text-xs font-bold text-slate-500">
-                  {{ 'surveyDashboard.noCriticalResponses' | t }}
-                </p>
-              }
-            </div>
-
-            <!-- Desktop Table -->
-            <div class="hidden overflow-x-auto rounded-xl border border-slate-100 lg:block">
-              <table class="w-full min-w-[62rem]">
-                <thead class="bg-slate-50/80 text-[11px] font-black uppercase tracking-wider text-slate-500">
-                  <tr>
-                    <th class="px-3.5 py-3 text-start">{{ 'surveyDashboard.source' | t }}</th>
-                    <th class="px-3.5 py-3 text-start">{{ 'surveyDashboard.template' | t }}</th>
-                    <th class="px-3.5 py-3 text-start">{{ 'surveyDashboard.branch' | t }}</th>
-                    <th class="px-3.5 py-3 text-start">{{ 'surveyDashboard.submittedOn' | t }}</th>
-                    <th class="px-3.5 py-3 text-start">{{ 'surveyDashboard.score' | t }}</th>
-                    <th class="px-3.5 py-3 text-start">{{ 'surveyDashboard.complaint' | t }}</th>
-                    <th class="px-3.5 py-3 text-start">{{ 'surveyDashboard.voice' | t }}</th>
-                    <th class="px-3.5 py-3 text-start">{{ 'surveyDashboard.operator' | t }}</th>
-                    <th class="px-3.5 py-3 text-start">{{ 'surveyDashboard.customInputs' | t }}</th>
-                    <th class="px-3.5 py-3 text-start">{{ 'surveyDashboard.action' | t }}</th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-100 text-xs">
-                  @for (
-                    response of dashboard.criticalResponses;
-                    track response.source + response.responseId
-                  ) {
-                    <tr class="transition hover:bg-slate-50/80">
-                      <td class="px-3.5 py-3">
-                        <span
-                          class="rounded-md px-2 py-0.5 text-[10px] font-black {{
-                            sourceClass(response.source)
-                          }}"
-                        >
-                          {{ sourceLabel(response.source) }}
-                        </span>
-                      </td>
-                      <td class="px-3.5 py-3">
-                        <p
-                          class="max-w-[14rem] truncate font-black text-slate-950"
-                          [title]="localized(response.templateNameEn, response.templateNameAr)"
-                        >
-                          {{ localized(response.templateNameEn, response.templateNameAr) }}
-                        </p>
-                      </td>
-                      <td class="px-3.5 py-3 font-semibold text-slate-600">
-                        {{ localized(response.branchNameEn, response.branchNameAr) }}
-                      </td>
-                      <td class="px-3.5 py-3 font-semibold text-slate-600">
-                        {{ response.submittedOnUtc ? (response.submittedOnUtc | date: 'medium') : '-' }}
-                      </td>
-                      <td class="px-3.5 py-3">
-                        <span
-                          class="rounded-lg px-2.5 py-1 text-[11px] font-black {{
-                            scoreClass(response.scorePercentage)
-                          }}"
-                        >
-                          {{ scoreLabel(response.scorePercentage) }}
-                        </span>
-                      </td>
-                      <td class="px-3.5 py-3">
-                        <p class="line-clamp-2 max-w-[14rem] font-semibold text-slate-700">
-                          {{ response.complaintText || '-' }}
-                        </p>
-                      </td>
-                      <td class="px-3.5 py-3">
-                        <span
-                          class="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-black"
-                          [class.bg-cyan-50]="response.hasVoice"
-                          [class.text-cyan-700]="response.hasVoice"
-                          [class.bg-slate-100]="!response.hasVoice"
-                          [class.text-slate-500]="!response.hasVoice"
-                        >
-                          <app-icon [icon]="micIcon" [size]="12" />
-                          {{ (response.hasVoice ? 'surveyDashboard.yes' : 'surveyDashboard.no') | t }}
-                        </span>
-                      </td>
-                      <td class="px-3.5 py-3 font-semibold text-slate-600">
-                        {{ localized(response.operatorNameEn, response.operatorNameAr) }}
-                      </td>
-                      <td class="px-3.5 py-3">
-                        <p class="line-clamp-2 max-w-[14rem] text-[11px] font-semibold text-slate-500">
-                          {{ customInputPreviewText(response.customInputsPreview) }}
-                        </p>
-                      </td>
-                      <td class="px-3.5 py-3">
                         @if (hasNavigation(response.detailsNavigation)) {
                           <button
-                            class="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-black text-slate-700 transition hover:bg-slate-50 hover:border-slate-300"
+                            class="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-700 transition hover:bg-slate-50"
                             type="button"
                             (click)="openNavigation(response.detailsNavigation)"
                           >
-                            <app-icon [icon]="detailsIcon" [size]="13" />
+                            <app-icon [icon]="detailsIcon" [size]="14" />
                             {{ 'surveyDashboard.details' | t }}
                           </button>
                         }
-                      </td>
-                    </tr>
-                  } @empty {
-                    <tr>
-                      <td
-                        class="px-3.5 py-8 text-center text-xs font-bold text-slate-500"
-                        colspan="10"
+                      </article>
+                    } @empty {
+                      <p
+                        class="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-6 text-center text-xs font-bold text-slate-500"
                       >
                         {{ 'surveyDashboard.noCriticalResponses' | t }}
-                      </td>
-                    </tr>
-                  }
-                </tbody>
-              </table>
-            </div>
+                      </p>
+                    }
+                  </div>
+
+                  <!-- Desktop Table -->
+                  <div class="hidden overflow-x-auto rounded-xl border border-slate-100 lg:block">
+                    <table class="w-full min-w-[62rem]">
+                      <thead
+                        class="bg-slate-50/80 text-[11px] font-black uppercase tracking-wider text-slate-500"
+                      >
+                        <tr>
+                          <th class="px-3.5 py-3 text-start">{{ 'surveyDashboard.source' | t }}</th>
+                          <th class="px-3.5 py-3 text-start">
+                            {{ 'surveyDashboard.template' | t }}
+                          </th>
+                          <th class="px-3.5 py-3 text-start">{{ 'surveyDashboard.branch' | t }}</th>
+                          <th class="px-3.5 py-3 text-start">
+                            {{ 'surveyDashboard.submittedOn' | t }}
+                          </th>
+                          <th class="px-3.5 py-3 text-start">{{ 'surveyDashboard.score' | t }}</th>
+                          <th class="px-3.5 py-3 text-start">
+                            {{ 'surveyDashboard.complaint' | t }}
+                          </th>
+                          <th class="px-3.5 py-3 text-start">{{ 'surveyDashboard.voice' | t }}</th>
+                          <th class="px-3.5 py-3 text-start">
+                            {{ 'surveyDashboard.operator' | t }}
+                          </th>
+                          <th class="px-3.5 py-3 text-start">
+                            {{ 'surveyDashboard.customInputs' | t }}
+                          </th>
+                          <th class="px-3.5 py-3 text-start">{{ 'surveyDashboard.action' | t }}</th>
+                        </tr>
+                      </thead>
+                      <tbody class="divide-y divide-slate-100 text-xs">
+                        @for (
+                          response of dashboard.criticalResponses;
+                          track response.source + response.responseId
+                        ) {
+                          <tr class="transition hover:bg-slate-50/80">
+                            <td class="px-3.5 py-3">
+                              <span
+                                class="rounded-md px-2 py-0.5 text-[10px] font-black {{
+                                  sourceClass(response.source)
+                                }}"
+                              >
+                                {{ sourceLabel(response.source) }}
+                              </span>
+                            </td>
+                            <td class="px-3.5 py-3">
+                              <p
+                                class="max-w-[14rem] truncate font-black text-slate-950"
+                                [title]="
+                                  localized(response.templateNameEn, response.templateNameAr)
+                                "
+                              >
+                                {{ localized(response.templateNameEn, response.templateNameAr) }}
+                              </p>
+                            </td>
+                            <td class="px-3.5 py-3 font-semibold text-slate-600">
+                              {{ localized(response.branchNameEn, response.branchNameAr) }}
+                            </td>
+                            <td class="px-3.5 py-3 font-semibold text-slate-600">
+                              {{
+                                response.submittedOnUtc
+                                  ? (response.submittedOnUtc | date: 'medium')
+                                  : '-'
+                              }}
+                            </td>
+                            <td class="px-3.5 py-3">
+                              <span
+                                class="rounded-lg px-2.5 py-1 text-[11px] font-black {{
+                                  scoreClass(response.scorePercentage)
+                                }}"
+                              >
+                                {{ scoreLabel(response.scorePercentage) }}
+                              </span>
+                            </td>
+                            <td class="px-3.5 py-3">
+                              <p class="line-clamp-2 max-w-[14rem] font-semibold text-slate-700">
+                                {{ response.complaintText || '-' }}
+                              </p>
+                            </td>
+                            <td class="px-3.5 py-3">
+                              <span
+                                class="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-black"
+                                [class.bg-cyan-50]="response.hasVoice"
+                                [class.text-cyan-700]="response.hasVoice"
+                                [class.bg-slate-100]="!response.hasVoice"
+                                [class.text-slate-500]="!response.hasVoice"
+                              >
+                                <app-icon [icon]="micIcon" [size]="12" />
+                                {{
+                                  (response.hasVoice ? 'surveyDashboard.yes' : 'surveyDashboard.no')
+                                    | t
+                                }}
+                              </span>
+                            </td>
+                            <td class="px-3.5 py-3 font-semibold text-slate-600">
+                              {{ localized(response.operatorNameEn, response.operatorNameAr) }}
+                            </td>
+                            <td class="px-3.5 py-3">
+                              <p
+                                class="line-clamp-2 max-w-[14rem] text-[11px] font-semibold text-slate-500"
+                              >
+                                {{ customInputPreviewText(response.customInputsPreview) }}
+                              </p>
+                            </td>
+                            <td class="px-3.5 py-3">
+                              @if (hasNavigation(response.detailsNavigation)) {
+                                <button
+                                  class="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-black text-slate-700 transition hover:bg-slate-50 hover:border-slate-300"
+                                  type="button"
+                                  (click)="openNavigation(response.detailsNavigation)"
+                                >
+                                  <app-icon [icon]="detailsIcon" [size]="13" />
+                                  {{ 'surveyDashboard.details' | t }}
+                                </button>
+                              }
+                            </td>
+                          </tr>
+                        } @empty {
+                          <tr>
+                            <td
+                              class="px-3.5 py-8 text-center text-xs font-bold text-slate-500"
+                              colspan="10"
+                            >
+                              {{ 'surveyDashboard.noCriticalResponses' | t }}
+                            </td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
             </article>
@@ -1714,14 +2011,9 @@
 
         <!-- ==================== TAB CONTENT: BRANCHES SUMMARY ==================== -->
         @if (dashboard.branchesSummary.length > 0) {
-          <div
-            class="table-accordion-item"
-            [class.is-expanded]="isSectionActive('branches')"
-          >
+          <div class="table-accordion-item" [class.is-expanded]="isSectionActive('branches')">
             <div class="table-accordion-content">
-              <article
-                class="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs"
-              >
+              <article class="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs">
                 <div
                   class="flex cursor-pointer select-none items-center justify-between rounded-xl p-1 -m-1 transition hover:bg-slate-50/70"
                   [class.mb-3]="!isSectionCollapsed('branches')"
@@ -1731,7 +2023,9 @@
                   (keydown.space)="$event.preventDefault(); toggleTableSection('branches')"
                 >
                   <div class="flex items-center gap-2">
-                    <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-cyan-50 text-[var(--theme-color-accent)]">
+                    <span
+                      class="flex h-7 w-7 items-center justify-center rounded-lg bg-cyan-50 text-[var(--theme-color-accent)]"
+                    >
                       <app-icon [icon]="branchIcon" [size]="15" />
                     </span>
                     <h2 class="text-sm font-black text-slate-950">
@@ -1757,137 +2051,174 @@
                   [class.is-collapsed]="isSectionCollapsed('branches')"
                 >
                   <div class="min-h-0 overflow-hidden">
-
-            <!-- Mobile View -->
-            <div class="space-y-3 lg:hidden">
-              @for (branch of dashboard.branchesSummary; track branch.branchId) {
-                <article class="rounded-xl border border-slate-100 bg-slate-50/70 p-3.5 shadow-2xs">
-                  <div class="flex items-start justify-between gap-3">
-                    <div class="min-w-0">
-                      <p class="break-words text-xs font-black text-slate-950 [overflow-wrap:anywhere]">
-                        {{ localized(branch.branchNameEn, branch.branchNameAr) }}
-                      </p>
-                      <p class="mt-1 text-[11px] font-bold text-slate-500">
-                        {{ branch.totalResponses }} {{ 'surveyDashboard.responses' | t }}
-                      </p>
-                    </div>
-                    <span
-                      class="shrink-0 rounded-lg px-2.5 py-1 text-[11px] font-black {{
-                        scoreClass(branch.averageScorePercentage)
-                      }}"
-                    >
-                      {{ scoreLabel(branch.averageScorePercentage) }}
-                    </span>
-                  </div>
-
-                  <div class="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
-                    <div class="rounded-lg bg-white p-2 border border-slate-100">
-                      <p class="text-[10px] font-black uppercase text-slate-400">
-                        {{ 'surveyDashboard.sourceInternal' | t }}
-                      </p>
-                      <p class="mt-1 font-black text-slate-900">{{ branch.internalResponses }}</p>
-                    </div>
-                    <div class="rounded-lg bg-white p-2 border border-slate-100">
-                      <p class="text-[10px] font-black uppercase text-slate-400">
-                        {{ 'surveyDashboard.sourceAnonymous' | t }}
-                      </p>
-                      <p class="mt-1 font-black text-slate-900">{{ branch.anonymousResponses }}</p>
-                    </div>
-                    <div class="rounded-lg bg-white p-2 border border-slate-100">
-                      <p class="text-[10px] font-black uppercase text-slate-400">
-                        {{ 'surveyDashboard.complaints' | t }}
-                      </p>
-                      <p class="mt-1 font-black" [class.text-rose-600]="branch.complaintsCount > 0" [class.text-slate-900]="branch.complaintsCount === 0">
-                        {{ branch.complaintsCount }}
-                      </p>
-                    </div>
-                    <div class="rounded-lg bg-white p-2 border border-slate-100">
-                      <p class="text-[10px] font-black uppercase text-slate-400">
-                        {{ 'surveyDashboard.voice' | t }}
-                      </p>
-                      <p class="mt-1 font-black text-slate-900">{{ branch.voiceAnswersCount }}</p>
-                    </div>
-                  </div>
-
-                  @if (hasNavigation(branch.detailsNavigation)) {
-                    <button
-                      class="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-700 transition hover:bg-slate-50"
-                      type="button"
-                      (click)="openNavigation(branch.detailsNavigation)"
-                    >
-                      <app-icon [icon]="detailsIcon" [size]="14" />
-                      {{ 'surveyDashboard.open' | t }}
-                    </button>
-                  }
-                </article>
-              }
-            </div>
-
-            <!-- Desktop Table -->
-            <div class="hidden overflow-x-auto rounded-xl border border-slate-100 lg:block">
-              <table class="w-full min-w-[50rem]">
-                <thead class="bg-slate-50/80 text-[11px] font-black uppercase tracking-wider text-slate-500">
-                  <tr>
-                    <th class="px-3.5 py-3 text-start">{{ 'surveyDashboard.branch' | t }}</th>
-                    <th class="px-3.5 py-3 text-start">{{ 'surveyDashboard.total' | t }}</th>
-                    <th class="px-3.5 py-3 text-start">{{ 'surveyDashboard.sourceInternal' | t }}</th>
-                    <th class="px-3.5 py-3 text-start">{{ 'surveyDashboard.sourceAnonymous' | t }}</th>
-                    <th class="px-3.5 py-3 text-start">{{ 'surveyDashboard.score' | t }}</th>
-                    <th class="px-3.5 py-3 text-start">{{ 'surveyDashboard.complaints' | t }}</th>
-                    <th class="px-3.5 py-3 text-start">{{ 'surveyDashboard.voice' | t }}</th>
-                    <th class="px-3.5 py-3 text-start">{{ 'surveyDashboard.action' | t }}</th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-100 text-xs">
-                  @for (branch of dashboard.branchesSummary; track branch.branchId) {
-                    <tr class="transition hover:bg-slate-50/80">
-                      <td class="px-3.5 py-3 font-black text-slate-950">
-                        {{ localized(branch.branchNameEn, branch.branchNameAr) }}
-                      </td>
-                      <td class="px-3.5 py-3 font-black text-slate-800">{{ branch.totalResponses }}</td>
-                      <td class="px-3.5 py-3 font-semibold text-slate-600">
-                        {{ branch.internalResponses }}
-                      </td>
-                      <td class="px-3.5 py-3 font-semibold text-slate-600">
-                        {{ branch.anonymousResponses }}
-                      </td>
-                      <td class="px-3.5 py-3">
-                        <span
-                          class="rounded-lg px-2.5 py-1 text-[11px] font-black {{
-                            scoreClass(branch.averageScorePercentage)
-                          }}"
+                    <!-- Mobile View -->
+                    <div class="space-y-3 lg:hidden">
+                      @for (branch of dashboard.branchesSummary; track branch.branchId) {
+                        <article
+                          class="rounded-xl border border-slate-100 bg-slate-50/70 p-3.5 shadow-2xs"
                         >
-                          {{ scoreLabel(branch.averageScorePercentage) }}
-                        </span>
-                      </td>
-                      <td class="px-3.5 py-3 font-black" [class.text-rose-600]="branch.complaintsCount > 0" [class.text-slate-800]="branch.complaintsCount === 0">
-                        {{ branch.complaintsCount }}
-                      </td>
-                      <td class="px-3.5 py-3 font-black text-slate-800">
-                        {{ branch.voiceAnswersCount }}
-                      </td>
-                      <td class="px-3.5 py-3">
-                        @if (hasNavigation(branch.detailsNavigation)) {
-                          <button
-                            class="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-black text-slate-700 transition hover:bg-slate-50 hover:border-slate-300"
-                            type="button"
-                            (click)="openNavigation(branch.detailsNavigation)"
-                          >
-                            <app-icon [icon]="detailsIcon" [size]="13" />
-                            {{ 'surveyDashboard.open' | t }}
-                          </button>
-                        }
-                      </td>
-                    </tr>
-                  }
-                </tbody>
-              </table>
-            </div>
+                          <div class="flex items-start justify-between gap-3">
+                            <div class="min-w-0">
+                              <p
+                                class="break-words text-xs font-black text-slate-950 [overflow-wrap:anywhere]"
+                              >
+                                {{ localized(branch.branchNameEn, branch.branchNameAr) }}
+                              </p>
+                              <p class="mt-1 text-[11px] font-bold text-slate-500">
+                                {{ branch.totalResponses }} {{ 'surveyDashboard.responses' | t }}
+                              </p>
+                            </div>
+                            <span
+                              class="shrink-0 rounded-lg px-2.5 py-1 text-[11px] font-black {{
+                                scoreClass(branch.averageScorePercentage)
+                              }}"
+                            >
+                              {{ scoreLabel(branch.averageScorePercentage) }}
+                            </span>
+                          </div>
+
+                          <div class="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+                            <div class="rounded-lg bg-white p-2 border border-slate-100">
+                              <p class="text-[10px] font-black uppercase text-slate-400">
+                                {{ 'surveyDashboard.sourceInternal' | t }}
+                              </p>
+                              <p class="mt-1 font-black text-slate-900">
+                                {{ branch.internalResponses }}
+                              </p>
+                            </div>
+                            <div class="rounded-lg bg-white p-2 border border-slate-100">
+                              <p class="text-[10px] font-black uppercase text-slate-400">
+                                {{ 'surveyDashboard.sourceAnonymous' | t }}
+                              </p>
+                              <p class="mt-1 font-black text-slate-900">
+                                {{ branch.anonymousResponses }}
+                              </p>
+                            </div>
+                            <div class="rounded-lg bg-white p-2 border border-slate-100">
+                              <p class="text-[10px] font-black uppercase text-slate-400">
+                                {{ 'surveyDashboard.complaints' | t }}
+                              </p>
+                              <p
+                                class="mt-1 font-black"
+                                [class.text-rose-600]="branch.complaintsCount > 0"
+                                [class.text-slate-900]="branch.complaintsCount === 0"
+                              >
+                                {{ branch.complaintsCount }}
+                              </p>
+                            </div>
+                            <div class="rounded-lg bg-white p-2 border border-slate-100">
+                              <p class="text-[10px] font-black uppercase text-slate-400">
+                                {{ 'surveyDashboard.voice' | t }}
+                              </p>
+                              <p class="mt-1 font-black text-slate-900">
+                                {{ branch.voiceAnswersCount }}
+                              </p>
+                            </div>
+                          </div>
+
+                          @if (hasNavigation(branch.detailsNavigation)) {
+                            <button
+                              class="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-700 transition hover:bg-slate-50"
+                              type="button"
+                              (click)="openNavigation(branch.detailsNavigation)"
+                            >
+                              <app-icon [icon]="detailsIcon" [size]="14" />
+                              {{ 'surveyDashboard.open' | t }}
+                            </button>
+                          }
+                        </article>
+                      }
+                    </div>
+
+                    <!-- Desktop Table -->
+                    <div class="hidden overflow-x-auto rounded-xl border border-slate-100 lg:block">
+                      <table class="w-full min-w-[50rem]">
+                        <thead
+                          class="bg-slate-50/80 text-[11px] font-black uppercase tracking-wider text-slate-500"
+                        >
+                          <tr>
+                            <th class="px-3.5 py-3 text-start">
+                              {{ 'surveyDashboard.branch' | t }}
+                            </th>
+                            <th class="px-3.5 py-3 text-start">
+                              {{ 'surveyDashboard.total' | t }}
+                            </th>
+                            <th class="px-3.5 py-3 text-start">
+                              {{ 'surveyDashboard.sourceInternal' | t }}
+                            </th>
+                            <th class="px-3.5 py-3 text-start">
+                              {{ 'surveyDashboard.sourceAnonymous' | t }}
+                            </th>
+                            <th class="px-3.5 py-3 text-start">
+                              {{ 'surveyDashboard.score' | t }}
+                            </th>
+                            <th class="px-3.5 py-3 text-start">
+                              {{ 'surveyDashboard.complaints' | t }}
+                            </th>
+                            <th class="px-3.5 py-3 text-start">
+                              {{ 'surveyDashboard.voice' | t }}
+                            </th>
+                            <th class="px-3.5 py-3 text-start">
+                              {{ 'surveyDashboard.action' | t }}
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 text-xs">
+                          @for (branch of dashboard.branchesSummary; track branch.branchId) {
+                            <tr class="transition hover:bg-slate-50/80">
+                              <td class="px-3.5 py-3 font-black text-slate-950">
+                                {{ localized(branch.branchNameEn, branch.branchNameAr) }}
+                              </td>
+                              <td class="px-3.5 py-3 font-black text-slate-800">
+                                {{ branch.totalResponses }}
+                              </td>
+                              <td class="px-3.5 py-3 font-semibold text-slate-600">
+                                {{ branch.internalResponses }}
+                              </td>
+                              <td class="px-3.5 py-3 font-semibold text-slate-600">
+                                {{ branch.anonymousResponses }}
+                              </td>
+                              <td class="px-3.5 py-3">
+                                <span
+                                  class="rounded-lg px-2.5 py-1 text-[11px] font-black {{
+                                    scoreClass(branch.averageScorePercentage)
+                                  }}"
+                                >
+                                  {{ scoreLabel(branch.averageScorePercentage) }}
+                                </span>
+                              </td>
+                              <td
+                                class="px-3.5 py-3 font-black"
+                                [class.text-rose-600]="branch.complaintsCount > 0"
+                                [class.text-slate-800]="branch.complaintsCount === 0"
+                              >
+                                {{ branch.complaintsCount }}
+                              </td>
+                              <td class="px-3.5 py-3 font-black text-slate-800">
+                                {{ branch.voiceAnswersCount }}
+                              </td>
+                              <td class="px-3.5 py-3">
+                                @if (hasNavigation(branch.detailsNavigation)) {
+                                  <button
+                                    class="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-black text-slate-700 transition hover:bg-slate-50 hover:border-slate-300"
+                                    type="button"
+                                    (click)="openNavigation(branch.detailsNavigation)"
+                                  >
+                                    <app-icon [icon]="detailsIcon" [size]="13" />
+                                    {{ 'surveyDashboard.open' | t }}
+                                  </button>
+                                }
+                              </td>
+                            </tr>
+                          }
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </article>
+              </article>
+            </div>
           </div>
-        </div>
         }
       </section>
     }

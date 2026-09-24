@@ -1,5 +1,12 @@
 import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -90,7 +97,8 @@ export class DashboardResponsesPageComponent {
   readonly resultSummary = computed(() => {
     const page = this.page();
     if (!page) return '';
-    return this.i18n.translate('dashboardDrillDown.resultSummary')
+    return this.i18n
+      .translate('dashboardDrillDown.resultSummary')
       .replace('{count}', String(page.totalItems))
       .replace('{page}', String(page.currentPage))
       .replace('{pages}', String(Math.max(page.totalPages, 1)));
@@ -99,7 +107,9 @@ export class DashboardResponsesPageComponent {
   constructor() {
     this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
       const path = params.get('path') ?? '';
-      this.title.set(params.get('title') || this.i18n.translate('dashboardDrillDown.responsesTitle'));
+      this.title.set(
+        params.get('title') || this.i18n.translate('dashboardDrillDown.responsesTitle'),
+      );
       this.routeType.set(params.get('routeType') ?? '');
       this.originalPath.set(path);
       this.currentPath.set(path);
@@ -195,12 +205,59 @@ export class DashboardResponsesPageComponent {
     if (item.customInputsPreview.length === 0) return '—';
     return item.customInputsPreview
       .slice(0, 3)
-      .map((input) => `${this.localized(input.labelEn || input.name, input.labelAr)}: ${input.value || '—'}`)
+      .map(
+        (input) =>
+          `${this.localized(input.labelEn || input.name, input.labelAr)}: ${input.value || '—'}`,
+      )
       .join(' · ');
   }
 
   detailValue(item: DashboardResponseDetailItem): string {
+    if (item.selectedOptionTextEn || item.selectedOptionTextAr) {
+      return this.localized(item.selectedOptionTextEn, item.selectedOptionTextAr);
+    }
+
     return item.value || item.type || '—';
+  }
+
+  answerBadgeClass(value: string): string {
+    const normalized = value.trim().toLowerCase();
+    if (
+      normalized.includes('excellent') ||
+      normalized.includes('very good') ||
+      normalized.includes('ممتاز') ||
+      normalized.includes('جيد جدا') ||
+      normalized.includes('راضي') ||
+      normalized.includes('راض') ||
+      normalized === 'yes' ||
+      normalized === 'نعم'
+    ) {
+      return 'bg-emerald-50 text-emerald-700 border-emerald-200/70';
+    }
+    if (
+      normalized.includes('good') ||
+      normalized.includes('neutral') ||
+      normalized.includes('جيد') ||
+      normalized.includes('محايد') ||
+      normalized.includes('مقبول')
+    ) {
+      return 'bg-amber-50 text-amber-700 border-amber-200/70';
+    }
+    if (
+      normalized.includes('poor') ||
+      normalized.includes('fair') ||
+      normalized.includes('bad') ||
+      normalized.includes('ضعيف') ||
+      normalized.includes('غير راض') ||
+      normalized.includes('غير راضي') ||
+      normalized.includes('سيء') ||
+      normalized.includes('سئ') ||
+      normalized === 'no' ||
+      normalized === 'لا'
+    ) {
+      return 'bg-rose-50 text-rose-700 border-rose-200/70';
+    }
+    return 'bg-slate-100 text-slate-800 border-slate-200/80';
   }
 
   goBack(): void {
@@ -208,7 +265,9 @@ export class DashboardResponsesPageComponent {
   }
 
   private loadWithUpdates(
-    updates: Readonly<Partial<Record<'pageNumber' | 'pageSize' | 'searchText' | 'orderSort', string | number>>>,
+    updates: Readonly<
+      Partial<Record<'pageNumber' | 'pageSize' | 'searchText' | 'orderSort', string | number>>
+    >,
   ): void {
     const path = this.drillDown.updatePath(this.currentPath() || this.originalPath(), updates);
     this.currentPath.set(path);
@@ -309,8 +368,6 @@ export class DashboardResponsesPageComponent {
       detailsPath = `/api/anonymous-templates/${encodeURIComponent(item.templateId)}/responses/${encodeURIComponent(item.responseId)}`;
     }
 
-    return detailsPath
-      ? { routeType: 'ResponseDetails', method: 'GET', path: detailsPath }
-      : null;
+    return detailsPath ? { routeType: 'ResponseDetails', method: 'GET', path: detailsPath } : null;
   }
 }

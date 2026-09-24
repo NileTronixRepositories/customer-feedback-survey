@@ -4,16 +4,15 @@ import { finalize, take } from 'rxjs';
 import { AnonymousTemplatesService } from '../../../../anonymous-templates/data/anonymous-templates.service';
 import { BranchTemplatesPdfReportService } from '../../data/branch-templates-pdf-report.service';
 import {
-  BRANCH_TEMPLATES_PDF_REPORT_LANGUAGES,
   BRANCH_TEMPLATES_PDF_REPORT_MAX_SCORE_PERCENTAGE,
-  BRANCH_TEMPLATES_PDF_REPORT_MAX_TOP_WORST_QUESTIONS_COUNT,
   BRANCH_TEMPLATES_PDF_REPORT_MIN_SCORE_PERCENTAGE,
-  BRANCH_TEMPLATES_PDF_REPORT_MIN_TOP_WORST_QUESTIONS_COUNT,
+  BRANCH_TEMPLATES_REPORT_QUESTION_COUNTS,
   BRANCH_TEMPLATES_PDF_REPORT_SCORE_CALCULATION_MODES,
   BRANCH_TEMPLATES_PDF_REPORT_TEMPLATE_KINDS,
-  BranchTemplatesPdfReportDownloadRequest,
   BranchTemplatesPdfReportQuery,
   BranchTemplatesPdfReportTemplateOption,
+  BranchTemplatesReportExportRequest,
+  BranchTemplatesReportFile,
   BranchTemplatesReportPreview,
   BranchTemplatesReportPreviewRequest,
 } from '../../domain/branch-templates-pdf-report.model';
@@ -108,9 +107,14 @@ export class BranchTemplatesPdfReportStore {
   }
 
   downloadExcel(
-    request: BranchTemplatesReportPreviewRequest,
-    onDownloaded: (blob: Blob) => void,
+    request: BranchTemplatesReportExportRequest,
+    onDownloaded: (file: BranchTemplatesReportFile) => void,
   ): void {
+    if (!request.query.templateId) {
+      this.errorSignal.set('branchTemplatesPdf.excelTemplateRequired');
+      return;
+    }
+
     const validationError = this.validateQuery(request.query);
     if (validationError) {
       this.errorSignal.set(validationError);
@@ -136,9 +140,9 @@ export class BranchTemplatesPdfReportStore {
       });
   }
 
-  download(
-    request: BranchTemplatesPdfReportDownloadRequest,
-    onDownloaded: (blob: Blob) => void,
+  downloadPdf(
+    request: BranchTemplatesReportExportRequest,
+    onDownloaded: (file: BranchTemplatesReportFile) => void,
   ): void {
     const validationError = this.validateQuery(request.query);
     if (validationError) {
@@ -150,7 +154,7 @@ export class BranchTemplatesPdfReportStore {
     this.errorSignal.set(null);
 
     this.reportService
-      .download(request)
+      .downloadPdf(request)
       .pipe(
         take(1),
         finalize(() => this.downloadingSignal.set(false)),
@@ -209,15 +213,11 @@ export class BranchTemplatesPdfReportStore {
       return 'branchTemplatesPdf.invalidScoreCalculationMode';
     }
 
-    if (query.language && !BRANCH_TEMPLATES_PDF_REPORT_LANGUAGES.includes(query.language)) {
-      return 'branchTemplatesPdf.invalidReportLanguage';
-    }
-
     if (
       query.topWorstQuestionsCount !== undefined &&
-      (!Number.isInteger(query.topWorstQuestionsCount) ||
-        query.topWorstQuestionsCount < BRANCH_TEMPLATES_PDF_REPORT_MIN_TOP_WORST_QUESTIONS_COUNT ||
-        query.topWorstQuestionsCount > BRANCH_TEMPLATES_PDF_REPORT_MAX_TOP_WORST_QUESTIONS_COUNT)
+      !BRANCH_TEMPLATES_REPORT_QUESTION_COUNTS.includes(
+        query.topWorstQuestionsCount as (typeof BRANCH_TEMPLATES_REPORT_QUESTION_COUNTS)[number],
+      )
     ) {
       return 'branchTemplatesPdf.invalidTopWorstQuestionsCount';
     }
@@ -284,6 +284,9 @@ export class BranchTemplatesPdfReportStore {
   }
 
   private readErrorKey(error: unknown): string {
+    const backendMessage = this.readBackendMessage(error);
+    if (backendMessage) return backendMessage;
+
     if (!(error instanceof HttpErrorResponse)) {
       return 'branchTemplatesPdf.downloadError';
     }
@@ -305,6 +308,9 @@ export class BranchTemplatesPdfReportStore {
   }
 
   private readExcelErrorKey(error: unknown): string {
+    const backendMessage = this.readBackendMessage(error);
+    if (backendMessage) return backendMessage;
+
     if (!(error instanceof HttpErrorResponse)) {
       return 'branchTemplatesPdf.excelDownloadError';
     }
@@ -326,6 +332,9 @@ export class BranchTemplatesPdfReportStore {
   }
 
   private readPreviewErrorKey(error: unknown): string {
+    const backendMessage = this.readBackendMessage(error);
+    if (backendMessage) return backendMessage;
+
     if (!(error instanceof HttpErrorResponse)) {
       return 'branchTemplatesPdf.previewLoadError';
     }
@@ -344,5 +353,22 @@ export class BranchTemplatesPdfReportStore {
     }
 
     return 'branchTemplatesPdf.previewLoadError';
+  }
+
+  private readBackendMessage(error: unknown): string | null {
+    if (!(error instanceof HttpErrorResponse)) return null;
+    const body = error.error;
+    if (typeof body === 'string' && body.trim()) return body.trim();
+    if (!body || typeof body !== 'object') return null;
+
+    const problem = body as {
+      detail?: unknown;
+      message?: unknown;
+      title?: unknown;
+      errors?: readonly { message?: unknown; messageName?: unknown }[];
+    };
+    const firstError = problem.errors?.[0];
+    const message = firstError?.message ?? firstError?.messageName ?? problem.detail ?? problem.message;
+    return typeof message === 'string' && message.trim() ? message.trim() : null;
   }
 }

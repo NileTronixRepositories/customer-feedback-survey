@@ -123,7 +123,7 @@
             <th class="px-2.5 py-2 text-start">{{ 'superAdminTemplates.activeFrom' | t }}</th>
             <th class="px-2.5 py-2 text-start">{{ 'superAdminTemplates.expireTo' | t }}</th>
             <th class="px-2.5 py-2 text-start">{{ 'superAdminTemplates.createdBy' | t }}</th>
-            <th class="px-2.5 py-2 text-end">{{ 'branches.actions' | t }}</th>
+            <th class="sticky-action-col px-2.5 py-2 text-end">{{ 'branches.actions' | t }}</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-100 bg-white">
@@ -229,15 +229,26 @@
                     </p>
                   }
                 </td>
-                <td class="px-2.5 py-2">
+                <td class="sticky-action-col px-2.5 py-2">
                   <div class="flex justify-end gap-1.5">
-                    @if (canOpenBranchAction(template)) {
+                    @if (canCopyToBranch(template)) {
                       <button
                         type="button"
                         class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-cyan-100 bg-cyan-50 text-[var(--theme-color-secondary)] transition hover:bg-cyan-100 focus:outline-none focus:ring-2 focus:ring-[var(--theme-color-accent)]/20"
                         [attr.aria-label]="'superAdminTemplates.copyToBranch' | t"
                         [title]="'superAdminTemplates.copyToBranch' | t"
                         (click)="openCopyModal(template)"
+                      >
+                        <app-icon [icon]="filePlusIcon" [size]="14" />
+                      </button>
+                    }
+                    @if (canAssignToBranch(template)) {
+                      <button
+                        type="button"
+                        class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-violet-100 bg-violet-50 text-violet-700 transition hover:bg-violet-100 focus:outline-none focus:ring-2 focus:ring-violet-500/20"
+                        [attr.aria-label]="'superAdminTemplates.assignToBranch' | t"
+                        [title]="'superAdminTemplates.assignToBranch' | t"
+                        (click)="openAssignModal(template)"
                       >
                         <app-icon [icon]="filePlusIcon" [size]="14" />
                       </button>
@@ -378,7 +389,7 @@
                 : ('superAdminTemplates.selectTargetBranch' | t)
             }}
           </option>
-          @for (branch of branchOptions(); track branch.id) {
+          @for (branch of copyTargetBranches(); track branch.id) {
             <option [value]="branch.id">{{ branchOptionDisplayName(branch) }}</option>
           }
         </select>
@@ -388,47 +399,6 @@
           </span>
         }
       </label>
-
-      @if (selectedTemplateForCopy(); as template) {
-        @if (isGlobalSource(template)) {
-          <div class="grid gap-3 sm:grid-cols-2">
-            <label class="flex min-w-0 flex-col gap-1">
-              <span class="text-[10px] font-bold text-slate-500">{{
-                'superAdminTemplates.activeFrom' | t
-              }}</span>
-              <input
-                class="filter-control"
-                type="datetime-local"
-                formControlName="activeFrom"
-                required
-              />
-            </label>
-            <label class="flex min-w-0 flex-col gap-1">
-              <span class="text-[10px] font-bold text-slate-500">{{
-                'superAdminTemplates.expireTo' | t
-              }}</span>
-              <input class="filter-control" type="datetime-local" formControlName="expireTo" />
-            </label>
-          </div>
-          <label class="flex min-w-0 flex-col gap-1">
-            <span class="text-[10px] font-bold text-slate-500">{{
-              'superAdminTemplates.optionalLogo' | t
-            }}</span>
-            <input
-              class="filter-control py-1.5"
-              type="file"
-              accept=".jpg,.jpeg,.png,.webp"
-              (change)="onLogoSelected($event)"
-            />
-            <span class="text-[10px] text-slate-500">{{ 'superAdminTemplates.logoHint' | t }}</span>
-          </label>
-          @if (logoError()) {
-            <p class="text-[10px] font-bold text-[var(--theme-color-danger)]">
-              {{ logoError() ?? '' | t }}
-            </p>
-          }
-        }
-      }
 
       @if (templatesStore.copyError()) {
         <div
@@ -530,12 +500,99 @@
           [disabled]="copyForm.invalid || branchOptionsLoading()"
         >
           <app-icon [icon]="filePlusIcon" [size]="14" />
-          {{
-            (selectedTemplateForCopy() && isGlobalSource(selectedTemplateForCopy()!)
-              ? 'superAdminTemplates.assignSubmit'
-              : 'superAdminTemplates.copySubmit'
-            ) | t
-          }}
+          {{ 'superAdminTemplates.copySubmit' | t }}
+        </app-button>
+      </div>
+    </form>
+  </app-modal>
+
+  <app-modal
+    [title]="'superAdminTemplates.assignToBranch' | t"
+    [subtitle]="'superAdminTemplates.assignToBranchDescription' | t"
+    [open]="assignModalOpen()"
+    size="lg"
+    (closed)="closeAssignModal()"
+  >
+    <form class="space-y-3" [formGroup]="assignForm" (ngSubmit)="assignSelectedTemplate()">
+      @if (selectedTemplateForAssignment(); as template) {
+        <div class="rounded-xl border border-slate-200/80 bg-slate-50/60 p-3 shadow-2xs">
+          <p class="text-[10px] font-extrabold uppercase text-slate-500">
+            {{ 'superAdminTemplates.sourceTemplate' | t }}
+          </p>
+          <p class="mt-1 break-words text-[12px] font-black text-slate-950 [overflow-wrap:anywhere]">
+            {{ templateDisplayName(template) }}
+          </p>
+        </div>
+      }
+
+      <label class="flex min-w-0 flex-col gap-1">
+        <span class="text-[10px] font-bold text-slate-500">{{ 'superAdminTemplates.targetBranch' | t }}</span>
+        <select class="filter-control" formControlName="branchId">
+          <option value="">{{ 'superAdminTemplates.selectTargetBranch' | t }}</option>
+          @for (branch of branchOptions(); track branch.id) {
+            <option [value]="branch.id">{{ branchOptionDisplayName(branch) }}</option>
+          }
+        </select>
+        @if (assignForm.controls.branchId.touched && assignForm.controls.branchId.invalid) {
+          <span class="text-[10px] font-bold text-[var(--theme-color-danger)]">
+            {{ 'superAdminTemplates.targetBranchRequired' | t }}
+          </span>
+        }
+      </label>
+
+      <div class="grid gap-3 sm:grid-cols-2">
+        <label class="flex min-w-0 flex-col gap-1">
+          <span class="text-[10px] font-bold text-slate-500">{{ 'superAdminTemplates.activeFrom' | t }}</span>
+          <input class="filter-control" type="datetime-local" formControlName="activeFrom" />
+        </label>
+        <label class="flex min-w-0 flex-col gap-1">
+          <span class="text-[10px] font-bold text-slate-500">{{ 'superAdminTemplates.expireTo' | t }}</span>
+          <input class="filter-control" type="datetime-local" formControlName="expireTo" />
+        </label>
+      </div>
+      @if (assignForm.touched && assignForm.hasError('expiryNotAfterActivation')) {
+        <p class="text-[10px] font-bold text-[var(--theme-color-danger)]">
+          {{ 'branchTemplates.expireToAfterActiveFrom' | t }}
+        </p>
+      }
+
+      <label class="flex min-w-0 flex-col gap-1">
+        <span class="text-[10px] font-bold text-slate-500">{{ 'superAdminTemplates.optionalLogo' | t }}</span>
+        <input
+          class="filter-control py-1.5"
+          type="file"
+          accept=".jpg,.jpeg,.png,.webp"
+          (change)="onLogoSelected($event)"
+        />
+        <span class="text-[10px] text-slate-500">{{ 'superAdminTemplates.logoHint' | t }}</span>
+      </label>
+      @if (logoError()) {
+        <p class="text-[10px] font-bold text-[var(--theme-color-danger)]">{{ logoError() ?? '' | t }}</p>
+      }
+
+      @if (templatesStore.copyError()) {
+        <div class="rounded-md border border-rose-100 bg-rose-50 p-2 text-[11px] font-semibold text-[var(--theme-color-danger)]">
+          {{ templatesStore.copyError() ?? '' | t }}
+        </div>
+      }
+      @if (templatesStore.copySuccess()) {
+        <div class="rounded-md border border-emerald-100 bg-emerald-50 p-2 text-[11px] font-semibold text-emerald-700">
+          {{ templatesStore.copySuccess() ?? '' | t }}
+        </div>
+      }
+
+      <div class="sticky bottom-0 -mx-4 -mb-4 mt-4 flex items-center justify-end gap-2 border-t border-slate-100 bg-white/95 px-4 py-3 backdrop-blur-sm sm:-mx-5 sm:-mb-5 sm:px-5">
+        <app-button size="sm" type="button" variant="secondary" (pressed)="closeAssignModal()">
+          {{ 'common.cancel' | t }}
+        </app-button>
+        <app-button
+          size="sm"
+          type="submit"
+          [loading]="templatesStore.copying()"
+          [disabled]="assignForm.invalid || branchOptionsLoading()"
+        >
+          <app-icon [icon]="filePlusIcon" [size]="14" />
+          {{ 'superAdminTemplates.assignSubmit' | t }}
         </app-button>
       </div>
     </form>

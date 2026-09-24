@@ -36,6 +36,11 @@ import {
   TrendingUp,
   UserCog,
   UsersRound,
+Hash,
+  Mail,
+  MapPin,
+  ShieldCheck,
+  User,
 } from 'lucide-angular';
 import { I18nService } from '../../../../../../core/services/i18n.service';
 import { ThemeColorService } from '../../../../../../core/theme/theme-color.service';
@@ -133,6 +138,11 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
   readonly resetIcon = RotateCcw;
   readonly calendarIcon = Calendar;
   readonly checkIcon = CheckCircle2;
+  readonly hashIcon = Hash;
+  readonly mailIcon = Mail;
+  readonly mapPinIcon = MapPin;
+  readonly shieldCheckIcon = ShieldCheck;
+  readonly userIcon = User;
   readonly activeTableTab = signal<'templates' | 'questions' | 'critical' | 'branches' | 'all'>('templates');
   private lastSingleTab: 'templates' | 'questions' | 'critical' | 'branches' = 'templates';
   readonly collapsedSections = signal<ReadonlySet<string>>(new Set());
@@ -441,6 +451,21 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
         .filter((role) => role.length > 0)
         .join(', ') || '-'
     );
+  }
+
+  branchUserRoleList(user: BranchAdminBranchUser): string[] {
+    return user.roles.map((role) => role.name).filter((role) => role && role.length > 0);
+  }
+
+  userInitials(name: string | null | undefined): string {
+    if (!name || !name.trim()) {
+      return 'U';
+    }
+    const parts = name.trim().split(/\s+/);
+    if (parts.length === 1) {
+      return parts[0].slice(0, 2).toUpperCase();
+    }
+    return (parts[0][0] + parts[1][0]).toUpperCase();
   }
 
   questionTypeLabel(type: string): string {

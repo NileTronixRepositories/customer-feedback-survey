@@ -98,15 +98,14 @@
         <span class="filter-label-text">
           {{ 'branchTemplatesPdf.topWorstQuestionsCount' | t }}
         </span>
-        <input
+        <select
           class="filter-control"
-          type="number"
-          [min]="minTopWorstQuestionsCount"
-          [max]="maxTopWorstQuestionsCount"
-          step="1"
-          inputmode="numeric"
           formControlName="topWorstQuestionsCount"
-        />
+        >
+          @for (count of questionCountOptions; track count) {
+            <option [value]="count">{{ count }}</option>
+          }
+        </select>
       </label>
 
       <label class="filter-label">
@@ -164,24 +163,11 @@
         </select>
       </label>
 
-      <label class="filter-label">
-        <span class="filter-label-text">
-          {{ 'branchTemplatesPdf.reportLanguage' | t }}
-        </span>
-        <select
-          class="filter-control filter-select"
-          formControlName="language"
-        >
-          <option value="Arabic">{{ 'branchTemplatesPdf.reportLanguageArabic' | t }}</option>
-          <option value="English">{{ 'branchTemplatesPdf.reportLanguageEnglish' | t }}</option>
-        </select>
-      </label>
-
       <div class="flex min-w-0 flex-wrap items-end gap-2 sm:col-span-2 xl:col-span-3 2xl:col-span-1 2xl:self-end">
         <button
           type="submit"
           class="inline-flex h-9 cursor-pointer items-center justify-center gap-1.5 whitespace-nowrap rounded-lg bg-[var(--theme-color-accent)] px-3 text-[11px] font-extrabold leading-none text-white shadow-sm shadow-cyan-900/10 transition hover:bg-[var(--theme-color-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-color-accent)] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
-          [disabled]="reportStore.downloading()"
+          [disabled]="reportStore.downloading() || reportStore.excelDownloading()"
         >
           @if (reportStore.downloading()) {
             <span class="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
@@ -193,7 +179,12 @@
         <button
           type="button"
           class="inline-flex h-9 cursor-pointer items-center justify-center gap-1.5 whitespace-nowrap rounded-lg bg-emerald-600 px-3 text-[11px] font-extrabold leading-none text-white shadow-sm shadow-emerald-900/10 transition hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
-          [disabled]="reportStore.excelDownloading()"
+          [disabled]="
+            reportStore.excelDownloading() || reportStore.downloading() || !hasSelectedTemplate()
+          "
+          [title]="
+            hasSelectedTemplate() ? '' : ('branchTemplatesPdf.excelTemplateRequired' | t)
+          "
           (click)="downloadExcelReport()"
         >
           @if (reportStore.excelDownloading()) {

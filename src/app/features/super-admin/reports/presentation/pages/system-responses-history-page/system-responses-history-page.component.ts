@@ -1,7 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
-import { Filter, Search } from 'lucide-angular';
+import { ChevronLeft, ChevronRight, Filter, Search } from 'lucide-angular';
 import { I18nService } from '../../../../../../core/services/i18n.service';
 import { TranslatePipe } from '../../../../../../shared/pipes/translate.pipe';
 import { ButtonComponent } from '../../../../../../shared/ui/button/button.component';
@@ -37,6 +37,8 @@ export class SystemResponsesHistoryPageComponent implements OnInit {
   private readonly formBuilder = inject(FormBuilder);
   private readonly i18n = inject(I18nService);
 
+  readonly chevronLeftIcon = ChevronLeft;
+  readonly chevronRightIcon = ChevronRight;
   readonly filterIcon = Filter;
   readonly searchIcon = Search;
   readonly advancedFiltersOpen = signal(false);

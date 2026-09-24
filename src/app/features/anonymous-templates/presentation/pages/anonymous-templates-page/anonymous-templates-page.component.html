@@ -168,22 +168,19 @@
       </div>
     </div>
 
-    <div class="overflow-hidden rounded-md border border-slate-100 bg-white">
-      <div class="overflow-x-auto">
-        <table class="min-w-[76rem] w-full divide-y divide-slate-100">
+    <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm shadow-slate-200/50">
+      <div class="table-scroll-container">
+        <table class="w-full min-w-[56rem] divide-y divide-slate-100 text-start">
           <thead class="bg-slate-50 text-start text-[10px] font-bold uppercase text-slate-500">
             <tr>
-              <th class="px-2.5 py-2">{{ 'anonymousTemplates.nameColumn' | t }}</th>
-              <th class="px-2.5 py-2">{{ 'common.scope' | t }}</th>
-              <th class="px-2.5 py-2">{{ 'anonymousTemplates.branchColumn' | t }}</th>
-              <th class="px-2.5 py-2">{{ 'superAdminTemplates.lifecycle' | t }}</th>
-              <th class="px-2.5 py-2">{{ 'anonymousTemplates.activeFromColumn' | t }}</th>
-              <th class="px-2.5 py-2">{{ 'anonymousTemplates.expireToColumn' | t }}</th>
-              <th class="px-2.5 py-2">{{ 'anonymousTemplates.countsColumn' | t }}</th>
-              <th class="px-2.5 py-2">{{ 'anonymousTemplates.createdOnColumn' | t }}</th>
-              <th class="px-2.5 py-2">{{ 'anonymousTemplates.publicUrl' | t }}</th>
-              <th class="px-2.5 py-2">{{ 'anonymousTemplates.qrCode' | t }}</th>
-              <th class="px-2.5 py-2 text-end">{{ 'branches.actions' | t }}</th>
+              <th class="px-3 py-2.5">{{ 'anonymousTemplates.nameColumn' | t }}</th>
+              <th class="px-2.5 py-2.5">{{ 'anonymousTemplates.scopeAndBranch' | t }}</th>
+              <th class="px-2.5 py-2.5">{{ 'superAdminTemplates.lifecycle' | t }}</th>
+              <th class="px-2.5 py-2.5">{{ 'anonymousTemplates.scheduleColumn' | t }}</th>
+              <th class="px-2.5 py-2.5">{{ 'anonymousTemplates.countsColumn' | t }}</th>
+              <th class="px-2.5 py-2.5">{{ 'anonymousTemplates.createdOnColumn' | t }}</th>
+              <th class="px-2.5 py-2.5">{{ 'anonymousTemplates.quickAccess' | t }}</th>
+              <th class="sticky-action-col px-3 py-2.5 text-end">{{ 'branches.actions' | t }}</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100 bg-white">
@@ -191,7 +188,7 @@
               <tr>
                 <td
                   class="px-2.5 py-6 text-center text-[11px] font-semibold text-slate-500"
-                  colspan="11"
+                  colspan="8"
                 >
                   <span
                     class="mx-auto mb-2 block h-5 w-5 animate-spin rounded-full border-2 border-[var(--theme-color-accent)]/30 border-t-[var(--theme-color-accent)]"
@@ -205,10 +202,11 @@
                 track template.anonymousTemplateId
               ) {
                 <tr
-                  class="align-top transition hover:bg-slate-50"
+                  class="group align-top transition hover:bg-slate-50"
                   [class.bg-slate-50]="template.isGlobal ? template.isArchived : !template.isActive"
                 >
-                  <td class="px-2.5 py-2">
+                  <!-- 1. Name & Description -->
+                  <td class="px-3 py-2.5">
                     <p
                       class="break-words text-[11px] font-bold text-slate-900 [overflow-wrap:anywhere]"
                     >
@@ -222,21 +220,32 @@
                       </p>
                     }
                   </td>
-                  <td class="px-2.5 py-2">
-                    <span
-                      class="rounded-full px-2 py-0.5 text-[10px] font-bold"
-                      [class.bg-violet-50]="template.isGlobal"
-                      [class.text-violet-700]="template.isGlobal"
-                      [class.bg-cyan-50]="!template.isGlobal"
-                      [class.text-[var(--theme-color-secondary)]]="!template.isGlobal"
-                    >
-                      {{ template.scopeName }}
-                    </span>
+
+                  <!-- 2. Scope & Branch -->
+                  <td class="px-2.5 py-2.5">
+                    <div class="flex flex-col gap-0.5">
+                      <span
+                        class="w-fit rounded-full px-2 py-0.5 text-[10px] font-bold"
+                        [class.bg-violet-50]="template.isGlobal"
+                        [class.text-violet-700]="template.isGlobal"
+                        [class.bg-cyan-50]="!template.isGlobal"
+                        [class.text-[var(--theme-color-secondary)]]="!template.isGlobal"
+                      >
+                        {{ template.scopeName }}
+                      </span>
+                      @if (!template.isGlobal) {
+                        <span
+                          class="max-w-[9rem] truncate text-[10px] font-semibold text-slate-700"
+                          [title]="branchDisplayName(template)"
+                        >
+                          {{ branchDisplayName(template) }}
+                        </span>
+                      }
+                    </div>
                   </td>
-                  <td class="px-2.5 py-2 text-[11px] font-semibold text-slate-700">
-                    {{ template.isGlobal ? '-' : branchDisplayName(template) }}
-                  </td>
-                  <td class="px-2.5 py-2">
+
+                  <!-- 3. Lifecycle Status -->
+                  <td class="px-2.5 py-2.5">
                     <div class="flex flex-col gap-1">
                       <span
                         class="w-fit rounded-full px-2 py-0.5 text-[10px] font-bold"
@@ -256,66 +265,103 @@
                         {{ lifecycleLabelKey(template) | t }}
                       </span>
                       @if (template.isManagedGlobalCopy) {
-                        <span class="text-[10px] font-bold text-violet-700">{{
-                          'superAdminTemplates.managedCopy' | t
-                        }}</span>
+                        <span class="text-[10px] font-bold text-violet-700">
+                          {{ 'superAdminTemplates.managedCopy' | t }}
+                        </span>
                       }
                     </div>
                   </td>
-                  <td class="px-2.5 py-2 text-[11px] text-slate-700">
-                    {{ template.activeFrom ? (template.activeFrom | date: 'mediumDate') : '-' }}
+
+                  <!-- 4. Schedule (Validity Dates) -->
+                  <td class="px-2.5 py-2.5 text-[10px] leading-tight text-slate-700">
+                    <div class="flex flex-col gap-0.5">
+                      <span class="font-medium whitespace-nowrap">
+                        {{ template.activeFrom ? (template.activeFrom | date: 'mediumDate') : '-' }}
+                      </span>
+                      <span class="text-slate-400 whitespace-nowrap">
+                        إلى: {{
+                          template.expireTo
+                            ? (template.expireTo | date: 'mediumDate')
+                            : ('anonymousTemplates.openEnded' | t)
+                        }}
+                      </span>
+                    </div>
                   </td>
-                  <td class="px-2.5 py-2 text-[11px] text-slate-700">
-                    {{
-                      template.expireTo
-                        ? (template.expireTo | date: 'mediumDate')
-                        : ('anonymousTemplates.openEnded' | t)
-                    }}
-                  </td>
-                  <td class="px-2.5 py-2">
+
+                  <!-- 5. Counts (Questions, Inputs, Responses) -->
+                  <td class="px-2.5 py-2.5">
                     <div class="flex flex-col gap-1 text-[10px] font-bold text-slate-600">
                       <span
-                        class="w-fit rounded-full bg-cyan-50 px-2 py-0.5 text-[var(--theme-color-secondary)]"
+                        class="w-fit rounded-full bg-cyan-50 px-2 py-0.5 text-[var(--theme-color-secondary)] whitespace-nowrap"
                       >
                         {{ template.questionsCount }} {{ 'anonymousTemplates.questionsShort' | t }}
                       </span>
-                      <span class="w-fit rounded-full bg-slate-50 px-2 py-0.5">
+                      <span class="w-fit rounded-full bg-slate-50 px-2 py-0.5 whitespace-nowrap">
                         {{ template.customInputsCount }} {{ 'anonymousTemplates.inputsShort' | t }}
                       </span>
-                      <span class="w-fit rounded-full bg-emerald-50 px-2 py-0.5 text-emerald-700">
+                      <span class="w-fit rounded-full bg-emerald-50 px-2 py-0.5 text-emerald-700 whitespace-nowrap">
                         {{ template.responsesCount }} {{ 'anonymousTemplates.responsesShort' | t }}
                       </span>
                     </div>
                   </td>
-                  <td class="px-2.5 py-2 text-[11px] text-slate-700">
+
+                  <!-- 6. Created On -->
+                  <td class="px-2.5 py-2.5 text-[11px] text-slate-700 whitespace-nowrap">
                     {{ template.createdOnUtc ? (template.createdOnUtc | date: 'mediumDate') : '-' }}
                   </td>
-                  <td class="px-2.5 py-2">
-                    <p
-                      class="max-w-40 truncate text-[10px] font-semibold text-slate-500"
-                      [title]="template.publicUrl"
-                    >
-                      {{ template.publicUrl || '-' }}
-                    </p>
+
+                  <!-- 7. Quick Access (QR & Link) -->
+                  <td class="px-2.5 py-2.5">
+                    <div class="flex items-center gap-1.5">
+                      @if (template.qrCode) {
+                        <button
+                          type="button"
+                          class="group relative shrink-0 cursor-pointer rounded-md border border-slate-200 bg-white p-0.5 transition hover:border-[var(--theme-color-accent)] hover:shadow-xs"
+                          (click)="downloadQrCode(template.qrCode)"
+                          [title]="'anonymousTemplates.downloadQr' | t"
+                        >
+                          <img
+                            class="h-7 w-7 object-contain"
+                            [src]="template.qrCode"
+                            [alt]="'anonymousTemplates.qrCodeAlt' | t"
+                          />
+                        </button>
+                      }
+                      @if (template.publicUrl) {
+                        <button
+                          type="button"
+                          class="inline-flex max-w-[8.5rem] items-center gap-1 rounded-md border border-slate-200 bg-slate-50 px-1.5 py-1 text-[10px] font-semibold text-slate-600 transition hover:border-cyan-300 hover:bg-cyan-50 hover:text-[var(--theme-color-secondary)] cursor-pointer"
+                          (click)="copyTemplatePublicUrl(template.anonymousTemplateId, template.publicUrl)"
+                          [title]="template.publicUrl"
+                        >
+                          <app-icon
+                            [icon]="copiedTemplateId() === template.anonymousTemplateId ? checkIcon : copyIcon"
+                            [size]="11"
+                            [class.text-emerald-600]="copiedTemplateId() === template.anonymousTemplateId"
+                          />
+                          <span class="truncate">
+                            {{
+                              copiedTemplateId() === template.anonymousTemplateId
+                                ? ('anonymousTemplates.copied' | t)
+                                : ('anonymousTemplates.copyPublicUrl' | t)
+                            }}
+                          </span>
+                        </button>
+                      } @else {
+                        <span class="text-xs text-slate-400">-</span>
+                      }
+                    </div>
                   </td>
-                  <td class="px-2.5 py-2">
-                    @if (template.qrCode) {
-                      <img
-                        class="h-8 w-8 rounded-md border border-slate-100 bg-white object-contain p-1"
-                        [src]="template.qrCode"
-                        [alt]="'anonymousTemplates.qrCodeAlt' | t"
-                      />
-                    } @else {
-                      <span class="text-xs font-semibold text-slate-400">-</span>
-                    }
-                  </td>
-                  <td class="px-2.5 py-2">
-                    <div class="flex justify-end gap-2">
+
+                  <!-- 8. Sticky Actions Column -->
+                  <td class="sticky-action-col px-3 py-2.5">
+                    <div class="flex items-center justify-end gap-1">
                       @if (canViewDetails()) {
                         <app-button
                           size="sm"
                           type="button"
                           variant="secondary"
+                          [title]="'anonymousTemplates.detailsTitle' | t"
                           (pressed)="openTemplateDetails(template.anonymousTemplateId)"
                         >
                           <app-icon [icon]="detailsIcon" [size]="14" />
@@ -326,6 +372,7 @@
                           size="sm"
                           type="button"
                           variant="secondary"
+                          [title]="'common.edit' | t"
                           (pressed)="openTemplateEdit(template)"
                         >
                           <app-icon [icon]="editIcon" [size]="14" />
@@ -336,17 +383,19 @@
                           size="sm"
                           type="button"
                           variant="secondary"
+                          [title]="'anonymousTemplates.responsesTitle' | t"
                           (pressed)="openTemplateResponses(template)"
                         >
                           <app-icon [icon]="responsesIcon" [size]="14" />
                         </app-button>
                       }
-                      @if (canCopyTemplateToBranch(template)) {
+                      @if (canAssignTemplateToBranch(template)) {
                         <app-button
                           size="sm"
                           type="button"
                           variant="secondary"
-                          (pressed)="openCopyTemplateToBranch(template)"
+                          [title]="'superAdminTemplates.assignSubmit' | t"
+                          (pressed)="openAssignTemplateToBranch(template)"
                         >
                           <app-icon [icon]="filePlusIcon" [size]="14" />
                         </app-button>
@@ -356,20 +405,27 @@
                         type="button"
                         variant="secondary"
                         [disabled]="!template.publicUrl"
+                        [title]="
+                          copiedTemplateId() === template.anonymousTemplateId
+                            ? ('anonymousTemplates.copied' | t)
+                            : ('anonymousTemplates.copyPublicUrl' | t)
+                        "
                         (pressed)="
                           copyTemplatePublicUrl(template.anonymousTemplateId, template.publicUrl)
                         "
                       >
-                        <app-icon [icon]="copyIcon" [size]="14" />
-                        @if (copiedTemplateId() === template.anonymousTemplateId) {
-                          {{ 'anonymousTemplates.copied' | t }}
-                        }
+                        <app-icon
+                          [icon]="copiedTemplateId() === template.anonymousTemplateId ? checkIcon : copyIcon"
+                          [size]="14"
+                          [class.text-emerald-600]="copiedTemplateId() === template.anonymousTemplateId"
+                        />
                       </app-button>
                       <app-button
                         size="sm"
                         type="button"
                         variant="secondary"
                         [disabled]="!template.qrCode"
+                        [title]="'anonymousTemplates.downloadQr' | t"
                         (pressed)="downloadQrCode(template.qrCode)"
                       >
                         <app-icon [icon]="downloadIcon" [size]="14" />
@@ -381,15 +437,10 @@
                           variant="danger"
                           [disabled]="anonymousTemplatesStore.deleting()"
                           [loading]="anonymousTemplatesStore.deleting()"
+                          [title]="(template.isGlobal ? 'superAdminTemplates.archive' : 'anonymousTemplates.deactivate') | t"
                           (pressed)="openDeleteTemplate(template)"
                         >
                           <app-icon [icon]="deleteIcon" [size]="14" />
-                          {{
-                            (template.isGlobal
-                              ? 'superAdminTemplates.archive'
-                              : 'anonymousTemplates.deactivate'
-                            ) | t
-                          }}
                         </app-button>
                       }
                       @if (canRestoreTemplate(template)) {
@@ -399,10 +450,10 @@
                           variant="secondary"
                           [disabled]="anonymousTemplatesStore.restoring()"
                           [loading]="anonymousTemplatesStore.restoring()"
+                          [title]="'common.restore' | t"
                           (pressed)="openRestoreTemplate(template)"
                         >
                           <app-icon [icon]="restoreIcon" [size]="14" />
-                          {{ 'common.restore' | t }}
                         </app-button>
                       }
                     </div>
@@ -412,7 +463,7 @@
                 <tr>
                   <td
                     class="px-2.5 py-6 text-center text-[11px] font-semibold text-slate-500"
-                    colspan="11"
+                    colspan="8"
                   >
                     <app-icon class="mx-auto mb-2 text-slate-300" [icon]="qrCodeIcon" [size]="24" />
                     {{ 'common.noRecords' | t }}
@@ -462,14 +513,18 @@
   </section>
 
   <app-modal
-    [title]="'superAdminTemplates.copyToBranch' | t"
-    [open]="copyModalOpen()"
-    (closed)="closeCopyTemplateToBranch()"
+    [title]="'superAdminTemplates.assignSubmit' | t"
+    [open]="assignmentModalOpen()"
+    (closed)="closeAssignTemplateToBranch()"
     size="lg"
-    [subtitle]="'superAdminTemplates.copyToBranchDescription' | t"
+    [subtitle]="'superAdminTemplates.assignToBranchDescription' | t"
   >
-    @if (templatePendingCopy(); as template) {
-      <form class="space-y-3" [formGroup]="copyForm" (ngSubmit)="copySelectedTemplateToBranch()">
+    @if (templatePendingAssignment(); as template) {
+      <form
+        class="space-y-3"
+        [formGroup]="assignmentForm"
+        (ngSubmit)="assignSelectedTemplateToBranch()"
+      >
         <div class="grid gap-2 sm:grid-cols-2">
           <div class="rounded-xl border border-slate-200/80 bg-slate-50/60 p-3 shadow-2xs">
             <p class="text-[10px] font-extrabold uppercase text-slate-500">
@@ -507,7 +562,7 @@
           <select
             class="h-9 rounded-xl border border-slate-200 bg-white px-3 text-[12px] font-semibold text-slate-700 outline-none transition focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15"
             formControlName="branchId"
-            [disabled]="branchOptionsLoading() || copyingTemplate()"
+            [disabled]="branchOptionsLoading() || assigningTemplate()"
           >
             <option value="">
               {{
@@ -520,30 +575,82 @@
               <option [value]="branch.id">{{ branchOptionDisplayName(branch) }}</option>
             }
           </select>
-          @if (copyForm.controls.branchId.touched && copyForm.controls.branchId.invalid) {
+          @if (
+            assignmentForm.controls.branchId.touched && assignmentForm.controls.branchId.invalid
+          ) {
             <span class="text-[10px] font-bold text-[var(--theme-color-danger)]">
               {{ 'superAdminTemplates.targetBranchRequired' | t }}
             </span>
           }
         </label>
 
-        @if (copyError()) {
+        <div class="grid gap-3 sm:grid-cols-2">
+          <label class="flex min-w-0 flex-col gap-1">
+            <span class="text-[10px] font-bold text-slate-500">
+              {{ 'superAdminTemplates.activeFrom' | t }}
+            </span>
+            <input
+              class="filter-control"
+              type="datetime-local"
+              formControlName="activeFrom"
+              required
+            />
+            @if (
+              assignmentForm.controls.activeFrom.touched &&
+              assignmentForm.controls.activeFrom.invalid
+            ) {
+              <span class="text-[10px] font-bold text-[var(--theme-color-danger)]">
+                {{ 'branchTemplates.activeFromRequired' | t }}
+              </span>
+            }
+          </label>
+          <label class="flex min-w-0 flex-col gap-1">
+            <span class="text-[10px] font-bold text-slate-500">
+              {{ 'superAdminTemplates.expireTo' | t }}
+            </span>
+            <input class="filter-control" type="datetime-local" formControlName="expireTo" />
+          </label>
+        </div>
+
+        <label class="flex min-w-0 flex-col gap-1">
+          <span class="text-[10px] font-bold text-slate-500">
+            {{ 'superAdminTemplates.optionalLogo' | t }}
+          </span>
+          <input
+            class="filter-control py-1.5"
+            type="file"
+            accept=".jpg,.jpeg,.png,.webp"
+            [disabled]="assigningTemplate()"
+            (change)="onAssignmentLogoSelected($event)"
+          />
+          <span class="text-[10px] text-slate-500">
+            {{ 'superAdminTemplates.logoHint' | t }}
+          </span>
+        </label>
+
+        @if (assignmentLogoError()) {
+          <p class="text-[10px] font-bold text-[var(--theme-color-danger)]">
+            {{ assignmentLogoError() ?? '' | t }}
+          </p>
+        }
+
+        @if (assignmentError()) {
           <div
             class="rounded-md border border-rose-100 bg-rose-50 p-2 text-[11px] font-semibold text-[var(--theme-color-danger)]"
           >
-            {{ copyError() ?? '' | t }}
+            {{ assignmentError() ?? '' | t }}
           </div>
         }
 
-        @if (copySuccess()) {
+        @if (assignmentSuccess()) {
           <div
             class="rounded-md border border-emerald-100 bg-emerald-50 p-2 text-[11px] font-semibold text-emerald-700"
           >
-            {{ copySuccess() ?? '' | t }}
+            {{ assignmentSuccess() ?? '' | t }}
           </div>
         }
 
-        @if (copyResult(); as result) {
+        @if (assignmentResult(); as result) {
           <div
             class="rounded-xl border border-[var(--theme-color-accent)]/20 bg-[var(--theme-color-accent-softest)]/50 p-3.5 shadow-2xs"
           >
@@ -553,7 +660,7 @@
             <p
               class="mt-1 break-words text-[11px] font-black text-slate-950 [overflow-wrap:anywhere]"
             >
-              {{ result.templateId || '-' }}
+              {{ result.anonymousTemplateId || '-' }}
             </p>
 
             <div class="mt-3 grid gap-3 sm:grid-cols-[1fr_auto]">
@@ -583,7 +690,7 @@
                   <app-icon [icon]="qrCodeIcon" [size]="14" />
                   <img
                     class="h-20 w-20 rounded-md object-contain"
-                    [src]="copyResultQrCodeSrc(result)"
+                    [src]="assignmentResultQrCodeSrc(result)"
                     [alt]="'superAdminTemplates.copiedQrCode' | t"
                   />
                 </div>
@@ -597,18 +704,21 @@
             size="sm"
             type="button"
             variant="secondary"
-            (pressed)="closeCopyTemplateToBranch()"
+            [disabled]="assigningTemplate()"
+            (pressed)="closeAssignTemplateToBranch()"
           >
             {{ 'common.cancel' | t }}
           </app-button>
           <app-button
             size="sm"
             type="submit"
-            [loading]="copyingTemplate()"
-            [disabled]="copyForm.invalid || branchOptionsLoading()"
+            [loading]="assigningTemplate()"
+            [disabled]="
+              assignmentForm.invalid || branchOptionsLoading() || !!assignmentLogoError()
+            "
           >
             <app-icon [icon]="filePlusIcon" [size]="14" />
-            {{ 'superAdminTemplates.copySubmit' | t }}
+            {{ 'superAdminTemplates.assignSubmit' | t }}
           </app-button>
         </div>
       </form>

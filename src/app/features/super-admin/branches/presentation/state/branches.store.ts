@@ -299,7 +299,7 @@ export class BranchesStore {
       });
   }
 
-  createBranchAdmin(payload: CreateBranchAdminPayload): void {
+  createBranchAdmin(payload: CreateBranchAdminPayload, onSuccess?: () => void): void {
     this.creatingAdminSignal.set(true);
     this.errorSignal.set(null);
     this.successSignal.set(null);
@@ -313,6 +313,7 @@ export class BranchesStore {
       .subscribe({
         next: () => {
           this.successSignal.set('branches.adminCreateSuccess');
+          onSuccess?.();
         },
         error: () => {
           this.errorSignal.set('branches.adminCreateError');

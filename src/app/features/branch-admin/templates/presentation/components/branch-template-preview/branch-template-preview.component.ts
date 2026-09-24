@@ -1,5 +1,26 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
-import { FileAudio, RotateCcw, Star } from 'lucide-angular';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  inject,
+  signal,
+} from '@angular/core';
+import {
+  CheckCircle2,
+  ChevronDown,
+  ChevronUp,
+  CornerDownRight,
+  Eye,
+  FileAudio,
+  GitBranch,
+  Info,
+  Lock,
+  RotateCcw,
+  Sparkles,
+  Star,
+  Zap,
+} from 'lucide-angular';
 import { I18nService } from '../../../../../../core/services/i18n.service';
 import {
   QUESTION_ANSWER_TYPE,
@@ -11,8 +32,11 @@ import {
 } from '../../../../../../shared/models/question-answer.model';
 import {
   ConditionalQuestionAnswerState,
+  QUESTION_CONDITION_TRIGGER_TYPE,
+  QuestionCondition,
   buildVisibleQuestionIds,
   buildVisibleQuestionOrder,
+  isQuestionConditionMatch,
 } from '../../../../../../shared/models/question-condition.model';
 import { TranslatePipe } from '../../../../../../shared/pipes/translate.pipe';
 import { ButtonComponent } from '../../../../../../shared/ui/button/button.component';
@@ -20,7 +44,7 @@ import { IconComponent } from '../../../../../../shared/ui/icon/icon.component';
 import { BranchTemplateQuestionSelectionItem } from '../../../domain/branch-template.model';
 import { BranchTemplatesStore } from '../../state/branch-templates.store';
 
-interface TemplatePreviewQuestion extends BranchTemplateQuestionSelectionItem {
+export interface TemplatePreviewQuestion extends BranchTemplateQuestionSelectionItem {
   templateQuestionId: string;
   groupId: string;
   groupNameEn: string;
@@ -29,9 +53,41 @@ interface TemplatePreviewQuestion extends BranchTemplateQuestionSelectionItem {
   answerType: QuestionAnswerType | null;
 }
 
-interface TemplatePreviewAnswerDraft extends ConditionalQuestionAnswerState {
+export interface TemplatePreviewAnswerDraft extends ConditionalQuestionAnswerState {
   textAnswer: string;
   voiceFileName: string;
+}
+
+export interface OptionBranchInfo {
+  hasBranch: boolean;
+  childCount: number;
+  isActive: boolean;
+  childQuestionNames: string[];
+}
+
+export interface ValueBranchInfo {
+  hasBranch: boolean;
+  childCount: number;
+  isActive: boolean;
+}
+
+export interface QuestionConditionSourceInfo {
+  isConditional: boolean;
+  parentQuestion?: TemplatePreviewQuestion;
+  parentIndex?: number;
+  parentText?: string;
+  triggerText?: string;
+  isSatisfied: boolean;
+}
+
+export interface LogicMapRuleItem {
+  condition: QuestionCondition;
+  parentQuestion: TemplatePreviewQuestion;
+  childQuestion: TemplatePreviewQuestion;
+  parentIndex: number;
+  childIndex: number;
+  triggerDescription: string;
+  isSatisfied: boolean;
 }
 
 const SCALE_VALUES = [1, 2, 3, 4, 5] as const;
@@ -46,41 +102,128 @@ const SCALE_VALUES = [1, 2, 3, 4, 5] as const;
 })
 export class BranchTemplatePreviewComponent {
   readonly templatesStore = inject(BranchTemplatesStore);
-  private readonly i18n = inject(I18nService);
+  readonly i18n = inject(I18nService);
 
   readonly fileAudioIcon = FileAudio;
   readonly resetIcon = RotateCcw;
   readonly starIcon = Star;
+  readonly gitBranchIcon = GitBranch;
+  readonly cornerDownRightIcon = CornerDownRight;
+  readonly checkCircleIcon = CheckCircle2;
+  readonly lockIcon = Lock;
+  readonly eyeIcon = Eye;
+  readonly infoIcon = Info;
+  readonly chevronDownIcon = ChevronDown;
+  readonly chevronUpIcon = ChevronUp;
+  readonly sparklesIcon = Sparkles;
+  readonly zapIcon = Zap;
+
   readonly ratingValues = SCALE_VALUES;
   readonly smileLevels = SMILE_LEVELS;
 
   readonly answers = signal<Record<string, TemplatePreviewAnswerDraft>>({});
+  readonly viewMode = signal<'realistic' | 'flow'>('realistic');
+  readonly showLogicMap = signal<boolean>(false);
+  readonly highlightedQuestionId = signal<string | null>(null);
+
   private readonly initializedPreviewKey = signal('');
 
   readonly selectedQuestions = computed<readonly TemplatePreviewQuestion[]>(() =>
     this.flattenSelectedQuestions(),
   );
+
+  readonly questionConditions = computed<readonly QuestionCondition[]>(
+    () => this.templatesStore.questionsSelection()?.questionConditions ?? [],
+  );
+
+  readonly questionsMap = computed(() => {
+    return new Map(this.selectedQuestions().map((q) => [q.templateQuestionId, q]));
+  });
+
+  readonly questionsOrderMap = computed(() => {
+    const orderMap = new Map<string, number>();
+    this.selectedQuestions().forEach((q, idx) => {
+      orderMap.set(q.templateQuestionId, idx + 1);
+    });
+    return orderMap;
+  });
+
   readonly visibleQuestionOrder = computed(() =>
     buildVisibleQuestionOrder(
       this.selectedQuestions().map((question) => ({
         templateQuestionId: question.templateQuestionId,
         order: question.order,
       })),
-      this.templatesStore.questionsSelection()?.questionConditions ?? [],
+      this.questionConditions(),
       this.answers(),
     ),
   );
+
   readonly visibleQuestions = computed<readonly TemplatePreviewQuestion[]>(() => {
-    const questionsByTemplateQuestionId = new Map(
-      this.selectedQuestions().map((question) => [question.templateQuestionId, question]),
-    );
+    const questionsByTemplateQuestionId = this.questionsMap();
 
     return this.visibleQuestionOrder()
       .map((templateQuestionId) => questionsByTemplateQuestionId.get(templateQuestionId))
       .filter((question): question is TemplatePreviewQuestion => question !== undefined);
   });
+
+  readonly visibleQuestionIdsSet = computed(() => new Set(this.visibleQuestionOrder()));
+
   readonly hiddenQuestionsCount = computed(
     () => this.selectedQuestions().length - this.visibleQuestions().length,
+  );
+
+  readonly rootQuestions = computed(() =>
+    this.selectedQuestions().filter((q) => !this.isConditionalQuestion(q.templateQuestionId)),
+  );
+
+  readonly conditionalQuestions = computed(() =>
+    this.selectedQuestions().filter((q) => this.isConditionalQuestion(q.templateQuestionId)),
+  );
+
+  readonly logicMapRules = computed<readonly LogicMapRuleItem[]>(() => {
+    const questionsMap = this.questionsMap();
+    const orderMap = this.questionsOrderMap();
+    const currentAnswers = this.answers();
+    const isArabic = this.i18n.language() === 'ar';
+
+    return this.questionConditions()
+      .map((condition): LogicMapRuleItem | null => {
+        const parent = questionsMap.get(condition.parentTemplateQuestionId);
+        const child = questionsMap.get(condition.childTemplateQuestionId);
+        if (!parent || !child) {
+          return null;
+        }
+
+        let triggerDescription = '';
+        if (condition.triggerType === QUESTION_CONDITION_TRIGGER_TYPE.SingleChoiceOption) {
+          const option = parent.options.find((opt) => opt.optionId === condition.selectedQuestionOptionId);
+          triggerDescription = option ? this.optionLabel(option) : '-';
+        } else if (condition.triggerType === QUESTION_CONDITION_TRIGGER_TYPE.StarRatingValue) {
+          triggerDescription = `${condition.triggerValue ?? ''} ${this.i18n.translate('branchTemplates.stars')}`;
+        } else if (condition.triggerType === QUESTION_CONDITION_TRIGGER_TYPE.SmileValue) {
+          const smile = this.smileLevels.find((s) => s.value === condition.triggerValue);
+          triggerDescription = smile ? `${smile.emoji} ${this.i18n.translate(smile.labelKey)}` : '-';
+        }
+
+        const parentAnswer = currentAnswers[parent.templateQuestionId] ?? this.createEmptyDraft();
+        const isSatisfied = isQuestionConditionMatch(condition, parentAnswer);
+
+        return {
+          condition,
+          parentQuestion: parent,
+          childQuestion: child,
+          parentIndex: orderMap.get(parent.templateQuestionId) ?? 1,
+          childIndex: orderMap.get(child.templateQuestionId) ?? 1,
+          triggerDescription,
+          isSatisfied,
+        };
+      })
+      .filter((item): item is LogicMapRuleItem => item !== null);
+  });
+
+  readonly activeLogicMapRulesCount = computed(
+    () => this.logicMapRules().filter((rule) => rule.isSatisfied).length,
   );
 
   constructor() {
@@ -98,7 +241,10 @@ export class BranchTemplatePreviewComponent {
           .map((question) => question.templateQuestionId)
           .join('|'),
         selection.questionConditions
-          .map((condition) => `${condition.parentTemplateQuestionId}|${condition.childTemplateQuestionId}|${condition.triggerType}|${condition.selectedQuestionOptionId ?? ''}|${condition.triggerValue ?? ''}`)
+          .map(
+            (condition) =>
+              `${condition.parentTemplateQuestionId}|${condition.childTemplateQuestionId}|${condition.triggerType}|${condition.selectedQuestionOptionId ?? ''}|${condition.triggerValue ?? ''}`,
+          )
           .sort()
           .join('::'),
       ].join('::');
@@ -116,16 +262,191 @@ export class BranchTemplatePreviewComponent {
     this.answers.set({});
   }
 
+  setViewMode(mode: 'realistic' | 'flow'): void {
+    this.viewMode.set(mode);
+  }
+
+  toggleLogicMap(): void {
+    this.showLogicMap.update((v) => !v);
+  }
+
+  isConditionalQuestion(questionId: string): boolean {
+    return this.questionConditions().some((c) => c.childTemplateQuestionId === questionId);
+  }
+
+  getConditionSourceInfo(question: TemplatePreviewQuestion): QuestionConditionSourceInfo {
+    const condition = this.questionConditions().find(
+      (c) => c.childTemplateQuestionId === question.templateQuestionId,
+    );
+    if (!condition) {
+      return { isConditional: false, isSatisfied: true };
+    }
+
+    const parent = this.questionsMap().get(condition.parentTemplateQuestionId);
+    const parentIndex = this.questionsOrderMap().get(condition.parentTemplateQuestionId) ?? 1;
+    const parentText = parent ? this.questionText(parent) : '';
+
+    let triggerText = '';
+    if (condition.triggerType === QUESTION_CONDITION_TRIGGER_TYPE.SingleChoiceOption) {
+      const opt = parent?.options.find((o) => o.optionId === condition.selectedQuestionOptionId);
+      triggerText = opt ? this.optionLabel(opt) : '-';
+    } else if (condition.triggerType === QUESTION_CONDITION_TRIGGER_TYPE.StarRatingValue) {
+      triggerText = `${condition.triggerValue ?? ''} ${this.i18n.translate('branchTemplates.stars')}`;
+    } else if (condition.triggerType === QUESTION_CONDITION_TRIGGER_TYPE.SmileValue) {
+      const smile = this.smileLevels.find((s) => s.value === condition.triggerValue);
+      triggerText = smile ? `${smile.emoji} ${this.i18n.translate(smile.labelKey)}` : '-';
+    }
+
+    const parentAnswer = this.answers()[condition.parentTemplateQuestionId] ?? this.createEmptyDraft();
+    const isSatisfied = isQuestionConditionMatch(condition, parentAnswer);
+
+    return {
+      isConditional: true,
+      parentQuestion: parent,
+      parentIndex,
+      parentText,
+      triggerText,
+      isSatisfied,
+    };
+  }
+
+  getOptionBranchInfo(question: TemplatePreviewQuestion, optionId: string): OptionBranchInfo {
+    const matching = this.questionConditions().filter(
+      (c) =>
+        c.parentTemplateQuestionId === question.templateQuestionId &&
+        c.triggerType === QUESTION_CONDITION_TRIGGER_TYPE.SingleChoiceOption &&
+        c.selectedQuestionOptionId === optionId,
+    );
+
+    const questionsMap = this.questionsMap();
+    const childQuestionNames = matching
+      .map((c) => {
+        const childQ = questionsMap.get(c.childTemplateQuestionId);
+        return childQ ? this.questionText(childQ) : '';
+      })
+      .filter((name) => name.length > 0);
+
+    return {
+      hasBranch: matching.length > 0,
+      childCount: matching.length,
+      isActive: this.selectedOptionId(question) === optionId,
+      childQuestionNames,
+    };
+  }
+
+  getStarBranchInfo(question: TemplatePreviewQuestion, value: number): ValueBranchInfo {
+    const matching = this.questionConditions().filter(
+      (c) =>
+        c.parentTemplateQuestionId === question.templateQuestionId &&
+        c.triggerType === QUESTION_CONDITION_TRIGGER_TYPE.StarRatingValue &&
+        c.triggerValue === value,
+    );
+
+    return {
+      hasBranch: matching.length > 0,
+      childCount: matching.length,
+      isActive: this.starRatingValue(question) === value,
+    };
+  }
+
+  getSmileBranchInfo(question: TemplatePreviewQuestion, value: number): ValueBranchInfo {
+    const matching = this.questionConditions().filter(
+      (c) =>
+        c.parentTemplateQuestionId === question.templateQuestionId &&
+        c.triggerType === QUESTION_CONDITION_TRIGGER_TYPE.SmileValue &&
+        c.triggerValue === value,
+    );
+
+    return {
+      hasBranch: matching.length > 0,
+      childCount: matching.length,
+      isActive: this.smileValue(question) === value,
+    };
+  }
+
+  isCompactOptionGrid(question: TemplatePreviewQuestion): boolean {
+    if (question.options.length > 5) {
+      return false;
+    }
+    return !question.options.some(
+      (opt) => (opt.textAr?.length ?? 0) > 35 || (opt.textEn?.length ?? 0) > 35,
+    );
+  }
+
+  optionsGridClass(question: TemplatePreviewQuestion): string {
+    const count = question.options.length;
+    if (this.isCompactOptionGrid(question)) {
+      if (count <= 2) {
+        return 'grid grid-cols-1 sm:grid-cols-2 gap-2.5';
+      }
+      if (count === 3) {
+        return 'grid grid-cols-1 sm:grid-cols-3 gap-2.5';
+      }
+      if (count === 4) {
+        return 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5';
+      }
+      return 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-2.5';
+    }
+
+    return 'grid grid-cols-1 md:grid-cols-2 gap-2.5';
+  }
+
+  testConditionRule(rule: LogicMapRuleItem): void {
+    const { condition, parentQuestion, childQuestion } = rule;
+
+    if (condition.triggerType === QUESTION_CONDITION_TRIGGER_TYPE.SingleChoiceOption) {
+      this.updateAnswer(parentQuestion.templateQuestionId, {
+        selectedQuestionOptionId: condition.selectedQuestionOptionId ?? '',
+      });
+    } else if (condition.triggerType === QUESTION_CONDITION_TRIGGER_TYPE.StarRatingValue) {
+      this.updateAnswer(parentQuestion.templateQuestionId, {
+        starRatingValue: condition.triggerValue ?? 5,
+      });
+    } else if (condition.triggerType === QUESTION_CONDITION_TRIGGER_TYPE.SmileValue) {
+      this.updateAnswer(parentQuestion.templateQuestionId, {
+        smileValue: condition.triggerValue ?? 5,
+      });
+    }
+
+    this.highlightedQuestionId.set(childQuestion.templateQuestionId);
+
+    setTimeout(() => {
+      const el = document.getElementById('preview-q-' + childQuestion.templateQuestionId);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 120);
+
+    setTimeout(() => {
+      if (this.highlightedQuestionId() === childQuestion.templateQuestionId) {
+        this.highlightedQuestionId.set(null);
+      }
+    }, 3500);
+  }
+
+  isQuestionHighlighted(question: TemplatePreviewQuestion): boolean {
+    return this.highlightedQuestionId() === question.templateQuestionId;
+  }
+
   selectSingleChoice(question: TemplatePreviewQuestion, optionId: string): void {
-    this.updateAnswer(question.templateQuestionId, { selectedQuestionOptionId: optionId });
+    const wasAlreadySelected = this.selectedOptionId(question) === optionId;
+    this.updateAnswer(question.templateQuestionId, {
+      selectedQuestionOptionId: wasAlreadySelected ? '' : optionId,
+    });
   }
 
   selectStarRating(question: TemplatePreviewQuestion, value: number): void {
-    this.updateAnswer(question.templateQuestionId, { starRatingValue: value });
+    const wasAlreadySelected = this.starRatingValue(question) === value;
+    this.updateAnswer(question.templateQuestionId, {
+      starRatingValue: wasAlreadySelected ? null : value,
+    });
   }
 
   selectSmileValue(question: TemplatePreviewQuestion, value: number): void {
-    this.updateAnswer(question.templateQuestionId, { smileValue: value });
+    const wasAlreadySelected = this.smileValue(question) === value;
+    this.updateAnswer(question.templateQuestionId, {
+      smileValue: wasAlreadySelected ? null : value,
+    });
   }
 
   updateTextAnswer(question: TemplatePreviewQuestion, event: Event): void {
@@ -137,7 +458,7 @@ export class BranchTemplatePreviewComponent {
 
   updateVoiceFile(question: TemplatePreviewQuestion, event: Event): void {
     const target = event.target;
-    const voiceFileName = target instanceof HTMLInputElement ? (target.files?.[0]?.name ?? '') : '';
+    const voiceFileName = target instanceof HTMLInputElement ? target.files?.[0]?.name ?? '' : '';
     this.updateAnswer(question.templateQuestionId, { voiceFileName });
 
     if (target instanceof HTMLInputElement) {
@@ -205,6 +526,17 @@ export class BranchTemplatePreviewComponent {
     return question.answerType === QUESTION_ANSWER_TYPE.Smiles;
   }
 
+  displayedQuestions(): readonly TemplatePreviewQuestion[] {
+    if (this.viewMode() === 'flow') {
+      return this.selectedQuestions();
+    }
+    return this.visibleQuestions();
+  }
+
+  isQuestionUnlocked(question: TemplatePreviewQuestion): boolean {
+    return this.visibleQuestionIdsSet().has(question.templateQuestionId);
+  }
+
   private updateAnswer(
     templateQuestionId: string,
     patch: Partial<TemplatePreviewAnswerDraft>,
@@ -244,7 +576,7 @@ export class BranchTemplatePreviewComponent {
         templateQuestionId: question.templateQuestionId,
         order: question.order,
       })),
-      this.templatesStore.questionsSelection()?.questionConditions ?? [],
+      this.questionConditions(),
       answers,
     );
 

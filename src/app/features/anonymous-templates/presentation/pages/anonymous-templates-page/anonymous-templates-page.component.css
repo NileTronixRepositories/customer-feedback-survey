@@ -1,1 +1,61 @@
-/* Styles are composed with Tailwind utility classes in the component template. */
+/* Custom visible horizontal scrollbar */
+.table-scroll-container {
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #0f766e #f1f5f9;
+  -webkit-overflow-scrolling: touch;
+}
+
+.table-scroll-container::-webkit-scrollbar {
+  height: 8px;
+}
+
+.table-scroll-container::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+.table-scroll-container::-webkit-scrollbar-thumb {
+  background: #0f766e;
+  border-radius: 4px;
+}
+
+.table-scroll-container::-webkit-scrollbar-thumb:hover {
+  background: #0d9488;
+}
+
+/* Pinned / Sticky Actions Column */
+.sticky-action-col {
+  position: sticky;
+  z-index: 10;
+}
+
+:host-context([dir="rtl"]) .sticky-action-col,
+[dir="rtl"] .sticky-action-col {
+  left: 0;
+  right: auto;
+  box-shadow: -4px 0 8px -2px rgba(15, 23, 42, 0.08);
+}
+
+:host-context([dir="ltr"]) .sticky-action-col,
+[dir="ltr"] .sticky-action-col {
+  right: 0;
+  left: auto;
+  box-shadow: 4px 0 8px -2px rgba(15, 23, 42, 0.08);
+}
+
+th.sticky-action-col {
+  background-color: #f8fafc; /* bg-slate-50 */
+}
+
+td.sticky-action-col {
+  background-color: #ffffff;
+}
+
+tr:hover td.sticky-action-col {
+  background-color: #f8fafc; /* bg-slate-50 on row hover */
+}
+
+tr.bg-slate-50 td.sticky-action-col {
+  background-color: #f8fafc;
+}

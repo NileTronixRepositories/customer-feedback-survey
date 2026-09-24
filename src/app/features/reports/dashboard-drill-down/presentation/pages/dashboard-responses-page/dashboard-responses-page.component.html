@@ -8,11 +8,17 @@
   />
 
   <!-- Tools Bar (Search & Filter Card) -->
-  <section class="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs" [attr.aria-label]="'dashboardDrillDown.filters' | t">
+  <section
+    class="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs"
+    [attr.aria-label]="'dashboardDrillDown.filters' | t"
+  >
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3 items-end">
       <!-- Search Field with Submit -->
       <form class="sm:col-span-2 lg:col-span-6 flex flex-col gap-1.5" (ngSubmit)="applySearch()">
-        <label for="response-search" class="text-xs font-black text-slate-700 flex items-center gap-1.5">
+        <label
+          for="response-search"
+          class="text-xs font-black text-slate-700 flex items-center gap-1.5"
+        >
           <app-icon [icon]="searchIcon" [size]="13" class="text-slate-400" />
           {{ 'dashboardDrillDown.search' | t }}
         </label>
@@ -39,7 +45,11 @@
           <app-icon [icon]="slidersIcon" [size]="13" class="text-slate-400" />
           {{ 'dashboardDrillDown.sort' | t }}
         </span>
-        <select class="filter-control filter-select" [formControl]="sortControl" (change)="changeSort()">
+        <select
+          class="filter-control filter-select"
+          [formControl]="sortControl"
+          (change)="changeSort()"
+        >
           <option value="Newest">{{ 'dashboardDrillDown.newest' | t }}</option>
           <option value="Oldest">{{ 'dashboardDrillDown.oldest' | t }}</option>
         </select>
@@ -47,8 +57,14 @@
 
       <!-- Page Size -->
       <label class="lg:col-span-3 flex flex-col gap-1.5">
-        <span class="text-xs font-black text-slate-700">{{ 'dashboardDrillDown.pageSize' | t }}</span>
-        <select class="filter-control filter-select" [formControl]="pageSizeControl" (change)="changePageSize()">
+        <span class="text-xs font-black text-slate-700">{{
+          'dashboardDrillDown.pageSize' | t
+        }}</span>
+        <select
+          class="filter-control filter-select"
+          [formControl]="pageSizeControl"
+          (change)="changePageSize()"
+        >
           <option [ngValue]="10">10</option>
           <option [ngValue]="25">25</option>
           <option [ngValue]="50">50</option>
@@ -65,8 +81,13 @@
       <div class="h-64 animate-pulse rounded-2xl border border-slate-200 bg-white"></div>
     </section>
   } @else if (errorKey()) {
-    <section class="rounded-2xl border border-rose-200 bg-rose-50/70 p-8 text-center shadow-xs" role="alert">
-      <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-100 text-rose-600 mb-3">
+    <section
+      class="rounded-2xl border border-rose-200 bg-rose-50/70 p-8 text-center shadow-xs"
+      role="alert"
+    >
+      <div
+        class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-100 text-rose-600 mb-3"
+      >
         <app-icon [icon]="alertIcon" [size]="24" />
       </div>
       <h2 class="text-sm font-black text-rose-950">{{ errorKey() | t }}</h2>
@@ -82,18 +103,28 @@
     </section>
   } @else if (page(); as result) {
     @if (result.data.length === 0) {
-      <section class="rounded-2xl border border-dashed border-slate-200 bg-white p-12 text-center shadow-xs">
-        <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-50 text-slate-300 mb-4">
+      <section
+        class="rounded-2xl border border-dashed border-slate-200 bg-white p-12 text-center shadow-xs"
+      >
+        <div
+          class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-50 text-slate-300 mb-4"
+        >
           <app-icon [icon]="searchIcon" [size]="28" />
         </div>
-        <h2 class="text-base font-black text-slate-900">{{ 'dashboardDrillDown.emptyTitle' | t }}</h2>
-        <p class="mt-1 text-xs font-semibold text-slate-500 max-w-sm mx-auto">{{ 'dashboardDrillDown.emptyBody' | t }}</p>
+        <h2 class="text-base font-black text-slate-900">
+          {{ 'dashboardDrillDown.emptyTitle' | t }}
+        </h2>
+        <p class="mt-1 text-xs font-semibold text-slate-500 max-w-sm mx-auto">
+          {{ 'dashboardDrillDown.emptyBody' | t }}
+        </p>
       </section>
     } @else {
       <section class="space-y-3">
         <!-- Results Counter Badge -->
         <div class="flex items-center justify-between text-xs font-bold text-slate-500 px-1">
-          <span class="inline-flex items-center gap-1.5 rounded-xl bg-white border border-slate-200/70 px-3 py-1 text-xs font-black text-slate-700 shadow-2xs">
+          <span
+            class="inline-flex items-center gap-1.5 rounded-xl bg-white border border-slate-200/70 px-3 py-1 text-xs font-black text-slate-700 shadow-2xs"
+          >
             {{ resultSummary() }}
           </span>
         </div>
@@ -101,7 +132,9 @@
         <!-- Table Container -->
         <div class="overflow-x-auto rounded-2xl border border-slate-200/80 bg-white shadow-xs">
           <table class="w-full min-w-[64rem]">
-            <thead class="bg-slate-50/80 text-[11px] font-black uppercase tracking-wider text-slate-500">
+            <thead
+              class="bg-slate-50/80 text-[11px] font-black uppercase tracking-wider text-slate-500"
+            >
               <tr>
                 <th class="px-3.5 py-3 text-start">{{ 'dashboardDrillDown.source' | t }}</th>
                 <th class="px-3.5 py-3 text-start">{{ 'dashboardDrillDown.template' | t }}</th>
@@ -118,12 +151,18 @@
               @for (item of result.data; track item.responseId) {
                 <tr class="transition hover:bg-slate-50/80">
                   <td class="px-3.5 py-3">
-                    <span class="source-badge" [class.source-badge--anonymous]="item.source === 'Anonymous'">
+                    <span
+                      class="source-badge"
+                      [class.source-badge--anonymous]="item.source === 'Anonymous'"
+                    >
                       {{ item.source || '—' }}
                     </span>
                   </td>
                   <td class="px-3.5 py-3">
-                    <p class="max-w-[14rem] truncate font-black text-slate-950" [title]="localized(item.templateNameEn, item.templateNameAr)">
+                    <p
+                      class="max-w-[14rem] truncate font-black text-slate-950"
+                      [title]="localized(item.templateNameEn, item.templateNameAr)"
+                    >
                       {{ localized(item.templateNameEn, item.templateNameAr) }}
                     </p>
                   </td>
@@ -142,29 +181,40 @@
                   <td class="px-3.5 py-3">
                     <div class="flex items-center gap-1.5 flex-wrap">
                       @if (item.hasComplaint) {
-                        <span class="inline-flex items-center gap-1 rounded-md bg-rose-50 border border-rose-200 px-2 py-0.5 text-[10px] font-black text-rose-700">
+                        <span
+                          class="inline-flex items-center gap-1 rounded-md bg-rose-50 border border-rose-200 px-2 py-0.5 text-[10px] font-black text-rose-700"
+                        >
                           <app-icon [icon]="complaintIcon" [size]="11" />
                           {{ 'dashboardDrillDown.complaint' | t }}
                         </span>
                       } @else {
-                        <span class="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-400">
+                        <span
+                          class="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-400"
+                        >
                           {{ 'dashboardDrillDown.complaint' | t }}
                         </span>
                       }
                       @if (item.hasVoice) {
-                        <span class="inline-flex items-center gap-1 rounded-md bg-cyan-50 border border-cyan-200 px-2 py-0.5 text-[10px] font-black text-cyan-700">
+                        <span
+                          class="inline-flex items-center gap-1 rounded-md bg-cyan-50 border border-cyan-200 px-2 py-0.5 text-[10px] font-black text-cyan-700"
+                        >
                           <app-icon [icon]="micIcon" [size]="11" />
                           {{ 'dashboardDrillDown.voice' | t }}
                         </span>
                       } @else {
-                        <span class="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-400">
+                        <span
+                          class="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-400"
+                        >
                           {{ 'dashboardDrillDown.voice' | t }}
                         </span>
                       }
                     </div>
                   </td>
                   <td class="px-3.5 py-3">
-                    <p class="line-clamp-2 max-w-[16rem] text-[11px] font-semibold text-slate-500" [title]="preview(item)">
+                    <p
+                      class="line-clamp-2 max-w-[16rem] text-[11px] font-semibold text-slate-500"
+                      [title]="preview(item)"
+                    >
                       {{ preview(item) }}
                     </p>
                   </td>
@@ -185,7 +235,10 @@
         </div>
 
         <!-- Pagination Controls -->
-        <nav class="flex items-center justify-between gap-3 pt-2" [attr.aria-label]="'dashboardDrillDown.pagination' | t">
+        <nav
+          class="flex items-center justify-between gap-3 pt-2"
+          [attr.aria-label]="'dashboardDrillDown.pagination' | t"
+        >
           <span class="text-xs font-bold text-slate-500">
             {{ result.currentPage }} / {{ result.totalPages || 1 }}
           </span>
@@ -196,7 +249,7 @@
               [disabled]="!result.hasPreviousPage"
               (click)="previousPage()"
             >
-              <app-icon [icon]="chevronRightIcon" [size]="14" [flipRtl]="true" />
+              <app-icon [icon]="chevronLeftIcon" [size]="14" [flipRtl]="true" />
               {{ 'dashboardDrillDown.previous' | t }}
             </button>
             <button
@@ -206,7 +259,7 @@
               (click)="nextPage()"
             >
               {{ 'dashboardDrillDown.next' | t }}
-              <app-icon [icon]="chevronLeftIcon" [size]="14" [flipRtl]="true" />
+              <app-icon [icon]="chevronRightIcon" [size]="14" [flipRtl]="true" />
             </button>
           </div>
         </nav>
@@ -224,49 +277,140 @@
     @if (detailsLoading()) {
       <div class="flex flex-col items-center justify-center p-12 gap-3">
         <span class="loader" aria-hidden="true"></span>
-        <p class="text-xs font-bold text-slate-500">{{ 'dashboardDrillDown.detailsLoading' | t }}</p>
+        <p class="text-xs font-bold text-slate-500">
+          {{ 'dashboardDrillDown.detailsLoading' | t }}
+        </p>
       </div>
     } @else if (detailsErrorKey()) {
-      <div class="rounded-xl border border-rose-200 bg-rose-50/80 p-4 text-center text-xs font-bold text-rose-700 m-2 flex items-center justify-center gap-2" role="alert">
+      <div
+        class="rounded-xl border border-rose-200 bg-rose-50/80 p-4 text-center text-xs font-bold text-rose-700 m-2 flex items-center justify-center gap-2"
+        role="alert"
+      >
         <app-icon [icon]="alertIcon" [size]="16" />
         <span>{{ detailsErrorKey() | t }}</span>
       </div>
     } @else if (selectedDetails(); as details) {
-      <div class="space-y-4 text-xs">
+      <div class="space-y-3.5 text-xs">
         <!-- Response Metadata Summary -->
-        <div class="overflow-hidden rounded-xl border border-slate-200/90 bg-slate-50/60 p-3.5 shadow-2xs">
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
-            <div class="rounded-lg bg-white p-2.5 border border-slate-100 shadow-2xs">
-              <p class="text-[10px] font-black uppercase text-slate-400">{{ 'dashboardDrillDown.template' | t }}</p>
-              <p class="mt-1 break-words font-black text-slate-900 text-xs">{{ localized(details.templateNameEn, details.templateNameAr) }}</p>
+        <div class="rounded-xl border border-slate-200/80 bg-slate-50/60 p-3 shadow-2xs">
+          <!-- Top Row: Template & Score -->
+          <div
+            class="flex flex-wrap items-center justify-between gap-2 pb-2.5 mb-2.5 border-b border-slate-200/60"
+          >
+            <div class="flex items-center gap-2 min-w-0">
+              <span
+                class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[var(--theme-color-accent-softest)] text-[var(--theme-color-secondary)]"
+              >
+                <app-icon [icon]="templateIcon" [size]="14" />
+              </span>
+              <div class="min-w-0">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">{{
+                  'dashboardDrillDown.template' | t
+                }}</span>
+                <h4
+                  class="text-sm font-black text-slate-900 truncate"
+                  [title]="localized(details.templateNameEn, details.templateNameAr)"
+                >
+                  {{ localized(details.templateNameEn, details.templateNameAr) }}
+                </h4>
+              </div>
             </div>
-            <div class="rounded-lg bg-white p-2.5 border border-slate-100 shadow-2xs">
-              <p class="text-[10px] font-black uppercase text-slate-400">{{ 'dashboardDrillDown.branch' | t }}</p>
-              <p class="mt-1 break-words font-black text-slate-900 text-xs">{{ localized(details.branchNameEn, details.branchNameAr) }}</p>
+
+            @if (details.isScored && details.scorePercentage !== null) {
+              <span
+                class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-black shadow-2xs shrink-0"
+                [class.bg-emerald-50]="details.scorePercentage >= 80"
+                [class.text-emerald-700]="details.scorePercentage >= 80"
+                [class.border]="true"
+                [class.border-emerald-200]="details.scorePercentage >= 80"
+                [class.bg-amber-50]="details.scorePercentage >= 60 && details.scorePercentage < 80"
+                [class.text-amber-700]="
+                  details.scorePercentage >= 60 && details.scorePercentage < 80
+                "
+                [class.border-amber-200]="
+                  details.scorePercentage >= 60 && details.scorePercentage < 80
+                "
+                [class.bg-rose-50]="details.scorePercentage < 60"
+                [class.text-rose-700]="details.scorePercentage < 60"
+                [class.border-rose-200]="details.scorePercentage < 60"
+              >
+                <span
+                  class="h-1.5 w-1.5 rounded-full"
+                  [class.bg-emerald-500]="details.scorePercentage >= 80"
+                  [class.bg-amber-500]="
+                    details.scorePercentage >= 60 && details.scorePercentage < 80
+                  "
+                  [class.bg-rose-500]="details.scorePercentage < 60"
+                ></span>
+                {{ details.scorePercentage.toFixed(1) }}%
+              </span>
+            }
+          </div>
+
+          <!-- Bottom Row: Branch, Operator & Submission Date -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+            <div
+              class="flex items-center gap-2 rounded-lg bg-white/90 border border-slate-200/60 px-2.5 py-1.5 shadow-2xs min-w-0"
+            >
+              <app-icon [icon]="branchIcon" [size]="13" class="text-slate-400 shrink-0" />
+              <div class="min-w-0">
+                <span class="text-[9px] font-bold text-slate-400 block">{{
+                  'dashboardDrillDown.branch' | t
+                }}</span>
+                <span class="font-bold text-slate-800 text-xs block truncate">{{
+                  localized(details.branchNameEn, details.branchNameAr)
+                }}</span>
+              </div>
             </div>
-            <div class="rounded-lg bg-white p-2.5 border border-slate-100 shadow-2xs">
-              <p class="text-[10px] font-black uppercase text-slate-400">{{ 'dashboardDrillDown.operator' | t }}</p>
-              <p class="mt-1 break-words font-black text-slate-900 text-xs">{{ localized(details.operatorNameEn, details.operatorNameAr) }}</p>
+
+            <div
+              class="flex items-center gap-2 rounded-lg bg-white/90 border border-slate-200/60 px-2.5 py-1.5 shadow-2xs min-w-0"
+            >
+              <app-icon [icon]="userIcon" [size]="13" class="text-slate-400 shrink-0" />
+              <div class="min-w-0">
+                <span class="text-[9px] font-bold text-slate-400 block">{{
+                  'dashboardDrillDown.operator' | t
+                }}</span>
+                <span class="font-bold text-slate-800 text-xs block truncate">{{
+                  localized(details.operatorNameEn, details.operatorNameAr)
+                }}</span>
+              </div>
             </div>
-            <div class="rounded-lg bg-white p-2.5 border border-slate-100 shadow-2xs">
-              <p class="text-[10px] font-black uppercase text-slate-400">{{ 'dashboardDrillDown.submittedOn' | t }}</p>
-              <p class="mt-1 break-words font-black text-slate-900 text-xs">{{ details.submittedOnUtc | date: 'medium' }}</p>
+
+            <div
+              class="flex items-center gap-2 rounded-lg bg-white/90 border border-slate-200/60 px-2.5 py-1.5 shadow-2xs min-w-0"
+            >
+              <app-icon [icon]="calendarIcon" [size]="13" class="text-slate-400 shrink-0" />
+              <div class="min-w-0">
+                <span class="text-[9px] font-bold text-slate-400 block">{{
+                  'dashboardDrillDown.submittedOn' | t
+                }}</span>
+                <span class="font-bold text-slate-800 text-xs block truncate">{{
+                  details.submittedOnUtc | date: 'medium'
+                }}</span>
+              </div>
             </div>
           </div>
         </div>
 
         <!-- Custom Inputs -->
         @if (details.customInputs.length > 0) {
-          <section class="space-y-2">
+          <section class="space-y-1.5">
             <h3 class="text-xs font-black text-slate-900 flex items-center gap-1.5">
               <app-icon [icon]="slidersIcon" [size]="14" class="text-slate-400" />
               {{ 'dashboardDrillDown.customInputs' | t }}
             </h3>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
               @for (item of details.customInputs; track item.labelEn) {
-                <div class="flex items-center justify-between gap-3 rounded-xl border border-slate-100 bg-slate-50/50 px-3.5 py-2 text-xs shadow-2xs">
-                  <strong class="font-black text-slate-700">{{ localized(item.labelEn, item.labelAr) }}</strong>
-                  <span class="font-bold text-slate-600">{{ detailValue(item) }}</span>
+                <div
+                  class="flex items-center justify-between gap-3 rounded-xl border border-slate-200/70 bg-white px-3 py-1.5 text-xs shadow-2xs"
+                >
+                  <span class="font-bold text-slate-500 text-[11px] truncate">{{
+                    localized(item.labelEn, item.labelAr)
+                  }}</span>
+                  <span class="font-black text-slate-800 text-xs shrink-0">{{
+                    detailValue(item)
+                  }}</span>
                 </div>
               }
             </div>
@@ -275,27 +419,63 @@
 
         <!-- Questions & Answers -->
         <section class="space-y-2">
-          <h3 class="text-xs font-black text-slate-900 flex items-center gap-1.5">
-            <app-icon [icon]="templateIcon" [size]="14" class="text-slate-400" />
-            {{ 'dashboardDrillDown.answers' | t }}
-          </h3>
-          <div class="space-y-2 max-h-[50vh] overflow-y-auto pr-1">
+          <div class="flex items-center justify-between gap-2">
+            <h3 class="text-xs font-black text-slate-900 flex items-center gap-1.5">
+              <app-icon
+                [icon]="templateIcon"
+                [size]="14"
+                class="text-[var(--theme-color-secondary)]"
+              />
+              {{ 'dashboardDrillDown.answers' | t }}
+              <span
+                class="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-black text-slate-600"
+              >
+                {{ details.answers.length }}
+              </span>
+            </h3>
+          </div>
+
+          <div
+            class="grid grid-cols-1 md:grid-cols-2 gap-2.5 items-start max-h-[52vh] overflow-y-auto pr-1"
+          >
             @for (item of details.answers; track $index) {
-              <div class="rounded-xl border border-slate-100 bg-slate-50/60 p-3 text-xs space-y-2 shadow-2xs">
-                <div class="flex items-start justify-between gap-2">
-                  <strong class="block font-black text-slate-900 text-xs leading-snug">{{ localized(item.labelEn, item.labelAr) }}</strong>
-                  <span class="rounded-md bg-white border border-slate-200/60 px-2 py-0.5 text-[11px] font-black text-[var(--theme-color-secondary)] shrink-0 shadow-2xs">
+              <div
+                class="flex flex-col justify-between gap-2 rounded-xl border border-slate-200/80 bg-white p-3 shadow-2xs transition hover:border-slate-300 hover:shadow-xs min-h-[72px]"
+              >
+                <div class="flex items-start justify-between gap-2.5">
+                  <div class="flex items-start gap-2 min-w-0">
+                    <span
+                      class="shrink-0 rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-black text-slate-500"
+                    >
+                      {{ $index + 1 }}
+                    </span>
+                    <strong class="font-bold text-slate-900 text-xs leading-snug break-words">
+                      {{ localized(item.labelEn, item.labelAr) }}
+                    </strong>
+                  </div>
+
+                  <span
+                    class="shrink-0 rounded-lg px-2.5 py-1 text-[11px] font-black border shadow-2xs {{
+                      answerBadgeClass(detailValue(item))
+                    }}"
+                  >
                     {{ detailValue(item) }}
                   </span>
                 </div>
+
                 @if (item.voiceUrl) {
-                  <div class="pt-1">
+                  <div class="pt-1.5 border-t border-slate-100">
                     <audio class="w-full h-8" controls [src]="item.voiceUrl"></audio>
                   </div>
                 }
                 @if (item.imageUrl) {
-                  <div class="pt-1">
-                    <a [href]="item.imageUrl" target="_blank" rel="noopener" class="inline-flex items-center gap-1 text-xs font-bold text-[var(--theme-color-secondary)] hover:underline">
+                  <div class="pt-1.5 border-t border-slate-100">
+                    <a
+                      [href]="item.imageUrl"
+                      target="_blank"
+                      rel="noopener"
+                      class="inline-flex items-center gap-1 text-xs font-bold text-[var(--theme-color-secondary)] hover:underline"
+                    >
                       <app-icon [icon]="detailsIcon" [size]="13" />
                       {{ 'dashboardDrillDown.openImage' | t }}
                     </a>
@@ -303,9 +483,11 @@
                 }
               </div>
             } @empty {
-              <p class="text-xs font-bold text-slate-400 p-6 text-center rounded-xl bg-slate-50 border border-slate-100">
+              <div
+                class="col-span-full rounded-xl bg-slate-50 border border-dashed border-slate-200 p-6 text-center text-xs font-bold text-slate-400"
+              >
                 {{ 'dashboardDrillDown.noAnswers' | t }}
-              </p>
+              </div>
             }
           </div>
         </section>

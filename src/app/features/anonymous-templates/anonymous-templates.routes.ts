@@ -1,6 +1,5 @@
 import { Routes } from '@angular/router';
 import { BranchesService } from '../super-admin/branches/data/branches.service';
-import { SuperAdminTemplatesService } from '../super-admin/templates/data/super-admin-templates.service';
 import { AnonymousTemplatesService } from './data/anonymous-templates.service';
 import { anonymousResponsesReportAccessGuard } from './presentation/guards/anonymous-responses-report-access.guard';
 import { anonymousTemplateAccessGuard } from './presentation/guards/anonymous-template-access.guard';
@@ -80,7 +79,6 @@ export const ANONYMOUS_TEMPLATES_ROUTES: Routes = [
       AnonymousTemplatesService,
       AnonymousTemplatesStore,
       BranchesService,
-      SuperAdminTemplatesService,
     ],
     loadComponent: () =>
       import('./presentation/pages/anonymous-templates-page/anonymous-templates-page.component').then(

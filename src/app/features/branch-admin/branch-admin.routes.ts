@@ -15,10 +15,10 @@ import { questionsAccessGuard } from './questions/presentation/guards/questions-
 import { QuestionsService } from './questions/data/questions.service';
 import { QuestionsStore } from './questions/presentation/state/questions.store';
 import { BranchSatisfactionReportService } from './reports/data/branch-satisfaction-report.service';
-import { BranchTemplatesExcelReportService } from './reports/data/branch-templates-excel-report.service';
 import { BranchTemplatesPdfReportService } from './reports/data/branch-templates-pdf-report.service';
 import { BranchSatisfactionReportStore } from './reports/presentation/state/branch-satisfaction-report.store';
 import { BranchTemplatesPdfReportStore } from './reports/presentation/state/branch-templates-pdf-report.store';
+import { branchTemplateReportsAccessGuard } from './reports/presentation/guards/branch-template-reports-access.guard';
 import { branchTemplateAccessGuard } from './templates/presentation/guards/branch-template-access.guard';
 import { BranchTemplatesService } from './templates/data/branch-templates.service';
 import { BranchTemplatesStore } from './templates/presentation/state/branch-templates.store';
@@ -74,10 +74,9 @@ export const BRANCH_ADMIN_ROUTES: Routes = [
       },
       {
         path: 'reports/templates-pdf',
-        canActivate: [branchDashboardAccessGuard],
+        canActivate: [branchTemplateReportsAccessGuard],
         providers: [
           AnonymousTemplatesService,
-          BranchTemplatesExcelReportService,
           BranchTemplatesPdfReportService,
           BranchTemplatesPdfReportStore,
         ],

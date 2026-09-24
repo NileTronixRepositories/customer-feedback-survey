@@ -3,7 +3,18 @@ import { ChangeDetectionStrategy, Component, OnInit, effect, inject, signal } fr
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { finalize, take } from 'rxjs';
-import { ArrowLeft, KeyRound, Pencil, RotateCcw, Save, Trash2, UserPlus, UsersRound, UserX, X } from 'lucide-angular';
+import {
+  ArrowLeft,
+  KeyRound,
+  Pencil,
+  RotateCcw,
+  Save,
+  Trash2,
+  UserPlus,
+  UsersRound,
+  UserX,
+  X,
+} from 'lucide-angular';
 import { I18nService } from '../../../../../../core/services/i18n.service';
 import { Role } from '../../../../../../shared/models/role.model';
 import { TranslatePipe } from '../../../../../../shared/pipes/translate.pipe';
@@ -19,6 +30,7 @@ import {
 import { UserPasswordResetService } from '../../../../../auth/data/user-password-reset.service';
 import { AuthStore } from '../../../../../auth/presentation/state/auth.store';
 import { DepartmentAdminsStore } from '../../../../../department-admin/department-admins/presentation/state/department-admins.store';
+import { OperatorsStore } from '../../../../../department-admin/operators/presentation/state/operators.store';
 import { DepartmentDetailsUser } from '../../../domain/department.model';
 import { DepartmentsStore } from '../../state/departments.store';
 
@@ -49,6 +61,7 @@ interface ResetPasswordTarget {
 export class DepartmentDetailsPageComponent implements OnInit {
   readonly departmentsStore = inject(DepartmentsStore);
   readonly departmentAdminsStore = inject(DepartmentAdminsStore);
+  readonly operatorsStore = inject(OperatorsStore);
   private readonly authStore = inject(AuthStore);
   private readonly formBuilder = inject(FormBuilder);
   private readonly i18n = inject(I18nService);
@@ -68,6 +81,7 @@ export class DepartmentDetailsPageComponent implements OnInit {
   readonly usersIcon = UsersRound;
   readonly editMode = signal(false);
   readonly createDepartmentAdminModalOpen = signal(false);
+  readonly createOperatorModalOpen = signal(false);
   readonly resetPasswordModalOpen = signal(false);
   readonly resetPasswordTarget = signal<ResetPasswordTarget | null>(null);
   readonly resettingPassword = signal(false);
@@ -87,6 +101,16 @@ export class DepartmentDetailsPageComponent implements OnInit {
     email: ['', [Validators.required, Validators.email, Validators.maxLength(200)]],
     phoneNumber: ['', Validators.maxLength(50)],
     password: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(200)]],
+  });
+
+  readonly operatorForm = this.formBuilder.nonNullable.group({
+    departmentId: ['', [Validators.required]],
+    nameEn: ['', [Validators.required, Validators.maxLength(200)]],
+    nameAr: ['', [Validators.maxLength(200)]],
+    userName: ['', [Validators.required, Validators.maxLength(100)]],
+    email: ['', [Validators.required, Validators.email, Validators.maxLength(256)]],
+    phoneNumber: ['', [Validators.maxLength(30)]],
+    password: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(100)]],
   });
 
   private patchedDepartmentId = '';
@@ -217,6 +241,49 @@ export class DepartmentDetailsPageComponent implements OnInit {
     });
   }
 
+  openCreateOperator(): void {
+    const department = this.departmentsStore.selectedDetails();
+    if (!department || !department.isActive) {
+      return;
+    }
+
+    this.operatorsStore.clearMessages();
+    this.operatorForm.reset();
+    this.operatorForm.controls.departmentId.setValue(department.id);
+    this.createOperatorModalOpen.set(true);
+  }
+
+  closeCreateOperatorModal(): void {
+    this.operatorForm.reset();
+    this.createOperatorModalOpen.set(false);
+  }
+
+  createOperator(): void {
+    const department = this.departmentsStore.selectedDetails();
+    this.operatorForm.markAllAsTouched();
+
+    if (!department || this.operatorForm.invalid || this.operatorsStore.creating()) {
+      return;
+    }
+
+    const value = this.operatorForm.getRawValue();
+    this.operatorsStore.createOperator(
+      {
+        departmentId: department.id,
+        nameEn: value.nameEn.trim(),
+        nameAr: value.nameAr.trim(),
+        userName: value.userName.trim(),
+        email: value.email.trim(),
+        phoneNumber: value.phoneNumber.trim(),
+        password: value.password,
+      },
+      () => {
+        this.closeCreateOperatorModal();
+        this.departmentsStore.loadDetails(department.id, false);
+      },
+    );
+  }
+
   canResetPassword(role: Role, applicationUserId: string): boolean {
     return this.authStore.canResetUserPassword(role, applicationUserId);
   }
@@ -226,16 +293,40 @@ export class DepartmentDetailsPageComponent implements OnInit {
   }
 
   canDeactivateDepartmentAdmin(admin: DepartmentDetailsUser): boolean {
-    return Boolean(admin.departmentAdminId) && admin.isActive && this.authStore.canDeactivateDepartmentAdmins();
+    return (
+      Boolean(admin.departmentAdminId) &&
+      admin.isActive &&
+      this.authStore.canDeactivateDepartmentAdmins()
+    );
   }
 
   canRestoreDepartmentAdmin(admin: DepartmentDetailsUser): boolean {
-    return Boolean(admin.departmentAdminId) && !admin.isActive && this.authStore.canRestoreDepartmentAdmins();
+    return (
+      Boolean(admin.departmentAdminId) &&
+      !admin.isActive &&
+      this.authStore.canRestoreDepartmentAdmins()
+    );
+  }
+
+  canDeactivateOperator(operator: DepartmentDetailsUser): boolean {
+    return (
+      Boolean(operator.operatorId) && operator.isActive && this.authStore.canDeactivateOperators()
+    );
+  }
+
+  canRestoreOperator(operator: DepartmentDetailsUser): boolean {
+    return (
+      Boolean(operator.operatorId) && !operator.isActive && this.authStore.canRestoreOperators()
+    );
   }
 
   deactivateDepartmentAdmin(admin: DepartmentDetailsUser, event?: MouseEvent): void {
     event?.stopPropagation();
-    if (!admin.departmentAdminId || !this.canDeactivateDepartmentAdmin(admin) || this.departmentAdminsStore.deactivating()) {
+    if (
+      !admin.departmentAdminId ||
+      !this.canDeactivateDepartmentAdmin(admin) ||
+      this.departmentAdminsStore.deactivating()
+    ) {
       return;
     }
 
@@ -254,7 +345,11 @@ export class DepartmentDetailsPageComponent implements OnInit {
 
   restoreDepartmentAdmin(admin: DepartmentDetailsUser, event?: MouseEvent): void {
     event?.stopPropagation();
-    if (!admin.departmentAdminId || !this.canRestoreDepartmentAdmin(admin) || this.departmentAdminsStore.restoring()) {
+    if (
+      !admin.departmentAdminId ||
+      !this.canRestoreDepartmentAdmin(admin) ||
+      this.departmentAdminsStore.restoring()
+    ) {
       return;
     }
 
@@ -265,6 +360,52 @@ export class DepartmentDetailsPageComponent implements OnInit {
 
     const department = this.departmentsStore.selectedDetails();
     this.departmentAdminsStore.restoreDepartmentAdmin(admin.departmentAdminId, () => {
+      if (department) {
+        this.departmentsStore.loadDetails(department.id, false);
+      }
+    });
+  }
+
+  deactivateOperator(operator: DepartmentDetailsUser, event?: MouseEvent): void {
+    event?.stopPropagation();
+    if (
+      !operator.operatorId ||
+      !this.canDeactivateOperator(operator) ||
+      this.operatorsStore.deactivating()
+    ) {
+      return;
+    }
+
+    const confirmed = globalThis.confirm(this.i18n.translate('operators.deactivateConfirm'));
+    if (!confirmed) {
+      return;
+    }
+
+    const department = this.departmentsStore.selectedDetails();
+    this.operatorsStore.deactivateOperator(operator.operatorId, () => {
+      if (department) {
+        this.departmentsStore.loadDetails(department.id, false);
+      }
+    });
+  }
+
+  restoreOperator(operator: DepartmentDetailsUser, event?: MouseEvent): void {
+    event?.stopPropagation();
+    if (
+      !operator.operatorId ||
+      !this.canRestoreOperator(operator) ||
+      this.operatorsStore.restoring()
+    ) {
+      return;
+    }
+
+    const confirmed = globalThis.confirm(this.i18n.translate('operators.restoreConfirm'));
+    if (!confirmed) {
+      return;
+    }
+
+    const department = this.departmentsStore.selectedDetails();
+    this.operatorsStore.restoreOperator(operator.operatorId, () => {
       if (department) {
         this.departmentsStore.loadDetails(department.id, false);
       }
@@ -364,7 +505,31 @@ export class DepartmentDetailsPageComponent implements OnInit {
     return 'branches.fieldRequired';
   }
 
-  private departmentAdminRequiredError(field: keyof typeof this.departmentAdminForm.controls): string {
+  operatorFieldError(field: keyof typeof this.operatorForm.controls): string {
+    const control = this.operatorForm.controls[field];
+    if (!control.touched || control.valid) {
+      return '';
+    }
+
+    if (control.hasError('required')) {
+      return this.operatorRequiredErrorKey(field);
+    }
+    if (control.hasError('email')) {
+      return 'operators.emailInvalid';
+    }
+    if (control.hasError('minlength')) {
+      return 'operators.passwordMinLength';
+    }
+    if (control.hasError('maxlength')) {
+      return this.operatorMaxLengthErrorKey(field);
+    }
+
+    return 'operators.validationError';
+  }
+
+  private departmentAdminRequiredError(
+    field: keyof typeof this.departmentAdminForm.controls,
+  ): string {
     const errorKeys: Record<keyof typeof this.departmentAdminForm.controls, string> = {
       departmentId: 'departmentAdmins.departmentIdRequired',
       nameEn: 'departmentAdmins.nameEnRequired',
@@ -373,6 +538,20 @@ export class DepartmentDetailsPageComponent implements OnInit {
       email: 'departmentAdmins.emailRequired',
       phoneNumber: 'branches.fieldRequired',
       password: 'departmentAdmins.passwordRequired',
+    };
+
+    return errorKeys[field];
+  }
+
+  private operatorRequiredErrorKey(field: keyof typeof this.operatorForm.controls): string {
+    const errorKeys: Record<keyof typeof this.operatorForm.controls, string> = {
+      departmentId: 'operators.departmentRequired',
+      nameEn: 'operators.nameEnRequired',
+      nameAr: 'operators.validationError',
+      userName: 'operators.userNameRequired',
+      email: 'operators.emailRequired',
+      phoneNumber: 'operators.validationError',
+      password: 'operators.passwordRequired',
     };
 
     return errorKeys[field];
@@ -393,7 +572,9 @@ export class DepartmentDetailsPageComponent implements OnInit {
     return englishText || arabicText || fallback;
   }
 
-  private departmentAdminMaxLengthError(field: keyof typeof this.departmentAdminForm.controls): string {
+  private departmentAdminMaxLengthError(
+    field: keyof typeof this.departmentAdminForm.controls,
+  ): string {
     const errorKeys: Record<keyof typeof this.departmentAdminForm.controls, string> = {
       departmentId: 'branches.fieldRequired',
       nameEn: 'departmentAdmins.nameEnMaxLength',
@@ -402,6 +583,20 @@ export class DepartmentDetailsPageComponent implements OnInit {
       email: 'departmentAdmins.emailMaxLength',
       phoneNumber: 'departmentAdmins.phoneNumberMaxLength',
       password: 'departmentAdmins.passwordMaxLength',
+    };
+
+    return errorKeys[field];
+  }
+
+  private operatorMaxLengthErrorKey(field: keyof typeof this.operatorForm.controls): string {
+    const errorKeys: Record<keyof typeof this.operatorForm.controls, string> = {
+      departmentId: 'operators.validationError',
+      nameEn: 'operators.nameEnMaxLength',
+      nameAr: 'operators.nameArMaxLength',
+      userName: 'operators.userNameMaxLength',
+      email: 'operators.emailMaxLength',
+      phoneNumber: 'operators.phoneNumberMaxLength',
+      password: 'operators.passwordMaxLength',
     };
 
     return errorKeys[field];

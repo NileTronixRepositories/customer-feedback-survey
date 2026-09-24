@@ -1,6 +1,12 @@
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  AbstractControl,
+  FormBuilder,
+  ReactiveFormsModule,
+  ValidationErrors,
+  Validators,
+} from '@angular/forms';
 import {
   ChevronLeft,
   ChevronRight,
@@ -61,6 +67,8 @@ export class SuperAdminTemplatesPageComponent implements OnInit {
   readonly copiedTemplateId = signal<string | null>(null);
   readonly copyModalOpen = signal(false);
   readonly selectedTemplateForCopy = signal<SuperAdminTemplateListItem | null>(null);
+  readonly assignModalOpen = signal(false);
+  readonly selectedTemplateForAssignment = signal<SuperAdminTemplateListItem | null>(null);
   readonly selectedLogo = signal<File | null>(null);
   readonly logoError = signal<string | null>(null);
 
@@ -75,9 +83,16 @@ export class SuperAdminTemplatesPageComponent implements OnInit {
 
   readonly copyForm = this.formBuilder.nonNullable.group({
     branchId: ['', [Validators.required]],
-    activeFrom: [''],
-    expireTo: [''],
   });
+
+  readonly assignForm = this.formBuilder.nonNullable.group(
+    {
+      branchId: ['', [Validators.required]],
+      activeFrom: ['', [Validators.required]],
+      expireTo: [''],
+    },
+    { validators: [this.expiryAfterActivationValidator] },
+  );
 
   ngOnInit(): void {
     this.templatesStore.load();
@@ -124,14 +139,9 @@ export class SuperAdminTemplatesPageComponent implements OnInit {
   }
 
   openCopyModal(template: SuperAdminTemplateListItem): void {
+    if (!this.canCopyToBranch(template)) return;
     this.selectedTemplateForCopy.set(template);
-    this.copyForm.reset({
-      branchId: '',
-      activeFrom: this.isGlobalSource(template) ? this.toLocalDateTime(new Date()) : '',
-      expireTo: '',
-    });
-    this.selectedLogo.set(null);
-    this.logoError.set(null);
+    this.copyForm.reset({ branchId: '' });
     this.copyModalOpen.set(true);
     this.templatesStore.clearCopyState();
   }
@@ -142,9 +152,7 @@ export class SuperAdminTemplatesPageComponent implements OnInit {
     }
     this.copyModalOpen.set(false);
     this.selectedTemplateForCopy.set(null);
-    this.copyForm.reset({ branchId: '', activeFrom: '', expireTo: '' });
-    this.selectedLogo.set(null);
-    this.logoError.set(null);
+    this.copyForm.reset({ branchId: '' });
     this.templatesStore.clearCopyState();
   }
 
@@ -156,20 +164,49 @@ export class SuperAdminTemplatesPageComponent implements OnInit {
       return;
     }
 
-    const value = this.copyForm.getRawValue();
-    if (this.isGlobalSource(template)) {
-      if (!value.activeFrom) return;
-      this.templatesStore.assignGlobalToBranch({
-        globalTemplateId: template.templateId,
-        branchId: value.branchId,
-        activeFrom: new Date(value.activeFrom).toISOString(),
-        expireTo: value.expireTo ? new Date(value.expireTo).toISOString() : null,
-        logo: this.selectedLogo(),
-      });
-      return;
-    }
+    this.templatesStore.copyToBranch({
+      templateId: template.templateId,
+      branchId: this.copyForm.controls.branchId.value,
+    });
+  }
 
-    this.templatesStore.copyToBranch({ templateId: template.templateId, branchId: value.branchId });
+  openAssignModal(template: SuperAdminTemplateListItem): void {
+    if (!this.canAssignToBranch(template)) return;
+    this.selectedTemplateForAssignment.set(template);
+    this.assignForm.reset({
+      branchId: '',
+      activeFrom: this.toLocalDateTime(new Date()),
+      expireTo: '',
+    });
+    this.selectedLogo.set(null);
+    this.logoError.set(null);
+    this.assignModalOpen.set(true);
+    this.templatesStore.clearCopyState();
+  }
+
+  closeAssignModal(): void {
+    if (this.templatesStore.copying()) return;
+    this.assignModalOpen.set(false);
+    this.selectedTemplateForAssignment.set(null);
+    this.assignForm.reset({ branchId: '', activeFrom: '', expireTo: '' });
+    this.selectedLogo.set(null);
+    this.logoError.set(null);
+    this.templatesStore.clearCopyState();
+  }
+
+  assignSelectedTemplate(): void {
+    this.assignForm.markAllAsTouched();
+    const template = this.selectedTemplateForAssignment();
+    if (!template || this.assignForm.invalid || this.templatesStore.copying()) return;
+
+    const value = this.assignForm.getRawValue();
+    this.templatesStore.assignGlobalToBranch({
+      globalTemplateId: template.templateId,
+      branchId: value.branchId,
+      activeFrom: new Date(value.activeFrom).toISOString(),
+      expireTo: value.expireTo ? new Date(value.expireTo).toISOString() : null,
+      logo: this.selectedLogo(),
+    });
   }
 
   isGlobalSource(template: SuperAdminTemplateListItem): boolean {
@@ -183,10 +220,31 @@ export class SuperAdminTemplatesPageComponent implements OnInit {
     return template.isActive ? 'common.active' : 'branches.inactive';
   }
 
-  canOpenBranchAction(template: SuperAdminTemplateListItem): boolean {
-    return this.isGlobalSource(template)
-      ? this.authStore.hasPermission('AnonymousTemplates.AssignGlobalToBranch')
-      : true;
+  canCopyToBranch(template: SuperAdminTemplateListItem): boolean {
+    if (!this.authStore.hasPermission('Templates.Create') || !template.isActive || !template.branchId) {
+      return false;
+    }
+
+    if (template.templateKind === 'Authorized') return true;
+    return (
+      template.scope === 'Branch' &&
+      !template.isGlobal &&
+      !template.isManagedGlobalCopy &&
+      !template.sourceGlobalAnonymousTemplateId
+    );
+  }
+
+  canAssignToBranch(template: SuperAdminTemplateListItem): boolean {
+    return (
+      this.authStore.hasPermission('AnonymousTemplates.AssignGlobalToBranch') &&
+      this.isGlobalSource(template) &&
+      !template.isArchived
+    );
+  }
+
+  copyTargetBranches(): readonly BranchSelection[] {
+    const sourceBranchId = this.selectedTemplateForCopy()?.branchId;
+    return this.branchOptions().filter((branch) => branch.id !== sourceBranchId);
   }
 
   onLogoSelected(event: Event): void {
@@ -333,5 +391,14 @@ export class SuperAdminTemplatesPageComponent implements OnInit {
   private toLocalDateTime(value: Date): string {
     const offset = value.getTimezoneOffset() * 60_000;
     return new Date(value.getTime() - offset).toISOString().slice(0, 16);
+  }
+
+  private expiryAfterActivationValidator(control: AbstractControl): ValidationErrors | null {
+    const activeFrom = control.get('activeFrom')?.value;
+    const expireTo = control.get('expireTo')?.value;
+    if (!activeFrom || !expireTo) return null;
+    return new Date(expireTo).getTime() > new Date(activeFrom).getTime()
+      ? null
+      : { expiryNotAfterActivation: true };
   }
 }

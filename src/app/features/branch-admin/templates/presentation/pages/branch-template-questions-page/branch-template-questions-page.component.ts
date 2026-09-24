@@ -224,7 +224,8 @@ export class BranchTemplateQuestionsPageComponent implements OnInit {
       ...questions,
       { ...question, isSelected: true, order: questions.length + 1 },
     ]);
-    this.collapseAvailableGroup(question.groupId);
+    // Keep group open so user can easily add multiple questions
+    // this.collapseAvailableGroup(question.groupId);
   }
 
   removeQuestion(questionId: string): void {

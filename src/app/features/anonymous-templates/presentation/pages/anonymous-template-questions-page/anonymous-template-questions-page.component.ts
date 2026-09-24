@@ -89,6 +89,7 @@ export class AnonymousTemplateQuestionsPageComponent implements OnInit {
   readonly conditionsDirty = signal(false);
   readonly initializedSelectionId = signal('');
   readonly draggingQuestionId = signal<string | null>(null);
+  readonly expandedAvailableGroupIds = signal<readonly string[]>([]);
 
   readonly anonymousTemplateId = computed(
     () => this.route.snapshot.paramMap.get('anonymousTemplateId') ?? '',
@@ -134,7 +135,11 @@ export class AnonymousTemplateQuestionsPageComponent implements OnInit {
   readonly pageTitle = computed(() => {
     const selection = this.anonymousTemplatesStore.questionsSelection();
     const template = this.anonymousTemplatesStore.selectedTemplate();
-    return this.localizedText(selection?.nameEn ?? template?.nameEn, selection?.nameAr ?? template?.nameAr, '');
+    return this.localizedText(
+      selection?.nameEn ?? template?.nameEn,
+      selection?.nameAr ?? template?.nameAr,
+      '',
+    );
   });
   readonly isDirty = computed(() => this.toSelectedIdsKey() !== this.toOriginalSelectedIdsKey());
   readonly hasPendingChanges = computed(() => this.isDirty() || this.conditionsDirty());
@@ -213,6 +218,26 @@ export class AnonymousTemplateQuestionsPageComponent implements OnInit {
 
   groupDisplayName(group: { nameEn: string | null; nameAr?: string | null }): string {
     return this.localizedText(group.nameEn, group.nameAr);
+  }
+
+  groupSecondaryDisplayName(group: { nameEn: string | null; nameAr?: string | null }): string {
+    const isArabic = this.i18n.language() === 'ar';
+    const secondary = isArabic ? (group.nameEn ?? '') : (group.nameAr ?? '');
+    return secondary.trim() !== this.groupDisplayName(group).trim() ? secondary.trim() : '';
+  }
+
+  toggleAvailableGroup(groupId: string): void {
+    this.expandedAvailableGroupIds.update((groupIds) =>
+      groupIds.includes(groupId)
+        ? groupIds.filter((currentGroupId) => currentGroupId !== groupId)
+        : [...groupIds, groupId],
+    );
+  }
+
+  isAvailableGroupExpanded(groupId: string): boolean {
+    return (
+      this.expandedAvailableGroupIds().includes(groupId) || this.searchText().trim().length > 0
+    );
   }
 
   questionGroupDisplayName(question: {
@@ -409,7 +434,11 @@ export class AnonymousTemplateQuestionsPageComponent implements OnInit {
     const selectedQuestionIds = this.selectedQuestionIds();
 
     for (const question of this.anonymousTemplatesStore.questionsSelection()?.questions ?? []) {
-      if (selectedQuestionIds.has(question.questionId) || !question.isActive || !question.isSelectable) {
+      if (
+        selectedQuestionIds.has(question.questionId) ||
+        !question.isActive ||
+        !question.isSelectable
+      ) {
         continue;
       }
 
@@ -506,10 +535,7 @@ export class AnonymousTemplateQuestionsPageComponent implements OnInit {
         resolvedQuestion.anonymousTemplateQuestionId !== null &&
         resolvedQuestion.anonymousTemplateQuestionId.length > 0
       ) {
-        draftQuestionsByLogicId.set(
-          resolvedQuestion.anonymousTemplateQuestionId,
-          resolvedQuestion,
-        );
+        draftQuestionsByLogicId.set(resolvedQuestion.anonymousTemplateQuestionId, resolvedQuestion);
       }
     }
 

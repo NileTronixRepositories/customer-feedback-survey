@@ -1,7 +1,9 @@
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { Router } from '@angular/router';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { firstValueFrom } from 'rxjs';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DashboardDrillDownService } from './dashboard-drill-down.service';
 
 describe('DashboardDrillDownService', () => {
@@ -10,8 +12,16 @@ describe('DashboardDrillDownService', () => {
   beforeEach(() => {
     router.navigate.mockReset();
     TestBed.configureTestingModule({
-      providers: [provideHttpClient(), { provide: Router, useValue: router }],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: Router, useValue: router },
+      ],
     });
+  });
+
+  afterEach(() => {
+    TestBed.inject(HttpTestingController).verify();
   });
 
   it('changes pagination without rewriting backend filters or encoded values', () => {
@@ -51,5 +61,36 @@ describe('DashboardDrillDownService', () => {
     expect(
       service.isSupported({ routeType: 'External', method: 'GET', path: 'https://example.com/api' }),
     ).toBe(false);
+  });
+
+  it('preserves localized option text in response details', async () => {
+    const service = TestBed.inject(DashboardDrillDownService);
+    const http = TestBed.inject(HttpTestingController);
+    const detailsPromise = firstValueFrom(
+      service.loadDetails({
+        routeType: 'SurveyResponseDetails',
+        method: 'GET',
+        path: '/api/reports/survey-responses/response-1',
+      }),
+    );
+
+    http.expectOne((request) => request.url.endsWith('/api/reports/survey-responses/response-1')).flush({
+      surveyResponseId: 'response-1',
+      answers: [
+        {
+          questionTextEn: 'How was your visit?',
+          questionTextAr: 'كيف كانت زيارتك؟',
+          questionTypeName: 'SingleChoice',
+          displayValue: 'Very Good',
+          selectedOptionTextEn: 'Very Good',
+          selectedOptionTextAr: 'جيد جداً',
+        },
+      ],
+    });
+
+    const details = await detailsPromise;
+
+    expect(details.answers[0].selectedOptionTextEn).toBe('Very Good');
+    expect(details.answers[0].selectedOptionTextAr).toBe('جيد جداً');
   });
 });
