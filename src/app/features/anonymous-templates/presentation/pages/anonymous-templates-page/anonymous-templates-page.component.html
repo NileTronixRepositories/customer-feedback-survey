@@ -176,7 +176,7 @@
               <th class="px-2.5 py-2">{{ 'anonymousTemplates.nameColumn' | t }}</th>
               <th class="px-2.5 py-2">{{ 'common.scope' | t }}</th>
               <th class="px-2.5 py-2">{{ 'anonymousTemplates.branchColumn' | t }}</th>
-              <th class="px-2.5 py-2">{{ 'common.status' | t }}</th>
+              <th class="px-2.5 py-2">{{ 'superAdminTemplates.lifecycle' | t }}</th>
               <th class="px-2.5 py-2">{{ 'anonymousTemplates.activeFromColumn' | t }}</th>
               <th class="px-2.5 py-2">{{ 'anonymousTemplates.expireToColumn' | t }}</th>
               <th class="px-2.5 py-2">{{ 'anonymousTemplates.countsColumn' | t }}</th>
@@ -206,7 +206,7 @@
               ) {
                 <tr
                   class="align-top transition hover:bg-slate-50"
-                  [class.bg-slate-50]="!template.isActive"
+                  [class.bg-slate-50]="template.isGlobal ? template.isArchived : !template.isActive"
                 >
                   <td class="px-2.5 py-2">
                     <p
@@ -239,19 +239,27 @@
                   <td class="px-2.5 py-2">
                     <div class="flex flex-col gap-1">
                       <span
-                        class="w-fit rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-600"
-                      >
-                        {{ template.statusName }}
-                      </span>
-                      <span
                         class="w-fit rounded-full px-2 py-0.5 text-[10px] font-bold"
-                        [class.bg-emerald-50]="template.isActive"
-                        [class.text-emerald-700]="template.isActive"
-                        [class.bg-slate-100]="!template.isActive"
-                        [class.text-slate-500]="!template.isActive"
+                        [class.bg-emerald-50]="
+                          template.isGlobal ? !template.isArchived : template.isActive
+                        "
+                        [class.text-emerald-700]="
+                          template.isGlobal ? !template.isArchived : template.isActive
+                        "
+                        [class.bg-slate-100]="
+                          template.isGlobal ? template.isArchived : !template.isActive
+                        "
+                        [class.text-slate-500]="
+                          template.isGlobal ? template.isArchived : !template.isActive
+                        "
                       >
-                        {{ (template.isActive ? 'common.active' : 'branches.inactive') | t }}
+                        {{ lifecycleLabelKey(template) | t }}
                       </span>
+                      @if (template.isManagedGlobalCopy) {
+                        <span class="text-[10px] font-bold text-violet-700">{{
+                          'superAdminTemplates.managedCopy' | t
+                        }}</span>
+                      }
                     </div>
                   </td>
                   <td class="px-2.5 py-2 text-[11px] text-slate-700">
@@ -376,6 +384,12 @@
                           (pressed)="openDeleteTemplate(template)"
                         >
                           <app-icon [icon]="deleteIcon" [size]="14" />
+                          {{
+                            (template.isGlobal
+                              ? 'superAdminTemplates.archive'
+                              : 'anonymousTemplates.deactivate'
+                            ) | t
+                          }}
                         </app-button>
                       }
                       @if (canRestoreTemplate(template)) {
@@ -388,6 +402,7 @@
                           (pressed)="openRestoreTemplate(template)"
                         >
                           <app-icon [icon]="restoreIcon" [size]="14" />
+                          {{ 'common.restore' | t }}
                         </app-button>
                       }
                     </div>
@@ -451,15 +466,12 @@
     [open]="copyModalOpen()"
     (closed)="closeCopyTemplateToBranch()"
     size="lg"
+    [subtitle]="'superAdminTemplates.copyToBranchDescription' | t"
   >
     @if (templatePendingCopy(); as template) {
       <form class="space-y-3" [formGroup]="copyForm" (ngSubmit)="copySelectedTemplateToBranch()">
-        <p class="text-[11px] font-semibold text-slate-500">
-          {{ 'superAdminTemplates.copyToBranchDescription' | t }}
-        </p>
-
         <div class="grid gap-2 sm:grid-cols-2">
-          <div class="rounded-lg border border-slate-200 bg-slate-50 p-3">
+          <div class="rounded-xl border border-slate-200/80 bg-slate-50/60 p-3 shadow-2xs">
             <p class="text-[10px] font-extrabold uppercase text-slate-500">
               {{ 'superAdminTemplates.sourceTemplate' | t }}
             </p>
@@ -472,7 +484,7 @@
               {{ 'superAdminTemplates.anonymous' | t }}
             </p>
           </div>
-          <div class="rounded-lg border border-slate-200 bg-slate-50 p-3">
+          <div class="rounded-xl border border-slate-200/80 bg-slate-50/60 p-3 shadow-2xs">
             <p class="text-[10px] font-extrabold uppercase text-slate-500">
               {{ 'superAdminTemplates.sourceBranch' | t }}
             </p>
@@ -493,7 +505,7 @@
             'superAdminTemplates.targetBranch' | t
           }}</span>
           <select
-            class="h-9 rounded-lg border border-slate-200 bg-white px-3 text-[12px] font-semibold text-slate-700 outline-none transition focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15"
+            class="h-9 rounded-xl border border-slate-200 bg-white px-3 text-[12px] font-semibold text-slate-700 outline-none transition focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15"
             formControlName="branchId"
             [disabled]="branchOptionsLoading() || copyingTemplate()"
           >
@@ -532,7 +544,9 @@
         }
 
         @if (copyResult(); as result) {
-          <div class="rounded-lg border border-cyan-100 bg-cyan-50/70 p-3">
+          <div
+            class="rounded-xl border border-[var(--theme-color-accent)]/20 bg-[var(--theme-color-accent-softest)]/50 p-3.5 shadow-2xs"
+          >
             <p class="text-[10px] font-extrabold uppercase text-slate-500">
               {{ 'superAdminTemplates.newTemplateId' | t }}
             </p>
@@ -564,7 +578,7 @@
               </div>
               @if (result.qrCode) {
                 <div
-                  class="flex flex-col items-center gap-1 rounded-lg border border-cyan-100 bg-white p-2"
+                  class="flex flex-col items-center gap-1 rounded-xl border border-[var(--theme-color-accent)]/20 bg-white p-2.5 shadow-2xs"
                 >
                   <app-icon [icon]="qrCodeIcon" [size]="14" />
                   <img
@@ -578,7 +592,7 @@
           </div>
         }
 
-        <div class="flex justify-end gap-2 border-t border-slate-100 pt-3">
+        <div class="flex items-center justify-end gap-2 border-t border-slate-100 pt-3">
           <app-button
             size="sm"
             type="button"
@@ -605,29 +619,31 @@
     [title]="'anonymousTemplates.deleteTitle' | t"
     [open]="deleteModalOpen()"
     (closed)="closeDeleteTemplate()"
+    size="sm"
   >
     @if (templatePendingDelete(); as template) {
       <div class="space-y-3">
-        <p class="text-[12px] font-semibold text-slate-700">
-          {{ 'anonymousTemplates.deleteConfirm' | t }}
-        </p>
-        <div class="rounded-md border border-slate-100 bg-slate-50 p-3 text-[11px] text-slate-600">
-          <div class="flex flex-wrap items-center gap-2">
+        <div
+          class="flex items-start gap-3 rounded-xl border border-red-200/60 bg-red-50/50 p-3 text-xs text-red-700"
+        >
+          <app-icon [icon]="alertIcon" [size]="16" class="mt-0.5 shrink-0 text-red-600" />
+          <p class="font-medium leading-relaxed">
+            {{ 'anonymousTemplates.deleteConfirm' | t }}
+          </p>
+        </div>
+        <div class="rounded-xl border border-slate-200/80 bg-slate-50/60 p-3.5 shadow-2xs">
+          <div class="flex flex-wrap items-center justify-between gap-2">
             <p class="break-words font-bold text-slate-900 [overflow-wrap:anywhere]">
               {{ templateDisplayName(template) }}
             </p>
             <span
-              class="rounded-full px-2 py-0.5 text-[10px] font-bold"
-              [class.bg-violet-50]="template.isGlobal"
-              [class.text-violet-700]="template.isGlobal"
-              [class.bg-cyan-50]="!template.isGlobal"
-              [class.text-[var(--theme-color-secondary)]]="!template.isGlobal"
+              class="inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-semibold border border-[var(--theme-color-accent)]/20 bg-[var(--theme-color-accent-softest)] text-[var(--theme-color-secondary)]"
             >
               {{ template.scopeName }}
             </span>
           </div>
         </div>
-        <div class="grid grid-cols-1 gap-2 sm:flex sm:flex-wrap sm:justify-end">
+        <div class="flex items-center justify-end gap-2 border-t border-slate-100 pt-3">
           <app-button size="sm" type="button" variant="secondary" (pressed)="closeDeleteTemplate()">
             {{ 'common.cancel' | t }}
           </app-button>
@@ -650,29 +666,31 @@
     [title]="'anonymousTemplates.restoreTitle' | t"
     [open]="restoreModalOpen()"
     (closed)="closeRestoreTemplate()"
+    size="sm"
   >
     @if (templatePendingRestore(); as template) {
       <div class="space-y-3">
-        <p class="text-[12px] font-semibold text-slate-700">
-          {{ 'anonymousTemplates.restoreConfirm' | t }}
-        </p>
-        <div class="rounded-md border border-slate-100 bg-slate-50 p-3 text-[11px] text-slate-600">
-          <div class="flex flex-wrap items-center gap-2">
+        <div
+          class="flex items-start gap-3 rounded-xl border border-amber-200/60 bg-amber-50/50 p-3 text-xs text-amber-800"
+        >
+          <app-icon [icon]="alertIcon" [size]="16" class="mt-0.5 shrink-0 text-amber-600" />
+          <p class="font-medium leading-relaxed">
+            {{ 'anonymousTemplates.restoreConfirm' | t }}
+          </p>
+        </div>
+        <div class="rounded-xl border border-slate-200/80 bg-slate-50/60 p-3.5 shadow-2xs">
+          <div class="flex flex-wrap items-center justify-between gap-2">
             <p class="break-words font-bold text-slate-900 [overflow-wrap:anywhere]">
               {{ templateDisplayName(template) }}
             </p>
             <span
-              class="rounded-full px-2 py-0.5 text-[10px] font-bold"
-              [class.bg-violet-50]="template.isGlobal"
-              [class.text-violet-700]="template.isGlobal"
-              [class.bg-cyan-50]="!template.isGlobal"
-              [class.text-[var(--theme-color-secondary)]]="!template.isGlobal"
+              class="inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-semibold border border-[var(--theme-color-accent)]/20 bg-[var(--theme-color-accent-softest)] text-[var(--theme-color-secondary)]"
             >
               {{ template.scopeName }}
             </span>
           </div>
         </div>
-        <div class="grid grid-cols-1 gap-2 sm:flex sm:flex-wrap sm:justify-end">
+        <div class="flex items-center justify-end gap-2 border-t border-slate-100 pt-3">
           <app-button
             size="sm"
             type="button"
@@ -700,10 +718,8 @@
     [open]="createModalOpen()"
     (closed)="closeCreateTemplate()"
     size="lg"
+    [subtitle]="'anonymousTemplates.createSubtitle' | t"
   >
-    <p class="mb-2 text-[11px] font-semibold text-slate-500">
-      {{ 'anonymousTemplates.createSubtitle' | t }}
-    </p>
     <form class="space-y-2" [formGroup]="templateForm" (ngSubmit)="createTemplate()">
       <div class="grid gap-2 md:grid-cols-2">
         <app-input
@@ -1080,7 +1096,9 @@
         }
       </section>
 
-      <div class="grid grid-cols-1 gap-2 sm:flex sm:flex-wrap sm:justify-end">
+      <div
+        class="sticky bottom-0 -mx-4 -mb-4 mt-4 flex items-center justify-end gap-2 border-t border-slate-100 bg-white/95 px-4 py-3 backdrop-blur-sm sm:-mx-5 sm:-mb-5 sm:px-5 z-10"
+      >
         <app-button size="sm" type="button" variant="secondary" (pressed)="resetForm()">
           {{ 'anonymousTemplates.resetForm' | t }}
         </app-button>
@@ -1116,7 +1134,7 @@
                 <span
                   class="rounded-full bg-white px-2 py-0.5 text-[10px] font-bold text-emerald-700"
                 >
-                  {{ template.statusName }}
+                  {{ lifecycleLabelKey(template) | t }}
                 </span>
                 <span
                   class="rounded-full bg-white px-2 py-0.5 text-[10px] font-bold text-[var(--theme-color-secondary)]"

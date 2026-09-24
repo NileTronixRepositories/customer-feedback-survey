@@ -3,6 +3,12 @@ import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
 import {
+  DashboardCharts,
+  DashboardDetailsNavigation,
+  DashboardSummaryActions,
+  SatisfactionCategory,
+} from '../../../reports/dashboard-drill-down/domain/dashboard-drill-down.model';
+import {
   DepartmentCriticalResponse,
   DepartmentCriticalResponseCustomInput,
   DepartmentCustomInputSegment,
@@ -89,6 +95,12 @@ export class DepartmentReportsService {
     if (query.hasVoice !== undefined) {
       params = params.set('hasVoice', String(query.hasVoice));
     }
+    if (query.satisfactionCategory) params = params.set('satisfactionCategory', query.satisfactionCategory);
+    if (query.isScored !== undefined) params = params.set('isScored', String(query.isScored));
+    if (query.questionId) params = params.set('questionId', query.questionId);
+    if (query.customInputName) params = params.set('customInputName', query.customInputName);
+    if (query.customInputType) params = params.set('customInputType', query.customInputType);
+    if (query.customInputValue) params = params.set('customInputValue', query.customInputValue);
 
     return this.http
       .get<ApiRecord>(
@@ -122,6 +134,8 @@ export class DepartmentReportsService {
     return {
       period: this.toPeriod(this.readRecord(response['period'])),
       summary: this.toSummary(this.readRecord(response['summary'])),
+      charts: this.toCharts(this.readRecord(response['charts'])),
+      summaryActions: this.toSummaryActions(this.readRecord(response['summaryActions'])),
       satisfactionTrend: this.readArray(response['satisfactionTrend']).map((item) =>
         this.toTrendPoint(item),
       ),
@@ -176,6 +190,7 @@ export class DepartmentReportsService {
       period: this.readString(item, 'period'),
       responsesCount: this.readNumber(item, 'responsesCount'),
       averageScorePercentage: this.readNumber(item, 'averageScorePercentage'),
+      detailsNavigation: this.toNavigation(this.readRecord(item['detailsNavigation'])),
     };
   }
 
@@ -191,6 +206,7 @@ export class DepartmentReportsService {
       voiceAnswersCount: this.readNumber(item, 'voiceAnswersCount'),
       lastResponseOnUtc: this.readNullableString(item, 'lastResponseOnUtc'),
       riskLevel: this.toRiskLevel(this.readString(item, 'riskLevel')),
+      detailsNavigation: this.toNavigation(this.readRecord(item['detailsNavigation'])),
     };
   }
 
@@ -207,6 +223,7 @@ export class DepartmentReportsService {
       averageScorePercentage: this.readNumber(item, 'averageScorePercentage'),
       complaintsCount: this.readNumber(item, 'complaintsCount'),
       riskLevel: this.toRiskLevel(this.readString(item, 'riskLevel')),
+      detailsNavigation: this.toNavigation(this.readRecord(item['detailsNavigation'])),
     };
   }
 
@@ -223,6 +240,7 @@ export class DepartmentReportsService {
       answersCount: this.readNumber(item, 'answersCount'),
       averageValue: this.readNumber(item, 'averageValue'),
       averageScorePercentage: this.readNumber(item, 'averageScorePercentage'),
+      detailsNavigation: this.toNavigation(this.readRecord(item['detailsNavigation'])),
     };
   }
 
@@ -242,6 +260,7 @@ export class DepartmentReportsService {
       value: this.readString(item, 'value'),
       responsesCount: this.readNumber(item, 'responsesCount'),
       averageScorePercentage: this.readNumber(item, 'averageScorePercentage'),
+      detailsNavigation: this.toNavigation(this.readRecord(item['detailsNavigation'])),
     };
   }
 
@@ -264,7 +283,37 @@ export class DepartmentReportsService {
       customInputs: this.readArray(item['customInputs']).map((input) =>
         this.toCriticalCustomInput(input),
       ),
+      detailsNavigation: this.toNavigation(this.readRecord(item['detailsNavigation'])),
     };
+  }
+
+  private toCharts(charts: ApiRecord | null): DashboardCharts {
+    return {
+      satisfactionDistribution: this.readArray(charts?.['satisfactionDistribution']).map((item) => ({
+        category: this.toSatisfactionCategory(this.readString(item, 'category')),
+        responsesCount: this.readNumber(item, 'responsesCount'),
+        percentage: this.readNumber(item, 'percentage'),
+        detailsNavigation: this.toNavigation(this.readRecord(item['detailsNavigation'])),
+      })),
+    };
+  }
+
+  private toSummaryActions(actions: ApiRecord | null): DashboardSummaryActions {
+    return {
+      allResponses: this.toNavigation(this.readRecord(actions?.['allResponses'])),
+      complaints: this.toNavigation(this.readRecord(actions?.['complaints'])),
+      voiceAnswers: this.toNavigation(this.readRecord(actions?.['voiceAnswers'])),
+    };
+  }
+
+  private toNavigation(item: ApiRecord | null): DashboardDetailsNavigation | null {
+    const path = this.readString(item, 'path');
+    if (!path || this.readString(item, 'method').toUpperCase() !== 'GET') return null;
+    return { routeType: this.readString(item, 'routeType'), method: 'GET', path };
+  }
+
+  private toSatisfactionCategory(value: string): SatisfactionCategory {
+    return value === 'Neutral' || value === 'Unhappy' ? value : 'Satisfied';
   }
 
   private toCriticalCustomInput(item: ApiRecord): DepartmentCriticalResponseCustomInput {

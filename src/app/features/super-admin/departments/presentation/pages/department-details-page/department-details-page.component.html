@@ -20,12 +20,22 @@
           </app-button>
         }
         @if (department.isActive) {
-          <app-button type="button" variant="danger" [loading]="departmentsStore.deleting()" (pressed)="deleteDepartment()">
+          <app-button
+            type="button"
+            variant="danger"
+            [loading]="departmentsStore.deleting()"
+            (pressed)="deleteDepartment()"
+          >
             <app-icon [icon]="deleteIcon" [size]="17" />
             {{ 'common.delete' | t }}
           </app-button>
         } @else if (canRestoreDepartment(department)) {
-          <app-button type="button" variant="secondary" [loading]="departmentsStore.restoring()" (pressed)="restoreDepartment()">
+          <app-button
+            type="button"
+            variant="secondary"
+            [loading]="departmentsStore.restoring()"
+            (pressed)="restoreDepartment()"
+          >
             <app-icon [icon]="restoreIcon" [size]="17" />
             {{ 'common.restore' | t }}
           </app-button>
@@ -35,42 +45,60 @@
   </div>
 
   @if (departmentsStore.detailsLoading()) {
-    <div class="flex items-center gap-2 border border-slate-100 bg-white p-3 text-xs font-semibold text-slate-600">
-      <span class="h-4 w-4 animate-spin rounded-full border-2 border-[var(--theme-color-accent)]/30 border-t-[var(--theme-color-accent)]"></span>
+    <div
+      class="flex items-center gap-2 border border-slate-100 bg-white p-3 text-xs font-semibold text-slate-600"
+    >
+      <span
+        class="h-4 w-4 animate-spin rounded-full border-2 border-[var(--theme-color-accent)]/30 border-t-[var(--theme-color-accent)]"
+      ></span>
       {{ 'departments.detailsLoading' | t }}
     </div>
   } @else if (departmentsStore.detailsError()) {
-    <div class="border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-[var(--theme-color-danger)]">
+    <div
+      class="border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-[var(--theme-color-danger)]"
+    >
       {{ departmentsStore.detailsError() ?? '' | t }}
     </div>
   } @else if (departmentsStore.selectedDetails(); as department) {
     @if (departmentsStore.success()) {
-      <div class="border border-emerald-100 bg-emerald-50 p-3 text-xs font-semibold text-emerald-700">
+      <div
+        class="border border-emerald-100 bg-emerald-50 p-3 text-xs font-semibold text-emerald-700"
+      >
         {{ departmentsStore.success() ?? '' | t }}
       </div>
     }
     @if (departmentsStore.error()) {
-      <div class="border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-[var(--theme-color-danger)]">
+      <div
+        class="border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-[var(--theme-color-danger)]"
+      >
         {{ departmentsStore.error() ?? '' | t }}
       </div>
     }
     @if (departmentAdminsStore.success()) {
-      <div class="border border-emerald-100 bg-emerald-50 p-3 text-xs font-semibold text-emerald-700">
+      <div
+        class="border border-emerald-100 bg-emerald-50 p-3 text-xs font-semibold text-emerald-700"
+      >
         {{ departmentAdminsStore.success() ?? '' | t }}
       </div>
     }
     @if (departmentAdminsStore.error()) {
-      <div class="border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-[var(--theme-color-danger)]">
+      <div
+        class="border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-[var(--theme-color-danger)]"
+      >
         {{ departmentAdminsStore.error() ?? '' | t }}
       </div>
     }
     @if (resetPasswordSuccess()) {
-      <div class="border border-emerald-100 bg-emerald-50 p-3 text-xs font-semibold text-emerald-700">
+      <div
+        class="border border-emerald-100 bg-emerald-50 p-3 text-xs font-semibold text-emerald-700"
+      >
         {{ resetPasswordSuccess() ?? '' | t }}
       </div>
     }
     @if (resetPasswordError()) {
-      <div class="border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-[var(--theme-color-danger)]">
+      <div
+        class="border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-[var(--theme-color-danger)]"
+      >
         {{ resetPasswordError() ?? '' | t }}
       </div>
     }
@@ -93,8 +121,11 @@
     </app-card>
 
     @if (editMode()) {
-      <app-card [title]="'departments.editDepartment' | t" [subtitle]="'departments.editDepartmentSubtitle' | t">
-        <form class="space-y-3" [formGroup]="departmentForm" (ngSubmit)="updateDepartment()">
+      <app-card
+        [title]="'departments.editDepartment' | t"
+        [subtitle]="'departments.editDepartmentSubtitle' | t"
+      >
+        <form class="space-y-4" [formGroup]="departmentForm" (ngSubmit)="updateDepartment()">
           <div class="grid gap-3 md:grid-cols-2">
             <app-input
               [label]="'departments.nameEn' | t"
@@ -134,7 +165,12 @@
       <app-card [title]="'departments.departmentAdmins' | t">
         <div card-actions>
           @if (department.isActive) {
-            <app-button type="button" size="sm" variant="secondary" (pressed)="openCreateDepartmentAdmin()">
+            <app-button
+              type="button"
+              size="sm"
+              variant="secondary"
+              (pressed)="openCreateDepartmentAdmin()"
+            >
               <app-icon [icon]="userPlusIcon" [size]="15" />
               {{ 'departmentAdmins.createDepartmentAdmin' | t }}
             </app-button>
@@ -146,7 +182,9 @@
               <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div class="min-w-0">
                   <p class="font-bold text-slate-900">{{ personDisplayName(admin) }}</p>
-                  <p class="mt-1 text-xs text-slate-500">{{ admin.userName }} - {{ admin.email }}</p>
+                  <p class="mt-1 text-xs text-slate-500">
+                    {{ admin.userName }} - {{ admin.email }}
+                  </p>
                   @if (admin.phoneNumber) {
                     <p class="mt-1 text-xs text-slate-500">{{ admin.phoneNumber }}</p>
                   }
@@ -161,45 +199,54 @@
                   </span>
                 </div>
                 <div class="flex flex-wrap gap-2 sm:justify-end">
-                @if (admin.isActive && canResetPassword('DEPARTMENT_ADMIN', admin.applicationUserId)) {
-                  <app-button
-                    type="button"
-                    size="sm"
-                    variant="secondary"
-                    [loading]="
-                      resettingPassword() &&
-                      resetPasswordTarget()?.applicationUserId === admin.applicationUserId
-                    "
-                    (pressed)="openResetPassword('DEPARTMENT_ADMIN', admin.applicationUserId, personDisplayName(admin), $event)"
-                  >
-                    <app-icon [icon]="resetPasswordIcon" [size]="14" />
-                    {{ 'users.resetPassword' | t }}
-                  </app-button>
-                }
-                @if (canDeactivateDepartmentAdmin(admin)) {
-                  <app-button
-                    type="button"
-                    size="sm"
-                    variant="danger"
-                    [loading]="departmentAdminsStore.deactivating()"
-                    (pressed)="deactivateDepartmentAdmin(admin, $event)"
-                  >
-                    <app-icon [icon]="deactivateIcon" [size]="14" />
-                    {{ 'departmentAdmins.deactivateAction' | t }}
-                  </app-button>
-                }
-                @if (canRestoreDepartmentAdmin(admin)) {
-                  <app-button
-                    type="button"
-                    size="sm"
-                    variant="secondary"
-                    [loading]="departmentAdminsStore.restoring()"
-                    (pressed)="restoreDepartmentAdmin(admin, $event)"
-                  >
-                    <app-icon [icon]="restoreIcon" [size]="14" />
-                    {{ 'common.restore' | t }}
-                  </app-button>
-                }
+                  @if (
+                    admin.isActive && canResetPassword('DEPARTMENT_ADMIN', admin.applicationUserId)
+                  ) {
+                    <app-button
+                      type="button"
+                      size="sm"
+                      variant="secondary"
+                      [loading]="
+                        resettingPassword() &&
+                        resetPasswordTarget()?.applicationUserId === admin.applicationUserId
+                      "
+                      (pressed)="
+                        openResetPassword(
+                          'DEPARTMENT_ADMIN',
+                          admin.applicationUserId,
+                          personDisplayName(admin),
+                          $event
+                        )
+                      "
+                    >
+                      <app-icon [icon]="resetPasswordIcon" [size]="14" />
+                      {{ 'users.resetPassword' | t }}
+                    </app-button>
+                  }
+                  @if (canDeactivateDepartmentAdmin(admin)) {
+                    <app-button
+                      type="button"
+                      size="sm"
+                      variant="danger"
+                      [loading]="departmentAdminsStore.deactivating()"
+                      (pressed)="deactivateDepartmentAdmin(admin, $event)"
+                    >
+                      <app-icon [icon]="deactivateIcon" [size]="14" />
+                      {{ 'departmentAdmins.deactivateAction' | t }}
+                    </app-button>
+                  }
+                  @if (canRestoreDepartmentAdmin(admin)) {
+                    <app-button
+                      type="button"
+                      size="sm"
+                      variant="secondary"
+                      [loading]="departmentAdminsStore.restoring()"
+                      (pressed)="restoreDepartmentAdmin(admin, $event)"
+                    >
+                      <app-icon [icon]="restoreIcon" [size]="14" />
+                      {{ 'common.restore' | t }}
+                    </app-button>
+                  }
                 </div>
               </div>
             </div>
@@ -216,7 +263,9 @@
               <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div class="min-w-0">
                   <p class="font-bold text-slate-900">{{ personDisplayName(operator) }}</p>
-                  <p class="mt-1 text-xs text-slate-500">{{ operator.userName }} - {{ operator.email }}</p>
+                  <p class="mt-1 text-xs text-slate-500">
+                    {{ operator.userName }} - {{ operator.email }}
+                  </p>
                   @if (operator.phoneNumber) {
                     <p class="mt-1 text-xs text-slate-500">{{ operator.phoneNumber }}</p>
                   }
@@ -230,7 +279,9 @@
                     {{ (operator.isActive ? 'common.active' : 'branches.inactive') | t }}
                   </span>
                 </div>
-                @if (operator.isActive && canResetPassword('OPERATOR', operator.applicationUserId)) {
+                @if (
+                  operator.isActive && canResetPassword('OPERATOR', operator.applicationUserId)
+                ) {
                   <app-button
                     type="button"
                     size="sm"
@@ -239,7 +290,14 @@
                       resettingPassword() &&
                       resetPasswordTarget()?.applicationUserId === operator.applicationUserId
                     "
-                    (pressed)="openResetPassword('OPERATOR', operator.applicationUserId, personDisplayName(operator), $event)"
+                    (pressed)="
+                      openResetPassword(
+                        'OPERATOR',
+                        operator.applicationUserId,
+                        personDisplayName(operator),
+                        $event
+                      )
+                    "
                   >
                     <app-icon [icon]="resetPasswordIcon" [size]="14" />
                     {{ 'users.resetPassword' | t }}
@@ -261,11 +319,15 @@
   [open]="createDepartmentAdminModalOpen()"
   (closed)="closeCreateDepartmentAdminModal()"
 >
-  <form class="space-y-3" [formGroup]="departmentAdminForm" (ngSubmit)="createDepartmentAdmin()">
+  <form class="space-y-4" [formGroup]="departmentAdminForm" (ngSubmit)="createDepartmentAdmin()">
     @if (departmentsStore.selectedDetails(); as department) {
-      <div class="border border-cyan-100 bg-cyan-50 p-3 text-xs font-semibold text-slate-700">
-        {{ 'departments.selectedDepartment' | t }}:
-        <span class="text-[var(--theme-color-secondary)]">{{ departmentDisplayName(department) }}</span>
+      <div
+        class="flex items-center gap-2 rounded-xl border border-[var(--theme-color-accent)]/20 bg-[var(--theme-color-accent-softest)]/50 p-3 text-xs font-semibold text-slate-700 shadow-2xs"
+      >
+        <span class="text-slate-500">{{ 'departments.selectedDepartment' | t }}:</span>
+        <span class="font-bold text-[var(--theme-color-secondary)]">{{
+          departmentDisplayName(department)
+        }}</span>
       </div>
     }
 
@@ -317,10 +379,15 @@
       [error]="departmentAdminFieldError('password') | t"
     />
 
-    <app-button type="submit" [fullWidth]="true" [loading]="departmentAdminsStore.creating()">
-      <app-icon [icon]="userPlusIcon" [size]="17" />
-      {{ 'departmentAdmins.createDepartmentAdmin' | t }}
-    </app-button>
+    <div class="sticky bottom-0 -mx-4 -mb-4 mt-4 flex items-center justify-end gap-2 border-t border-slate-100 bg-white/95 px-4 py-3 backdrop-blur-sm sm:-mx-5 sm:-mb-5 sm:px-5 z-10">
+      <app-button type="button" variant="secondary" (pressed)="closeCreateDepartmentAdminModal()">
+        {{ 'common.cancel' | t }}
+      </app-button>
+      <app-button type="submit" [loading]="departmentAdminsStore.creating()">
+        <app-icon [icon]="userPlusIcon" [size]="17" />
+        {{ 'departmentAdmins.createDepartmentAdmin' | t }}
+      </app-button>
+    </div>
   </form>
 </app-modal>
 

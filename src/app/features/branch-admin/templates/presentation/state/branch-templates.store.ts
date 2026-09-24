@@ -67,6 +67,7 @@ export class BranchTemplatesStore {
   private readonly detailsErrorSignal = signal<string | null>(null);
   private readonly questionsSelectionErrorSignal = signal<string | null>(null);
   private readonly successSignal = signal<string | null>(null);
+  private readonly assetActionSignal = signal(false);
 
   readonly templates = this.templatesSignal.asReadonly();
   readonly selection = this.selectionSignal.asReadonly();
@@ -93,6 +94,7 @@ export class BranchTemplatesStore {
   readonly detailsError = this.detailsErrorSignal.asReadonly();
   readonly questionsSelectionError = this.questionsSelectionErrorSignal.asReadonly();
   readonly success = this.successSignal.asReadonly();
+  readonly assetActionLoading = this.assetActionSignal.asReadonly();
   readonly totalPages = computed(() =>
     Math.max(1, Math.ceil(this.totalItemsSignal() / this.pageSizeSignal())),
   );
@@ -541,6 +543,56 @@ export class BranchTemplatesStore {
       });
   }
 
+  copyAsAnonymous(templateId: string): void {
+    if (this.assetActionSignal()) return;
+    this.assetActionSignal.set(true);
+    this.errorSignal.set(null);
+    this.branchTemplatesService.copyAsAnonymous(templateId).pipe(
+      take(1),
+      finalize(() => this.assetActionSignal.set(false)),
+    ).subscribe({
+      next: () => this.successSignal.set('branchTemplates.copyAsAnonymousSuccess'),
+      error: (error: unknown) =>
+        this.errorSignal.set(this.readErrorKey(error, 'branchTemplates.copyAsAnonymousError')),
+    });
+  }
+
+  uploadLogo(templateId: string, logo: File): void {
+    if (this.assetActionSignal()) return;
+    this.assetActionSignal.set(true);
+    this.errorSignal.set(null);
+    this.branchTemplatesService.uploadLogo(templateId, logo).pipe(
+      take(1),
+      finalize(() => this.assetActionSignal.set(false)),
+    ).subscribe({
+      next: (template) => {
+        const merged = this.mergeTemplate(templateId, template);
+        this.selectedTemplateSignal.set(merged);
+        this.replaceTemplateInList(merged);
+        this.successSignal.set('branchTemplates.logoUploadSuccess');
+      },
+      error: (error: unknown) => this.errorSignal.set(this.readErrorKey(error, 'branchTemplates.logoError')),
+    });
+  }
+
+  deleteLogo(templateId: string): void {
+    if (this.assetActionSignal()) return;
+    this.assetActionSignal.set(true);
+    this.errorSignal.set(null);
+    this.branchTemplatesService.deleteLogo(templateId).pipe(
+      take(1),
+      finalize(() => this.assetActionSignal.set(false)),
+    ).subscribe({
+      next: (template) => {
+        const merged = this.mergeTemplate(templateId, template);
+        this.selectedTemplateSignal.set(merged);
+        this.replaceTemplateInList(merged);
+        this.successSignal.set('branchTemplates.logoDeleteSuccess');
+      },
+      error: (error: unknown) => this.errorSignal.set(this.readErrorKey(error, 'branchTemplates.logoError')),
+    });
+  }
+
   clearMessages(): void {
     this.errorSignal.set(null);
     this.successSignal.set(null);
@@ -566,7 +618,6 @@ export class BranchTemplatesStore {
       branchId: result.branchId,
       templateNameEn: '',
       templateNameAr: '',
-      status: 'Draft',
       isActive: true,
       groups: [],
       questionConditions: [],
@@ -819,8 +870,8 @@ export class BranchTemplatesStore {
       description: template.description || currentTemplate?.description || '',
       activeFrom: template.activeFrom || currentTemplate?.activeFrom || '',
       expireTo: template.expireTo ?? currentTemplate?.expireTo ?? null,
-      status: template.status || currentTemplate?.status || 'Draft',
       isActive: template.isActive,
+      logoPath: template.logoPath ?? currentTemplate?.logoPath ?? null,
       questionsCount: template.questionsCount || currentTemplate?.questionsCount || 0,
       groupsCount: template.groupsCount || currentTemplate?.groupsCount || 0,
       customInputsCount: template.customInputsCount || currentTemplate?.customInputsCount || 0,

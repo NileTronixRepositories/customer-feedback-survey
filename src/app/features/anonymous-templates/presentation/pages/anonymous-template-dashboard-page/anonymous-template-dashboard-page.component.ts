@@ -12,7 +12,6 @@ import {
   viewChild,
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
 import { Chart, registerables } from 'chart.js';
 import {
   AlertTriangle,
@@ -38,15 +37,20 @@ import {
   AnonymousTemplateDashboardQuestionInsight,
   AnonymousTemplateDashboardRiskLevel,
   AnonymousTemplateDashboardTemplatePerformance,
+  AnonymousTemplateDashboardTrendPoint,
 } from '../../../domain/anonymous-template.model';
 import { AnonymousTemplateDashboardStore } from '../../state/anonymous-template-dashboard.store';
+import { DashboardDrillDownService } from '../../../../reports/dashboard-drill-down/data/dashboard-drill-down.service';
+import { DashboardDetailsNavigation } from '../../../../reports/dashboard-drill-down/domain/dashboard-drill-down.model';
+import { SatisfactionDistributionComponent } from '../../../../reports/dashboard-drill-down/presentation/components/satisfaction-distribution/satisfaction-distribution.component';
+import { DashboardSummaryActionsComponent } from '../../../../reports/dashboard-drill-down/presentation/components/dashboard-summary-actions/dashboard-summary-actions.component';
 
 Chart.register(...registerables);
 
 @Component({
   selector: 'app-anonymous-template-dashboard-page',
   standalone: true,
-  imports: [ButtonComponent, DatePipe, DecimalPipe, IconComponent, ReactiveFormsModule, TranslatePipe],
+  imports: [ButtonComponent, DashboardSummaryActionsComponent, DatePipe, DecimalPipe, IconComponent, ReactiveFormsModule, SatisfactionDistributionComponent, TranslatePipe],
   templateUrl: './anonymous-template-dashboard-page.component.html',
   styleUrl: './anonymous-template-dashboard-page.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -55,7 +59,7 @@ export class AnonymousTemplateDashboardPageComponent implements OnInit, OnDestro
   readonly store = inject(AnonymousTemplateDashboardStore);
   private readonly formBuilder = inject(FormBuilder);
   private readonly i18n = inject(I18nService);
-  private readonly router = inject(Router);
+  private readonly drillDown = inject(DashboardDrillDownService);
   private readonly themeColors = inject(ThemeColorService);
   private readonly chartCanvas = viewChild<ElementRef<HTMLCanvasElement>>('trendCanvas');
   private trendChart: Chart<'line', number[], string> | null = null;
@@ -156,16 +160,15 @@ export class AnonymousTemplateDashboardPageComponent implements OnInit, OnDestro
   }
 
   openCriticalResponse(response: AnonymousTemplateDashboardCriticalResponse): void {
-    if (!response.anonymousTemplateId || !response.anonymousSurveyResponseId) {
-      return;
-    }
+    this.openNavigation(response.detailsNavigation, this.i18n.translate('dashboardDrillDown.responseDetails'));
+  }
 
-    void this.router.navigate([
-      '/anonymous-templates',
-      response.anonymousTemplateId,
-      'responses',
-      response.anonymousSurveyResponseId,
-    ]);
+  openDrillDown(event: { title: string; navigation: DashboardDetailsNavigation }): void {
+    this.drillDown.open(event);
+  }
+
+  openNavigation(navigation: DashboardDetailsNavigation | null, title: string): void {
+    if (navigation) this.drillDown.open({ title, navigation });
   }
 
   templateName(
@@ -242,7 +245,7 @@ export class AnonymousTemplateDashboardPageComponent implements OnInit, OnDestro
 
   private renderTrendChart(
     canvas: HTMLCanvasElement,
-    trend: readonly { period: string; averageScorePercentage: number; responsesCount: number }[],
+    trend: readonly AnonymousTemplateDashboardTrendPoint[],
     language: string,
   ): void {
     this.trendChart?.destroy();
@@ -266,6 +269,12 @@ export class AnonymousTemplateDashboardPageComponent implements OnInit, OnDestro
         responsive: true,
         maintainAspectRatio: false,
         locale: language,
+        onClick: (_event, elements) => {
+          const point = trend[elements[0]?.index ?? -1];
+          if (point?.detailsNavigation) {
+            this.openNavigation(point.detailsNavigation, point.period);
+          }
+        },
         plugins: {
           legend: { display: false },
           tooltip: {

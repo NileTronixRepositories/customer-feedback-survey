@@ -26,6 +26,13 @@ export interface BranchSurveyResponsesQuery {
   maxScorePercentage?: number;
   hasComplaint?: boolean;
   hasVoice?: boolean;
+  satisfactionCategory?: SatisfactionCategory;
+  isScored?: boolean;
+  questionId?: string;
+  customInputName?: string;
+  customInputType?: string;
+  customInputValue?: string;
+  orderSort?: 'Newest' | 'Oldest';
   searchText?: string;
   pageNumber: number;
   pageSize: number;
@@ -65,6 +72,8 @@ export interface BranchSurveyResponseCustomInputPreview {
 export interface BranchDashboardResponse {
   period: BranchDashboardPeriod;
   summary: BranchDashboardSummary;
+  charts: DashboardCharts;
+  summaryActions: DashboardSummaryActions;
   satisfactionTrend: readonly BranchDashboardTrendPoint[];
   templatePerformance: readonly BranchDashboardTemplatePerformance[];
   lowestRatedQuestions: readonly BranchDashboardQuestionInsight[];
@@ -100,6 +109,7 @@ export interface BranchDashboardTrendPoint {
   period: string;
   responsesCount: number;
   averageScorePercentage: number;
+  detailsNavigation: DashboardDetailsNavigation | null;
 }
 
 export interface BranchDashboardTemplatePerformance {
@@ -111,6 +121,7 @@ export interface BranchDashboardTemplatePerformance {
   averageScorePercentage: number;
   complaintsCount: number;
   riskLevel: BranchDashboardRiskLevel;
+  detailsNavigation: DashboardDetailsNavigation | null;
 }
 
 export interface BranchDashboardQuestionInsight {
@@ -125,6 +136,7 @@ export interface BranchDashboardQuestionInsight {
   answersCount: number;
   averageValue: number;
   averageScorePercentage: number;
+  detailsNavigation: DashboardDetailsNavigation | null;
 }
 
 export interface BranchDashboardCustomInputSegment {
@@ -138,6 +150,7 @@ export interface BranchDashboardCustomInputSegmentValue {
   value: string;
   responsesCount: number;
   averageScorePercentage: number;
+  detailsNavigation: DashboardDetailsNavigation | null;
 }
 
 export interface BranchDashboardCriticalResponse {
@@ -149,6 +162,7 @@ export interface BranchDashboardCriticalResponse {
   scorePercentage: number;
   complaintText: string | null;
   customInputs: readonly BranchDashboardCriticalResponseCustomInput[];
+  detailsNavigation: DashboardDetailsNavigation | null;
 }
 
 export interface BranchDashboardCriticalResponseCustomInput {
@@ -211,3 +225,9 @@ export interface BranchSurveyResponseAnswer {
   displayValue: string;
   children: readonly BranchSurveyResponseAnswer[];
 }
+import {
+  DashboardCharts,
+  DashboardDetailsNavigation,
+  DashboardSummaryActions,
+  SatisfactionCategory,
+} from '../../../reports/dashboard-drill-down/domain/dashboard-drill-down.model';

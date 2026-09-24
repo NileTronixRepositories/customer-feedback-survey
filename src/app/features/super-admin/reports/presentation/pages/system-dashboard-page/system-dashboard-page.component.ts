@@ -35,8 +35,11 @@ import {
   SystemReportsRiskLevel,
   SystemTemplatePerformance,
 } from '../../../domain/system-reports.model';
-import { SystemResponseDetailsModalComponent } from '../../components/system-response-details-modal/system-response-details-modal.component';
 import { SystemReportsStore } from '../../state/system-reports.store';
+import { DashboardDrillDownService } from '../../../../../reports/dashboard-drill-down/data/dashboard-drill-down.service';
+import { DashboardDetailsNavigation } from '../../../../../reports/dashboard-drill-down/domain/dashboard-drill-down.model';
+import { SatisfactionDistributionComponent } from '../../../../../reports/dashboard-drill-down/presentation/components/satisfaction-distribution/satisfaction-distribution.component';
+import { DashboardSummaryActionsComponent } from '../../../../../reports/dashboard-drill-down/presentation/components/dashboard-summary-actions/dashboard-summary-actions.component';
 
 @Component({
   selector: 'app-system-dashboard-page',
@@ -49,7 +52,8 @@ import { SystemReportsStore } from '../../state/system-reports.store';
     IconComponent,
     ReactiveFormsModule,
     RouterLink,
-    SystemResponseDetailsModalComponent,
+    SatisfactionDistributionComponent,
+    DashboardSummaryActionsComponent,
     TranslatePipe,
   ],
   templateUrl: './system-dashboard-page.component.html',
@@ -60,6 +64,7 @@ export class SystemDashboardPageComponent implements OnInit {
   readonly store = inject(SystemReportsStore);
   private readonly formBuilder = inject(FormBuilder);
   private readonly i18n = inject(I18nService);
+  private readonly drillDown = inject(DashboardDrillDownService);
 
   readonly searchIcon = Search;
   readonly filtersIcon = SlidersHorizontal;
@@ -164,7 +169,15 @@ export class SystemDashboardPageComponent implements OnInit {
   }
 
   openDetails(response: SystemCriticalResponse): void {
-    this.store.loadDetails(response.surveyResponseId);
+    this.openNavigation(response.detailsNavigation, this.i18n.translate('dashboardDrillDown.responseDetails'));
+  }
+
+  openDrillDown(event: { title: string; navigation: DashboardDetailsNavigation }): void {
+    this.drillDown.open(event);
+  }
+
+  openNavigation(navigation: DashboardDetailsNavigation | null, title: string): void {
+    if (navigation) this.drillDown.open({ title, navigation });
   }
 
   localized(englishText: string, arabicText: string | null | undefined): string {

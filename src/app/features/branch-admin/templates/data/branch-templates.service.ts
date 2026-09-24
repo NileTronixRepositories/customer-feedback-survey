@@ -145,6 +145,24 @@ export class BranchTemplatesService {
       .pipe(map((response) => this.toTemplate(response)));
   }
 
+  copyAsAnonymous(templateId: string): Observable<unknown> {
+    return this.http.post(`${this.templatesUrl}/${templateId}/copy-as-anonymous`, null);
+  }
+
+  uploadLogo(templateId: string, logo: File): Observable<BranchTemplate> {
+    const formData = new FormData();
+    formData.append('Logo', logo);
+    return this.http
+      .put<BranchTemplateApiResponse>(`${this.templatesUrl}/${templateId}/logo`, formData)
+      .pipe(map((response) => this.toTemplate(response)));
+  }
+
+  deleteLogo(templateId: string): Observable<BranchTemplate> {
+    return this.http
+      .delete<BranchTemplateApiResponse>(`${this.templatesUrl}/${templateId}/logo`)
+      .pipe(map((response) => this.toTemplate(response)));
+  }
+
   private toPageResult(
     response:
       | BranchTemplatesPageApiResponse
@@ -201,8 +219,8 @@ export class BranchTemplatesService {
       description: response.description ?? '',
       activeFrom: response.activeFrom ?? '',
       expireTo: response.expireTo ?? null,
-      status: response.statusName ?? response.status ?? 'Draft',
       isActive: response.isActive ?? true,
+      logoPath: response.logoPath ?? null,
       questionsCount: summary?.questionsCount ?? response.questionsCount ?? questions.length,
       groupsCount: summary?.groupsCount ?? this.countQuestionGroups(questions),
       customInputsCount:
@@ -248,7 +266,6 @@ export class BranchTemplatesService {
       branchId: this.readRecordId(response.branchId),
       templateNameEn: response.templateNameEn ?? '',
       templateNameAr: response.templateNameAr ?? '',
-      status: response.status ?? 'Draft',
       isActive: response.isActive ?? true,
       groups: this.toQuestionSelectionGroups(response),
       questionConditions: (response.questionConditions ?? [])

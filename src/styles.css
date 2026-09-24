@@ -422,3 +422,31 @@ canvas {
   background-color: rgba(100, 116, 139, 0.55);
 }
 
+/* ==========================================================================
+   Standardized Sticky Modal Footer Utility
+   ========================================================================== */
+.modal-sticky-footer {
+  position: sticky;
+  bottom: 0;
+  margin-inline: -1rem;
+  margin-bottom: -1rem;
+  margin-top: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  border-top: 1px solid #f1f5f9;
+  background-color: rgba(255, 255, 255, 0.95);
+  padding: 0.75rem 1rem;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 10;
+}
+
+@media (min-width: 640px) {
+  .modal-sticky-footer {
+    margin-inline: -1.25rem;
+    margin-bottom: -1.25rem;
+    padding-inline: 1.25rem;
+  }
+}

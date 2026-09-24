@@ -4,19 +4,31 @@ import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import {
   ArrowLeft,
+  Award,
+  BarChart3,
+  Calendar,
+  CheckCircle2,
   ChevronLeft,
   ChevronRight,
+  Clock,
   Eye,
   FileText,
+  Filter,
+  Inbox,
+  Layers,
+  MessageSquare,
+  RotateCcw,
   Search,
+  Sparkles,
+  TrendingUp,
 } from 'lucide-angular';
 import { AuthStore } from '../../../../auth/presentation/state/auth.store';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 import { ButtonComponent } from '../../../../../shared/ui/button/button.component';
-import { CardComponent } from '../../../../../shared/ui/card/card.component';
 import { IconComponent } from '../../../../../shared/ui/icon/icon.component';
 import { ActivatedRoute } from '@angular/router';
 import { I18nService } from '../../../../../core/services/i18n.service';
+import { resolveMediaUrl } from '../../../../../shared/utils/media-url.util';
 import { AnonymousTemplatesStore } from '../../state/anonymous-templates.store';
 
 @Component({
@@ -24,7 +36,6 @@ import { AnonymousTemplatesStore } from '../../state/anonymous-templates.store';
   standalone: true,
   imports: [
     ButtonComponent,
-    CardComponent,
     DatePipe,
     DecimalPipe,
     IconComponent,
@@ -45,15 +56,55 @@ export class AnonymousTemplateResponsesPageComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
 
   readonly arrowLeftIcon = ArrowLeft;
+  readonly awardIcon = Award;
+  readonly barChartIcon = BarChart3;
+  readonly calendarIcon = Calendar;
+  readonly checkCircleIcon = CheckCircle2;
   readonly chevronLeftIcon = ChevronLeft;
   readonly chevronRightIcon = ChevronRight;
+  readonly clockIcon = Clock;
   readonly detailsIcon = Eye;
   readonly fileTextIcon = FileText;
+  readonly filterIcon = Filter;
+  readonly inboxIcon = Inbox;
+  readonly layersIcon = Layers;
+  readonly messageSquareIcon = MessageSquare;
+  readonly rotateCcwIcon = RotateCcw;
   readonly searchIcon = Search;
+  readonly sparklesIcon = Sparkles;
+  readonly trendingUpIcon = TrendingUp;
 
   readonly anonymousTemplateId = this.route.snapshot.paramMap.get('anonymousTemplateId') ?? '';
   readonly canViewResponses = computed(() =>
     this.authStore.canManageAnonymousTemplates('ViewResponses'),
+  );
+
+  readonly selectedTemplate = computed(() => this.anonymousTemplatesStore.selectedTemplate());
+
+  readonly templateLogoUrl = computed(() => {
+    const template = this.selectedTemplate();
+    return template?.logoPath ? resolveMediaUrl(template.logoPath) : null;
+  });
+
+  readonly totalResponses = computed(() => this.anonymousTemplatesStore.responsesTotalItems());
+
+  readonly scoredResponsesCount = computed(() =>
+    this.anonymousTemplatesStore.responses().filter((r) => r.isScored).length,
+  );
+
+  readonly averageScorePercentage = computed(() => {
+    const scored = this.anonymousTemplatesStore.responses().filter(
+      (r) => r.isScored && r.scorePercentage !== null,
+    );
+    if (scored.length === 0) {
+      return null;
+    }
+    const sum = scored.reduce((acc, curr) => acc + (curr.scorePercentage ?? 0), 0);
+    return Math.round((sum / scored.length) * 10) / 10;
+  });
+
+  readonly totalAnswersInPage = computed(() =>
+    this.anonymousTemplatesStore.responses().reduce((acc, curr) => acc + curr.answersCount, 0),
   );
 
   readonly filtersForm = this.formBuilder.nonNullable.group({

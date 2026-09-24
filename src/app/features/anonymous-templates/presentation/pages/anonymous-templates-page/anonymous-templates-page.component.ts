@@ -18,6 +18,7 @@ import {
   Validators,
 } from '@angular/forms';
 import {
+  AlertTriangle,
   BarChart3,
   Building2,
   ChevronLeft,
@@ -154,6 +155,7 @@ export class AnonymousTemplatesPageComponent implements OnInit {
 
   readonly advancedFiltersOpen = signal(true);
 
+  readonly alertIcon = AlertTriangle;
   readonly deleteIcon = Trash2;
   readonly copiedPublicUrl = signal(false);
   readonly copiedTemplateId = signal<string | null>(null);
@@ -474,11 +476,13 @@ export class AnonymousTemplatesPageComponent implements OnInit {
   }
 
   canDeleteTemplate(template: AnonymousTemplateListItem): boolean {
-    return this.canDelete() && template.isActive && this.canUseTemplateAction(template);
+    const canDeactivateOrArchive = template.isGlobal ? !template.isArchived : template.isActive;
+    return this.canDelete() && canDeactivateOrArchive && this.canUseTemplateAction(template);
   }
 
   canRestoreTemplate(template: AnonymousTemplateListItem): boolean {
-    return this.canRestore() && !template.isActive && this.canUseTemplateAction(template);
+    const canRestoreLifecycle = template.isGlobal ? template.isArchived : !template.isActive;
+    return this.canRestore() && canRestoreLifecycle && this.canUseTemplateAction(template);
   }
 
   canViewTemplateResponses(template: AnonymousTemplateListItem): boolean {
@@ -486,7 +490,17 @@ export class AnonymousTemplatesPageComponent implements OnInit {
   }
 
   canUpdateTemplate(template: AnonymousTemplateListItem): boolean {
-    return this.canUpdate() && template.isActive && this.canUseTemplateAction(template);
+    const structurallyEditable =
+      !template.isManagedGlobalCopy &&
+      (template.isGlobal ? !template.isArchived : template.isActive);
+    return this.canUpdate() && structurallyEditable && this.canUseTemplateAction(template);
+  }
+
+  lifecycleLabelKey(template: AnonymousTemplateListItem): string {
+    if (template.isGlobal) {
+      return template.isArchived ? 'superAdminTemplates.archived' : 'superAdminTemplates.available';
+    }
+    return template.isActive ? 'common.active' : 'branches.inactive';
   }
 
   canCopyTemplateToBranch(template: AnonymousTemplateListItem): boolean {
@@ -600,7 +614,8 @@ export class AnonymousTemplatesPageComponent implements OnInit {
     return 'branchTemplates.fieldRequired';
   }
 
-  copyPublicUrl(publicUrl: string): void {
+  copyPublicUrl(publicUrl: string | null): void {
+    if (!publicUrl) return;
     if (!publicUrl) {
       return;
     }
@@ -615,7 +630,8 @@ export class AnonymousTemplatesPageComponent implements OnInit {
     this.copiedPublicUrl.set(false);
   }
 
-  copyTemplatePublicUrl(templateId: string, publicUrl: string): void {
+  copyTemplatePublicUrl(templateId: string, publicUrl: string | null): void {
+    if (!publicUrl) return;
     if (!publicUrl) {
       return;
     }

@@ -8,8 +8,8 @@
       <div class="flex min-w-0 items-center justify-end">
         <img
           class="h-auto w-[8.75rem] max-w-[52vw] shrink-0 object-contain transition duration-300 hover:scale-[1.02] sm:w-[12rem]"
-          [src]="brandAssets.publicSurveyLogo"
-          [attr.alt]="'publicAnonymousTemplates.cleopatraLogoAlt' | t"
+          [src]="templateLogoUrl()"
+          [attr.alt]="templateName() || ('publicAnonymousTemplates.cleopatraLogoAlt' | t)"
         />
       </div>
 
@@ -27,8 +27,14 @@
   <section class="mx-auto w-full max-w-3xl flex-1 px-3 py-5 sm:px-4 sm:py-8">
     <div class="text-center animate-fade-in-down" style="margin-bottom: 1.5rem">
       <h1 class="text-lg font-extrabold leading-7 text-slate-950 sm:text-xl">
-        {{ 'publicAnonymousTemplates.headerTitle' | t }}
+        {{ templateName() || ('publicAnonymousTemplates.headerTitle' | t) }}
       </h1>
+      @if (branchName()) {
+        <p class="mt-1 text-xs font-semibold text-slate-500">{{ branchName() }}</p>
+      }
+      @if (templateDescription()) {
+        <p class="mx-auto mt-2 max-w-[70ch] text-xs leading-5 text-slate-600">{{ templateDescription() }}</p>
+      }
     </div>
     @if (publicAnonymousTemplateStore.loading()) {
       <div class="public-survey-enter py-16 text-center">

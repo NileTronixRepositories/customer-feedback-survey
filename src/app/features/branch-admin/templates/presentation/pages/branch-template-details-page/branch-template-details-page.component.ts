@@ -1,4 +1,4 @@
-import { DatePipe, Location } from '@angular/common';
+import { DatePipe, DecimalPipe, Location } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, computed, effect, inject, signal } from '@angular/core';
 import {
   AbstractControl,
@@ -26,7 +26,17 @@ import {
   Trash2,
   X,
   Plus,
+  Copy,
+  Calendar,
+  Clock,
+  GitBranch,
+  HelpCircle,
+  ImageUp,
+  Sliders,
+  Sparkles,
+  TrendingUp,
 } from 'lucide-angular';
+import { resolveMediaUrl } from '../../../../../../shared/utils/media-url.util';
 import { I18nService } from '../../../../../../core/services/i18n.service';
 import { AuthStore } from '../../../../../auth/presentation/state/auth.store';
 import {
@@ -122,7 +132,7 @@ interface TemplateDetailsQuestionView {
     ButtonComponent,
     BranchResponseDetailsModalComponent,
     BranchTemplateQuestionTreeComponent,
-    CardComponent,
+    DecimalPipe,
     DatePipe,
     IconComponent,
     InputComponent,
@@ -157,8 +167,19 @@ export class BranchTemplateDetailsPageComponent implements OnInit {
   readonly listChecksIcon = ListChecks;
   readonly complaintIcon = MessageSquareText;
   readonly plusIcon = Plus;
+  readonly copyIcon = Copy;
+  readonly logoIcon = ImageUp;
   readonly saveIcon = Save;
   readonly unselectedIcon = Circle;
+  readonly calendarIcon = Calendar;
+  readonly clockIcon = Clock;
+  readonly branchIcon = GitBranch;
+  readonly helpCircleIcon = HelpCircle;
+  readonly slidersIcon = Sliders;
+  readonly sparklesIcon = Sparkles;
+  readonly trendingUpIcon = TrendingUp;
+  readonly logicConditionsCount = computed(() => this.questionTreeConditions().length);
+  readonly totalResponsesCount = computed(() => this.responsesStore.responses()?.totalItems ?? 0);
   readonly editMode = signal(false);
   readonly questionGroups = computed<readonly TemplateDetailsQuestionGroupView[]>(() => {
     const selectionGroups = this.templatesStore.questionsSelection()?.groups ?? [];
@@ -204,6 +225,9 @@ export class BranchTemplateDetailsPageComponent implements OnInit {
       [],
   );
   readonly canUpdate = computed(() => this.authStore.canManageTemplates('Update'));
+  readonly canCopyBetweenTypes = computed(() =>
+    this.authStore.hasPermission('Templates.CopyBetweenTypes'),
+  );
   readonly canDelete = computed(() => this.authStore.canManageTemplates('Delete'));
   readonly canAssignQuestions = computed(() =>
     this.authStore.canManageTemplates('AssignQuestions'),
@@ -419,6 +443,26 @@ export class BranchTemplateDetailsPageComponent implements OnInit {
     this.templatesStore.deleteTemplate(template.templateId, () => {
       void this.router.navigateByUrl('/branch-admin/templates');
     });
+  }
+
+  logoUrl(template: BranchTemplate): string | null {
+    return resolveMediaUrl(template.logoPath);
+  }
+
+  copyAsAnonymous(template: BranchTemplate): void {
+    if (template.isActive && this.canCopyBetweenTypes()) {
+      this.templatesStore.copyAsAnonymous(template.templateId);
+    }
+  }
+
+  onLogoSelected(template: BranchTemplate, event: Event): void {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (!file || !/\.(?:jpe?g|png|webp)$/i.test(file.name) || file.size > 5 * 1024 * 1024) return;
+    this.templatesStore.uploadLogo(template.templateId, file);
+  }
+
+  removeLogo(template: BranchTemplate): void {
+    if (template.logoPath) this.templatesStore.deleteLogo(template.templateId);
   }
 
   openQuestionsManager(): void {

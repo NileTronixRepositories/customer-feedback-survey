@@ -19,6 +19,8 @@ import {
   ArrowLeft,
   BarChart3,
   Building2,
+  Calendar,
+  CheckCircle2,
   ChevronDown,
   ClipboardList,
   Eye,
@@ -28,7 +30,9 @@ import {
   Layers,
   MessageSquareWarning,
   Mic,
+  RotateCcw,
   Search,
+  SlidersHorizontal,
   TrendingUp,
   UserCog,
   UsersRound,
@@ -39,7 +43,6 @@ import { ButtonComponent } from '../../../../../../shared/ui/button/button.compo
 import { PageHeaderComponent } from '../../../../../../shared/ui/page-header/page-header.component';
 import { IconComponent } from '../../../../../../shared/ui/icon/icon.component';
 import { TranslatePipe } from '../../../../../../shared/pipes/translate.pipe';
-import { BranchResponseDetailsModalComponent } from '../../../../../branch-admin/dashboard/presentation/components/branch-response-details-modal/branch-response-details-modal.component';
 import {
   BranchAdminBranchAdmin,
   BranchAdminBranchDetails,
@@ -50,9 +53,12 @@ import {
 } from '../../../../../branch-admin/branch/domain/branch-admin-branch.model';
 import { BranchAdminBranchStore } from '../../../../../branch-admin/branch/presentation/state/branch-admin-branch.store';
 import { AuthStore } from '../../../../../auth/presentation/state/auth.store';
-import { SurveyAnonymousResponseDetailsModalComponent } from '../../components/survey-anonymous-response-details-modal/survey-anonymous-response-details-modal.component';
 import { SurveyTemplateDetailsModalComponent } from '../../components/survey-template-details-modal/survey-template-details-modal.component';
 import { SurveyDashboardStore } from '../../state/survey-dashboard.store';
+import { DashboardDrillDownService } from '../../../../dashboard-drill-down/data/dashboard-drill-down.service';
+import { DashboardDetailsNavigation } from '../../../../dashboard-drill-down/domain/dashboard-drill-down.model';
+import { SatisfactionDistributionComponent } from '../../../../dashboard-drill-down/presentation/components/satisfaction-distribution/satisfaction-distribution.component';
+import { DashboardSummaryActionsComponent } from '../../../../dashboard-drill-down/presentation/components/dashboard-summary-actions/dashboard-summary-actions.component';
 import {
   SurveyDashboardCriticalResponse,
   SurveyDashboardCustomInputPreview,
@@ -74,15 +80,15 @@ Chart.register(...registerables);
   selector: 'app-survey-dashboard-page',
   standalone: true,
   imports: [
-    BranchResponseDetailsModalComponent,
     ButtonComponent,
     DatePipe,
     PageHeaderComponent,
     DecimalPipe,
     IconComponent,
     ReactiveFormsModule,
-    SurveyAnonymousResponseDetailsModalComponent,
     SurveyTemplateDetailsModalComponent,
+    SatisfactionDistributionComponent,
+    DashboardSummaryActionsComponent,
     TranslatePipe,
   ],
   templateUrl: './survey-dashboard-page.component.html',
@@ -97,6 +103,7 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
   private readonly i18n = inject(I18nService);
   private readonly router = inject(Router);
   private readonly themeColors = inject(ThemeColorService);
+  private readonly drillDown = inject(DashboardDrillDownService);
   private readonly chartCanvas = viewChild<ElementRef<HTMLCanvasElement>>('trendCanvas');
   private readonly templatePerformanceSection = viewChild<ElementRef<HTMLElement>>(
     'templatePerformanceSection',
@@ -122,6 +129,14 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
   readonly trendIcon = TrendingUp;
   readonly questionsIcon = ClipboardList;
   readonly userCogIcon = UserCog;
+  readonly slidersIcon = SlidersHorizontal;
+  readonly resetIcon = RotateCcw;
+  readonly calendarIcon = Calendar;
+  readonly checkIcon = CheckCircle2;
+  readonly activeTableTab = signal<'templates' | 'questions' | 'critical' | 'branches' | 'all'>('templates');
+  private lastSingleTab: 'templates' | 'questions' | 'critical' | 'branches' = 'templates';
+  readonly collapsedSections = signal<ReadonlySet<string>>(new Set());
+  readonly calculationOptionsOpen = signal(false);
 
   readonly advancedFiltersOpen = signal(true);
   readonly branchSnapshotExpanded = signal(false);
@@ -151,6 +166,7 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
     from: [''],
     to: [''],
     groupBy: ['Day' as SurveyDashboardGroupBy],
+    scoreCalculationMode: ['RootQuestions' as const],
     topQuestionsCount: ['5'],
     criticalResponsesCount: ['10'],
     criticalScoreThreshold: ['40'],
@@ -251,6 +267,7 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
       from: '',
       to: '',
       groupBy: 'Day',
+      scoreCalculationMode: 'RootQuestions',
       topQuestionsCount: '5',
       criticalResponsesCount: '10',
       criticalScoreThreshold: '40',
@@ -278,7 +295,59 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
     void this.router.navigate(['/anonymous-templates/dashboard']);
   }
 
+  setTableTab(tab: 'templates' | 'questions' | 'critical' | 'branches' | 'all'): void {
+    if (tab === 'all') {
+      this.toggleAllTables();
+      return;
+    }
+
+    this.lastSingleTab = tab;
+    this.activeTableTab.set(tab);
+    this.collapsedSections.update((sections) => {
+      const next = new Set(sections);
+      next.delete(tab);
+      return next;
+    });
+  }
+
+  toggleAllTables(): void {
+    if (this.activeTableTab() === 'all') {
+      this.activeTableTab.set(this.lastSingleTab || 'templates');
+    } else {
+      this.activeTableTab.set('all');
+      this.collapsedSections.set(new Set());
+    }
+  }
+
+  isSectionActive(section: 'templates' | 'questions' | 'critical' | 'branches'): boolean {
+    if (this.activeTableTab() === 'all') {
+      return true;
+    }
+    return this.activeTableTab() === section;
+  }
+
+  isSectionCollapsed(sectionKey: string): boolean {
+    return this.collapsedSections().has(sectionKey);
+  }
+
+  toggleTableSection(sectionKey: string): void {
+    this.collapsedSections.update((sections) => {
+      const next = new Set(sections);
+      if (next.has(sectionKey)) {
+        next.delete(sectionKey);
+      } else {
+        next.add(sectionKey);
+      }
+      return next;
+    });
+  }
+
+  toggleCalculationOptions(): void {
+    this.calculationOptionsOpen.update((open) => !open);
+  }
+
   focusTemplatePerformance(): void {
+    this.activeTableTab.set('templates');
     const section = this.templatePerformanceSection()?.nativeElement;
     if (!section) {
       return;
@@ -295,39 +364,16 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
   }
 
   openNavigation(navigation: SurveyDashboardNavigation | null): void {
-    if (!navigation || navigation.method.toUpperCase() !== 'GET') {
-      return;
+    if (navigation) {
+      this.drillDown.open({
+        title: this.i18n.translate('dashboardDrillDown.responsesTitle'),
+        navigation,
+      });
     }
+  }
 
-    if (navigation.routeType === 'BranchDashboard') {
-      this.openBranchDashboard(navigation);
-      return;
-    }
-
-    if (navigation.routeType === 'InternalResponseDetails') {
-      this.store.loadInternalResponseDetails(navigation);
-      return;
-    }
-
-    if (navigation.routeType === 'AnonymousResponseDetails') {
-      this.store.loadAnonymousResponseDetails(navigation);
-      return;
-    }
-
-    if (
-      navigation.routeType === 'InternalTemplateResponses' ||
-      navigation.routeType === 'InternalTemplateResponsesByQuestionContext'
-    ) {
-      this.openInternalTemplateResponses(navigation);
-      return;
-    }
-
-    if (
-      navigation.routeType === 'AnonymousTemplateResponses' ||
-      navigation.routeType === 'AnonymousTemplateResponsesByQuestionContext'
-    ) {
-      this.openAnonymousTemplateResponses(navigation);
-    }
+  openDrillDown(event: { title: string; navigation: DashboardDetailsNavigation }): void {
+    this.drillDown.open(event);
   }
 
   openTemplateDetails(template: SurveyDashboardTemplatePerformance): void {
@@ -519,6 +565,7 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
       from: this.toStartOfDay(value.from),
       to: this.toEndOfDay(value.to),
       groupBy: value.groupBy,
+      scoreCalculationMode: value.scoreCalculationMode,
       topQuestionsCount: this.toPositiveInteger(value.topQuestionsCount, 5),
       criticalResponsesCount: this.toPositiveInteger(value.criticalResponsesCount, 10),
       criticalScoreThreshold: this.toPercentage(value.criticalScoreThreshold, 40),
@@ -566,88 +613,6 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
     }
 
     return templates.filter((template) => !template.branchId || template.branchId === branchId);
-  }
-
-  private openBranchDashboard(navigation: SurveyDashboardNavigation): void {
-    const branchId = this.queryParam(navigation.path, 'branchId');
-    if (this.isSuperAdmin() && branchId) {
-      this.filtersForm.patchValue({ branchId });
-      this.selectedBranchId.set(branchId);
-      this.store.loadTemplateOptions({ branchId });
-    }
-
-    this.store.loadDashboardFromNavigation(navigation);
-  }
-
-  private openInternalTemplateResponses(navigation: SurveyDashboardNavigation): void {
-    const queryParams = this.navigationQueryParams(navigation.path, [
-      'templateId',
-      'pageNumber',
-      'pageSize',
-    ]);
-    const route = this.isSuperAdmin()
-      ? ['/reports/survey-dashboard/internal-responses']
-      : ['/branch-admin/templates/responses'];
-
-    void this.router.navigate(route, { queryParams });
-  }
-
-  private openAnonymousTemplateResponses(navigation: SurveyDashboardNavigation): void {
-    const templateId =
-      this.pathSegmentAfter(navigation.path, 'anonymous-templates') ||
-      this.queryParam(navigation.path, 'anonymousTemplateId');
-
-    if (!templateId) {
-      return;
-    }
-
-    void this.router.navigate(['/anonymous-templates', templateId, 'responses']);
-  }
-
-  private queryParam(path: string, name: string): string {
-    const url = this.navigationUrl(path);
-    if (!url) {
-      return '';
-    }
-
-    const expectedName = name.toLowerCase();
-    for (const [key, value] of url.searchParams.entries()) {
-      if (key.toLowerCase() === expectedName) {
-        return value;
-      }
-    }
-
-    return '';
-  }
-
-  private navigationQueryParams(path: string, names: readonly string[]): Record<string, string> {
-    return names.reduce<Record<string, string>>((params, name) => {
-      const value = this.queryParam(path, name);
-      if (value.length > 0) {
-        params[name] = value;
-      }
-
-      return params;
-    }, {});
-  }
-
-  private pathSegmentAfter(path: string, segment: string): string {
-    const url = this.navigationUrl(path);
-    if (!url) {
-      return '';
-    }
-
-    const segments = url.pathname.split('/').filter(Boolean);
-    const index = segments.findIndex((item) => item.toLowerCase() === segment.toLowerCase());
-    return index >= 0 ? (segments[index + 1] ?? '') : '';
-  }
-
-  private navigationUrl(path: string): URL | null {
-    try {
-      return new URL(path, 'http://local');
-    } catch {
-      return null;
-    }
   }
 
   private clearTemplatePerformanceFocusTimer(): void {
@@ -729,6 +694,12 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
         maintainAspectRatio: false,
         locale: language,
         spanGaps: false,
+        onClick: (_event, elements) => {
+          const point = trend[elements[0]?.index ?? -1];
+          if (point?.detailsNavigation) {
+            this.openNavigation(point.detailsNavigation);
+          }
+        },
         plugins: {
           legend: {
             display: true,

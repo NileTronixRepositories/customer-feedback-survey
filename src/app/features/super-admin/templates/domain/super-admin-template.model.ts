@@ -2,6 +2,7 @@ import { CreatedByUser, CreatedByUserApiResponse } from '../../../../shared/mode
 
 export type SuperAdminTemplateKind = 'Authorized' | 'Anonymous';
 export type SuperAdminTemplateCatalogKind = SuperAdminTemplateKind | 'AuthorizeAndAnonymous';
+export type SuperAdminAnonymousTemplateScope = 'Branch' | 'Global' | null;
 
 export interface SuperAdminTemplatesQuery {
   pageNumber: number;
@@ -15,7 +16,7 @@ export interface SuperAdminTemplatesQuery {
 
 export interface SuperAdminTemplateListItem {
   templateId: string;
-  branchId: string;
+  branchId: string | null;
   branchNameEn: string | null;
   branchNameAr: string | null;
   templateKind: SuperAdminTemplateKind;
@@ -23,9 +24,14 @@ export interface SuperAdminTemplateListItem {
   nameEn: string | null;
   nameAr: string | null;
   description: string | null;
-  status: string;
-  statusName: string;
+  scope: SuperAdminAnonymousTemplateScope;
+  scopeName: string | null;
+  isGlobal: boolean;
+  isArchived: boolean;
+  sourceGlobalAnonymousTemplateId: string | null;
+  isManagedGlobalCopy: boolean;
   isActive: boolean;
+  logoPath: string | null;
   questionsCount: number;
   customInputsCount: number;
   publicUrl: string | null;
@@ -52,6 +58,14 @@ export interface CopySuperAdminTemplateToBranchPayload {
   branchId: string;
 }
 
+export interface AssignGlobalAnonymousTemplateToBranchPayload {
+  globalTemplateId: string;
+  branchId: string;
+  activeFrom: string;
+  expireTo: string | null;
+  logo: File | null;
+}
+
 export interface SuperAdminTemplateCopyResult {
   templateId: string;
   branchId: string;
@@ -73,9 +87,14 @@ export interface SuperAdminTemplateApiResponse {
   nameEn?: string | null;
   nameAr?: string | null;
   description?: string | null;
-  status?: string | null;
-  statusName?: string | null;
+  scope?: string | number | null;
+  scopeName?: string | null;
+  isGlobal?: boolean | null;
+  isArchived?: boolean | null;
+  sourceGlobalAnonymousTemplateId?: string | number | null;
+  isManagedGlobalCopy?: boolean | null;
   isActive?: boolean | null;
+  logoPath?: string | null;
   questionsCount?: number | null;
   customInputsCount?: number | null;
   publicUrl?: string | null;

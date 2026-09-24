@@ -29,6 +29,13 @@ export interface SystemResponsesQuery {
   maxScorePercentage?: number;
   hasComplaint?: boolean;
   hasVoice?: boolean;
+  satisfactionCategory?: SatisfactionCategory;
+  isScored?: boolean;
+  questionId?: string;
+  customInputName?: string;
+  customInputType?: string;
+  customInputValue?: string;
+  orderSort?: 'Newest' | 'Oldest';
   searchText?: string;
   pageNumber: number;
   pageSize: number;
@@ -37,6 +44,8 @@ export interface SystemResponsesQuery {
 export interface SystemDashboardResponse {
   period: SystemDashboardPeriod;
   summary: SystemDashboardSummary;
+  charts: DashboardCharts;
+  summaryActions: DashboardSummaryActions;
   satisfactionTrend: readonly SystemTrendPoint[];
   branchPerformance: readonly SystemBranchPerformance[];
   departmentActivity: readonly SystemDepartmentActivity[];
@@ -70,6 +79,7 @@ export interface SystemTrendPoint {
   period: string;
   responsesCount: number;
   averageScorePercentage: number;
+  detailsNavigation: DashboardDetailsNavigation | null;
 }
 
 export interface SystemBranchPerformance {
@@ -83,6 +93,7 @@ export interface SystemBranchPerformance {
   voiceAnswersCount: number;
   activeTemplatesCount: number;
   riskLevel: SystemReportsRiskLevel;
+  detailsNavigation: DashboardDetailsNavigation | null;
 }
 
 export interface SystemDepartmentActivity {
@@ -92,6 +103,7 @@ export interface SystemDepartmentActivity {
   operatorsCount: number;
   responsesCount: number;
   lastResponseDate: string | null;
+  detailsNavigation: DashboardDetailsNavigation | null;
 }
 
 export interface SystemTemplatePerformance {
@@ -105,6 +117,7 @@ export interface SystemTemplatePerformance {
   averageScorePercentage: number;
   complaintsCount: number;
   riskLevel: SystemReportsRiskLevel;
+  detailsNavigation: DashboardDetailsNavigation | null;
 }
 
 export interface SystemCriticalResponse {
@@ -126,6 +139,7 @@ export interface SystemCriticalResponse {
   scorePercentage: number;
   complaintText: string | null;
   customInputs: readonly SystemResponseCustomInputPreview[];
+  detailsNavigation: DashboardDetailsNavigation | null;
 }
 
 export interface SystemResponsesPagination {
@@ -241,3 +255,9 @@ export interface ReportDepartmentOption {
   nameEn: string;
   nameAr: string;
 }
+import {
+  DashboardCharts,
+  DashboardDetailsNavigation,
+  DashboardSummaryActions,
+  SatisfactionCategory,
+} from '../../../reports/dashboard-drill-down/domain/dashboard-drill-down.model';

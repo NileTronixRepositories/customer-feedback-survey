@@ -397,17 +397,17 @@
 </div>
 
 <app-modal [title]="'questions.createTitle' | t" [open]="createModalOpen()" (closed)="closeCreateQuestion()" size="lg">
-  <form class="space-y-3" [formGroup]="questionForm" (ngSubmit)="createQuestion()">
+  <form class="space-y-4" [formGroup]="questionForm" (ngSubmit)="createQuestion()">
     @if (!isGroupScoped() && !questionsStore.groupsLoading() && questionsStore.groupsSelection().length === 0) {
-      <div class="border border-amber-100 bg-amber-50 p-3 text-xs font-semibold text-amber-700">
+      <div class="rounded-xl border border-amber-200/80 bg-amber-50/80 p-3 text-xs font-semibold text-amber-800 shadow-2xs">
         {{ 'questions.noActiveGroupsHelp' | t }}
       </div>
     }
 
     <div class="grid md:grid-cols-2">
       @if (isGroupScoped()) {
-        <div class="rounded-lg border border-cyan-100 bg-cyan-50/70 p-3">
-          <span class="mb-1.5 block text-xs font-semibold text-slate-700">{{ 'questions.group' | t }}</span>
+        <div class="rounded-xl border border-[var(--theme-color-accent)]/20 bg-[var(--theme-color-accent-softest)]/50 p-3 shadow-2xs">
+          <span class="mb-1 block text-xs font-semibold text-slate-500">{{ 'questions.group' | t }}</span>
           <p class="break-words text-xs font-extrabold text-[var(--theme-color-secondary)] [overflow-wrap:anywhere]">
             {{ selectedGroupLabel() }}
           </p>
@@ -565,7 +565,7 @@
       </section>
     }
 
-    <div class="flex flex-wrap justify-end gap-2 border-t border-slate-100">
+    <div class="sticky bottom-0 -mx-4 -mb-4 mt-4 flex flex-wrap justify-end gap-2 border-t border-slate-100 bg-white/95 px-4 py-3 backdrop-blur-sm sm:-mx-5 sm:-mb-5 sm:px-5 z-10">
       <app-button type="button" variant="secondary" (pressed)="closeCreateQuestion()">
         {{ 'common.cancel' | t }}
       </app-button>
@@ -582,17 +582,17 @@
 </app-modal>
 
 <app-modal [title]="'questions.updateTitle' | t" [open]="editModalOpen()" (closed)="closeEditQuestion()" size="lg">
-  <form class="space-y-3" [formGroup]="editQuestionForm" (ngSubmit)="updateSelectedQuestion()">
+  <form class="space-y-4" [formGroup]="editQuestionForm" (ngSubmit)="updateSelectedQuestion()">
     @if (!isGroupScoped() && !questionsStore.groupsLoading() && questionsStore.groupsSelection().length === 0) {
-      <div class="border border-amber-100 bg-amber-50 p-3 text-xs font-semibold text-amber-700">
+      <div class="rounded-xl border border-amber-200/80 bg-amber-50/80 p-3 text-xs font-semibold text-amber-800 shadow-2xs">
         {{ 'questions.noActiveGroupsHelp' | t }}
       </div>
     }
 
     <div class="grid md:grid-cols-2">
       @if (isGroupScoped()) {
-        <div class="rounded-lg border border-cyan-100 bg-cyan-50/70 p-3">
-          <span class="mb-1.5 block text-xs font-semibold text-slate-700">{{ 'questions.group' | t }}</span>
+        <div class="rounded-xl border border-[var(--theme-color-accent)]/20 bg-[var(--theme-color-accent-softest)]/50 p-3 shadow-2xs">
+          <span class="mb-1 block text-xs font-semibold text-slate-500">{{ 'questions.group' | t }}</span>
           <p class="break-words text-xs font-extrabold text-[var(--theme-color-secondary)] [overflow-wrap:anywhere]">
             {{ selectedGroupLabel() }}
           </p>
@@ -750,7 +750,7 @@
       </section>
     }
 
-    <div class="flex flex-wrap justify-end gap-2 border-t border-slate-100">
+    <div class="sticky bottom-0 -mx-4 -mb-4 mt-4 flex flex-wrap justify-end gap-2 border-t border-slate-100 bg-white/95 px-4 py-3 backdrop-blur-sm sm:-mx-5 sm:-mb-5 sm:px-5 z-10">
       <app-button type="button" variant="secondary" (pressed)="closeEditQuestion()">
         {{ 'common.cancel' | t }}
       </app-button>
@@ -766,16 +766,26 @@
   </form>
 </app-modal>
 
-<app-modal [title]="'questions.deleteTitle' | t" [open]="deleteModalOpen()" (closed)="closeDeleteQuestion()">
+<app-modal [title]="'questions.deleteTitle' | t" [open]="deleteModalOpen()" (closed)="closeDeleteQuestion()" size="sm">
   @if (questionPendingDelete(); as question) {
-    <div class="space-y-3">
-      <p class="font-semibold text-slate-700">{{ 'questions.deleteConfirm' | t }}</p>
-      <div class="border border-slate-100 bg-slate-50 p-3 text-xs text-slate-600">
-        <p class="font-bold text-slate-900">{{ question.textEn }}</p>
-        <p class="mt-1">{{ question.textAr || '-' }}</p>
-        <p class="mt-2 font-semibold text-slate-500">{{ questionGroupPrimaryLabel(question) }}</p>
+    <div class="space-y-4">
+      <div class="flex items-start gap-3 rounded-xl border border-red-200/60 bg-red-50/50 p-3 text-xs text-red-700">
+        <app-icon [icon]="deleteIcon" [size]="18" class="mt-0.5 shrink-0 text-red-500" />
+        <p class="font-medium leading-relaxed">{{ 'questions.deleteConfirm' | t }}</p>
       </div>
-      <div class="flex flex-wrap justify-end gap-2">
+
+      <div class="rounded-xl border border-slate-200/80 bg-slate-50/60 p-3.5 shadow-2xs">
+        <p class="text-xs font-bold text-slate-900">{{ question.textEn }}</p>
+        @if (question.textAr) {
+          <p class="mt-1 text-xs text-slate-600">{{ question.textAr }}</p>
+        }
+        <div class="mt-2.5 flex items-center gap-1.5 text-[11px] font-medium text-slate-500">
+          <span class="inline-block h-1.5 w-1.5 rounded-full bg-[var(--theme-color-primary)]"></span>
+          <span>{{ questionGroupPrimaryLabel(question) }}</span>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end gap-2 border-t border-slate-100 pt-3">
         <app-button type="button" variant="secondary" (pressed)="closeDeleteQuestion()">
           {{ 'common.cancel' | t }}
         </app-button>

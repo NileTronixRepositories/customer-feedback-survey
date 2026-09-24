@@ -3,6 +3,10 @@ import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import {
+  DashboardDetailsNavigation,
+  SatisfactionCategory,
+} from '../../reports/dashboard-drill-down/domain/dashboard-drill-down.model';
+import {
   toScopeState,
   toSelectableEditableScopeState,
 } from '../../../shared/models/resource-scope.model';
@@ -42,6 +46,7 @@ import {
   AnonymousTemplateResponsesPageApiResponse,
   AnonymousTemplateResponsesPageResult,
   AnonymousTemplateStateChange,
+  AssignGlobalAnonymousTemplatePayload,
   AnonymousTemplateSummary,
   AnonymousTemplateSummaryApiResponse,
   AnonymousTemplatesListQuery,
@@ -143,6 +148,53 @@ export class AnonymousTemplatesService {
       .pipe(map((response) => this.toStateChange(response)));
   }
 
+  assignGlobalToBranch(
+    globalTemplateId: string,
+    payload: AssignGlobalAnonymousTemplatePayload,
+  ): Observable<AnonymousTemplate> {
+    const formData = new FormData();
+    formData.append('BranchId', payload.branchId);
+    formData.append('ActiveFrom', payload.activeFrom);
+    if (payload.expireTo) {
+      formData.append('ExpireTo', payload.expireTo);
+    }
+    if (payload.logo) {
+      formData.append('Logo', payload.logo);
+    }
+    return this.http
+      .post<AnonymousTemplateApiResponse>(
+        `${this.anonymousTemplatesUrl}/${globalTemplateId}/assign-to-branch`,
+        formData,
+      )
+      .pipe(map((response) => this.toTemplate(response)));
+  }
+
+  copyAsAuthorized(anonymousTemplateId: string): Observable<unknown> {
+    return this.http.post(
+      `${this.anonymousTemplatesUrl}/${anonymousTemplateId}/copy-as-authorized`,
+      null,
+    );
+  }
+
+  uploadLogo(anonymousTemplateId: string, logo: File): Observable<AnonymousTemplate> {
+    const formData = new FormData();
+    formData.append('Logo', logo);
+    return this.http
+      .put<AnonymousTemplateApiResponse>(
+        `${this.anonymousTemplatesUrl}/${anonymousTemplateId}/logo`,
+        formData,
+      )
+      .pipe(map((response) => this.toTemplate(response)));
+  }
+
+  deleteLogo(anonymousTemplateId: string): Observable<AnonymousTemplate> {
+    return this.http
+      .delete<AnonymousTemplateApiResponse>(
+        `${this.anonymousTemplatesUrl}/${anonymousTemplateId}/logo`,
+      )
+      .pipe(map((response) => this.toTemplate(response)));
+  }
+
   questionsSelection(
     anonymousTemplateId: string,
     searchText = '',
@@ -218,6 +270,13 @@ export class AnonymousTemplatesService {
     if (query.maxScorePercentage !== null) {
       params = params.set('maxScorePercentage', query.maxScorePercentage);
     }
+    if (query.satisfactionCategory) params = params.set('satisfactionCategory', query.satisfactionCategory);
+    if (query.isScored !== undefined) params = params.set('isScored', query.isScored);
+    if (query.questionId) params = params.set('questionId', query.questionId);
+    if (query.customInputName) params = params.set('customInputName', query.customInputName);
+    if (query.customInputType) params = params.set('customInputType', query.customInputType);
+    if (query.customInputValue) params = params.set('customInputValue', query.customInputValue);
+    if (query.searchText) params = params.set('searchText', query.searchText);
 
     return this.http
       .get<
@@ -256,6 +315,12 @@ export class AnonymousTemplatesService {
     if (query.hasVoice !== undefined) {
       params = params.set('hasVoice', query.hasVoice);
     }
+    if (query.satisfactionCategory) params = params.set('satisfactionCategory', query.satisfactionCategory);
+    if (query.isScored !== undefined) params = params.set('isScored', query.isScored);
+    if (query.questionId) params = params.set('questionId', query.questionId);
+    if (query.customInputName) params = params.set('customInputName', query.customInputName);
+    if (query.customInputType) params = params.set('customInputType', query.customInputType);
+    if (query.customInputValue) params = params.set('customInputValue', query.customInputValue);
 
     const searchText = query.searchText?.trim() ?? '';
     if (searchText.length > 0) {
@@ -368,10 +433,24 @@ export class AnonymousTemplatesService {
         complaintsCount: summary.complaintsCount ?? 0,
         voiceAnswersCount: summary.voiceAnswersCount ?? 0,
       },
+      charts: {
+        satisfactionDistribution: (response.charts?.satisfactionDistribution ?? []).map((item) => ({
+          category: this.toSatisfactionCategory(item.category),
+          responsesCount: item.responsesCount ?? 0,
+          percentage: item.percentage ?? 0,
+          detailsNavigation: this.toDashboardNavigation(item.detailsNavigation),
+        })),
+      },
+      summaryActions: {
+        allResponses: this.toDashboardNavigation(response.summaryActions?.allResponses),
+        complaints: this.toDashboardNavigation(response.summaryActions?.complaints),
+        voiceAnswers: this.toDashboardNavigation(response.summaryActions?.voiceAnswers),
+      },
       satisfactionTrend: (response.satisfactionTrend ?? []).map((point) => ({
         period: point.period ?? '',
         responsesCount: point.responsesCount ?? 0,
         averageScorePercentage: point.averageScorePercentage ?? 0,
+        detailsNavigation: this.toDashboardNavigation(point.detailsNavigation),
       })),
       anonymousTemplatePerformance: (response.anonymousTemplatePerformance ?? []).map((item) =>
         this.toDashboardTemplatePerformance(item),
@@ -389,6 +468,7 @@ export class AnonymousTemplatesService {
         answersCount: item.answersCount ?? 0,
         averageValue: item.averageValue ?? 0,
         averageScorePercentage: item.averageScorePercentage ?? 0,
+        detailsNavigation: this.toDashboardNavigation(item.detailsNavigation),
       })),
       customInputSegments: (response.customInputSegments ?? []).map((segment) => ({
         customInputName: segment.customInputName ?? '',
@@ -398,6 +478,7 @@ export class AnonymousTemplatesService {
           value: item.value ?? '',
           responsesCount: item.responsesCount ?? 0,
           averageScorePercentage: item.averageScorePercentage ?? 0,
+          detailsNavigation: this.toDashboardNavigation(item.detailsNavigation),
         })),
       })),
       criticalResponses: (response.criticalResponses ?? []).map((item) =>
@@ -415,16 +496,16 @@ export class AnonymousTemplatesService {
       nameAr: item.nameAr ?? null,
       scope: item.scope ?? 0,
       scopeName: item.scopeName ?? '',
-      status: item.status ?? 0,
-      statusName: item.statusName ?? '',
       isActive: item.isActive ?? false,
-      publicUrl: item.publicUrl ?? '',
+      logoPath: item.logoPath ?? null,
+      publicUrl: item.publicUrl ?? null,
       qrCode: item.qrCode ?? null,
       responsesCount: item.responsesCount ?? 0,
       scoredResponsesCount: item.scoredResponsesCount ?? 0,
       averageScorePercentage: item.averageScorePercentage ?? 0,
       complaintsCount: item.complaintsCount ?? 0,
       riskLevel: this.toDashboardRiskLevel(item.riskLevel),
+      detailsNavigation: this.toDashboardNavigation(item.detailsNavigation),
     };
   }
 
@@ -443,7 +524,20 @@ export class AnonymousTemplatesService {
         name: input.name ?? '',
         value: input.value ?? '',
       })),
+      detailsNavigation: this.toDashboardNavigation(item.detailsNavigation),
     };
+  }
+
+  private toDashboardNavigation(
+    navigation: DashboardDetailsNavigation | null | undefined,
+  ): DashboardDetailsNavigation | null {
+    return navigation?.method === 'GET' && navigation.path?.startsWith('/api/')
+      ? navigation
+      : null;
+  }
+
+  private toSatisfactionCategory(value: string): SatisfactionCategory {
+    return value === 'Neutral' || value === 'Unhappy' ? value : 'Satisfied';
   }
 
   private toDashboardRiskLevel(
@@ -615,7 +709,7 @@ export class AnonymousTemplatesService {
       questionId,
       questionTextEn: response.questionTextEn ?? '',
       questionTextAr: response.questionTextAr ?? null,
-      questionType: this.toStatus(response.questionType),
+      questionType: this.toNumber(response.questionType),
       questionTypeName: response.questionTypeName ?? '',
       questionOrder: response.questionOrder ?? response.order ?? 0,
       selectedQuestionOptionId: this.readNullableRecordId(response.selectedQuestionOptionId),
@@ -649,10 +743,16 @@ export class AnonymousTemplatesService {
       description: response.description ?? null,
       activeFrom: response.activeFrom ?? '',
       expireTo: response.expireTo ?? null,
-      status: this.toStatus(response.status),
-      statusName: response.statusName ?? 'Draft',
       isActive: response.isActive ?? true,
-      publicUrl: response.publicUrl ?? '',
+      isArchived: response.isArchived ?? false,
+      logoPath: response.logoPath ?? null,
+      sourceGlobalAnonymousTemplateId: this.readNullableRecordId(
+        response.sourceGlobalAnonymousTemplateId,
+      ),
+      isManagedGlobalCopy:
+        response.isManagedGlobalCopy ??
+        this.readNullableRecordId(response.sourceGlobalAnonymousTemplateId) !== null,
+      publicUrl: response.publicUrl ?? null,
       qrCode: response.qrCode ?? null,
       questionsCount: response.questionsCount ?? 0,
       customInputsCount: response.customInputsCount ?? 0,
@@ -691,10 +791,16 @@ export class AnonymousTemplatesService {
       description: response.description ?? null,
       activeFrom: response.activeFrom ?? '',
       expireTo: response.expireTo ?? null,
-      status: this.toStatus(response.status),
-      statusName: response.statusName ?? 'Draft',
       isActive: response.isActive ?? true,
-      publicUrl: response.publicUrl ?? '',
+      isArchived: response.isArchived ?? false,
+      logoPath: response.logoPath ?? null,
+      sourceGlobalAnonymousTemplateId: this.readNullableRecordId(
+        response.sourceGlobalAnonymousTemplateId,
+      ),
+      isManagedGlobalCopy:
+        response.isManagedGlobalCopy ??
+        this.readNullableRecordId(response.sourceGlobalAnonymousTemplateId) !== null,
+      publicUrl: response.publicUrl ?? null,
       qrCode: response.qrCode ?? null,
       createdByApplicationUserId: this.readRecordId(response.createdByApplicationUserId),
       createdOnUtc: response.createdOnUtc ?? '',
@@ -715,9 +821,8 @@ export class AnonymousTemplatesService {
       ...toScopeState(response),
       anonymousTemplateId: this.readRecordId(response.anonymousTemplateId),
       branchId: this.readNullableRecordId(response.branchId),
-      status: this.toStatus(response.status),
-      statusName: response.statusName ?? '',
       isActive: response.isActive ?? true,
+      isArchived: response.isArchived ?? false,
     };
   }
 
@@ -773,7 +878,7 @@ export class AnonymousTemplatesService {
       isEditable: response.isEditable ?? true,
       textEn: response.textEn ?? '',
       textAr: response.textAr ?? null,
-      type: this.toStatus(response.type),
+      type: this.toNumber(response.type),
       typeName: response.typeName ?? '',
       order: response.order ?? 0,
       isActive: response.isActive ?? true,
@@ -820,7 +925,7 @@ export class AnonymousTemplatesService {
       selectedOrder: response.selectedOrder ?? null,
       textEn: response.textEn ?? '',
       textAr: response.textAr ?? null,
-      type: this.toStatus(response.type),
+      type: this.toNumber(response.type),
       typeName: response.typeName ?? '',
       isActive: response.isActive ?? true,
       options: (response.options ?? [])
@@ -864,7 +969,7 @@ export class AnonymousTemplatesService {
       groupNameAr: response.groupNameAr ?? null,
       textEn: response.textEn ?? '',
       textAr: response.textAr ?? null,
-      type: this.toStatus(response.type),
+      type: this.toNumber(response.type),
       typeName: response.typeName ?? '',
       order: response.order ?? 0,
     };
@@ -895,7 +1000,7 @@ export class AnonymousTemplatesService {
       childAnonymousTemplateQuestionId: this.readRecordId(
         response.childAnonymousTemplateQuestionId,
       ),
-      triggerType: this.toStatus(response.triggerType),
+      triggerType: this.toNumber(response.triggerType),
       triggerTypeName: response.triggerTypeName ?? '',
       selectedQuestionOptionId: this.readNullableRecordId(response.selectedQuestionOptionId),
       triggerValue: response.triggerValue ?? null,
@@ -948,16 +1053,14 @@ export class AnonymousTemplatesService {
     return normalizedType === '2' || normalizedType === 'integer' ? 2 : 1;
   }
 
-  private toStatus(status: number | string | null | undefined): number | null {
-    if (typeof status === 'number') {
-      return Number.isFinite(status) ? status : null;
+  private toNumber(value: number | string | null | undefined): number | null {
+    if (typeof value === 'number') {
+      return Number.isFinite(value) ? value : null;
     }
-
-    if (typeof status === 'string') {
-      const numericStatus = Number(status);
-      return Number.isFinite(numericStatus) ? numericStatus : null;
+    if (typeof value === 'string' && value.trim().length > 0) {
+      const numericValue = Number(value);
+      return Number.isFinite(numericValue) ? numericValue : null;
     }
-
     return null;
   }
 

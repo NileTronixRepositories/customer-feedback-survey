@@ -22,6 +22,8 @@ export interface DepartmentDashboardQuery {
 export interface DepartmentDashboardResponse {
   period: DepartmentDashboardPeriod;
   summary: DepartmentDashboardSummary;
+  charts: DashboardCharts;
+  summaryActions: DashboardSummaryActions;
   satisfactionTrend: readonly DepartmentDashboardTrendPoint[];
   operatorPerformance: readonly DepartmentOperatorPerformance[];
   templatePerformance: readonly DepartmentTemplatePerformance[];
@@ -58,6 +60,7 @@ export interface DepartmentDashboardTrendPoint {
   period: string;
   responsesCount: number;
   averageScorePercentage: number;
+  detailsNavigation: DashboardDetailsNavigation | null;
 }
 
 export interface DepartmentOperatorPerformance {
@@ -71,6 +74,7 @@ export interface DepartmentOperatorPerformance {
   voiceAnswersCount: number;
   lastResponseOnUtc: string | null;
   riskLevel: DepartmentReportsRiskLevel;
+  detailsNavigation: DashboardDetailsNavigation | null;
 }
 
 export interface DepartmentTemplatePerformance {
@@ -85,6 +89,7 @@ export interface DepartmentTemplatePerformance {
   averageScorePercentage: number;
   complaintsCount: number;
   riskLevel: DepartmentReportsRiskLevel;
+  detailsNavigation: DashboardDetailsNavigation | null;
 }
 
 export interface DepartmentQuestionInsight {
@@ -99,6 +104,7 @@ export interface DepartmentQuestionInsight {
   answersCount: number;
   averageValue: number;
   averageScorePercentage: number;
+  detailsNavigation: DashboardDetailsNavigation | null;
 }
 
 export interface DepartmentCustomInputSegment {
@@ -112,6 +118,7 @@ export interface DepartmentCustomInputSegmentValue {
   value: string;
   responsesCount: number;
   averageScorePercentage: number;
+  detailsNavigation: DashboardDetailsNavigation | null;
 }
 
 export interface DepartmentCriticalResponse {
@@ -130,6 +137,7 @@ export interface DepartmentCriticalResponse {
   scorePercentage: number;
   complaintText: string | null;
   customInputs: readonly DepartmentCriticalResponseCustomInput[];
+  detailsNavigation: DashboardDetailsNavigation | null;
 }
 
 export interface DepartmentCriticalResponseCustomInput {
@@ -149,6 +157,12 @@ export interface DepartmentOperatorResponsesQuery {
   maxScorePercentage?: number;
   hasComplaint?: boolean;
   hasVoice?: boolean;
+  satisfactionCategory?: SatisfactionCategory;
+  isScored?: boolean;
+  questionId?: string;
+  customInputName?: string;
+  customInputType?: string;
+  customInputValue?: string;
 }
 
 export interface DepartmentOperatorResponsesPagination {
@@ -269,3 +283,9 @@ export interface DepartmentReportTemplateOption {
   branchNameAr: string | null;
   branchCode: string;
 }
+import {
+  DashboardCharts,
+  DashboardDetailsNavigation,
+  DashboardSummaryActions,
+  SatisfactionCategory,
+} from '../../../reports/dashboard-drill-down/domain/dashboard-drill-down.model';

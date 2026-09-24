@@ -30,6 +30,7 @@ import {
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 import { IconComponent } from '../../../../../shared/ui/icon/icon.component';
 import { PublicSurveyFooterComponent } from '../../components/public-survey-footer/public-survey-footer.component';
+import { resolveMediaUrl } from '../../../../../shared/utils/media-url.util';
 import { PublicSurveyBrandingService } from '../../services/public-survey-branding.service';
 import { PublicAnonymousTemplateStore } from '../../state/public-anonymous-template.store';
 
@@ -76,6 +77,16 @@ export class PublicAnonymousTemplatePageComponent implements OnInit, OnDestroy {
   readonly templateDescription = computed(() => {
     const template = this.publicAnonymousTemplateStore.template();
     return template ? this.localizedText(template.description ?? '', null) : '';
+  });
+
+  readonly templateLogoUrl = computed(() =>
+    resolveMediaUrl(this.publicAnonymousTemplateStore.template()?.logoPath) ??
+    this.brandAssets.publicSurveyLogo,
+  );
+
+  readonly branchName = computed(() => {
+    const branch = this.publicAnonymousTemplateStore.template()?.branch;
+    return branch ? this.localizedText(branch.nameEn, branch.nameAr) : '';
   });
 
   readonly visibleQuestions = computed<readonly PublicAnonymousTemplateQuestion[]>(() => {

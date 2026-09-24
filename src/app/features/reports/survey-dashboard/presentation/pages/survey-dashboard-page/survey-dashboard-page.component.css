@@ -1,1 +1,92 @@
-/* survey-dashboard-page styles */
+/* Survey Dashboard Executive Modern Styles */
+
+:host {
+  display: block;
+  width: 100%;
+}
+
+/* Card hover elevations */
+article,
+button {
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom scrollbars for data tables */
+.overflow-x-auto {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(203, 213, 225, 0.6) transparent;
+}
+
+.overflow-x-auto::-webkit-scrollbar {
+  height: 6px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb {
+  background-color: rgba(203, 213, 225, 0.7);
+  border-radius: 9999px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(148, 163, 184, 0.9);
+}
+
+/* Table row micro-interactions */
+tbody tr {
+  transition: background-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Filter controls consistent height & styling */
+.filter-control {
+  transition: border-color 150ms ease-in-out, box-shadow 150ms ease-in-out;
+}
+
+/* Smooth Tab transitions */
+button[type='button'] {
+  touch-action: manipulation;
+}
+
+/* Catchy Accordion Sections Collapse & Expand Animation */
+.table-accordion-item {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  margin-bottom: 0;
+  transition: grid-template-rows 380ms cubic-bezier(0.16, 1, 0.3, 1),
+              opacity 300ms cubic-bezier(0.16, 1, 0.3, 1),
+              margin-bottom 350ms cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+  visibility: hidden;
+}
+
+.table-accordion-item.is-expanded {
+  grid-template-rows: 1fr;
+  opacity: 1;
+  margin-bottom: 1rem;
+  pointer-events: auto;
+  visibility: visible;
+}
+
+.table-accordion-content {
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Inner Card Table Collapse & Expand Animation */
+.table-body-collapse {
+  display: grid;
+  grid-template-rows: 1fr;
+  opacity: 1;
+  transition: grid-template-rows 340ms cubic-bezier(0.16, 1, 0.3, 1),
+              opacity 260ms ease-out;
+}
+
+.table-body-collapse.is-collapsed {
+  grid-template-rows: 0fr;
+  opacity: 0;
+  pointer-events: none;
+}
+

@@ -111,11 +111,6 @@
 .nav-item:hover {
   background: rgb(var(--on) / 8%);
   color: var(--text);
-  transform: translateX(4px);
-}
-
-:host-context([dir='rtl']) .nav-item:hover {
-  transform: translateX(-4px);
 }
 
 .nav-icon-box {
@@ -133,6 +128,7 @@
 .nav-item:hover .nav-icon-box {
   background: rgb(var(--on) / 92%);
   color: var(--theme-color-primary);
+  transform: scale(1.04);
 }
 
 .nav-item-active {
@@ -195,14 +191,6 @@
   .nav-item {
     min-height: 3rem;
     border-radius: 0.8rem;
-  }
-
-  .nav-item:hover {
-    transform: none;
-  }
-
-  :host-context([dir='rtl']) .nav-item:hover {
-    transform: none;
   }
 }
 
@@ -272,4 +260,3 @@
   width: 0;
   height: 0;
 }
-

@@ -42,6 +42,7 @@ import {
   buildVisibleQuestionOrder,
 } from '../../../../../../shared/models/question-condition.model';
 import { TranslatePipe } from '../../../../../../shared/pipes/translate.pipe';
+import { resolveMediaUrl } from '../../../../../../shared/utils/media-url.util';
 import { ButtonComponent } from '../../../../../../shared/ui/button/button.component';
 import { IconComponent } from '../../../../../../shared/ui/icon/icon.component';
 import { PageHeaderComponent } from '../../../../../../shared/ui/page-header/page-header.component';
@@ -99,6 +100,7 @@ interface OperatorTemplateView {
   branchId: string;
   branchName: string;
   branchCode: string;
+  logoUrl: string | null;
   activeFrom: string;
   expireTo: string | null;
   isActive: boolean;
@@ -269,6 +271,7 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
     );
   });
   readonly selectedBranchId = signal(ALL_BRANCHES_FILTER_ID);
+  readonly failedLogoTemplateIds = signal<ReadonlySet<string>>(new Set());
   readonly expandedLatestResponseTemplateIds = signal<ReadonlySet<string>>(new Set());
   readonly currentQuestionIndex = signal(0);
   readonly customInputsOpen = signal(false);
@@ -401,6 +404,7 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
   }
 
   reloadTemplates(): void {
+    this.failedLogoTemplateIds.set(new Set());
     this.operatorTemplatesStore.load();
   }
 
@@ -426,6 +430,22 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
 
   isLatestResponseExpanded(template: OperatorTemplateView): boolean {
     return this.expandedLatestResponseTemplateIds().has(template.templateId);
+  }
+
+  hasTemplateLogo(template: OperatorTemplateView): boolean {
+    return Boolean(
+      template.logoUrl && !this.failedLogoTemplateIds().has(template.templateId),
+    );
+  }
+
+  handleTemplateLogoError(templateId: string): void {
+    this.failedLogoTemplateIds.update((failedTemplateIds) => {
+      if (failedTemplateIds.has(templateId)) {
+        return failedTemplateIds;
+      }
+
+      return new Set(failedTemplateIds).add(templateId);
+    });
   }
 
   startTemplateResponse(template: OperatorTemplateView): void {
@@ -887,6 +907,7 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
 
   private toTemplateView(template: OperatorAssignedTemplate): OperatorTemplateView {
     const isArabic = this.i18n.language() === 'ar';
+    const name = this.localizedText(template.nameEn, template.nameAr, isArabic);
     const questions = [...template.questions]
       .filter((question) => question.templateQuestionId.length > 0)
       .sort(
@@ -903,8 +924,13 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
 
     return {
       templateId: template.templateId,
-      name: this.localizedText(template.nameEn, template.nameAr, isArabic),
-      secondaryName: '',
+      name,
+      secondaryName: this.alternateLocalizedText(
+        template.nameEn,
+        template.nameAr,
+        isArabic,
+        name,
+      ),
       description: this.localizedOptionalText(
         template.descriptionEn,
         template.descriptionAr,
@@ -913,6 +939,7 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
       branchId: template.branchId,
       branchName: this.localizedText(template.branchNameEn, template.branchNameAr, isArabic),
       branchCode: template.branchCode,
+      logoUrl: resolveMediaUrl(template.logoPath),
       activeFrom: template.activeFrom,
       expireTo: template.expireTo,
       isActive: template.isActive,
@@ -1768,6 +1795,16 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
     arabicText: string,
     isArabic: boolean,
   ): string {
-    return (isArabic ? arabicText : englishText).trim();
+    return this.localizedText(englishText.trim(), arabicText.trim(), isArabic);
+  }
+
+  private alternateLocalizedText(
+    englishText: string,
+    arabicText: string,
+    isArabic: boolean,
+    primaryText: string,
+  ): string {
+    const alternateText = (isArabic ? englishText : arabicText).trim();
+    return alternateText && alternateText !== primaryText ? alternateText : '';
   }
 }

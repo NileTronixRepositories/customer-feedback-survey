@@ -78,6 +78,14 @@ export class PublicAnonymousTemplateService {
       anonymousTemplateId:
         this.readRecordId(response.anonymousTemplateId) || fallbackAnonymousTemplateId,
       branchId: this.readNullableRecordId(response.branchId),
+      branch: response.branch
+        ? {
+            branchId: this.readRecordId(response.branch.branchId),
+            nameEn: response.branch.nameEn ?? '',
+            nameAr: response.branch.nameAr ?? null,
+          }
+        : null,
+      logoPath: response.logoPath ?? null,
       nameEn: response.nameEn ?? '',
       nameAr: response.nameAr ?? null,
       description: response.description ?? null,

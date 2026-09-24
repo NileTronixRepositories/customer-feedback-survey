@@ -1,6 +1,18 @@
 import { DatePipe, DecimalPipe, NgTemplateOutlet } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, input, output } from '@angular/core';
-import { Calendar, FileText, Hash, Image as ImageIcon, MessageSquareText, Mic } from 'lucide-angular';
+import {
+  Calendar,
+  ChartColumnIncreasing,
+  CheckCircle2,
+  CircleGauge,
+  FileText,
+  Hash,
+  Image as ImageIcon,
+  ListChecks,
+  MessageSquareText,
+  Mic,
+  Star,
+} from 'lucide-angular';
 import { environment } from '../../../../../../../environments/environment';
 import { I18nService } from '../../../../../../core/services/i18n.service';
 import {
@@ -8,7 +20,7 @@ import {
   toQuestionAnswerType,
 } from '../../../../../../shared/models/question-answer.model';
 import { TranslatePipe } from '../../../../../../shared/pipes/translate.pipe';
-import { ButtonComponent } from '../../../../../../shared/ui/button/button.component';
+
 import { IconComponent } from '../../../../../../shared/ui/icon/icon.component';
 import { ModalComponent } from '../../../../../../shared/ui/modal/modal.component';
 import {
@@ -26,7 +38,7 @@ interface AnonymousResponseAnswerTreeNode {
   selector: 'app-survey-anonymous-response-details-modal',
   standalone: true,
   imports: [
-    ButtonComponent,
+
     DatePipe,
     DecimalPipe,
     IconComponent,
@@ -51,11 +63,18 @@ export class SurveyAnonymousResponseDetailsModalComponent {
   );
 
   readonly calendarIcon = Calendar;
+  readonly chartIcon = ChartColumnIncreasing;
+  readonly checkCircleIcon = CheckCircle2;
   readonly fileIcon = FileText;
+  readonly gaugeIcon = CircleGauge;
   readonly hashIcon = Hash;
   readonly imageIcon = ImageIcon;
+  readonly listChecksIcon = ListChecks;
   readonly messageIcon = MessageSquareText;
   readonly micIcon = Mic;
+  readonly starIcon = Star;
+
+  readonly scaleSlots = [1, 2, 3, 4, 5];
 
   responseTitle(response: AnonymousTemplateResponseDetails): string {
     return this.localized(response.templateNameEn, response.templateNameAr);
@@ -67,6 +86,53 @@ export class SurveyAnonymousResponseDetailsModalComponent {
 
   questionText(answer: AnonymousTemplateResponseAnswer): string {
     return this.localized(answer.questionTextEn, answer.questionTextAr);
+  }
+
+  scoreBadgeLabel(response: AnonymousTemplateResponseDetails): string {
+    if (!response.isScored) {
+      return this.i18n.translate('surveyDashboard.notScored');
+    }
+    const percent = response.scorePercentage ?? 0;
+    return `${this.i18n.translate('surveyDashboard.scored')} - ${percent.toFixed(1)}%`;
+  }
+
+  questionTypeLabel(answer: AnonymousTemplateResponseAnswer): string {
+    return answer.questionTypeName || '-';
+  }
+
+  isSingleChoice(answer: AnonymousTemplateResponseAnswer): boolean {
+    return toQuestionAnswerType(answer.questionTypeName || answer.questionType) === QUESTION_ANSWER_TYPE.SingleChoice;
+  }
+
+  isStarRating(answer: AnonymousTemplateResponseAnswer): boolean {
+    return toQuestionAnswerType(answer.questionTypeName || answer.questionType) === QUESTION_ANSWER_TYPE.StarRating;
+  }
+
+  isSmiles(answer: AnonymousTemplateResponseAnswer): boolean {
+    return toQuestionAnswerType(answer.questionTypeName || answer.questionType) === QUESTION_ANSWER_TYPE.Smiles;
+  }
+
+  isComplain(answer: AnonymousTemplateResponseAnswer): boolean {
+    return toQuestionAnswerType(answer.questionTypeName || answer.questionType) === QUESTION_ANSWER_TYPE.Complain;
+  }
+
+  isVoice(answer: AnonymousTemplateResponseAnswer): boolean {
+    return toQuestionAnswerType(answer.questionTypeName || answer.questionType) === QUESTION_ANSWER_TYPE.Voice;
+  }
+
+  isImage(answer: AnonymousTemplateResponseAnswer): boolean {
+    return toQuestionAnswerType(answer.questionTypeName || answer.questionType) === QUESTION_ANSWER_TYPE.Image;
+  }
+
+  isStarActive(slot: number, value: number | null): boolean {
+    return slot <= (value ?? 0);
+  }
+
+  customInputTypeLabel(typeName: string): string {
+    if (typeName.toLowerCase().includes('int') || typeName.toLowerCase().includes('num')) {
+      return this.i18n.translate('surveyDashboard.typeInteger');
+    }
+    return this.i18n.translate('surveyDashboard.typeString');
   }
 
   answerDisplayValue(answer: AnonymousTemplateResponseAnswer): string {
@@ -102,7 +168,7 @@ export class SurveyAnonymousResponseDetailsModalComponent {
     return this.toMediaUrl(answer.imageFileUrl);
   }
 
-  private localized(englishText: string | null | undefined, arabicText: string | null | undefined): string {
+  localized(englishText: string | null | undefined, arabicText: string | null | undefined): string {
     const english = englishText?.trim() ?? '';
     const arabic = arabicText?.trim() ?? '';
 

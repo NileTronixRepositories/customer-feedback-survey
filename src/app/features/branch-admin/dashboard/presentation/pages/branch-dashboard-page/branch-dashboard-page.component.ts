@@ -11,7 +11,6 @@ import {
   viewChild,
 } from '@angular/core';
 import { DatePipe, DecimalPipe } from '@angular/common';
-import { RouterLink } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { Chart, registerables } from 'chart.js';
 import { finalize, take } from 'rxjs';
@@ -47,15 +46,19 @@ import { BranchAdminTemplate } from '../../../../branch/domain/branch-admin-bran
 import { BranchTemplate } from '../../../../templates/domain/branch-template.model';
 import { BranchTemplatesService } from '../../../../templates/data/branch-templates.service';
 import { BranchTemplateQuestionTreeComponent } from '../../../../templates/presentation/components/branch-template-question-tree/branch-template-question-tree.component';
-import { BranchResponseDetailsModalComponent } from '../../components/branch-response-details-modal/branch-response-details-modal.component';
 import {
   BranchDashboardCriticalResponse,
   BranchDashboardCustomInputSegment,
   BranchDashboardGroupBy,
   BranchDashboardQuestionInsight,
   BranchDashboardTemplatePerformance,
+  BranchDashboardTrendPoint,
 } from '../../../domain/branch-dashboard.model';
 import { BranchDashboardStore } from '../../state/branch-dashboard.store';
+import { DashboardDrillDownService } from '../../../../../reports/dashboard-drill-down/data/dashboard-drill-down.service';
+import { DashboardDetailsNavigation } from '../../../../../reports/dashboard-drill-down/domain/dashboard-drill-down.model';
+import { SatisfactionDistributionComponent } from '../../../../../reports/dashboard-drill-down/presentation/components/satisfaction-distribution/satisfaction-distribution.component';
+import { DashboardSummaryActionsComponent } from '../../../../../reports/dashboard-drill-down/presentation/components/dashboard-summary-actions/dashboard-summary-actions.component';
 
 Chart.register(...registerables);
 
@@ -68,11 +71,11 @@ Chart.register(...registerables);
     DecimalPipe,
     IconComponent,
     ModalComponent,
-    BranchResponseDetailsModalComponent,
     BranchTemplateQuestionTreeComponent,
     ReactiveFormsModule,
-    RouterLink,
     TranslatePipe,
+    SatisfactionDistributionComponent,
+    DashboardSummaryActionsComponent,
   ],
   templateUrl: './branch-dashboard-page.component.html',
   styleUrl: './branch-dashboard-page.component.css',
@@ -87,6 +90,7 @@ export class BranchDashboardPageComponent implements OnInit, OnDestroy {
   private readonly formBuilder = inject(FormBuilder);
   private readonly i18n = inject(I18nService);
   private readonly themeColors = inject(ThemeColorService);
+  private readonly drillDown = inject(DashboardDrillDownService);
   private readonly chartCanvas = viewChild<ElementRef<HTMLCanvasElement>>('trendCanvas');
   private trendChart: Chart<'line', number[], string> | null = null;
 
@@ -122,7 +126,7 @@ export class BranchDashboardPageComponent implements OnInit, OnDestroy {
       this.dashboardStore.dashboard()?.summary.activeTemplatesCount ??
       this.branchStore
         .branch()
-        ?.templates.filter((template) => template.status?.toLowerCase() === 'active').length ??
+        ?.templates.filter((template) => template.isActive).length ??
       0,
   );
   readonly inactiveTemplatesCount = computed(() =>
@@ -138,7 +142,7 @@ export class BranchDashboardPageComponent implements OnInit, OnDestroy {
 
   readonly filtersIcon = SlidersHorizontal;
   readonly strokeDashArray = 238.76;
-  readonly customInputSegmentsVisible = false;
+  readonly customInputSegmentsVisible = true;
 
   readonly totalResponses = computed(
     () => this.dashboardStore.dashboard()?.summary.totalResponses ?? 0,
@@ -158,19 +162,13 @@ export class BranchDashboardPageComponent implements OnInit, OnDestroy {
   });
 
   readonly satisfiedPercent = computed(() => {
-    const total = this.totalResponses();
-    const satisfied = this.dashboardStore.dashboard()?.summary.satisfiedResponses ?? 0;
-    return total > 0 ? (satisfied / total) * 100 : 0;
+    return this.satisfactionPercentage('Satisfied');
   });
   readonly neutralPercent = computed(() => {
-    const total = this.totalResponses();
-    const neutral = this.dashboardStore.dashboard()?.summary.neutralResponses ?? 0;
-    return total > 0 ? (neutral / total) * 100 : 0;
+    return this.satisfactionPercentage('Neutral');
   });
   readonly unhappyPercent = computed(() => {
-    const total = this.totalResponses();
-    const unhappy = this.dashboardStore.dashboard()?.summary.unhappyResponses ?? 0;
-    return total > 0 ? (unhappy / total) * 100 : 0;
+    return this.satisfactionPercentage('Unhappy');
   });
 
   readonly selectedSegment = computed(() => {
@@ -260,9 +258,27 @@ export class BranchDashboardPageComponent implements OnInit, OnDestroy {
     this.advancedFiltersOpen.update((open) => !open);
   }
 
-  filterByTemplate(templateId: string): void {
-    this.filtersForm.patchValue({ templateId });
-    this.applyFilters();
+  openDrillDown(event: { title: string; navigation: DashboardDetailsNavigation }): void {
+    this.drillDown.open(event);
+  }
+
+  openNavigation(navigation: DashboardDetailsNavigation | null, title: string): void {
+    if (navigation) this.drillDown.open({ title, navigation });
+  }
+
+  openAllResponses(): void {
+    this.openNavigation(
+      this.dashboardStore.dashboard()?.summaryActions.allResponses ?? null,
+      this.i18n.translate('branchDashboard.viewAllResponses'),
+    );
+  }
+
+  private satisfactionPercentage(category: 'Satisfied' | 'Neutral' | 'Unhappy'): number {
+    return (
+      this.dashboardStore
+        .dashboard()
+        ?.charts.satisfactionDistribution.find((item) => item.category === category)?.percentage ?? 0
+    );
   }
 
   openTemplateDetails(event: Event, templateId: string): void {
@@ -370,8 +386,11 @@ export class BranchDashboardPageComponent implements OnInit, OnDestroy {
     return response.customInputs.map((input) => `${input.name}: ${input.value}`).join(' | ');
   }
 
-  openResponseDetails(surveyResponseId: string): void {
-    this.dashboardStore.loadResponseDetails(surveyResponseId);
+  openResponseDetails(response: BranchDashboardCriticalResponse): void {
+    this.openNavigation(
+      response.detailsNavigation,
+      this.i18n.translate('dashboardDrillDown.responseDetails'),
+    );
   }
 
   private localized(englishText: string, arabicText: string | null | undefined): string {
@@ -402,7 +421,7 @@ export class BranchDashboardPageComponent implements OnInit, OnDestroy {
 
   private renderTrendChart(
     canvas: HTMLCanvasElement,
-    trend: readonly { period: string; averageScorePercentage: number; responsesCount: number }[],
+    trend: readonly BranchDashboardTrendPoint[],
     language: string,
   ): void {
     this.trendChart?.destroy();
@@ -427,6 +446,12 @@ export class BranchDashboardPageComponent implements OnInit, OnDestroy {
         responsive: true,
         maintainAspectRatio: false,
         locale: language,
+        onClick: (_event, elements) => {
+          const point = trend[elements[0]?.index ?? -1];
+          if (point?.detailsNavigation) {
+            this.openNavigation(point.detailsNavigation, point.period);
+          }
+        },
         layout: { padding: { top: 8 } },
         plugins: {
           legend: { display: false },

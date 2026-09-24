@@ -211,7 +211,7 @@ export class BranchesService {
       nameEn: response.nameEn ?? '',
       nameAr: response.nameAr ?? '',
       description: response.description ?? '',
-      status: response.status ?? '',
+      logoPath: response.logoPath ?? null,
       questionsCount: response.questionsCount ?? 0
     };
   }

@@ -3,7 +3,28 @@ import { ChangeDetectionStrategy, Component, OnInit, effect, inject, signal } fr
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { finalize, take } from 'rxjs';
-import { ArrowLeft, Building, KeyRound, Pencil, RotateCcw, Save, Trash2, UserPlus, UserX, X } from 'lucide-angular';
+import {
+  ArrowLeft,
+  Building,
+  Calendar,
+  FileText,
+  Hash,
+  HelpCircle,
+  KeyRound,
+  Layers,
+  Mail,
+  MapPin,
+  Pencil,
+  Phone,
+  RotateCcw,
+  Save,
+  ShieldCheck,
+  Trash2,
+  UserPlus,
+  Users,
+  UserX,
+  X,
+} from 'lucide-angular';
 import { ButtonComponent } from '../../../../../../shared/ui/button/button.component';
 import { CardComponent } from '../../../../../../shared/ui/card/card.component';
 import { IconComponent } from '../../../../../../shared/ui/icon/icon.component';
@@ -67,6 +88,16 @@ export class BranchDetailsPageComponent implements OnInit {
   private readonly userPasswordResetService = inject(UserPasswordResetService);
 
   readonly branchIcon = Building;
+  readonly mapPinIcon = MapPin;
+  readonly calendarIcon = Calendar;
+  readonly usersIcon = Users;
+  readonly shieldCheckIcon = ShieldCheck;
+  readonly layersIcon = Layers;
+  readonly fileTextIcon = FileText;
+  readonly mailIcon = Mail;
+  readonly phoneIcon = Phone;
+  readonly hashIcon = Hash;
+  readonly questionIcon = HelpCircle;
   readonly arrowLeftIcon = ArrowLeft;
   readonly cancelIcon = X;
   readonly deactivateIcon = UserX;
@@ -617,5 +648,15 @@ export class BranchDetailsPageComponent implements OnInit {
     };
 
     return errorKeys[field];
+  }
+  userInitials(name: string | null | undefined): string {
+    if (!name || !name.trim()) {
+      return 'U';
+    }
+    const parts = name.trim().split(/\s+/);
+    if (parts.length === 1) {
+      return parts[0].slice(0, 2).toUpperCase();
+    }
+    return (parts[0][0] + parts[1][0]).toUpperCase();
   }
 }

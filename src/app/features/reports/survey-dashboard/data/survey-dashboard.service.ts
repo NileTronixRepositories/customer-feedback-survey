@@ -3,6 +3,11 @@ import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
 import {
+  DashboardCharts,
+  DashboardSummaryActions,
+  SatisfactionCategory,
+} from '../../dashboard-drill-down/domain/dashboard-drill-down.model';
+import {
   AnswerScaleValue,
   QuestionAnswerOption,
 } from '../../../../shared/models/question-answer.model';
@@ -166,6 +171,9 @@ export class SurveyDashboardService {
     if (query.from) params = params.set('from', query.from);
     if (query.to) params = params.set('to', query.to);
     if (query.groupBy) params = params.set('groupBy', query.groupBy);
+    if (query.scoreCalculationMode) {
+      params = params.set('scoreCalculationMode', query.scoreCalculationMode);
+    }
     if (query.topQuestionsCount !== undefined) {
       params = params.set('topQuestionsCount', String(query.topQuestionsCount));
     }
@@ -199,6 +207,8 @@ export class SurveyDashboardService {
       filters,
       appliedFilters,
       summary: this.toSummary(this.readRecord(response['summary'])),
+      charts: this.toCharts(this.readRecord(response['charts'])),
+      summaryActions: this.toSummaryActions(this.readRecord(response['summaryActions'])),
       sourceBreakdown: this.toSourceBreakdown(this.readRecord(response['sourceBreakdown'])),
       branchesSummary: this.readArray(response['branchesSummary']).map((item) =>
         this.toBranchSummary(item),
@@ -250,6 +260,10 @@ export class SurveyDashboardService {
       from: this.readNullableString(filters, 'from'),
       to: this.readNullableString(filters, 'to'),
       groupBy: this.toGroupBy(this.readString(filters, 'groupBy')),
+      scoreCalculationMode:
+        this.readString(filters, 'scoreCalculationMode') === 'LowestConditionLevel'
+          ? 'LowestConditionLevel'
+          : 'RootQuestions',
       topQuestionsCount: this.readNumber(filters, 'topQuestionsCount') || 5,
       criticalResponsesCount: this.readNumber(filters, 'criticalResponsesCount') || 10,
       criticalScoreThreshold: this.readNumber(filters, 'criticalScoreThreshold') || 40,
@@ -296,6 +310,7 @@ export class SurveyDashboardService {
       unhappyResponses: this.readNumber(metrics, 'unhappyResponses'),
       complaintsCount: this.readNumber(metrics, 'complaintsCount'),
       voiceAnswersCount: this.readNumber(metrics, 'voiceAnswersCount'),
+      detailsNavigation: this.toNavigation(this.readRecord(metrics?.['detailsNavigation'])),
     };
   }
 
@@ -329,7 +344,31 @@ export class SurveyDashboardService {
         item,
         'anonymousAverageScorePercentage',
       ),
+      detailsNavigation: this.toNavigation(this.readRecord(item['detailsNavigation'])),
     };
+  }
+
+  private toCharts(charts: ApiRecord | null): DashboardCharts {
+    return {
+      satisfactionDistribution: this.readArray(charts?.['satisfactionDistribution']).map((item) => ({
+        category: this.toSatisfactionCategory(this.readString(item, 'category')),
+        responsesCount: this.readNumber(item, 'responsesCount'),
+        percentage: this.readNumber(item, 'percentage'),
+        detailsNavigation: this.toNavigation(this.readRecord(item['detailsNavigation'])),
+      })),
+    };
+  }
+
+  private toSummaryActions(actions: ApiRecord | null): DashboardSummaryActions {
+    return {
+      allResponses: this.toNavigation(this.readRecord(actions?.['allResponses'])),
+      complaints: this.toNavigation(this.readRecord(actions?.['complaints'])),
+      voiceAnswers: this.toNavigation(this.readRecord(actions?.['voiceAnswers'])),
+    };
+  }
+
+  private toSatisfactionCategory(value: string): SatisfactionCategory {
+    return value === 'Neutral' || value === 'Unhappy' ? value : 'Satisfied';
   }
 
   private toTemplatePerformance(item: ApiRecord): SurveyDashboardTemplatePerformance {
@@ -427,13 +466,14 @@ export class SurveyDashboardService {
 
   private toNavigation(navigation: ApiRecord | null): SurveyDashboardNavigation | null {
     const path = this.readString(navigation, 'path');
-    if (path.length === 0) {
+    const method = (this.readString(navigation, 'method') || 'GET').toUpperCase();
+    if (path.length === 0 || method !== 'GET') {
       return null;
     }
 
     return {
       routeType: this.readString(navigation, 'routeType'),
-      method: this.readString(navigation, 'method') || 'GET',
+      method: 'GET',
       path,
     };
   }
@@ -718,10 +758,6 @@ export class SurveyDashboardService {
       nameEn: this.readString(template, 'nameEn'),
       nameAr: this.readNullableString(template, 'nameAr'),
       description: this.readNullableString(template, 'description'),
-      status:
-        this.readString(template, 'statusName') ||
-        this.readDisplayString(template['status']) ||
-        'Draft',
       isActive: this.readBooleanWithDefault(template, 'isActive', true),
       activeFrom: this.readString(template, 'activeFrom'),
       expireTo: this.readNullableString(template, 'expireTo'),
@@ -775,10 +811,6 @@ export class SurveyDashboardService {
       nameEn: this.readString(template, 'nameEn'),
       nameAr: this.readNullableString(template, 'nameAr'),
       description: this.readNullableString(template, 'description'),
-      status:
-        this.readString(template, 'statusName') ||
-        this.readDisplayString(template['status']) ||
-        'Draft',
       isActive: this.readBooleanWithDefault(template, 'isActive', true),
       activeFrom: this.readString(template, 'activeFrom'),
       expireTo: this.readNullableString(template, 'expireTo'),

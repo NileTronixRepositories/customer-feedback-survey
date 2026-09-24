@@ -13,7 +13,12 @@
             {{ 'common.edit' | t }}
           </app-button>
         }
-        <app-button type="button" variant="danger" [loading]="branchesStore.deleting()" (pressed)="deleteBranch()">
+        <app-button
+          type="button"
+          variant="danger"
+          [loading]="branchesStore.deleting()"
+          (pressed)="deleteBranch()"
+        >
           <app-icon [icon]="deleteIcon" [size]="17" />
           {{ 'common.delete' | t }}
         </app-button>
@@ -22,88 +27,154 @@
   </app-page-header>
 
   @if (branchesStore.detailsLoading()) {
-    <div class="flex items-center gap-2 border border-slate-100 bg-white p-3 text-xs font-semibold text-slate-600">
-      <span class="h-4 w-4 animate-spin rounded-full border-2 border-[var(--theme-color-accent)]/30 border-t-[var(--theme-color-accent)]"></span>
+    <div
+      class="flex items-center gap-2 border border-slate-100 bg-white p-3 text-xs font-semibold text-slate-600"
+    >
+      <span
+        class="h-4 w-4 animate-spin rounded-full border-2 border-[var(--theme-color-accent)]/30 border-t-[var(--theme-color-accent)]"
+      ></span>
       {{ 'branches.detailsLoading' | t }}
     </div>
   } @else if (branchesStore.detailsError()) {
-    <div class="border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-[var(--theme-color-danger)]">
+    <div
+      class="border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-[var(--theme-color-danger)]"
+    >
       {{ branchesStore.detailsError() ?? '' | t }}
     </div>
   } @else if (branchesStore.selectedBranchDetails(); as branch) {
     @if (branchesStore.detailsSuccess()) {
-      <div class="border border-emerald-100 bg-emerald-50 p-3 text-xs font-semibold text-emerald-700">
+      <div
+        class="border border-emerald-100 bg-emerald-50 p-3 text-xs font-semibold text-emerald-700"
+      >
         {{ branchesStore.detailsSuccess() ?? '' | t }}
       </div>
     }
     @if (departmentAdminsStore.success()) {
-      <div class="border border-emerald-100 bg-emerald-50 p-3 text-xs font-semibold text-emerald-700">
+      <div
+        class="border border-emerald-100 bg-emerald-50 p-3 text-xs font-semibold text-emerald-700"
+      >
         {{ departmentAdminsStore.success() ?? '' | t }}
       </div>
     }
     @if (departmentAdminsStore.error()) {
-      <div class="border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-[var(--theme-color-danger)]">
+      <div
+        class="border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-[var(--theme-color-danger)]"
+      >
         {{ departmentAdminsStore.error() ?? '' | t }}
       </div>
     }
     @if (branchAdminsStore.success()) {
-      <div class="border border-emerald-100 bg-emerald-50 p-3 text-xs font-semibold text-emerald-700">
+      <div
+        class="border border-emerald-100 bg-emerald-50 p-3 text-xs font-semibold text-emerald-700"
+      >
         {{ branchAdminsStore.success() ?? '' | t }}
       </div>
     }
     @if (branchAdminsStore.error()) {
-      <div class="border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-[var(--theme-color-danger)]">
+      <div
+        class="border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-[var(--theme-color-danger)]"
+      >
         {{ branchAdminsStore.error() ?? '' | t }}
       </div>
     }
     @if (departmentsStore.success()) {
-      <div class="border border-emerald-100 bg-emerald-50 p-3 text-xs font-semibold text-emerald-700">
+      <div
+        class="border border-emerald-100 bg-emerald-50 p-3 text-xs font-semibold text-emerald-700"
+      >
         {{ departmentsStore.success() ?? '' | t }}
       </div>
     }
     @if (departmentsStore.error()) {
-      <div class="border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-[var(--theme-color-danger)]">
+      <div
+        class="border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-[var(--theme-color-danger)]"
+      >
         {{ departmentsStore.error() ?? '' | t }}
       </div>
     }
     @if (resetPasswordSuccess()) {
-      <div class="border border-emerald-100 bg-emerald-50 p-3 text-xs font-semibold text-emerald-700">
+      <div
+        class="border border-emerald-100 bg-emerald-50 p-3 text-xs font-semibold text-emerald-700"
+      >
         {{ resetPasswordSuccess() ?? '' | t }}
       </div>
     }
     @if (resetPasswordError()) {
-      <div class="border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-[var(--theme-color-danger)]">
+      <div
+        class="border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-[var(--theme-color-danger)]"
+      >
         {{ resetPasswordError() ?? '' | t }}
       </div>
     }
 
-    <app-card>
-      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-        <div class="min-w-0 space-y-2">
-          <p class="font-extrabold text-slate-950">{{ branch.code }}</p>
-          <div class="space-y-1">
-            <p class="text-xs font-semibold text-slate-600">{{ localizedDisplayName(branch) }}</p>
+    <!-- Executive Identity Hero Card -->
+    <div
+      class="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-6 shadow-xs"
+    >
+      <div class="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+        <div class="flex items-start gap-4">
+          <!-- Squircle Avatar with Brand Gradient -->
+          <div
+            class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#148496] via-[#0f5b67] to-[#0a3a42] text-white shadow-md shadow-[#148496]/20 ring-4 ring-[#148496]/10"
+          >
+            <app-icon [icon]="branchIcon" [size]="28" />
           </div>
-          <p class="text-xs text-slate-600">{{ branch.address || '-' }}</p>
-          <p class="text-xs font-semibold text-slate-400">
-            {{ branch.createdOnUtc ? (branch.createdOnUtc | date: 'medium') : '-' }}
-          </p>
+
+          <!-- Main Info -->
+          <div class="min-w-0 space-y-1.5">
+            <div class="flex flex-wrap items-center gap-2.5">
+              <span
+                class="rounded-md bg-slate-100 px-2 py-0.5 font-mono text-xs font-semibold tracking-wider text-slate-700"
+              >
+                {{ branch.code }}
+              </span>
+              <!-- Living Pulse Status Badge -->
+              <span
+                class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold"
+                [class.bg-emerald-50]="branch.isActive"
+                [class.text-emerald-700]="branch.isActive"
+                [class.bg-slate-100]="!branch.isActive"
+                [class.text-slate-600]="!branch.isActive"
+              >
+                @if (branch.isActive) {
+                  <span class="relative flex h-2 w-2">
+                    <span
+                      class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"
+                    ></span>
+                    <span class="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
+                  </span>
+                } @else {
+                  <span class="h-2 w-2 rounded-full bg-slate-400"></span>
+                }
+                {{ (branch.isActive ? 'common.active' : 'branches.inactive') | t }}
+              </span>
+            </div>
+
+            <h1 class="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
+              {{ localizedDisplayName(branch) }}
+            </h1>
+
+            <div class="flex flex-wrap items-center gap-x-5 gap-y-1.5 pt-0.5 text-xs text-slate-500">
+              @if (branch.address) {
+                <span class="inline-flex items-center gap-1.5">
+                  <app-icon [icon]="mapPinIcon" [size]="14" class="text-slate-400" />
+                  {{ branch.address }}
+                </span>
+              }
+              @if (branch.createdOnUtc) {
+                <span class="inline-flex items-center gap-1.5">
+                  <app-icon [icon]="calendarIcon" [size]="14" class="text-slate-400" />
+                  {{ branch.createdOnUtc | date: 'mediumDate' }}
+                </span>
+              }
+            </div>
+          </div>
         </div>
-        <span
-          class="inline-flex w-fit rounded-full px-2.5 py-1 text-xs font-bold"
-          [class.bg-emerald-50]="branch.isActive"
-          [class.text-emerald-700]="branch.isActive"
-          [class.bg-slate-100]="!branch.isActive"
-          [class.text-slate-500]="!branch.isActive"
-        >
-          {{ (branch.isActive ? 'common.active' : 'branches.inactive') | t }}
-        </span>
       </div>
-    </app-card>
+    </div>
 
     @if (editMode()) {
       <app-card [title]="'branches.editBranch' | t" [subtitle]="'branches.editBranchSubtitle' | t">
-        <form class="space-y-3" [formGroup]="branchForm" (ngSubmit)="updateBranch()">
+        <form class="space-y-4" [formGroup]="branchForm" (ngSubmit)="updateBranch()">
           <div class="grid gap-3 md:grid-cols-2">
             <app-input
               [label]="'branches.nameEn' | t"
@@ -142,279 +213,529 @@
       </app-card>
     }
 
-    <section class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-      <app-card [title]="'branches.branchAdminsCount' | t">
-        <p class="font-bold text-slate-900">{{ branch.summary.branchAdminsCount }}</p>
-      </app-card>
-      <app-card [title]="'branches.departmentsCount' | t">
-        <p class="font-bold text-slate-900">{{ branch.summary.departmentsCount }}</p>
-      </app-card>
-      <app-card [title]="'branches.branchUsersCount' | t">
-        <p class="font-bold text-slate-900">{{ branch.summary.branchUsersCount }}</p>
-      </app-card>
-      <app-card [title]="'branches.questionsCount' | t">
-        <p class="font-bold text-slate-900">{{ branch.summary.questionsCount }}</p>
-      </app-card>
+    <!-- 4-Column Executive KPI Grid -->
+    <section class="grid grid-cols-2 gap-3.5 sm:gap-4 lg:grid-cols-4">
+      <!-- KPI 1: Branch Admins -->
+      <div
+        class="group relative overflow-hidden rounded-xl border border-slate-200/80 bg-white p-4 shadow-xs transition hover:border-[#148496]/40 hover:shadow-sm"
+      >
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold text-slate-500">{{ 'branches.branchAdminsCount' | t }}</span>
+          <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-cyan-50 text-[#148496]">
+            <app-icon [icon]="shieldCheckIcon" [size]="18" />
+          </div>
+        </div>
+        <p class="mt-2 text-2xl font-bold tracking-tight text-slate-900">
+          {{ branch.summary.branchAdminsCount }}
+        </p>
+      </div>
+
+      <!-- KPI 2: Departments -->
+      <div
+        class="group relative overflow-hidden rounded-xl border border-slate-200/80 bg-white p-4 shadow-xs transition hover:border-[#148496]/40 hover:shadow-sm"
+      >
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold text-slate-500">{{ 'branches.departmentsCount' | t }}</span>
+          <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-teal-50 text-[#0f5b67]">
+            <app-icon [icon]="layersIcon" [size]="18" />
+          </div>
+        </div>
+        <p class="mt-2 text-2xl font-bold tracking-tight text-slate-900">
+          {{ branch.summary.departmentsCount }}
+        </p>
+      </div>
+
+      <!-- KPI 3: Branch Users -->
+      <div
+        class="group relative overflow-hidden rounded-xl border border-slate-200/80 bg-white p-4 shadow-xs transition hover:border-[#148496]/40 hover:shadow-sm"
+      >
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold text-slate-500">{{ 'branches.branchUsersCount' | t }}</span>
+          <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-sky-50 text-sky-700">
+            <app-icon [icon]="usersIcon" [size]="18" />
+          </div>
+        </div>
+        <p class="mt-2 text-2xl font-bold tracking-tight text-slate-900">
+          {{ branch.summary.branchUsersCount }}
+        </p>
+      </div>
+
+      <!-- KPI 4: Questions -->
+      <div
+        class="group relative overflow-hidden rounded-xl border border-slate-200/80 bg-white p-4 shadow-xs transition hover:border-[#148496]/40 hover:shadow-sm"
+      >
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold text-slate-500">{{ 'branches.questionsCount' | t }}</span>
+          <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-50 text-amber-700">
+            <app-icon [icon]="questionIcon" [size]="18" />
+          </div>
+        </div>
+        <p class="mt-2 text-2xl font-bold tracking-tight text-slate-900">
+          {{ branch.summary.questionsCount }}
+        </p>
+      </div>
     </section>
 
-    <div class="grid gap-3 xl:grid-cols-2">
-      <app-card [title]="'branches.branchAdmins' | t">
-        <div class="space-y-2">
-          @for (admin of branch.branchAdmins; track admin.branchAdminId) {
-            <div class="border border-slate-100 p-3 transition hover:border-[var(--theme-color-accent)]/40 hover:bg-cyan-50/40">
-              <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <button type="button" class="min-w-0 flex-1 text-start" (click)="openBranchAdminDetails(admin)">
-                  <p class="font-bold text-slate-900">{{ localizedDisplayName(admin) }}</p>
-                  <p class="mt-1 text-xs text-slate-500">{{ admin.userName }} - {{ admin.email }}</p>
-                  @if (admin.phoneNumber) {
-                    <p class="mt-1 text-xs text-slate-500">{{ admin.phoneNumber }}</p>
-                  }
-                  <span
-                    class="mt-2 inline-flex w-fit rounded-full px-2 py-0.5 text-[10px] font-bold"
-                    [class.bg-emerald-50]="admin.isActive"
-                    [class.text-emerald-700]="admin.isActive"
-                    [class.bg-slate-100]="!admin.isActive"
-                    [class.text-slate-500]="!admin.isActive"
-                  >
-                    {{ (admin.isActive ? 'common.active' : 'branches.inactive') | t }}
-                  </span>
-                </button>
-                <div class="flex flex-wrap gap-2 sm:justify-end">
-                @if (admin.isActive && canResetPassword('BRANCH_ADMIN', admin.applicationUserId)) {
-                  <app-button
-                    type="button"
-                    size="sm"
-                    variant="secondary"
-                    [loading]="
-                      resettingPassword() &&
-                      resetPasswordTarget()?.applicationUserId === admin.applicationUserId
-                    "
-                    (pressed)="openResetPassword('BRANCH_ADMIN', admin.applicationUserId, localizedDisplayName(admin), $event)"
-                  >
-                    <app-icon [icon]="resetPasswordIcon" [size]="14" />
-                    {{ 'users.resetPassword' | t }}
-                  </app-button>
-                }
-                @if (canDeactivateBranchAdmin(admin)) {
-                  <app-button
-                    type="button"
-                    size="sm"
-                    variant="danger"
-                    [loading]="branchAdminsStore.deactivating()"
-                    (pressed)="deactivateBranchAdmin(admin, $event)"
-                  >
-                    <app-icon [icon]="deactivateIcon" [size]="14" />
-                    {{ 'branchAdmins.deactivateAction' | t }}
-                  </app-button>
-                }
-                @if (canRestoreBranchAdmin(admin)) {
-                  <app-button
-                    type="button"
-                    size="sm"
-                    variant="secondary"
-                    [loading]="branchAdminsStore.restoring()"
-                    (pressed)="restoreBranchAdmin(admin, $event)"
-                  >
-                    <app-icon [icon]="restoreIcon" [size]="14" />
-                    {{ 'common.restore' | t }}
-                  </app-button>
-                }
-                </div>
-              </div>
-            </div>
-          } @empty {
-            <p class="text-slate-500">{{ 'common.noRecords' | t }}</p>
-          }
-        </div>
-      </app-card>
-
-      <app-card [title]="'common.departments' | t">
-        <div class="space-y-2">
-          @for (department of branch.departments; track department.departmentId) {
-            <div
-              role="button"
-              tabindex="0"
-              class="border border-slate-100 p-3 transition hover:border-[var(--theme-color-accent)]/40 hover:bg-cyan-50/40"
-              (click)="openDepartmentDetails(department)"
-              (keydown.enter)="openDepartmentDetails(department)"
-              (keydown.space)="$event.preventDefault(); openDepartmentDetails(department)"
-            >
-              <div class="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
-                <div class="min-w-0">
-                  <p class="font-bold text-slate-900">
-                    {{ codedDisplayName(department) }}
-                  </p>
-                  <span
-                    class="mt-2 inline-flex w-fit rounded-full px-2 py-0.5 text-[10px] font-bold"
-                    [class.bg-emerald-50]="department.isActive"
-                    [class.text-emerald-700]="department.isActive"
-                    [class.bg-slate-100]="!department.isActive"
-                    [class.text-slate-500]="!department.isActive"
-                  >
-                    {{ (department.isActive ? 'common.active' : 'branches.inactive') | t }}
-                  </span>
-                </div>
-                <div class="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
-                  <p class="text-xs font-semibold text-slate-500">
-                    {{ 'branches.operatorsCount' | t }}: {{ department.operatorsCount }}
-                  </p>
-                  @if (department.isActive) {
-                    <app-button
-                      type="button"
-                      size="sm"
-                      variant="secondary"
-                      (pressed)="$event.stopPropagation(); openCreateDepartmentAdmin(department)"
+    <!-- 12-Column Asymmetric Master-Detail Grid -->
+    <div class="grid gap-6 lg:grid-cols-12">
+      <!-- Operations & Content Stream (7 cols) -->
+      <div class="space-y-6 lg:col-span-7">
+        <!-- Departments Card -->
+        <app-card [title]="'common.departments' | t">
+          <div class="space-y-3">
+            @for (department of branch.departments; track department.departmentId) {
+              <div
+                role="button"
+                tabindex="0"
+                class="group relative rounded-xl border border-slate-200/70 bg-white p-4 transition-all hover:border-[#148496]/50 hover:shadow-xs focus:outline-none focus:ring-2 focus:ring-[#148496]/30"
+                (click)="openDepartmentDetails(department)"
+                (keydown.enter)="openDepartmentDetails(department)"
+                (keydown.space)="$event.preventDefault(); openDepartmentDetails(department)"
+              >
+                <!-- Department Header Row -->
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div class="flex items-center gap-3">
+                    <div
+                      class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-teal-50 text-[#0f5b67] transition group-hover:bg-[#148496]/10"
                     >
-                      <app-icon [icon]="userPlusIcon" [size]="15" />
-                      {{ 'departmentAdmins.createDepartmentAdmin' | t }}
-                    </app-button>
+                      <app-icon [icon]="layersIcon" [size]="20" />
+                    </div>
+                    <div class="min-w-0">
+                      <div class="flex items-center gap-2">
+                        <p class="font-bold text-slate-900 transition group-hover:text-[#148496]">
+                          {{ codedDisplayName(department) }}
+                        </p>
+                        <!-- Status Badge -->
+                        <span
+                          class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold"
+                          [class.bg-emerald-50]="department.isActive"
+                          [class.text-emerald-700]="department.isActive"
+                          [class.bg-slate-100]="!department.isActive"
+                          [class.text-slate-500]="!department.isActive"
+                        >
+                          <span
+                            class="h-1.5 w-1.5 rounded-full"
+                            [class.bg-emerald-500]="department.isActive"
+                            [class.bg-slate-400]="!department.isActive"
+                          ></span>
+                          {{ (department.isActive ? 'common.active' : 'branches.inactive') | t }}
+                        </span>
+                      </div>
+                      <p class="mt-0.5 text-xs text-slate-500">
+                        {{ 'branches.operatorsCount' | t }}:
+                        <span class="font-semibold text-slate-700">{{ department.operatorsCount }}</span>
+                      </p>
+                    </div>
+                  </div>
+
+                  <!-- Create Department Admin Action -->
+                  @if (department.isActive) {
+                    <div class="shrink-0">
+                      <app-button
+                        type="button"
+                        size="sm"
+                        variant="secondary"
+                        (pressed)="$event.stopPropagation(); openCreateDepartmentAdmin(department)"
+                      >
+                        <app-icon [icon]="userPlusIcon" [size]="14" />
+                        {{ 'departmentAdmins.createDepartmentAdmin' | t }}
+                      </app-button>
+                    </div>
+                  }
+                </div>
+
+                <!-- Nested Department Admins List -->
+                @if (department.departmentAdmins.length > 0) {
+                  <div class="mt-3.5 space-y-2 rounded-lg border border-slate-100 bg-slate-50/70 p-2.5">
+                    <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                      {{ 'branches.branchAdmins' | t }} ({{ department.departmentAdmins.length }})
+                    </p>
+                    @for (admin of department.departmentAdmins; track admin.departmentAdminId) {
+                      <div
+                        class="flex flex-col gap-2 rounded-md border border-slate-200/50 bg-white p-2.5 sm:flex-row sm:items-center sm:justify-between"
+                      >
+                        <div class="flex items-center gap-2.5 min-w-0">
+                          <div
+                            class="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-[#148496]/10 text-xs font-bold text-[#148496]"
+                          >
+                            {{ userInitials(admin.nameEn || admin.userName) }}
+                          </div>
+                          <div class="min-w-0">
+                            <p class="truncate text-xs font-bold text-slate-800">
+                              {{ localizedDisplayName(admin) }}
+                            </p>
+                            <p class="truncate text-[11px] text-slate-500">
+                              {{ admin.email }}
+                            </p>
+                          </div>
+                        </div>
+
+                        <!-- Department Admin Actions & Status -->
+                        <div class="flex flex-wrap items-center gap-1.5 sm:justify-end">
+                          <span
+                            class="inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold"
+                            [class.bg-emerald-50]="admin.isActive"
+                            [class.text-emerald-700]="admin.isActive"
+                            [class.bg-slate-100]="!admin.isActive"
+                            [class.text-slate-500]="!admin.isActive"
+                          >
+                            {{ (admin.isActive ? 'common.active' : 'branches.inactive') | t }}
+                          </span>
+                          @if (
+                            admin.isActive &&
+                            canResetPassword('DEPARTMENT_ADMIN', admin.applicationUserId)
+                          ) {
+                            <app-button
+                              type="button"
+                              size="sm"
+                              variant="secondary"
+                              [loading]="
+                                resettingPassword() &&
+                                resetPasswordTarget()?.applicationUserId === admin.applicationUserId
+                              "
+                              (pressed)="
+                                openResetPassword(
+                                  'DEPARTMENT_ADMIN',
+                                  admin.applicationUserId,
+                                  localizedDisplayName(admin),
+                                  $event
+                                )
+                              "
+                            >
+                              <app-icon [icon]="resetPasswordIcon" [size]="13" />
+                              {{ 'users.resetPassword' | t }}
+                            </app-button>
+                          }
+                          @if (canDeactivateDepartmentAdmin(admin)) {
+                            <app-button
+                              type="button"
+                              size="sm"
+                              variant="danger"
+                              [loading]="departmentAdminsStore.deactivating()"
+                              (pressed)="deactivateDepartmentAdmin(admin, $event)"
+                            >
+                              <app-icon [icon]="deactivateIcon" [size]="13" />
+                              {{ 'departmentAdmins.deactivateAction' | t }}
+                            </app-button>
+                          }
+                          @if (canRestoreDepartmentAdmin(admin)) {
+                            <app-button
+                              type="button"
+                              size="sm"
+                              variant="secondary"
+                              [loading]="departmentAdminsStore.restoring()"
+                              (pressed)="restoreDepartmentAdmin(admin, $event)"
+                            >
+                              <app-icon [icon]="restoreIcon" [size]="13" />
+                              {{ 'common.restore' | t }}
+                            </app-button>
+                          }
+                        </div>
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            } @empty {
+              <div
+                class="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 py-8 text-center"
+              >
+                <div class="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+                  <app-icon [icon]="layersIcon" [size]="24" />
+                </div>
+                <p class="mt-2 text-sm font-semibold text-slate-700">{{ 'common.noRecords' | t }}</p>
+                <p class="mt-0.5 text-xs text-slate-400">{{ 'branches.departmentsCount' | t }}: 0</p>
+              </div>
+            }
+          </div>
+        </app-card>
+
+        <!-- Templates Card -->
+        <app-card [title]="'branches.templates' | t">
+          <div class="space-y-3">
+            @for (template of branch.templates; track template.templateId) {
+              <div
+                class="rounded-xl border border-slate-200/70 bg-white p-4 transition hover:border-[#148496]/40 hover:shadow-xs"
+              >
+                <div class="flex items-start gap-3">
+                  <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-cyan-50 text-[#148496]">
+                    <app-icon [icon]="fileTextIcon" [size]="18" />
+                  </div>
+                  <div class="min-w-0 flex-1">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                      <p class="font-bold text-slate-900">{{ localizedDisplayName(template) }}</p>
+                      <span
+                        class="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-700"
+                      >
+                        {{ template.questionsCount }} {{ 'branches.questionsCount' | t }}
+                      </span>
+                    </div>
+                    @if (template.description) {
+                      <p class="mt-1 text-xs text-slate-500">{{ template.description }}</p>
+                    }
+                  </div>
+                </div>
+              </div>
+            } @empty {
+              <div
+                class="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 py-6 text-center"
+              >
+                <div class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+                  <app-icon [icon]="fileTextIcon" [size]="20" />
+                </div>
+                <p class="mt-2 text-sm font-semibold text-slate-600">{{ 'common.noRecords' | t }}</p>
+              </div>
+            }
+          </div>
+        </app-card>
+
+        <!-- Question Groups Card -->
+        <app-card [title]="'branches.questionGroups' | t">
+          <div class="grid gap-3.5 sm:grid-cols-2">
+            @for (group of branch.questionGroups; track group.groupId) {
+              <div class="rounded-xl border border-slate-200/70 bg-white p-4 transition hover:border-[#148496]/40">
+                <div class="flex items-center gap-2">
+                  <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-50 text-amber-700">
+                    <app-icon [icon]="questionIcon" [size]="16" />
+                  </div>
+                  <p class="font-bold text-slate-900">{{ localizedDisplayName(group) }}</p>
+                </div>
+                <div class="mt-3 space-y-1.5">
+                  @for (question of group.questions; track question.questionId) {
+                    <div class="rounded-lg bg-slate-50 p-2.5 border border-slate-100">
+                      <p class="text-xs font-semibold text-slate-700">
+                        {{ questionDisplayText(question) }}
+                      </p>
+                      <span
+                        class="mt-1 inline-block rounded bg-slate-200/60 px-1.5 py-0.5 text-[10px] font-medium text-slate-600"
+                      >
+                        {{ question.type }}
+                      </span>
+                    </div>
+                  } @empty {
+                    <p class="text-xs text-slate-400">{{ 'common.noRecords' | t }}</p>
                   }
                 </div>
               </div>
-              @if (department.departmentAdmins.length > 0) {
-                <div class="mt-3 space-y-2 border-t border-slate-100 pt-3">
-                  @for (admin of department.departmentAdmins; track admin.departmentAdminId) {
-                    <div class="flex flex-col gap-2 rounded-lg bg-white p-2 sm:flex-row sm:items-center sm:justify-between">
-                      <p class="text-xs text-slate-600">{{ localizedDisplayName(admin) }} - {{ admin.email }}</p>
-                      <div class="flex flex-wrap gap-2 sm:justify-end">
+            } @empty {
+              <div
+                class="col-span-full flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 py-6 text-center"
+              >
+                <div class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+                  <app-icon [icon]="questionIcon" [size]="20" />
+                </div>
+                <p class="mt-2 text-sm font-semibold text-slate-600">{{ 'common.noRecords' | t }}</p>
+              </div>
+            }
+          </div>
+        </app-card>
+      </div>
+
+      <!-- Personnel & Governance Stream (5 cols) -->
+      <div class="space-y-6 lg:col-span-5">
+        <!-- Branch Admins Card -->
+        <app-card [title]="'branches.branchAdmins' | t">
+          <div class="space-y-3">
+            @for (admin of branch.branchAdmins; track admin.branchAdminId) {
+              <div
+                class="rounded-xl border border-slate-200/70 bg-white p-4 transition-all hover:border-[#148496]/50 hover:shadow-xs"
+              >
+                <div class="flex items-start gap-3">
+                  <!-- Squircle Avatar with Initials -->
+                  <div
+                    class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#148496] to-[#0f5b67] text-xs font-bold text-white shadow-xs"
+                  >
+                    {{ userInitials(admin.nameEn || admin.userName) }}
+                  </div>
+
+                  <!-- Details -->
+                  <div class="min-w-0 flex-1">
+                    <button
+                      type="button"
+                      class="text-start focus:outline-none"
+                      (click)="openBranchAdminDetails(admin)"
+                    >
+                      <p class="font-bold text-slate-900 transition hover:text-[#148496]">
+                        {{ localizedDisplayName(admin) }}
+                      </p>
+                    </button>
+
+                    <div class="mt-1 space-y-0.5 text-xs text-slate-500">
+                      <div class="flex items-center gap-1.5 truncate">
+                        <app-icon [icon]="mailIcon" [size]="12" class="shrink-0 text-slate-400" />
+                        <span class="truncate">{{ admin.email }}</span>
+                      </div>
+                      @if (admin.phoneNumber) {
+                        <div class="flex items-center gap-1.5">
+                          <app-icon [icon]="phoneIcon" [size]="12" class="shrink-0 text-slate-400" />
+                          <span>{{ admin.phoneNumber }}</span>
+                        </div>
+                      }
+                    </div>
+
+                    <div class="mt-2.5 flex items-center justify-between gap-2 border-t border-slate-100 pt-2.5">
+                      <!-- Status Pill with dot -->
                       <span
-                        class="inline-flex w-fit rounded-full px-2 py-0.5 text-[10px] font-bold"
+                        class="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-semibold"
                         [class.bg-emerald-50]="admin.isActive"
                         [class.text-emerald-700]="admin.isActive"
                         [class.bg-slate-100]="!admin.isActive"
                         [class.text-slate-500]="!admin.isActive"
                       >
+                        <span
+                          class="h-1.5 w-1.5 rounded-full"
+                          [class.bg-emerald-500]="admin.isActive"
+                          [class.bg-slate-400]="!admin.isActive"
+                        ></span>
                         {{ (admin.isActive ? 'common.active' : 'branches.inactive') | t }}
                       </span>
-                      @if (admin.isActive && canResetPassword('DEPARTMENT_ADMIN', admin.applicationUserId)) {
-                        <app-button
-                          type="button"
-                          size="sm"
-                          variant="secondary"
-                          [loading]="
-                            resettingPassword() &&
-                            resetPasswordTarget()?.applicationUserId === admin.applicationUserId
-                          "
-                          (pressed)="openResetPassword('DEPARTMENT_ADMIN', admin.applicationUserId, localizedDisplayName(admin), $event)"
-                        >
-                          <app-icon [icon]="resetPasswordIcon" [size]="14" />
-                          {{ 'users.resetPassword' | t }}
-                        </app-button>
-                      }
-                      @if (canDeactivateDepartmentAdmin(admin)) {
-                        <app-button
-                          type="button"
-                          size="sm"
-                          variant="danger"
-                          [loading]="departmentAdminsStore.deactivating()"
-                          (pressed)="deactivateDepartmentAdmin(admin, $event)"
-                        >
-                          <app-icon [icon]="deactivateIcon" [size]="14" />
-                          {{ 'departmentAdmins.deactivateAction' | t }}
-                        </app-button>
-                      }
-                      @if (canRestoreDepartmentAdmin(admin)) {
-                        <app-button
-                          type="button"
-                          size="sm"
-                          variant="secondary"
-                          [loading]="departmentAdminsStore.restoring()"
-                          (pressed)="restoreDepartmentAdmin(admin, $event)"
-                        >
-                          <app-icon [icon]="restoreIcon" [size]="14" />
-                          {{ 'common.restore' | t }}
-                        </app-button>
-                      }
+
+                      <!-- Action Toolbar -->
+                      <div class="flex flex-wrap items-center gap-1.5">
+                        @if (
+                          admin.isActive && canResetPassword('BRANCH_ADMIN', admin.applicationUserId)
+                        ) {
+                          <app-button
+                            type="button"
+                            size="sm"
+                            variant="secondary"
+                            [loading]="
+                              resettingPassword() &&
+                              resetPasswordTarget()?.applicationUserId === admin.applicationUserId
+                            "
+                            (pressed)="
+                              openResetPassword(
+                                'BRANCH_ADMIN',
+                                admin.applicationUserId,
+                                localizedDisplayName(admin),
+                                $event
+                              )
+                            "
+                          >
+                            <app-icon [icon]="resetPasswordIcon" [size]="13" />
+                            {{ 'users.resetPassword' | t }}
+                          </app-button>
+                        }
+                        @if (canDeactivateBranchAdmin(admin)) {
+                          <app-button
+                            type="button"
+                            size="sm"
+                            variant="danger"
+                            [loading]="branchAdminsStore.deactivating()"
+                            (pressed)="deactivateBranchAdmin(admin, $event)"
+                          >
+                            <app-icon [icon]="deactivateIcon" [size]="13" />
+                            {{ 'branchAdmins.deactivateAction' | t }}
+                          </app-button>
+                        }
+                        @if (canRestoreBranchAdmin(admin)) {
+                          <app-button
+                            type="button"
+                            size="sm"
+                            variant="secondary"
+                            [loading]="branchAdminsStore.restoring()"
+                            (pressed)="restoreBranchAdmin(admin, $event)"
+                          >
+                            <app-icon [icon]="restoreIcon" [size]="13" />
+                            {{ 'common.restore' | t }}
+                          </app-button>
+                        }
                       </div>
                     </div>
-                  }
+                  </div>
                 </div>
-              }
-            </div>
-          } @empty {
-            <p class="text-slate-500">{{ 'common.noRecords' | t }}</p>
-          }
-        </div>
-      </app-card>
-
-      <app-card [title]="'branches.branchUsers' | t">
-        <div class="space-y-2">
-          @for (user of branch.branchUsers; track user.branchUserId) {
-            <div class="border border-slate-100 p-3">
-              <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                <div class="min-w-0">
-                  <p class="font-bold text-slate-900">{{ localizedDisplayName(user) }}</p>
-                  <p class="mt-1 text-xs text-slate-500">{{ user.userName }} - {{ user.email }}</p>
-                </div>
-                @if (canResetPassword('BRANCH_USER', user.applicationUserId)) {
-                  <app-button
-                    type="button"
-                    size="sm"
-                    variant="secondary"
-                    [loading]="
-                      resettingPassword() &&
-                      resetPasswordTarget()?.applicationUserId === user.applicationUserId
-                    "
-                    (pressed)="openResetPassword('BRANCH_USER', user.applicationUserId, localizedDisplayName(user), $event)"
-                  >
-                    <app-icon [icon]="resetPasswordIcon" [size]="14" />
-                    {{ 'users.resetPassword' | t }}
-                  </app-button>
-                }
-              </div>
-              @if (user.roles.length > 0) {
-                <div class="mt-2 flex flex-wrap gap-2">
-                  @for (role of user.roles; track role.roleId) {
-                    <span class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
-                      {{ role.name }}
-                    </span>
-                  }
-                </div>
-              }
-            </div>
-          } @empty {
-            <p class="text-slate-500">{{ 'common.noRecords' | t }}</p>
-          }
-        </div>
-      </app-card>
-
-      <app-card [title]="'branches.templates' | t">
-        <div class="space-y-2">
-          @for (template of branch.templates; track template.templateId) {
-            <div class="border border-slate-100 p-3">
-              <p class="font-bold text-slate-900">{{ localizedDisplayName(template) }}</p>
-              @if (template.description) {
-                <p class="mt-1 text-xs text-slate-500">{{ template.description }}</p>
-              }
-              <p class="mt-2 text-xs font-semibold text-slate-500">
-                {{ template.status }} - {{ template.questionsCount }} {{ 'branches.questionsCount' | t }}
-              </p>
-            </div>
-          } @empty {
-            <p class="text-slate-500">{{ 'common.noRecords' | t }}</p>
-          }
-        </div>
-      </app-card>
-    </div>
-
-    <app-card [title]="'branches.questionGroups' | t">
-      <div class="grid gap-3 xl:grid-cols-2">
-        @for (group of branch.questionGroups; track group.groupId) {
-          <div class="border border-slate-100 p-3">
-            <p class="font-bold text-slate-900">{{ localizedDisplayName(group) }}</p>
-            @for (question of group.questions; track question.questionId) {
-              <div class="mt-2 rounded-lg bg-slate-50 p-2.5">
-                <p class="text-xs font-semibold text-slate-700">{{ questionDisplayText(question) }} - {{ question.type }}</p>
               </div>
             } @empty {
-              <p class="mt-2 text-xs text-slate-500">{{ 'common.noRecords' | t }}</p>
+              <div
+                class="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 py-6 text-center"
+              >
+                <div class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+                  <app-icon [icon]="shieldCheckIcon" [size]="20" />
+                </div>
+                <p class="mt-2 text-sm font-semibold text-slate-600">{{ 'common.noRecords' | t }}</p>
+              </div>
             }
           </div>
-        } @empty {
-          <p class="text-slate-500">{{ 'common.noRecords' | t }}</p>
-        }
+        </app-card>
+
+        <!-- Branch Users Card -->
+        <app-card [title]="'branches.branchUsers' | t">
+          <div class="space-y-3">
+            @for (user of branch.branchUsers; track user.branchUserId) {
+              <div
+                class="rounded-xl border border-slate-200/70 bg-white p-4 transition hover:border-[#148496]/40 hover:shadow-xs"
+              >
+                <div class="flex items-start gap-3">
+                  <!-- Squircle Avatar -->
+                  <div
+                    class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-sky-50 text-xs font-bold text-sky-700"
+                  >
+                    {{ userInitials(user.nameEn || user.userName) }}
+                  </div>
+
+                  <div class="min-w-0 flex-1">
+                    <div class="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
+                      <div class="min-w-0">
+                        <p class="font-bold text-slate-900">{{ localizedDisplayName(user) }}</p>
+                        <p class="mt-0.5 truncate text-xs text-slate-500">
+                          {{ user.userName }} &bull; {{ user.email }}
+                        </p>
+                      </div>
+
+                      @if (canResetPassword('BRANCH_USER', user.applicationUserId)) {
+                        <div class="shrink-0">
+                          <app-button
+                            type="button"
+                            size="sm"
+                            variant="secondary"
+                            [loading]="
+                              resettingPassword() &&
+                              resetPasswordTarget()?.applicationUserId === user.applicationUserId
+                            "
+                            (pressed)="
+                              openResetPassword(
+                                'BRANCH_USER',
+                                user.applicationUserId,
+                                localizedDisplayName(user),
+                                $event
+                              )
+                            "
+                          >
+                            <app-icon [icon]="resetPasswordIcon" [size]="13" />
+                            {{ 'users.resetPassword' | t }}
+                          </app-button>
+                        </div>
+                      }
+                    </div>
+
+                    @if (user.roles.length > 0) {
+                      <div class="mt-2.5 flex flex-wrap gap-1.5">
+                        @for (role of user.roles; track role.roleId) {
+                          <span
+                            class="rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-600"
+                          >
+                            {{ role.name }}
+                          </span>
+                        }
+                      </div>
+                    }
+                  </div>
+                </div>
+              </div>
+            } @empty {
+              <div
+                class="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 py-6 text-center"
+              >
+                <div class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+                  <app-icon [icon]="usersIcon" [size]="20" />
+                </div>
+                <p class="mt-2 text-sm font-semibold text-slate-600">{{ 'common.noRecords' | t }}</p>
+              </div>
+            }
+          </div>
+        </app-card>
       </div>
-    </app-card>
+    </div>
   }
 </div>
 
@@ -424,8 +745,8 @@
   (closed)="closeBranchAdminDetails()"
 >
   @if (selectedBranchAdmin(); as admin) {
-    <form class="space-y-3" [formGroup]="branchAdminDetailsForm" (ngSubmit)="updateBranchAdmin()">
-      <div class="border border-slate-100 bg-slate-50 p-3">
+    <form class="space-y-4" [formGroup]="branchAdminDetailsForm" (ngSubmit)="updateBranchAdmin()">
+      <div class="rounded-xl border border-slate-200/80 bg-slate-50/60 p-3 shadow-2xs">
         <p class="font-bold text-slate-900">{{ localizedDisplayName(admin) }}</p>
         <p class="mt-1 text-xs text-slate-500">{{ admin.userName }} - {{ admin.email }}</p>
         @if (admin.phoneNumber) {
@@ -475,19 +796,31 @@
         />
       </div>
 
-      <div class="flex flex-col justify-between gap-2 pt-1 sm:flex-row sm:flex-wrap">
+      <div
+        class="sticky bottom-0 -mx-4 -mb-4 mt-4 flex flex-col justify-between gap-2 border-t border-slate-100 bg-white/95 px-4 py-3 backdrop-blur-sm sm:-mx-5 sm:-mb-5 sm:px-5 z-10 sm:flex-row sm:flex-wrap"
+      >
         @if (canDeactivateBranchAdmin(admin)) {
-          <app-button type="button" variant="danger" [loading]="branchAdminsStore.deactivating()" (pressed)="deactivateBranchAdmin(admin)">
+          <app-button
+            type="button"
+            variant="danger"
+            [loading]="branchAdminsStore.deactivating()"
+            (pressed)="deactivateBranchAdmin(admin)"
+          >
             <app-icon [icon]="deactivateIcon" [size]="16" />
             {{ 'branchAdmins.deactivateAction' | t }}
           </app-button>
         } @else if (canRestoreBranchAdmin(admin)) {
-          <app-button type="button" variant="secondary" [loading]="branchAdminsStore.restoring()" (pressed)="restoreBranchAdmin(admin)">
+          <app-button
+            type="button"
+            variant="secondary"
+            [loading]="branchAdminsStore.restoring()"
+            (pressed)="restoreBranchAdmin(admin)"
+          >
             <app-icon [icon]="restoreIcon" [size]="16" />
             {{ 'common.restore' | t }}
           </app-button>
         }
-        <div class="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
+        <div class="flex items-center justify-end gap-2 sm:ms-auto">
           <app-button type="button" variant="secondary" (pressed)="closeBranchAdminDetails()">
             <app-icon [icon]="cancelIcon" [size]="16" />
             {{ 'common.cancel' | t }}
@@ -508,8 +841,8 @@
   (closed)="closeDepartmentDetails()"
 >
   @if (selectedDepartmentDetails(); as department) {
-    <form class="space-y-3" [formGroup]="departmentDetailsForm" (ngSubmit)="updateDepartment()">
-      <div class="border border-slate-100 bg-slate-50 p-3">
+    <form class="space-y-4" [formGroup]="departmentDetailsForm" (ngSubmit)="updateDepartment()">
+      <div class="rounded-xl border border-slate-200/80 bg-slate-50/60 p-3 shadow-2xs">
         <p class="font-bold text-slate-900">
           {{ codedDisplayName(department) }}
         </p>
@@ -541,79 +874,104 @@
       </div>
 
       @if (department.departmentAdmins.length > 0) {
-        <div class="border border-slate-100 p-3">
+        <div class="rounded-xl border border-slate-200/80 bg-slate-50/40 p-3.5 shadow-2xs">
           <p class="text-xs font-bold text-slate-500">{{ 'branches.departmentAdminsCount' | t }}</p>
           @for (admin of department.departmentAdmins; track admin.departmentAdminId) {
-            <div class="mt-2 flex flex-col gap-2 rounded-lg bg-slate-50 p-2 sm:flex-row sm:items-center sm:justify-between">
-              <p class="text-xs text-slate-600">{{ localizedDisplayName(admin) }} - {{ admin.email }}</p>
+            <div
+              class="mt-2 flex flex-col gap-2 rounded-lg bg-white p-2.5 shadow-2xs sm:flex-row sm:items-center sm:justify-between"
+            >
+              <p class="text-xs text-slate-600">
+                {{ localizedDisplayName(admin) }} - {{ admin.email }}
+              </p>
               <div class="flex flex-wrap gap-2 sm:justify-end">
-              <span
-                class="inline-flex w-fit rounded-full px-2 py-0.5 text-[10px] font-bold"
-                [class.bg-emerald-50]="admin.isActive"
-                [class.text-emerald-700]="admin.isActive"
-                [class.bg-slate-100]="!admin.isActive"
-                [class.text-slate-500]="!admin.isActive"
-              >
-                {{ (admin.isActive ? 'common.active' : 'branches.inactive') | t }}
-              </span>
-              @if (admin.isActive && canResetPassword('DEPARTMENT_ADMIN', admin.applicationUserId)) {
-                <app-button
-                  type="button"
-                  size="sm"
-                  variant="secondary"
-                  [loading]="
-                    resettingPassword() &&
-                    resetPasswordTarget()?.applicationUserId === admin.applicationUserId
-                  "
-                  (pressed)="openResetPassword('DEPARTMENT_ADMIN', admin.applicationUserId, localizedDisplayName(admin), $event)"
+                <span
+                  class="inline-flex w-fit rounded-full px-2 py-0.5 text-[10px] font-bold"
+                  [class.bg-emerald-50]="admin.isActive"
+                  [class.text-emerald-700]="admin.isActive"
+                  [class.bg-slate-100]="!admin.isActive"
+                  [class.text-slate-500]="!admin.isActive"
                 >
-                  <app-icon [icon]="resetPasswordIcon" [size]="14" />
-                  {{ 'users.resetPassword' | t }}
-                </app-button>
-              }
-              @if (canDeactivateDepartmentAdmin(admin)) {
-                <app-button
-                  type="button"
-                  size="sm"
-                  variant="danger"
-                  [loading]="departmentAdminsStore.deactivating()"
-                  (pressed)="deactivateDepartmentAdmin(admin, $event)"
-                >
-                  <app-icon [icon]="deactivateIcon" [size]="14" />
-                  {{ 'departmentAdmins.deactivateAction' | t }}
-                </app-button>
-              }
-              @if (canRestoreDepartmentAdmin(admin)) {
-                <app-button
-                  type="button"
-                  size="sm"
-                  variant="secondary"
-                  [loading]="departmentAdminsStore.restoring()"
-                  (pressed)="restoreDepartmentAdmin(admin, $event)"
-                >
-                  <app-icon [icon]="restoreIcon" [size]="14" />
-                  {{ 'common.restore' | t }}
-                </app-button>
-              }
+                  {{ (admin.isActive ? 'common.active' : 'branches.inactive') | t }}
+                </span>
+                @if (
+                  admin.isActive && canResetPassword('DEPARTMENT_ADMIN', admin.applicationUserId)
+                ) {
+                  <app-button
+                    type="button"
+                    size="sm"
+                    variant="secondary"
+                    [loading]="
+                      resettingPassword() &&
+                      resetPasswordTarget()?.applicationUserId === admin.applicationUserId
+                    "
+                    (pressed)="
+                      openResetPassword(
+                        'DEPARTMENT_ADMIN',
+                        admin.applicationUserId,
+                        localizedDisplayName(admin),
+                        $event
+                      )
+                    "
+                  >
+                    <app-icon [icon]="resetPasswordIcon" [size]="14" />
+                    {{ 'users.resetPassword' | t }}
+                  </app-button>
+                }
+                @if (canDeactivateDepartmentAdmin(admin)) {
+                  <app-button
+                    type="button"
+                    size="sm"
+                    variant="danger"
+                    [loading]="departmentAdminsStore.deactivating()"
+                    (pressed)="deactivateDepartmentAdmin(admin, $event)"
+                  >
+                    <app-icon [icon]="deactivateIcon" [size]="14" />
+                    {{ 'departmentAdmins.deactivateAction' | t }}
+                  </app-button>
+                }
+                @if (canRestoreDepartmentAdmin(admin)) {
+                  <app-button
+                    type="button"
+                    size="sm"
+                    variant="secondary"
+                    [loading]="departmentAdminsStore.restoring()"
+                    (pressed)="restoreDepartmentAdmin(admin, $event)"
+                  >
+                    <app-icon [icon]="restoreIcon" [size]="14" />
+                    {{ 'common.restore' | t }}
+                  </app-button>
+                }
               </div>
             </div>
           }
         </div>
       }
 
-      <div class="flex flex-col justify-between gap-2 pt-1 sm:flex-row sm:flex-wrap">
+      <div
+        class="sticky bottom-0 -mx-4 -mb-4 mt-4 flex flex-col justify-between gap-2 border-t border-slate-100 bg-white/95 px-4 py-3 backdrop-blur-sm sm:-mx-5 sm:-mb-5 sm:px-5 z-10 sm:flex-row sm:flex-wrap"
+      >
         @if (department.isActive) {
-          <app-button type="button" variant="danger" [loading]="departmentsStore.deleting()" (pressed)="deleteDepartment()">
+          <app-button
+            type="button"
+            variant="danger"
+            [loading]="departmentsStore.deleting()"
+            (pressed)="deleteDepartment()"
+          >
             <app-icon [icon]="deleteIcon" [size]="16" />
             {{ 'common.delete' | t }}
           </app-button>
         } @else if (canRestoreDepartment(department)) {
-          <app-button type="button" variant="secondary" [loading]="departmentsStore.restoring()" (pressed)="restoreDepartment()">
+          <app-button
+            type="button"
+            variant="secondary"
+            [loading]="departmentsStore.restoring()"
+            (pressed)="restoreDepartment()"
+          >
             <app-icon [icon]="restoreIcon" [size]="16" />
             {{ 'common.restore' | t }}
           </app-button>
         }
-        <div class="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
+        <div class="flex items-center justify-end gap-2 sm:ms-auto">
           <app-button type="button" variant="secondary" (pressed)="closeDepartmentDetails()">
             <app-icon [icon]="cancelIcon" [size]="16" />
             {{ 'common.cancel' | t }}
@@ -633,11 +991,15 @@
   [open]="createDepartmentAdminModalOpen()"
   (closed)="closeCreateDepartmentAdminModal()"
 >
-  <form class="space-y-3" [formGroup]="departmentAdminForm" (ngSubmit)="createDepartmentAdmin()">
+  <form class="space-y-4" [formGroup]="departmentAdminForm" (ngSubmit)="createDepartmentAdmin()">
     @if (selectedDepartment(); as department) {
-      <div class="border border-cyan-100 bg-cyan-50 p-3 text-xs font-semibold text-slate-700">
-        {{ 'departments.selectedDepartment' | t }}:
-        <span class="text-[var(--theme-color-secondary)]">{{ codedDisplayName(department) }}</span>
+      <div
+        class="flex items-center gap-2 rounded-xl border border-[var(--theme-color-accent)]/20 bg-[var(--theme-color-accent-softest)]/50 p-3 text-xs font-semibold text-slate-700 shadow-2xs"
+      >
+        <span class="text-slate-500">{{ 'departments.selectedDepartment' | t }}:</span>
+        <span class="font-bold text-[var(--theme-color-secondary)]">{{
+          codedDisplayName(department)
+        }}</span>
       </div>
     }
 
@@ -689,10 +1051,17 @@
       [error]="departmentAdminFieldError('password') | t"
     />
 
-    <app-button type="submit" [fullWidth]="true" [loading]="departmentAdminsStore.creating()">
-      <app-icon [icon]="userPlusIcon" [size]="17" />
-      {{ 'departmentAdmins.createDepartmentAdmin' | t }}
-    </app-button>
+    <div
+      class="sticky bottom-0 -mx-4 -mb-4 mt-4 flex items-center justify-end gap-2 border-t border-slate-100 bg-white/95 px-4 py-3 backdrop-blur-sm sm:-mx-5 sm:-mb-5 sm:px-5 z-10"
+    >
+      <app-button type="button" variant="secondary" (pressed)="closeCreateDepartmentAdminModal()">
+        {{ 'common.cancel' | t }}
+      </app-button>
+      <app-button type="submit" [loading]="departmentAdminsStore.creating()">
+        <app-icon [icon]="userPlusIcon" [size]="17" />
+        {{ 'departmentAdmins.createDepartmentAdmin' | t }}
+      </app-button>
+    </div>
   </form>
 </app-modal>
 

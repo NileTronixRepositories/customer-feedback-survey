@@ -29,6 +29,7 @@ export interface OperatorAssignedTemplate {
   branchNameEn: string;
   branchNameAr: string;
   branchCode: string;
+  logoPath: string | null;
   activeFrom: string;
   expireTo: string | null;
   isActive: boolean;
@@ -161,6 +162,7 @@ export interface OperatorAssignedTemplateApiResponse {
   branchNameEn?: string;
   branchNameAr?: string | null;
   branchCode?: string | null;
+  logoPath?: string | null;
   activeFrom?: string | null;
   expireTo?: string | null;
   isActive?: boolean;

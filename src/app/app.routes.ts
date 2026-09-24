@@ -150,6 +150,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'dashboard-responses',
+        loadComponent: () =>
+          import(
+            './features/reports/dashboard-drill-down/presentation/pages/dashboard-responses-page/dashboard-responses-page.component'
+          ).then((m) => m.DashboardResponsesPageComponent),
+      },
+      {
         path: 'reports',
         loadChildren: () =>
           import('./features/super-admin/reports/reports.routes').then((m) => m.REPORTS_ROUTES),

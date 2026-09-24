@@ -5,6 +5,7 @@ import { environment } from '../../../../../environments/environment';
 import { toCreatedByUser } from '../../../../shared/models/audit.model';
 import {
   CopySuperAdminTemplateToBranchPayload,
+  AssignGlobalAnonymousTemplateToBranchPayload,
   SuperAdminTemplateCopyApiResponse,
   SuperAdminTemplateCopyResult,
   SuperAdminTemplateApiResponse,
@@ -20,6 +21,7 @@ import {
 export class SuperAdminTemplatesService {
   private readonly http = inject(HttpClient);
   private readonly templatesUrl = `${environment.apiBaseUrl}/api/templates/super-admin`;
+  private readonly anonymousTemplatesUrl = `${environment.apiBaseUrl}/api/anonymous-templates`;
 
   list(query: SuperAdminTemplatesQuery): Observable<SuperAdminTemplatesPageResult> {
     let params = new HttpParams()
@@ -54,6 +56,30 @@ export class SuperAdminTemplatesService {
     return this.http
       .post<SuperAdminTemplateCopyApiResponse | null>(`${this.templatesUrl}/copy-to-branch`, payload)
       .pipe(map((response) => this.toCopyResult(response, payload)));
+  }
+
+  assignGlobalToBranch(
+    payload: AssignGlobalAnonymousTemplateToBranchPayload,
+  ): Observable<SuperAdminTemplateCopyResult> {
+    const formData = new FormData();
+    formData.append('BranchId', payload.branchId);
+    formData.append('ActiveFrom', payload.activeFrom);
+    if (payload.expireTo) formData.append('ExpireTo', payload.expireTo);
+    if (payload.logo) formData.append('Logo', payload.logo);
+
+    return this.http
+      .post<SuperAdminTemplateCopyApiResponse | null>(
+        `${this.anonymousTemplatesUrl}/${payload.globalTemplateId}/assign-to-branch`,
+        formData,
+      )
+      .pipe(
+        map((response) =>
+          this.toCopyResult(response, {
+            templateId: payload.globalTemplateId,
+            branchId: payload.branchId,
+          }),
+        ),
+      );
   }
 
   private toPageResult(
@@ -100,7 +126,7 @@ export class SuperAdminTemplatesService {
 
     return {
       templateId: this.readRecordId(response.templateId),
-      branchId: this.readRecordId(response.branchId),
+      branchId: this.readNullableRecordId(response.branchId),
       branchNameEn: response.branchNameEn ?? null,
       branchNameAr: response.branchNameAr ?? null,
       templateKind,
@@ -108,9 +134,18 @@ export class SuperAdminTemplatesService {
       nameEn: response.nameEn ?? null,
       nameAr: response.nameAr ?? null,
       description: response.description ?? null,
-      status: response.status ?? '',
-      statusName: response.statusName ?? response.status ?? '',
+      scope: this.toScope(response.scope, response.scopeName),
+      scopeName: response.scopeName ?? null,
+      isGlobal: response.isGlobal ?? false,
+      isArchived: response.isArchived ?? false,
+      sourceGlobalAnonymousTemplateId: this.readNullableRecordId(
+        response.sourceGlobalAnonymousTemplateId,
+      ),
+      isManagedGlobalCopy:
+        response.isManagedGlobalCopy ??
+        this.readNullableRecordId(response.sourceGlobalAnonymousTemplateId) !== null,
       isActive: response.isActive ?? true,
+      logoPath: response.logoPath ?? null,
       questionsCount: response.questionsCount ?? 0,
       customInputsCount: response.customInputsCount ?? 0,
       publicUrl: response.publicUrl ?? null,
@@ -154,5 +189,20 @@ export class SuperAdminTemplatesService {
 
   private readRecordId(value: string | number | null | undefined): string {
     return value === null || value === undefined ? '' : String(value);
+  }
+
+  private readNullableRecordId(value: string | number | null | undefined): string | null {
+    const id = this.readRecordId(value);
+    return id.length > 0 ? id : null;
+  }
+
+  private toScope(
+    value: string | number | null | undefined,
+    name: string | null | undefined,
+  ): 'Branch' | 'Global' | null {
+    const normalized = String(name ?? value ?? '').trim().toLowerCase();
+    if (normalized === 'global' || normalized === '2') return 'Global';
+    if (normalized === 'branch' || normalized === '1') return 'Branch';
+    return null;
   }
 }

@@ -1,0 +1,11 @@
+<div class="summary-actions">
+  <button type="button" [disabled]="!actions().allResponses" (click)="select(actions().allResponses, 'dashboardDrillDown.allResponses')">
+    <span>{{ 'dashboardDrillDown.allResponses' | t }}</span><strong>{{ totalResponses() | number }}</strong>
+  </button>
+  <button type="button" [disabled]="!actions().complaints" (click)="select(actions().complaints, 'dashboardDrillDown.complaintResponses')">
+    <span>{{ 'dashboardDrillDown.complaints' | t }}</span><strong>{{ complaints() | number }}</strong>
+  </button>
+  <button type="button" [disabled]="!actions().voiceAnswers" (click)="select(actions().voiceAnswers, 'dashboardDrillDown.voiceResponses')">
+    <span>{{ 'dashboardDrillDown.voiceAnswers' | t }}</span><strong>{{ voiceAnswers() | number }}</strong>
+  </button>
+</div>

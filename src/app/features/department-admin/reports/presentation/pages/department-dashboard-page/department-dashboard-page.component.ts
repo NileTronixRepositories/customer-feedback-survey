@@ -12,7 +12,6 @@ import {
 } from '@angular/core';
 import { DatePipe, DecimalPipe, LowerCasePipe } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
 import { Chart, registerables } from 'chart.js';
 import {
   Search,
@@ -36,6 +35,7 @@ import {
   DepartmentCriticalResponse,
   DepartmentCustomInputSegment,
   DepartmentDashboardResponse,
+  DepartmentDashboardTrendPoint,
   DepartmentOperatorPerformance,
   DepartmentQuestionInsight,
   DepartmentReportTemplateOption,
@@ -44,13 +44,17 @@ import {
   DepartmentTemplatePerformance,
 } from '../../../domain/department-reports.model';
 import { DepartmentDashboardStore } from '../../state/department-dashboard.store';
+import { DashboardDrillDownService } from '../../../../../reports/dashboard-drill-down/data/dashboard-drill-down.service';
+import { DashboardDetailsNavigation } from '../../../../../reports/dashboard-drill-down/domain/dashboard-drill-down.model';
+import { SatisfactionDistributionComponent } from '../../../../../reports/dashboard-drill-down/presentation/components/satisfaction-distribution/satisfaction-distribution.component';
+import { DashboardSummaryActionsComponent } from '../../../../../reports/dashboard-drill-down/presentation/components/dashboard-summary-actions/dashboard-summary-actions.component';
 
 Chart.register(...registerables);
 
 @Component({
   selector: 'app-department-dashboard-page',
   standalone: true,
-  imports: [ButtonComponent, DatePipe, DecimalPipe, IconComponent, LowerCasePipe, ReactiveFormsModule, TranslatePipe],
+  imports: [ButtonComponent, DashboardSummaryActionsComponent, DatePipe, DecimalPipe, IconComponent, LowerCasePipe, ReactiveFormsModule, SatisfactionDistributionComponent, TranslatePipe],
   templateUrl: './department-dashboard-page.component.html',
   styleUrl: './department-dashboard-page.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -59,8 +63,8 @@ export class DepartmentDashboardPageComponent implements OnInit, OnDestroy {
   readonly store = inject(DepartmentDashboardStore);
   private readonly formBuilder = inject(FormBuilder);
   private readonly i18n = inject(I18nService);
-  private readonly router = inject(Router);
   private readonly themeColors = inject(ThemeColorService);
+  private readonly drillDown = inject(DashboardDrillDownService);
   private readonly chartCanvas = viewChild<ElementRef<HTMLCanvasElement>>('trendCanvas');
   private trendChart: Chart<'line', number[], string> | null = null;
 
@@ -134,9 +138,13 @@ export class DepartmentDashboardPageComponent implements OnInit, OnDestroy {
   });
 
   readonly satisfactionData = computed(() => {
-    const summary = this.store.dashboard()?.summary;
-    if (!summary) return null;
+    const dashboard = this.store.dashboard();
+    if (!dashboard) return null;
+    const summary = dashboard.summary;
     const total = summary.satisfiedResponses + summary.neutralResponses + summary.unhappyResponses;
+    const percentage = (category: 'Satisfied' | 'Neutral' | 'Unhappy') =>
+      dashboard.charts.satisfactionDistribution.find((item) => item.category === category)
+        ?.percentage ?? 0;
     return {
       satisfied: summary.satisfiedResponses,
       neutral: summary.neutralResponses,
@@ -144,9 +152,9 @@ export class DepartmentDashboardPageComponent implements OnInit, OnDestroy {
       scored: summary.scoredResponses,
       unscored: summary.unscoredResponses,
       total,
-      satisfiedPercent: total > 0 ? (summary.satisfiedResponses / total) * 100 : 0,
-      neutralPercent: total > 0 ? (summary.neutralResponses / total) * 100 : 0,
-      unhappyPercent: total > 0 ? (summary.unhappyResponses / total) * 100 : 0,
+      satisfiedPercent: percentage('Satisfied'),
+      neutralPercent: percentage('Neutral'),
+      unhappyPercent: percentage('Unhappy'),
     };
   });
 
@@ -214,18 +222,19 @@ export class DepartmentDashboardPageComponent implements OnInit, OnDestroy {
   }
 
   openOperatorResponses(operator: DepartmentOperatorPerformance): void {
-    if (!operator.operatorId) return;
-    void this.router.navigate(['/reports/department/operators', operator.operatorId, 'responses']);
+    this.openNavigation(operator.detailsNavigation, this.operatorName(operator));
   }
 
   openCriticalResponse(response: DepartmentCriticalResponse): void {
-    if (!response.operatorId || !response.surveyResponseId) return;
-    void this.router.navigate([
-      '/reports/department/operators',
-      response.operatorId,
-      'responses',
-      response.surveyResponseId,
-    ]);
+    this.openNavigation(response.detailsNavigation, this.i18n.translate('dashboardDrillDown.responseDetails'));
+  }
+
+  openDrillDown(event: { title: string; navigation: DashboardDetailsNavigation }): void {
+    this.drillDown.open(event);
+  }
+
+  openNavigation(navigation: DashboardDetailsNavigation | null, title: string): void {
+    if (navigation) this.drillDown.open({ title, navigation });
   }
 
   optionName(template: DepartmentReportTemplateOption): string {
@@ -347,6 +356,13 @@ export class DepartmentDashboardPageComponent implements OnInit, OnDestroy {
         responsive: true,
         maintainAspectRatio: false,
         locale: language,
+        onClick: (_event, elements) => {
+          const point: DepartmentDashboardTrendPoint | undefined =
+            trend[elements[0]?.index ?? -1];
+          if (point?.detailsNavigation) {
+            this.openNavigation(point.detailsNavigation, point.period);
+          }
+        },
         plugins: {
           legend: { display: false },
           tooltip: {

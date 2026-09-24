@@ -19,8 +19,6 @@ import {
 } from '../../../../shared/models/resource-scope.model';
 import { CreatedByUser, CreatedByUserApiResponse } from '../../../../shared/models/audit.model';
 
-export type BranchTemplateStatus = 'Draft' | 'Published' | 'Archived' | string;
-
 export interface BranchTemplate {
   templateId: string;
   branchId: string;
@@ -32,8 +30,8 @@ export interface BranchTemplate {
   description: string;
   activeFrom: string;
   expireTo: string | null;
-  status: BranchTemplateStatus;
   isActive: boolean;
+  logoPath: string | null;
   questionsCount: number;
   groupsCount: number;
   customInputsCount: number;
@@ -112,7 +110,6 @@ export interface BranchTemplateQuestionSelection {
   branchId: string;
   templateNameEn: string;
   templateNameAr: string;
-  status: BranchTemplateStatus;
   isActive: boolean;
   groups: readonly BranchTemplateQuestionGroupSelection[];
   questionConditions: readonly QuestionCondition[];
@@ -210,9 +207,8 @@ export interface BranchTemplateApiResponse {
   description?: string | null;
   activeFrom?: string | null;
   expireTo?: string | null;
-  status?: BranchTemplateStatus;
-  statusName?: BranchTemplateStatus;
   isActive?: boolean;
+  logoPath?: string | null;
   questionsCount?: number;
   customInputsCount?: number;
   summary?: BranchTemplateSummaryApiResponse | null;
@@ -287,7 +283,6 @@ export interface BranchTemplateQuestionSelectionApiResponse {
   branchId?: string | number;
   templateNameEn?: string;
   templateNameAr?: string | null;
-  status?: BranchTemplateStatus;
   isActive?: boolean;
   groups?: readonly BranchTemplateQuestionGroupSelectionApiResponse[];
   questions?: readonly BranchTemplateQuestionSelectionItemApiResponse[];

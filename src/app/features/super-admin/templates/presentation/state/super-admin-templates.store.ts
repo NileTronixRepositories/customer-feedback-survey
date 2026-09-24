@@ -4,6 +4,7 @@ import { finalize, take } from 'rxjs';
 import { SuperAdminTemplatesService } from '../../data/super-admin-templates.service';
 import {
   CopySuperAdminTemplateToBranchPayload,
+  AssignGlobalAnonymousTemplateToBranchPayload,
   SuperAdminTemplateCopyResult,
   SuperAdminTemplateListItem,
   SuperAdminTemplatesQuery,
@@ -152,6 +153,33 @@ export class SuperAdminTemplatesStore {
         error: (error: unknown) => {
           this.copyErrorSignal.set(this.readCopyErrorMessage(error));
         },
+      });
+  }
+
+  assignGlobalToBranch(
+    payload: AssignGlobalAnonymousTemplateToBranchPayload,
+    onAssigned?: () => void,
+  ): void {
+    if (this.copyingSignal()) return;
+    this.copyingSignal.set(true);
+    this.copyErrorSignal.set(null);
+    this.copySuccessSignal.set(null);
+    this.copyResultSignal.set(null);
+
+    this.templatesService
+      .assignGlobalToBranch(payload)
+      .pipe(
+        take(1),
+        finalize(() => this.copyingSignal.set(false)),
+      )
+      .subscribe({
+        next: (result) => {
+          this.copyResultSignal.set(result);
+          this.copySuccessSignal.set('superAdminTemplates.assignSuccess');
+          this.load();
+          onAssigned?.();
+        },
+        error: (error: unknown) => this.copyErrorSignal.set(this.readCopyErrorMessage(error)),
       });
   }
 

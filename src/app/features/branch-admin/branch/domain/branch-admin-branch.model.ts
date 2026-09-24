@@ -75,7 +75,8 @@ export interface BranchAdminTemplate {
   nameEn: string;
   nameAr: string;
   description: string;
-  status: string;
+  logoPath: string | null;
+  isActive: boolean;
   questionsCount: number;
 }
 
@@ -171,7 +172,8 @@ export interface BranchAdminTemplateApiResponse {
   nameEn?: string;
   nameAr?: string | null;
   description?: string | null;
-  status?: string;
+  logoPath?: string | null;
+  isActive?: boolean;
   questionsCount?: number;
 }
 

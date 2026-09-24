@@ -4,6 +4,12 @@ import {
   SelectableEditableScopeApiFields,
   SelectableEditableScopeState,
 } from '../../../shared/models/resource-scope.model';
+import {
+  DashboardCharts,
+  DashboardDetailsNavigation,
+  DashboardSummaryActions,
+  SatisfactionCategory,
+} from '../../reports/dashboard-drill-down/domain/dashboard-drill-down.model';
 
 export type AnonymousTemplateScope = 1 | 2;
 export type AnonymousTemplateCustomInputType = 1 | 2;
@@ -35,10 +41,12 @@ export interface AnonymousTemplate extends ScopeState {
   description: string | null;
   activeFrom: string;
   expireTo: string | null;
-  status: number | null;
-  statusName: string;
   isActive: boolean;
-  publicUrl: string;
+  isArchived: boolean;
+  logoPath: string | null;
+  sourceGlobalAnonymousTemplateId: string | null;
+  isManagedGlobalCopy: boolean;
+  publicUrl: string | null;
   qrCode: string | null;
   createdByApplicationUserId: string;
   createdOnUtc: string;
@@ -184,10 +192,12 @@ export interface AnonymousTemplateListItem extends ScopeState {
   description: string | null;
   activeFrom: string;
   expireTo: string | null;
-  status: number | null;
-  statusName: string;
   isActive: boolean;
-  publicUrl: string;
+  isArchived: boolean;
+  logoPath: string | null;
+  sourceGlobalAnonymousTemplateId: string | null;
+  isManagedGlobalCopy: boolean;
+  publicUrl: string | null;
   qrCode: string | null;
   questionsCount: number;
   customInputsCount: number;
@@ -199,9 +209,22 @@ export interface AnonymousTemplateListItem extends ScopeState {
 export interface AnonymousTemplateStateChange extends ScopeState {
   anonymousTemplateId: string;
   branchId: string | null;
-  status: number | null;
-  statusName: string;
   isActive: boolean;
+  isArchived: boolean;
+}
+
+export interface AssignGlobalAnonymousTemplatePayload {
+  branchId: string;
+  activeFrom: string;
+  expireTo: string | null;
+  logo: File | null;
+}
+
+export interface AnonymousTemplateCopyResult {
+  anonymousTemplateId: string;
+  templateId: string;
+  nameEn: string;
+  nameAr: string | null;
 }
 
 export interface AnonymousTemplateResponsesListQuery {
@@ -212,6 +235,13 @@ export interface AnonymousTemplateResponsesListQuery {
   toDate: string | null;
   minScorePercentage: number | null;
   maxScorePercentage: number | null;
+  satisfactionCategory?: SatisfactionCategory;
+  isScored?: boolean;
+  questionId?: string;
+  customInputName?: string;
+  customInputType?: string;
+  customInputValue?: string;
+  searchText?: string;
 }
 
 export interface AnonymousTemplateResponsesPageResult {
@@ -229,6 +259,12 @@ export interface BranchAnonymousResponsesQuery {
   to?: string;
   minScorePercentage?: number;
   maxScorePercentage?: number;
+  satisfactionCategory?: SatisfactionCategory;
+  isScored?: boolean;
+  questionId?: string;
+  customInputName?: string;
+  customInputType?: string;
+  customInputValue?: string;
   hasComplaint?: boolean;
   hasVoice?: boolean;
   searchText?: string;
@@ -388,9 +424,11 @@ export interface AnonymousTemplateApiResponse extends ScopeApiFields {
   description?: string | null;
   activeFrom?: string | null;
   expireTo?: string | null;
-  status?: number | string | null;
-  statusName?: string | null;
   isActive?: boolean;
+  isArchived?: boolean;
+  logoPath?: string | null;
+  sourceGlobalAnonymousTemplateId?: string | number | null;
+  isManagedGlobalCopy?: boolean;
   publicUrl?: string | null;
   qrCode?: string | null;
   questionsCount?: number | null;
@@ -639,6 +677,8 @@ export interface AnonymousTemplateDashboardQuery {
 export interface AnonymousTemplateDashboardResponse {
   period: AnonymousTemplateDashboardPeriod;
   summary: AnonymousTemplateDashboardSummary;
+  charts: DashboardCharts;
+  summaryActions: DashboardSummaryActions;
   satisfactionTrend: readonly AnonymousTemplateDashboardTrendPoint[];
   anonymousTemplatePerformance: readonly AnonymousTemplateDashboardTemplatePerformance[];
   lowestRatedQuestions: readonly AnonymousTemplateDashboardQuestionInsight[];
@@ -675,6 +715,7 @@ export interface AnonymousTemplateDashboardTrendPoint {
   period: string;
   responsesCount: number;
   averageScorePercentage: number;
+  detailsNavigation: DashboardDetailsNavigation | null;
 }
 
 export interface AnonymousTemplateDashboardTemplatePerformance {
@@ -683,16 +724,16 @@ export interface AnonymousTemplateDashboardTemplatePerformance {
   nameAr: string | null;
   scope: number;
   scopeName: string;
-  status: number;
-  statusName: string;
   isActive: boolean;
-  publicUrl: string;
+  logoPath: string | null;
+  publicUrl: string | null;
   qrCode: string | null;
   responsesCount: number;
   scoredResponsesCount: number;
   averageScorePercentage: number;
   complaintsCount: number;
   riskLevel: AnonymousTemplateDashboardRiskLevel;
+  detailsNavigation: DashboardDetailsNavigation | null;
 }
 
 export interface AnonymousTemplateDashboardQuestionInsight {
@@ -708,6 +749,7 @@ export interface AnonymousTemplateDashboardQuestionInsight {
   answersCount: number;
   averageValue: number;
   averageScorePercentage: number;
+  detailsNavigation: DashboardDetailsNavigation | null;
 }
 
 export interface AnonymousTemplateDashboardCustomInputSegment {
@@ -721,6 +763,7 @@ export interface AnonymousTemplateDashboardCustomInputSegmentItem {
   value: string;
   responsesCount: number;
   averageScorePercentage: number;
+  detailsNavigation: DashboardDetailsNavigation | null;
 }
 
 export interface AnonymousTemplateDashboardCriticalResponse {
@@ -732,6 +775,7 @@ export interface AnonymousTemplateDashboardCriticalResponse {
   scorePercentage: number;
   complaintText: string | null;
   customInputs: readonly AnonymousTemplateDashboardCriticalCustomInput[];
+  detailsNavigation: DashboardDetailsNavigation | null;
 }
 
 export interface AnonymousTemplateDashboardCriticalCustomInput {
@@ -747,6 +791,8 @@ export interface AnonymousTemplateDashboardApiResponse {
     groupBy?: AnonymousTemplateDashboardGroupBy | string | null;
   } | null;
   summary?: Partial<AnonymousTemplateDashboardSummary> | null;
+  charts?: DashboardCharts | null;
+  summaryActions?: DashboardSummaryActions | null;
   satisfactionTrend?: readonly Partial<AnonymousTemplateDashboardTrendPoint>[];
   anonymousTemplatePerformance?: readonly Partial<AnonymousTemplateDashboardTemplatePerformance>[];
   lowestRatedQuestions?: readonly Partial<AnonymousTemplateDashboardQuestionInsight>[];
@@ -765,5 +811,6 @@ export interface AnonymousTemplateDashboardApiResponse {
     scorePercentage?: number | null;
     complaintText?: string | null;
     customInputs?: readonly Partial<AnonymousTemplateDashboardCriticalCustomInput>[];
+    detailsNavigation?: DashboardDetailsNavigation | null;
   }[];
 }

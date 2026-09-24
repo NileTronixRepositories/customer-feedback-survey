@@ -46,13 +46,17 @@
   }
 
   @if (templatesStore.error()) {
-    <div class="border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-[var(--theme-color-danger)]">
+    <div
+      class="border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-[var(--theme-color-danger)]"
+    >
       {{ templatesStore.error() ?? '' | t }}
     </div>
   }
 
   @if (editTemplateDetailsError()) {
-    <div class="border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-[var(--theme-color-danger)]">
+    <div
+      class="border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-[var(--theme-color-danger)]"
+    >
       {{ editTemplateDetailsError() ?? '' | t }}
     </div>
   }
@@ -85,26 +89,16 @@
             />
           </label>
           <label class="filter-label flex-1 min-w-[130px]">
-            <span class="filter-label-text">{{
-              'branchTemplates.isActiveFilter' | t
-            }}</span>
-            <select
-              class="filter-control filter-select"
-              formControlName="isActive"
-            >
+            <span class="filter-label-text">{{ 'branchTemplates.isActiveFilter' | t }}</span>
+            <select class="filter-control filter-select" formControlName="isActive">
               <option value="">{{ 'branchTemplates.allTemplates' | t }}</option>
               <option value="true">{{ 'common.active' | t }}</option>
               <option value="false">{{ 'branches.inactive' | t }}</option>
             </select>
           </label>
           <label class="filter-label flex-1 min-w-[130px]">
-            <span class="filter-label-text">{{
-              'branchTemplates.orderSort' | t
-            }}</span>
-            <select
-              class="filter-control filter-select"
-              formControlName="orderSort"
-            >
+            <span class="filter-label-text">{{ 'branchTemplates.orderSort' | t }}</span>
+            <select class="filter-control filter-select" formControlName="orderSort">
               <option value="">{{ 'branchTemplates.defaultSort' | t }}</option>
               <option value="Newest">{{ 'branchTemplates.newest' | t }}</option>
               <option value="Oldest">{{ 'branchTemplates.oldest' | t }}</option>
@@ -144,7 +138,7 @@
           >
             <tr>
               <th class="px-3 py-2">{{ 'branchTemplates.title' | t }}</th>
-              <th class="px-3 py-2">{{ 'common.status' | t }}</th>
+              <th class="px-3 py-2">{{ 'branchTemplates.lifecycle' | t }}</th>
               <th class="text-center">{{ 'branches.questionsCount' | t }}</th>
               <th class="px-3 py-2">{{ 'common.createdBy' | t }}</th>
               <th class="px-3 py-2">{{ 'branches.createdOn' | t }}</th>
@@ -196,11 +190,6 @@
                   <td class="px-3 py-2">
                     <div class="space-y-2">
                       <div class="flex flex-wrap gap-1.5">
-                        <span
-                          class="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-bold text-slate-600"
-                        >
-                          {{ 'branchTemplates.templateStatusLabel' | t }}: {{ template.status }}
-                        </span>
                         <span
                           class="rounded-full px-2.5 py-1 text-[11px] font-bold"
                           [class.bg-emerald-50]="template.isActive"
@@ -357,7 +346,9 @@
             [routerLink]="[template.templateId]"
           >
             <div class="flex items-start gap-3">
-              <span class="flex shrink-0 items-center justify-center bg-cyan-50 text-[var(--theme-color-accent)]">
+              <span
+                class="flex shrink-0 items-center justify-center bg-cyan-50 text-[var(--theme-color-accent)]"
+              >
                 <app-icon [icon]="fileTextIcon" [size]="18" />
               </span>
               <div class="min-w-0 flex-1">
@@ -378,11 +369,8 @@
 
             <div class="grid gap-2 text-xs text-slate-600 sm:grid-cols-3">
               <div class="rounded-lg bg-slate-50 p-2">
-                <p class="font-bold text-slate-400">{{ 'common.status' | t }}</p>
+                <p class="font-bold text-slate-400">{{ 'branchTemplates.lifecycle' | t }}</p>
                 <div class="mt-1 flex flex-wrap gap-1.5">
-                  <span class="rounded-full bg-slate-100 px-2 py-1 font-bold text-slate-600">
-                    {{ 'branchTemplates.templateStatusLabel' | t }}: {{ template.status }}
-                  </span>
                   <span
                     class="rounded-full px-2 py-1 font-bold"
                     [class.bg-emerald-50]="template.isActive"
@@ -556,7 +544,9 @@
       <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div class="min-w-0">
           <div class="flex items-center gap-2">
-            <span class="flex items-center justify-center bg-cyan-50 text-[var(--theme-color-accent)]">
+            <span
+              class="flex items-center justify-center bg-cyan-50 text-[var(--theme-color-accent)]"
+            >
               <app-icon [icon]="fileTextIcon" [size]="18" />
             </span>
             <div class="min-w-0">
@@ -592,9 +582,6 @@
           }
         </div>
         <div class="flex flex-wrap gap-2">
-          <span class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-600">
-            {{ 'branchTemplates.templateStatusLabel' | t }}: {{ template.status }}
-          </span>
           <span
             class="rounded-full px-2.5 py-1 text-xs font-bold"
             [class.bg-emerald-50]="template.isActive"
@@ -616,10 +603,8 @@
   [open]="createModalOpen()"
   (closed)="closeCreateTemplate()"
   size="lg"
+  [subtitle]="'branchTemplates.createSubtitle' | t"
 >
-  <p class="text-xs font-semibold text-slate-500">
-    {{ 'branchTemplates.createSubtitle' | t }}
-  </p>
   <form class="space-y-3" [formGroup]="templateForm" (ngSubmit)="createTemplate()">
     <div class="grid gap-3 md:grid-cols-2">
       <app-input
@@ -649,7 +634,7 @@
           {{ 'branchTemplates.activeFrom' | t }}
         </span>
         <input
-          class="w-full border px-3.5 py-2.5 text-xs text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[var(--theme-color-accent)] focus:ring-4 focus:ring-[var(--theme-color-accent)]/10 disabled:bg-slate-100"
+          class="h-9 w-full rounded-xl border px-3.5 py-2 text-xs text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15 disabled:bg-slate-100"
           [class.border-[var(--theme-color-danger)]]="templateFieldError('activeFrom').length > 0"
           [class.border-slate-200]="templateFieldError('activeFrom').length === 0"
           type="datetime-local"
@@ -667,7 +652,7 @@
           {{ 'branchTemplates.expireTo' | t }}
         </span>
         <input
-          class="w-full border px-3.5 py-2.5 text-xs text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[var(--theme-color-accent)] focus:ring-4 focus:ring-[var(--theme-color-accent)]/10 disabled:bg-slate-100"
+          class="h-9 w-full rounded-xl border px-3.5 py-2 text-xs text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15 disabled:bg-slate-100"
           [class.border-[var(--theme-color-danger)]]="templateFieldError('expireTo').length > 0"
           [class.border-slate-200]="templateFieldError('expireTo').length === 0"
           type="datetime-local"
@@ -894,7 +879,9 @@
                         formControlName="minLength"
                       />
                       @if (customInputFieldError(inputIndex, 'minLength')) {
-                        <span class="mt-2 block text-xs font-medium text-[var(--theme-color-danger)]">
+                        <span
+                          class="mt-2 block text-xs font-medium text-[var(--theme-color-danger)]"
+                        >
                           {{ customInputFieldError(inputIndex, 'minLength') | t }}
                         </span>
                       }
@@ -918,7 +905,9 @@
                         formControlName="maxLength"
                       />
                       @if (customInputFieldError(inputIndex, 'maxLength')) {
-                        <span class="mt-2 block text-xs font-medium text-[var(--theme-color-danger)]">
+                        <span
+                          class="mt-2 block text-xs font-medium text-[var(--theme-color-danger)]"
+                        >
                           {{ customInputFieldError(inputIndex, 'maxLength') | t }}
                         </span>
                       }
@@ -945,7 +934,9 @@
                         {{ 'branchTemplates.customInputStartWithHint' | t }}
                       </span>
                       @if (customInputFieldError(inputIndex, 'startWith')) {
-                        <span class="mt-2 block text-xs font-medium text-[var(--theme-color-danger)]">
+                        <span
+                          class="mt-2 block text-xs font-medium text-[var(--theme-color-danger)]"
+                        >
                           {{ customInputFieldError(inputIndex, 'startWith') | t }}
                         </span>
                       }
@@ -969,7 +960,9 @@
                         formControlName="minValue"
                       />
                       @if (customInputFieldError(inputIndex, 'minValue')) {
-                        <span class="mt-2 block text-xs font-medium text-[var(--theme-color-danger)]">
+                        <span
+                          class="mt-2 block text-xs font-medium text-[var(--theme-color-danger)]"
+                        >
                           {{ customInputFieldError(inputIndex, 'minValue') | t }}
                         </span>
                       }
@@ -991,7 +984,9 @@
                         formControlName="maxValue"
                       />
                       @if (customInputFieldError(inputIndex, 'maxValue')) {
-                        <span class="mt-2 block text-xs font-medium text-[var(--theme-color-danger)]">
+                        <span
+                          class="mt-2 block text-xs font-medium text-[var(--theme-color-danger)]"
+                        >
                           {{ customInputFieldError(inputIndex, 'maxValue') | t }}
                         </span>
                       }
@@ -1005,7 +1000,9 @@
       }
     </section>
 
-    <div class="grid grid-cols-1 gap-2 sm:flex sm:flex-wrap sm:justify-end">
+    <div
+      class="sticky bottom-0 -mx-4 -mb-4 mt-4 flex items-center justify-end gap-2 border-t border-slate-100 bg-white/95 px-4 py-3 backdrop-blur-sm sm:-mx-5 sm:-mb-5 sm:px-5 z-10"
+    >
       <app-button type="button" variant="secondary" (pressed)="closeCreateTemplate()">
         {{ 'common.cancel' | t }}
       </app-button>
@@ -1021,6 +1018,7 @@
   [title]="'branchTemplates.updateTitle' | t"
   [open]="editModalOpen()"
   (closed)="closeEditTemplate()"
+  size="lg"
 >
   <form class="space-y-3" [formGroup]="editTemplateForm" (ngSubmit)="updateSelectedTemplate()">
     <div class="grid gap-3 md:grid-cols-2">
@@ -1051,8 +1049,10 @@
           {{ 'branchTemplates.activeFrom' | t }}
         </span>
         <input
-          class="w-full border px-3.5 py-2.5 text-xs text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[var(--theme-color-accent)] focus:ring-4 focus:ring-[var(--theme-color-accent)]/10 disabled:bg-slate-100"
-          [class.border-[var(--theme-color-danger)]]="editTemplateFieldError('activeFrom').length > 0"
+          class="h-9 w-full rounded-xl border px-3.5 py-2 text-xs text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15 disabled:bg-slate-100"
+          [class.border-[var(--theme-color-danger)]]="
+            editTemplateFieldError('activeFrom').length > 0
+          "
           [class.border-slate-200]="editTemplateFieldError('activeFrom').length === 0"
           type="datetime-local"
           formControlName="activeFrom"
@@ -1069,7 +1069,7 @@
           {{ 'branchTemplates.expireTo' | t }}
         </span>
         <input
-          class="w-full border px-3.5 py-2.5 text-xs text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[var(--theme-color-accent)] focus:ring-4 focus:ring-[var(--theme-color-accent)]/10 disabled:bg-slate-100"
+          class="h-9 w-full rounded-xl border px-3.5 py-2 text-xs text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15 disabled:bg-slate-100"
           [class.border-[var(--theme-color-danger)]]="editTemplateFieldError('expireTo').length > 0"
           [class.border-slate-200]="editTemplateFieldError('expireTo').length === 0"
           type="datetime-local"
@@ -1302,7 +1302,9 @@
                         formControlName="minLength"
                       />
                       @if (editCustomInputFieldError(inputIndex, 'minLength')) {
-                        <span class="mt-2 block text-xs font-medium text-[var(--theme-color-danger)]">
+                        <span
+                          class="mt-2 block text-xs font-medium text-[var(--theme-color-danger)]"
+                        >
                           {{ editCustomInputFieldError(inputIndex, 'minLength') | t }}
                         </span>
                       }
@@ -1326,7 +1328,9 @@
                         formControlName="maxLength"
                       />
                       @if (editCustomInputFieldError(inputIndex, 'maxLength')) {
-                        <span class="mt-2 block text-xs font-medium text-[var(--theme-color-danger)]">
+                        <span
+                          class="mt-2 block text-xs font-medium text-[var(--theme-color-danger)]"
+                        >
                           {{ editCustomInputFieldError(inputIndex, 'maxLength') | t }}
                         </span>
                       }
@@ -1353,7 +1357,9 @@
                         {{ 'branchTemplates.customInputStartWithHint' | t }}
                       </span>
                       @if (editCustomInputFieldError(inputIndex, 'startWith')) {
-                        <span class="mt-2 block text-xs font-medium text-[var(--theme-color-danger)]">
+                        <span
+                          class="mt-2 block text-xs font-medium text-[var(--theme-color-danger)]"
+                        >
                           {{ editCustomInputFieldError(inputIndex, 'startWith') | t }}
                         </span>
                       }
@@ -1377,7 +1383,9 @@
                         formControlName="minValue"
                       />
                       @if (editCustomInputFieldError(inputIndex, 'minValue')) {
-                        <span class="mt-2 block text-xs font-medium text-[var(--theme-color-danger)]">
+                        <span
+                          class="mt-2 block text-xs font-medium text-[var(--theme-color-danger)]"
+                        >
                           {{ editCustomInputFieldError(inputIndex, 'minValue') | t }}
                         </span>
                       }
@@ -1399,7 +1407,9 @@
                         formControlName="maxValue"
                       />
                       @if (editCustomInputFieldError(inputIndex, 'maxValue')) {
-                        <span class="mt-2 block text-xs font-medium text-[var(--theme-color-danger)]">
+                        <span
+                          class="mt-2 block text-xs font-medium text-[var(--theme-color-danger)]"
+                        >
                           {{ editCustomInputFieldError(inputIndex, 'maxValue') | t }}
                         </span>
                       }
@@ -1413,7 +1423,9 @@
       }
     </section>
 
-    <div class="grid grid-cols-1 gap-2 sm:flex sm:flex-wrap sm:justify-end">
+    <div
+      class="sticky bottom-0 -mx-4 -mb-4 mt-4 flex items-center justify-end gap-2 border-t border-slate-100 bg-white/95 px-4 py-3 backdrop-blur-sm sm:-mx-5 sm:-mb-5 sm:px-5 z-10"
+    >
       <app-button type="button" variant="secondary" (pressed)="closeEditTemplate()">
         {{ 'common.cancel' | t }}
       </app-button>

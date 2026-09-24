@@ -2,27 +2,29 @@ import { DatePipe, DecimalPipe, NgTemplateOutlet } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, input, output } from '@angular/core';
 import {
   Calendar,
+  ChartColumnIncreasing,
+  CheckCircle2,
   CircleGauge,
   FileText,
   Hash,
   Image as ImageIcon,
+  ListChecks,
+  MessageSquareText,
   Mic,
+  Star,
   UserRound,
 } from 'lucide-angular';
 import { environment } from '../../../../../../../environments/environment';
 import { I18nService } from '../../../../../../core/services/i18n.service';
 import { TranslatePipe } from '../../../../../../shared/pipes/translate.pipe';
-import { ButtonComponent } from '../../../../../../shared/ui/button/button.component';
+
 import { IconComponent } from '../../../../../../shared/ui/icon/icon.component';
 import { ModalComponent } from '../../../../../../shared/ui/modal/modal.component';
 import {
   BranchSurveyResponseAnswer,
   BranchSurveyResponseDetails,
+  BranchSurveyResponseScore,
 } from '../../../domain/branch-dashboard.model';
-
-interface ScaleSlot {
-  readonly index: number;
-}
 
 interface BranchResponseAnswerTreeNode {
   readonly answer: BranchSurveyResponseAnswer;
@@ -33,7 +35,7 @@ interface BranchResponseAnswerTreeNode {
   selector: 'app-branch-response-details-modal',
   standalone: true,
   imports: [
-    ButtonComponent,
+
     DatePipe,
     DecimalPipe,
     IconComponent,
@@ -58,19 +60,19 @@ export class BranchResponseDetailsModalComponent {
   );
 
   readonly calendarIcon = Calendar;
+  readonly chartIcon = ChartColumnIncreasing;
+  readonly checkCircleIcon = CheckCircle2;
   readonly fileIcon = FileText;
   readonly gaugeIcon = CircleGauge;
   readonly hashIcon = Hash;
   readonly imageIcon = ImageIcon;
+  readonly listChecksIcon = ListChecks;
+  readonly messageIcon = MessageSquareText;
   readonly micIcon = Mic;
+  readonly starIcon = Star;
   readonly userIcon = UserRound;
-  readonly scaleSlots: readonly ScaleSlot[] = [
-    { index: 1 },
-    { index: 2 },
-    { index: 3 },
-    { index: 4 },
-    { index: 5 },
-  ];
+
+  readonly scaleSlots = [1, 2, 3, 4, 5];
 
   templateName(details: BranchSurveyResponseDetails): string {
     return this.localized(details.templateNameEn, details.templateNameAr);
@@ -86,6 +88,43 @@ export class BranchResponseDetailsModalComponent {
 
   selectedOptionText(answer: BranchSurveyResponseAnswer): string {
     return this.localized(answer.selectedOptionTextEn ?? '', answer.selectedOptionTextAr);
+  }
+
+  scoreBadgeLabel(score: BranchSurveyResponseScore): string {
+    if (!score.isScored) {
+      return this.i18n.translate('branchResponseDetails.unscored');
+    }
+    const percent = score.scorePercentage ?? 0;
+    return `${this.i18n.translate('branchResponseDetails.scored')} - ${percent.toFixed(1)}%`;
+  }
+
+  questionTypeLabel(answer: BranchSurveyResponseAnswer): string {
+    if (answer.questionTypeName) {
+      return answer.questionTypeName;
+    }
+    switch (answer.questionType) {
+      case 'SingleChoice':
+        return this.i18n.translate('questions.typeSingleChoice');
+      case 'StarRating':
+        return this.i18n.translate('questions.typeStarRating');
+      case 'Smiles':
+        return this.i18n.translate('questions.typeSmiles');
+      case 'Complain':
+        return this.i18n.translate('questions.typeComplain');
+      case 'Voice':
+        return this.i18n.translate('questions.typeVoice');
+      case 'Image':
+        return this.i18n.translate('questions.typeImage');
+      default:
+        return answer.questionType;
+    }
+  }
+
+  customInputTypeLabel(typeName: string): string {
+    if (typeName.toLowerCase().includes('int') || typeName.toLowerCase().includes('num')) {
+      return this.i18n.translate('surveyDashboard.typeInteger');
+    }
+    return this.i18n.translate('surveyDashboard.typeString');
   }
 
   displayAnswer(answer: BranchSurveyResponseAnswer): string {
@@ -112,8 +151,8 @@ export class BranchResponseDetailsModalComponent {
     return answer.voiceFileName || answer.displayValue || this.i18n.translate('branchReports.voice');
   }
 
-  isActiveScaleSlot(slot: ScaleSlot, value: number | null): boolean {
-    return slot.index <= (value ?? 0);
+  isStarActive(slot: number, value: number | null): boolean {
+    return slot <= (value ?? 0);
   }
 
   voiceUrl(answer: BranchSurveyResponseAnswer): string {
@@ -124,7 +163,7 @@ export class BranchResponseDetailsModalComponent {
     return this.toMediaUrl(answer.imageFileUrl);
   }
 
-  private localized(englishText: string, arabicText: string | null | undefined): string {
+  localized(englishText: string, arabicText: string | null | undefined): string {
     if (this.i18n.language() === 'ar') {
       return arabicText || englishText || '-';
     }

@@ -470,7 +470,6 @@ export class BranchTemplateQuestionsPageComponent implements OnInit {
       branchId: '',
       templateNameEn: '',
       templateNameAr: '',
-      status: 'Draft',
       isActive: true,
       groups: [],
       questionConditions: [],

@@ -1,17 +1,28 @@
 @if (open()) {
   <div
-    class="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/45 p-2 backdrop-blur-[2px] sm:items-center"
+    class="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/50 p-2 backdrop-blur-[3px] transition-opacity duration-200 sm:items-center sm:p-4"
+    (click)="onBackdropClick($event)"
   >
     <section
-      class="max-h-[calc(100dvh-1rem)] w-full overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-2xl shadow-slate-950/20 sm:max-h-[calc(100dvh-2rem)]"
+      role="dialog"
+      aria-modal="true"
+      [attr.aria-label]="title()"
+      class="flex max-h-[calc(100dvh-2rem)] w-full flex-col overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-2xl shadow-slate-950/25 transition-all duration-200 sm:max-h-[calc(100dvh-3.5rem)]"
+      [class.max-w-md]="size() === 'sm'"
       [class.max-w-xl]="size() === 'md'"
       [class.max-w-4xl]="size() === 'lg'"
       [class.max-w-5xl]="size() === 'xl'"
+      [class.max-w-6xl]="size() === '2xl'"
     >
       <header
-        class="flex items-center justify-between gap-3 border-b border-slate-100 bg-white px-5 py-3.5"
+        class="flex shrink-0 items-center justify-between gap-3 border-b border-slate-100 bg-white px-5 py-3.5 sm:px-6 sm:py-4"
       >
-        <h2 class="min-w-0 text-base font-bold leading-6 text-slate-900">{{ title() }}</h2>
+        <div class="min-w-0">
+          <h2 class="truncate text-base font-extrabold leading-6 text-slate-900">{{ title() }}</h2>
+          @if (subtitle()) {
+            <p class="mt-0.5 truncate text-xs font-semibold text-slate-500">{{ subtitle() }}</p>
+          }
+        </div>
         <button
           type="button"
           class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 focus:outline-none focus:ring-2 focus:ring-[var(--theme-focus-ring)]"
@@ -29,7 +40,7 @@
           </svg>
         </button>
       </header>
-      <div class="max-h-[calc(100dvh-5.5rem)] overflow-y-auto custom-scrollbar p-4 sm:p-5">
+      <div class="min-h-0 flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-5">
         <ng-content />
       </div>
     </section>

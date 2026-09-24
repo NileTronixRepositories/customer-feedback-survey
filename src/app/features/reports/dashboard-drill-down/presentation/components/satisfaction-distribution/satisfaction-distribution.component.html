@@ -1,0 +1,29 @@
+<section class="distribution" [attr.aria-label]="'dashboardDrillDown.satisfactionDistribution' | t">
+  <div class="distribution-chart" role="img" [attr.aria-label]="'dashboardDrillDown.chartDescription' | t">
+    <div class="distribution-chart__ring" [style.background]="chartBackground()">
+      <div class="distribution-chart__center">
+        <strong>{{ normalizedItems()[0].responsesCount + normalizedItems()[1].responsesCount + normalizedItems()[2].responsesCount }}</strong>
+        <span>{{ 'dashboardDrillDown.scoredResponses' | t }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="distribution-list">
+    @for (item of normalizedItems(); track item.category) {
+      <button
+        class="distribution-item"
+        type="button"
+        [disabled]="!isActionable(item)"
+        [attr.aria-label]="(categoryKey(item.category) | t) + ': ' + item.percentage + '%, ' + item.responsesCount"
+        (click)="select(item)"
+      >
+        <span class="distribution-item__label">
+          <span class="distribution-key" [class]="categoryClass(item.category)"></span>
+          {{ categoryKey(item.category) | t }}
+        </span>
+        <strong>{{ item.percentage | number: '1.0-2' }}%</strong>
+        <span>{{ item.responsesCount | number }} {{ 'dashboardDrillDown.responses' | t }}</span>
+      </button>
+    }
+  </div>
+</section>

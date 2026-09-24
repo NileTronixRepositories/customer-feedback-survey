@@ -295,6 +295,7 @@ export class OperatorsService {
       branchNameEn: response.branchNameEn ?? '',
       branchNameAr: response.branchNameAr ?? '',
       branchCode: response.branchCode ?? '',
+      logoPath: response.logoPath ?? null,
       isSelected: response.isSelected ?? false,
       questionsCount: response.questionsCount ?? questions.length,
       questions,

@@ -1,0 +1,10 @@
+:host { display: block; }
+.summary-actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .5rem; }
+button { display: flex; min-width: 0; align-items: center; justify-content: space-between; gap: .75rem; border: 0; border-radius: .75rem; background: #f8fafc; padding: .75rem; color: #475569; text-align: start; transition: background-color 160ms ease-out; }
+button:not(:disabled) { cursor: pointer; }
+button:not(:disabled):hover { background: #f1f5f9; }
+button:focus-visible { outline: 3px solid color-mix(in srgb, var(--primary, #2563eb) 32%, transparent); outline-offset: 2px; }
+button:disabled { opacity: .65; }
+span { min-width: 0; overflow-wrap: anywhere; font-size: .75rem; font-weight: 700; }
+strong { color: #0f172a; font-size: 1rem; font-variant-numeric: tabular-nums; }
+@media (max-width: 540px) { .summary-actions { grid-template-columns: 1fr; } }

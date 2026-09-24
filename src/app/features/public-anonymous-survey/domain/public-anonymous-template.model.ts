@@ -12,6 +12,8 @@ export type PublicQuestionKind =
 export interface PublicAnonymousTemplate extends ScopeState {
   anonymousTemplateId: string;
   branchId: string | null;
+  branch: PublicAnonymousTemplateBranch | null;
+  logoPath: string | null;
   nameEn: string;
   nameAr: string | null;
   description: string | null;
@@ -21,6 +23,12 @@ export interface PublicAnonymousTemplate extends ScopeState {
   questions: readonly PublicAnonymousTemplateQuestion[];
   questionConditions: readonly PublicAnonymousTemplateQuestionCondition[];
   rootAnonymousTemplateQuestionIds: readonly string[];
+}
+
+export interface PublicAnonymousTemplateBranch {
+  branchId: string;
+  nameEn: string;
+  nameAr: string | null;
 }
 
 export interface PublicAnonymousTemplateCustomInput {
@@ -77,6 +85,8 @@ export interface PublicAnonymousTemplateQuestionCondition {
 export interface PublicAnonymousTemplateApiResponse extends ScopeApiFields {
   anonymousTemplateId?: string | number;
   branchId?: string | number | null;
+  branch?: PublicAnonymousTemplateBranchApiResponse | null;
+  logoPath?: string | null;
   nameEn?: string | null;
   nameAr?: string | null;
   description?: string | null;
@@ -86,6 +96,12 @@ export interface PublicAnonymousTemplateApiResponse extends ScopeApiFields {
   questions?: readonly PublicAnonymousTemplateQuestionApiResponse[];
   questionConditions?: readonly PublicAnonymousTemplateQuestionConditionApiResponse[];
   rootAnonymousTemplateQuestionIds?: readonly (string | number)[];
+}
+
+export interface PublicAnonymousTemplateBranchApiResponse {
+  branchId?: string | number;
+  nameEn?: string | null;
+  nameAr?: string | null;
 }
 
 export interface PublicAnonymousTemplateCustomInputApiResponse {

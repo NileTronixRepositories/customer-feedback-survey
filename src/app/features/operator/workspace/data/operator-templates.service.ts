@@ -92,6 +92,7 @@ export class OperatorTemplatesService {
       branchNameEn: response.branchNameEn ?? '',
       branchNameAr: response.branchNameAr ?? '',
       branchCode: response.branchCode ?? '',
+      logoPath: response.logoPath ?? null,
       activeFrom: response.activeFrom ?? '',
       expireTo: response.expireTo ?? null,
       isActive: response.isActive ?? true,

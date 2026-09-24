@@ -113,7 +113,7 @@ export interface BranchDetailsTemplate {
   nameEn: string;
   nameAr: string;
   description: string;
-  status: string;
+  logoPath: string | null;
   questionsCount: number;
 }
 
@@ -254,7 +254,7 @@ export interface BranchDetailsTemplateApiResponse {
   nameEn?: string;
   nameAr?: string | null;
   description?: string | null;
-  status?: string;
+  logoPath?: string | null;
   questionsCount?: number;
 }
 

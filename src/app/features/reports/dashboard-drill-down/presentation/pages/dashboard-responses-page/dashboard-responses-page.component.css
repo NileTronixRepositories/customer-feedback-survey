@@ -1,0 +1,94 @@
+/* Dashboard Responses Page Styles */
+
+:host {
+  display: block;
+  width: 100%;
+}
+
+/* Source Badges */
+.source-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 0.5rem;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.7rem;
+  font-weight: 800;
+  white-space: nowrap;
+  background: #ecfeff;
+  color: #0e7490;
+  border: 1px solid rgba(6, 182, 212, 0.2);
+}
+
+.source-badge--anonymous {
+  background: #f5f3ff;
+  color: #6d28d9;
+  border: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+/* Score Badges */
+.score-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 0.5rem;
+  padding: 0.25rem 0.65rem;
+  font-size: 0.75rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.score-badge--positive {
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.score-badge--neutral {
+  background: #fffbeb;
+  color: #b45309;
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.score-badge--negative {
+  background: #fff1f2;
+  color: #be123c;
+  border: 1px solid rgba(244, 63, 94, 0.2);
+}
+
+.score-badge--empty {
+  background: #f1f5f9;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+}
+
+/* Custom Scrollbar for Table */
+.overflow-x-auto {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(203, 213, 225, 0.6) transparent;
+}
+
+.overflow-x-auto::-webkit-scrollbar {
+  height: 6px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb {
+  background-color: rgba(203, 213, 225, 0.7);
+  border-radius: 9999px;
+}
+
+
+
+/* Spinner Loader */
+.loader {
+  width: 2rem;
+  height: 2rem;
+  border: 3px solid rgba(20, 132, 150, 0.2);
+  border-top-color: var(--theme-color-primary, #148496);
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

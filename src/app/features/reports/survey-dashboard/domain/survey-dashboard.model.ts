@@ -3,12 +3,18 @@ import {
   QuestionAnswerTypeInput,
 } from '../../../../shared/models/question-answer.model';
 import { QuestionCondition } from '../../../../shared/models/question-condition.model';
+import {
+  DashboardCharts,
+  DashboardDetailsNavigation,
+  DashboardSummaryActions,
+} from '../../dashboard-drill-down/domain/dashboard-drill-down.model';
 
 export type SurveyDashboardSource = 'All' | 'Internal' | 'Anonymous';
 export type SurveyDashboardGroupBy = 'Day' | 'Month';
 export type SurveyDashboardRiskLevel = 'Healthy' | 'MediumRisk' | 'HighRisk' | string;
 export type SurveyDashboardTemplateKind = 'Authorized' | 'Anonymous';
 export type SurveyDashboardTemplateDashboardSource = 'Internal' | 'Anonymous';
+export type SurveyDashboardScoreCalculationMode = 'RootQuestions' | 'LowestConditionLevel';
 
 export interface SurveyDashboardQuery {
   branchId?: string;
@@ -18,6 +24,7 @@ export interface SurveyDashboardQuery {
   from?: string;
   to?: string;
   groupBy?: SurveyDashboardGroupBy;
+  scoreCalculationMode?: SurveyDashboardScoreCalculationMode;
   topQuestionsCount?: number;
   criticalResponsesCount?: number;
   criticalScoreThreshold?: number;
@@ -29,11 +36,7 @@ export interface SurveyDashboardTemplatesSelectionQuery {
   templateKind?: SurveyDashboardTemplateKind;
 }
 
-export interface SurveyDashboardNavigation {
-  routeType: string;
-  method: string;
-  path: string;
-}
+export type SurveyDashboardNavigation = DashboardDetailsNavigation;
 
 export interface SurveyDashboardResponse {
   period: SurveyDashboardPeriod;
@@ -41,6 +44,8 @@ export interface SurveyDashboardResponse {
   filters: SurveyDashboardAppliedFilters;
   appliedFilters: SurveyDashboardAppliedFilters;
   summary: SurveyDashboardSummary;
+  charts: DashboardCharts;
+  summaryActions: DashboardSummaryActions;
   sourceBreakdown: SurveyDashboardSourceBreakdown;
   branchesSummary: readonly SurveyDashboardBranchSummary[];
   satisfactionTrend: readonly SurveyDashboardTrendPoint[];
@@ -74,6 +79,7 @@ export interface SurveyDashboardAppliedFilters {
   from: string | null;
   to: string | null;
   groupBy: SurveyDashboardGroupBy;
+  scoreCalculationMode: SurveyDashboardScoreCalculationMode;
   topQuestionsCount: number;
   criticalResponsesCount: number;
   criticalScoreThreshold: number;
@@ -114,6 +120,7 @@ export interface SurveyDashboardSourceMetrics {
   unhappyResponses: number;
   complaintsCount: number;
   voiceAnswersCount: number;
+  detailsNavigation: SurveyDashboardNavigation | null;
 }
 
 export interface SurveyDashboardBranchSummary {
@@ -137,6 +144,7 @@ export interface SurveyDashboardTrendPoint {
   averageScorePercentage: number | null;
   internalAverageScorePercentage: number | null;
   anonymousAverageScorePercentage: number | null;
+  detailsNavigation: SurveyDashboardNavigation | null;
 }
 
 export interface SurveyDashboardTemplatePerformance {
@@ -252,7 +260,6 @@ export interface SurveyDashboardTemplateDetails {
   nameEn: string;
   nameAr: string | null;
   description: string | null;
-  status: string;
   isActive: boolean;
   activeFrom: string;
   expireTo: string | null;

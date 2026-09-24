@@ -34,6 +34,10 @@ import {
   Clock,
   Activity,
   Building2,
+  ExternalLink,
+  Globe,
+  HelpCircle,
+  Sliders,
 } from 'lucide-angular';
 import { AuthStore } from '../../../../auth/presentation/state/auth.store';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
@@ -42,6 +46,7 @@ import { IconComponent } from '../../../../../shared/ui/icon/icon.component';
 import { InputComponent } from '../../../../../shared/ui/input/input.component';
 import { ModalComponent } from '../../../../../shared/ui/modal/modal.component';
 import { I18nService } from '../../../../../core/services/i18n.service';
+import { resolveMediaUrl } from '../../../../../shared/utils/media-url.util';
 import {
   AnonymousTemplate,
   AnonymousTemplateCustomInputType,
@@ -131,6 +136,10 @@ export class AnonymousTemplateDetailsPageComponent implements OnInit {
   readonly clockIcon = Clock;
   readonly activityIcon = Activity;
   readonly buildingIcon = Building2;
+  readonly globeIcon = Globe;
+  readonly slidersIcon = Sliders;
+  readonly helpCircleIcon = HelpCircle;
+  readonly externalLinkIcon = ExternalLink;
   readonly copiedPublicUrl = signal(false);
   readonly editModalOpen = signal(false);
   private readonly openEditFromRoute = signal(false);
@@ -143,6 +152,9 @@ export class AnonymousTemplateDetailsPageComponent implements OnInit {
   );
   readonly canViewResponses = computed(() =>
     this.authStore.canManageAnonymousTemplates('ViewResponses'),
+  );
+  readonly canCopyBetweenTypes = computed(() =>
+    this.authStore.hasPermission('Templates.CopyBetweenTypes'),
   );
 
   readonly editForm = this.formBuilder.nonNullable.group({
@@ -305,7 +317,11 @@ export class AnonymousTemplateDetailsPageComponent implements OnInit {
   }
 
   canUpdateTemplate(template: AnonymousTemplate): boolean {
-    if (!this.canUpdate() || !template.isActive) {
+    if (
+      !this.canUpdate() ||
+      template.isManagedGlobalCopy ||
+      (template.isGlobal ? template.isArchived : !template.isActive)
+    ) {
       return false;
     }
 
@@ -323,7 +339,8 @@ export class AnonymousTemplateDetailsPageComponent implements OnInit {
   canManageQuestions(template: AnonymousTemplate): boolean {
     if (
       (!this.canAssignQuestions() && !this.canManageQuestionConditions()) ||
-      !template.isActive
+      template.isManagedGlobalCopy ||
+      (template.isGlobal ? template.isArchived : !template.isActive)
     ) {
       return false;
     }
@@ -343,7 +360,7 @@ export class AnonymousTemplateDetailsPageComponent implements OnInit {
   }
 
   canViewTemplateResponses(template: AnonymousTemplate): boolean {
-    if (!this.canViewResponses()) {
+    if (!this.canViewResponses() || template.isGlobal) {
       return false;
     }
 
@@ -356,6 +373,38 @@ export class AnonymousTemplateDetailsPageComponent implements OnInit {
     }
 
     return this.authStore.hasPermission('AnonymousTemplates.ViewResponses');
+  }
+
+  lifecycleLabelKey(template: AnonymousTemplate): string {
+    if (template.isGlobal) {
+      return template.isArchived ? 'superAdminTemplates.archived' : 'superAdminTemplates.available';
+    }
+    return template.isActive ? 'common.active' : 'branches.inactive';
+  }
+
+  logoUrl(template: AnonymousTemplate): string | null {
+    return resolveMediaUrl(template.logoPath);
+  }
+
+  copyAsAuthorized(template: AnonymousTemplate): void {
+    if (
+      this.canCopyBetweenTypes() &&
+      template.isActive &&
+      !template.isGlobal &&
+      !template.isManagedGlobalCopy
+    ) {
+      this.anonymousTemplatesStore.copyAsAuthorized(template.anonymousTemplateId);
+    }
+  }
+
+  onLogoSelected(template: AnonymousTemplate, event: Event): void {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (!file || !/\.(?:jpe?g|png|webp)$/i.test(file.name) || file.size > 5 * 1024 * 1024) return;
+    this.anonymousTemplatesStore.uploadLogo(template.anonymousTemplateId, file);
+  }
+
+  removeLogo(template: AnonymousTemplate): void {
+    if (template.logoPath) this.anonymousTemplatesStore.deleteLogo(template.anonymousTemplateId);
   }
 
   templateFieldError(field: AnonymousTemplateFieldName): string {
@@ -428,7 +477,8 @@ export class AnonymousTemplateDetailsPageComponent implements OnInit {
     return 'branchTemplates.fieldRequired';
   }
 
-  copyPublicUrl(publicUrl: string): void {
+  copyPublicUrl(publicUrl: string | null): void {
+    if (!publicUrl) return;
     if (!publicUrl) {
       return;
     }
@@ -455,7 +505,10 @@ export class AnonymousTemplateDetailsPageComponent implements OnInit {
     return this.localizedText(template.nameEn, template.nameAr);
   }
 
-  branchDisplayName(template: { branchNameEn: string | null; branchNameAr: string | null }): string {
+  branchDisplayName(template: {
+    branchNameEn: string | null;
+    branchNameAr: string | null;
+  }): string {
     return this.localizedText(template.branchNameEn, template.branchNameAr);
   }
 
@@ -551,7 +604,10 @@ export class AnonymousTemplateDetailsPageComponent implements OnInit {
       return isArabic ? 'اختيار واحد' : 'Single choice';
     }
 
-    if (normalizedTypeName === 'singlechoiceoption' || normalizedTypeName === 'single choice option') {
+    if (
+      normalizedTypeName === 'singlechoiceoption' ||
+      normalizedTypeName === 'single choice option'
+    ) {
       return isArabic ? 'اختيار محدد' : 'Selected option';
     }
 
@@ -657,13 +713,13 @@ export class AnonymousTemplateDetailsPageComponent implements OnInit {
           labelAr: customInput.labelAr ?? '',
           type: customInput.type,
           isRequired: customInput.isRequired,
-        minLength: customInput.minLength,
-        maxLength: customInput.maxLength,
-        minValue: customInput.minValue,
-        maxValue: customInput.maxValue,
-        startWith: customInput.startWith ?? '',
-        order: customInput.order,
-      }),
+          minLength: customInput.minLength,
+          maxLength: customInput.maxLength,
+          minValue: customInput.minValue,
+          maxValue: customInput.maxValue,
+          startWith: customInput.startWith ?? '',
+          order: customInput.order,
+        }),
       );
     });
   }

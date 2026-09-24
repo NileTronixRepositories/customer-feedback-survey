@@ -134,7 +134,8 @@ export class BranchAdminBranchService {
       nameEn: response.nameEn ?? '',
       nameAr: response.nameAr ?? '',
       description: response.description ?? '',
-      status: response.status ?? '',
+      logoPath: response.logoPath ?? null,
+      isActive: response.isActive ?? true,
       questionsCount: response.questionsCount ?? 0,
     };
   }

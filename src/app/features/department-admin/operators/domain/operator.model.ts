@@ -119,6 +119,7 @@ export interface OperatorTemplateSelectionItem {
   branchNameEn: string;
   branchNameAr: string;
   branchCode: string;
+  logoPath: string | null;
   isSelected: boolean;
   questionsCount: number;
   questions: readonly OperatorTemplateQuestionSelectionItem[];
@@ -229,6 +230,7 @@ export interface OperatorTemplateSelectionApiResponse {
   branchNameEn?: string;
   branchNameAr?: string | null;
   branchCode?: string | null;
+  logoPath?: string | null;
   isSelected?: boolean;
   questionsCount?: number;
   questions?: readonly OperatorTemplateQuestionSelectionApiResponse[];

@@ -90,6 +90,7 @@ export class AnonymousTemplatesStore {
   private readonly restoringSignal = signal(false);
   private readonly errorSignal = signal<string | null>(null);
   private readonly successSignal = signal<string | null>(null);
+  private readonly assetActionSignal = signal(false);
 
   readonly templates = this.templatesSignal.asReadonly();
   readonly currentPage = this.currentPageSignal.asReadonly();
@@ -104,6 +105,7 @@ export class AnonymousTemplatesStore {
   readonly selectedTemplate = this.selectedTemplateSignal.asReadonly();
   readonly detailsLoading = this.detailsLoadingSignal.asReadonly();
   readonly detailsError = this.detailsErrorSignal.asReadonly();
+  readonly assetActionLoading = this.assetActionSignal.asReadonly();
   readonly responses = this.responsesSignal.asReadonly();
   readonly responsesCurrentPage = this.responsesCurrentPageSignal.asReadonly();
   readonly responsesPageSize = this.responsesPageSizeSignal.asReadonly();
@@ -222,6 +224,51 @@ export class AnonymousTemplatesStore {
           this.errorSignal.set(this.readRestoreErrorKey(error));
         },
       });
+  }
+
+  copyAsAuthorized(anonymousTemplateId: string): void {
+    if (this.assetActionSignal()) return;
+    this.assetActionSignal.set(true);
+    this.errorSignal.set(null);
+    this.anonymousTemplatesService.copyAsAuthorized(anonymousTemplateId).pipe(
+      take(1),
+      finalize(() => this.assetActionSignal.set(false)),
+    ).subscribe({
+      next: () => this.successSignal.set('anonymousTemplates.copyAsAuthorizedSuccess'),
+      error: (error: unknown) => this.errorSignal.set(this.readUpdateErrorKey(error)),
+    });
+  }
+
+  uploadLogo(anonymousTemplateId: string, logo: File): void {
+    if (this.assetActionSignal()) return;
+    this.assetActionSignal.set(true);
+    this.errorSignal.set(null);
+    this.anonymousTemplatesService.uploadLogo(anonymousTemplateId, logo).pipe(
+      take(1),
+      finalize(() => this.assetActionSignal.set(false)),
+    ).subscribe({
+      next: (template) => {
+        this.selectedTemplateSignal.set(template);
+        this.successSignal.set('anonymousTemplates.logoUploadSuccess');
+      },
+      error: (error: unknown) => this.errorSignal.set(this.readUpdateErrorKey(error)),
+    });
+  }
+
+  deleteLogo(anonymousTemplateId: string): void {
+    if (this.assetActionSignal()) return;
+    this.assetActionSignal.set(true);
+    this.errorSignal.set(null);
+    this.anonymousTemplatesService.deleteLogo(anonymousTemplateId).pipe(
+      take(1),
+      finalize(() => this.assetActionSignal.set(false)),
+    ).subscribe({
+      next: (template) => {
+        this.selectedTemplateSignal.set(template);
+        this.successSignal.set('anonymousTemplates.logoDeleteSuccess');
+      },
+      error: (error: unknown) => this.errorSignal.set(this.readUpdateErrorKey(error)),
+    });
   }
 
   updateTemplate(
@@ -626,22 +673,14 @@ export class AnonymousTemplatesStore {
     this.templatesSignal.update((templates) =>
       templates.map((template) =>
         template.anonymousTemplateId === stateChange.anonymousTemplateId
-          ? {
-              ...template,
-              ...stateChange,
-              statusName: stateChange.statusName || template.statusName,
-            }
+          ? { ...template, ...stateChange }
           : template,
       ),
     );
 
     const selectedTemplate = this.selectedTemplateSignal();
     if (selectedTemplate?.anonymousTemplateId === stateChange.anonymousTemplateId) {
-      this.selectedTemplateSignal.set({
-        ...selectedTemplate,
-        ...stateChange,
-        statusName: stateChange.statusName || selectedTemplate.statusName,
-      });
+      this.selectedTemplateSignal.set({ ...selectedTemplate, ...stateChange });
     }
   }
 

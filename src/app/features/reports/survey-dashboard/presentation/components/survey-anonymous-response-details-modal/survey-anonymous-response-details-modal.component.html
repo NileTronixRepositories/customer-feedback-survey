@@ -1,76 +1,268 @@
-<app-modal [title]="'surveyDashboard.anonymousResponseDetails' | t" [open]="open()" size="lg" (closed)="closed.emit()">
+<app-modal
+  [title]="'surveyDashboard.anonymousResponseDetails' | t"
+  [open]="open()"
+  size="xl"
+  (closed)="closed.emit()"
+>
   @if (loading()) {
-    <div class="space-y-2">
-      <div class="h-16 animate-pulse rounded-lg bg-slate-50"></div>
-      <div class="h-10 animate-pulse rounded-lg bg-slate-50"></div>
-      <div class="h-32 animate-pulse rounded-lg bg-slate-50"></div>
+    <div class="space-y-2.5 p-1">
+      <div class="h-20 animate-pulse rounded-xl bg-slate-100"></div>
+      <div class="grid grid-cols-3 gap-2.5">
+        <div class="h-16 animate-pulse rounded-xl bg-slate-100"></div>
+        <div class="h-16 animate-pulse rounded-xl bg-slate-100"></div>
+        <div class="h-16 animate-pulse rounded-xl bg-slate-100"></div>
+      </div>
+      <div class="h-20 animate-pulse rounded-xl bg-slate-100"></div>
+      <div class="h-28 animate-pulse rounded-xl bg-slate-100"></div>
     </div>
   } @else if (error()) {
-    <div class="rounded-lg border border-rose-100 bg-rose-50 p-3 text-[11px] font-semibold text-rose-700">
-      {{ error() }}
+    <div
+      class="rounded-xl border border-rose-200 bg-rose-50/80 p-3 text-xs font-bold text-rose-800 shadow-2xs flex items-center gap-2"
+    >
+      <svg
+        class="h-4 w-4 text-rose-500 shrink-0"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+        />
+      </svg>
+      <span>{{ error() ?? '' | t }}</span>
     </div>
   } @else if (details(); as response) {
-    <div class="space-y-3 text-[11px]">
-      <header class="rounded-lg border border-slate-200 bg-slate-50/70 px-3 py-2.5">
+    <div class="space-y-2.5 text-xs">
+      <!-- Survey Header Card -->
+      <header
+        class="overflow-hidden rounded-xl border border-slate-200/90 bg-slate-50/40 px-3.5 py-2.5 shadow-2xs"
+      >
         <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
           <div class="min-w-0">
-            <p class="text-[9px] font-black uppercase tracking-wide text-[var(--theme-color-secondary)]">
-              {{ 'surveyDashboard.anonymousResponse' | t }}
-            </p>
-            <h3 class="mt-0.5 break-words text-sm font-black text-slate-950 [overflow-wrap:anywhere]">
+            <div
+              class="inline-flex items-center gap-1 rounded bg-[var(--theme-color-accent-softest)] px-2 py-0.5 text-[10px] font-bold text-[var(--theme-color-secondary)]"
+            >
+              <app-icon [icon]="fileIcon" [size]="11" />
+              <span>{{ 'surveyDashboard.anonymousResponse' | t }}</span>
+            </div>
+            <h3
+              class="mt-1 break-words text-sm sm:text-base font-black text-slate-900 leading-tight [overflow-wrap:anywhere]"
+            >
               {{ responseTitle(response) }}
             </h3>
-            <div class="mt-2 flex flex-wrap gap-x-3 gap-y-1 font-semibold text-slate-500">
-              <span class="inline-flex items-center gap-1">
-                <app-icon [icon]="calendarIcon" [size]="12" />
-                {{ response.submittedOnUtc ? (response.submittedOnUtc | date: 'medium') : '-' }}
-              </span>
-              <span class="inline-flex min-w-0 items-center gap-1">
-                <app-icon [icon]="hashIcon" [size]="12" />
-                <span class="truncate">{{ response.anonymousSurveyResponseId }}</span>
-              </span>
-            </div>
           </div>
 
+          <!-- Status / Health Badge -->
           <span
-            class="inline-flex w-fit shrink-0 rounded-full px-2.5 py-1 text-[10px] font-black"
+            class="inline-flex w-fit shrink-0 items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-extrabold shadow-2xs"
             [class.bg-slate-100]="!response.isScored"
             [class.text-slate-600]="!response.isScored"
+            [class.border]="true"
+            [class.border-slate-200]="!response.isScored"
             [class.bg-emerald-50]="response.isScored && (response.scorePercentage ?? 0) >= 80"
             [class.text-emerald-700]="response.isScored && (response.scorePercentage ?? 0) >= 80"
-            [class.bg-amber-50]="response.isScored && (response.scorePercentage ?? 0) >= 60 && (response.scorePercentage ?? 0) < 80"
-            [class.text-amber-700]="response.isScored && (response.scorePercentage ?? 0) >= 60 && (response.scorePercentage ?? 0) < 80"
+            [class.border-emerald-200]="response.isScored && (response.scorePercentage ?? 0) >= 80"
+            [class.bg-amber-50]="
+              response.isScored &&
+              (response.scorePercentage ?? 0) >= 60 &&
+              (response.scorePercentage ?? 0) < 80
+            "
+            [class.text-amber-700]="
+              response.isScored &&
+              (response.scorePercentage ?? 0) >= 60 &&
+              (response.scorePercentage ?? 0) < 80
+            "
+            [class.border-amber-200]="
+              response.isScored &&
+              (response.scorePercentage ?? 0) >= 60 &&
+              (response.scorePercentage ?? 0) < 80
+            "
             [class.bg-rose-50]="response.isScored && (response.scorePercentage ?? 0) < 60"
             [class.text-rose-700]="response.isScored && (response.scorePercentage ?? 0) < 60"
+            [class.border-rose-200]="response.isScored && (response.scorePercentage ?? 0) < 60"
           >
-            {{ response.isScored ? ((response.scorePercentage ?? 0) | number: '1.0-1') + '%' : ('surveyDashboard.notScored' | t) }}
+            @if (response.isScored) {
+              <span
+                class="h-1.5 w-1.5 rounded-full"
+                [class.bg-emerald-500]="(response.scorePercentage ?? 0) >= 80"
+                [class.bg-amber-500]="
+                  (response.scorePercentage ?? 0) >= 60 && (response.scorePercentage ?? 0) < 80
+                "
+                [class.bg-rose-500]="(response.scorePercentage ?? 0) < 60"
+              ></span>
+            }
+            {{ scoreBadgeLabel(response) }}
           </span>
+        </div>
+
+        <!-- Meta Details Chips -->
+        <div class="mt-2 flex flex-wrap items-center gap-1.5 text-[11px]">
+          <!-- Submitted On -->
+          <div
+            class="inline-flex items-center gap-1 rounded-md border border-slate-200/80 bg-white px-2 py-0.5 text-slate-700 shadow-2xs"
+          >
+            <app-icon class="text-slate-400" [icon]="calendarIcon" [size]="12" />
+            <span class="text-slate-400 font-medium">{{ 'surveyDashboard.submittedOn' | t }}:</span>
+            <span class="font-bold text-slate-800">{{
+              response.submittedOnUtc ? (response.submittedOnUtc | date: 'medium') : '-'
+            }}</span>
+          </div>
+
+          <!-- Response ID -->
+          <div
+            class="inline-flex items-center gap-1 rounded-md border border-slate-200/80 bg-white px-2 py-0.5 text-slate-700 shadow-2xs"
+          >
+            <app-icon class="text-slate-400" [icon]="hashIcon" [size]="12" />
+            <span class="text-slate-400 font-medium">ID:</span>
+            <span class="font-bold text-slate-800">{{ response.anonymousSurveyResponseId }}</span>
+          </div>
         </div>
       </header>
 
-      <section class="rounded-lg border border-slate-200 bg-white">
-        <div class="flex items-center justify-between border-b border-slate-100 px-3 py-2">
+      <!-- KPI Stat Cards (Compact Horizontal Row) -->
+      <section class="grid grid-cols-3 gap-2">
+        <!-- Actual Score -->
+        <div
+          class="flex items-center justify-between rounded-xl border border-slate-200/80 bg-white p-2 sm:p-2.5 shadow-2xs transition-all hover:border-slate-300"
+        >
           <div>
-            <h4 class="text-xs font-black text-slate-950">{{ 'surveyDashboard.customInputs' | t }}</h4>
-            <p class="text-[10px] font-semibold text-slate-500">
-              {{ response.customInputValuesCount }} {{ 'surveyDashboard.submittedFields' | t }}
+            <p class="text-[10px] font-bold uppercase tracking-wide text-slate-400">
+              {{ 'departmentResponseDetails.actualScore' | t }}
+            </p>
+            <p class="text-base sm:text-lg font-black text-slate-900 mt-0.5 leading-none">
+              {{ response.isScored ? response.actualScore : '-' }}
             </p>
           </div>
-          <app-icon class="text-[var(--theme-color-accent)]" [icon]="fileIcon" [size]="15" />
+          <div
+            class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--theme-color-accent-softest)] text-[var(--theme-color-primary)]"
+          >
+            <app-icon [icon]="gaugeIcon" [size]="16" />
+          </div>
+        </div>
+
+        <!-- Max Score -->
+        <div
+          class="flex items-center justify-between rounded-xl border border-slate-200/80 bg-white p-2 sm:p-2.5 shadow-2xs transition-all hover:border-slate-300"
+        >
+          <div>
+            <p class="text-[10px] font-bold uppercase tracking-wide text-slate-400">
+              {{ 'departmentResponseDetails.maxScore' | t }}
+            </p>
+            <p class="text-base sm:text-lg font-black text-slate-900 mt-0.5 leading-none">
+              {{ response.isScored ? response.maxScore : '-' }}
+            </p>
+          </div>
+          <div
+            class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600"
+          >
+            <app-icon [icon]="checkCircleIcon" [size]="16" />
+          </div>
+        </div>
+
+        <!-- Percentage -->
+        <div
+          class="flex flex-col justify-between rounded-xl border border-slate-200/80 bg-white p-2 sm:p-2.5 shadow-2xs transition-all hover:border-slate-300"
+        >
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-[10px] font-bold uppercase tracking-wide text-slate-400">
+                {{ 'departmentResponseDetails.percentage' | t }}
+              </p>
+              <p
+                class="text-base sm:text-lg font-black mt-0.5 leading-none"
+                [class.text-slate-900]="!response.isScored"
+                [class.text-emerald-600]="
+                  response.isScored && (response.scorePercentage ?? 0) >= 80
+                "
+                [class.text-amber-600]="
+                  response.isScored &&
+                  (response.scorePercentage ?? 0) >= 60 &&
+                  (response.scorePercentage ?? 0) < 80
+                "
+                [class.text-rose-600]="
+                  response.isScored && (response.scorePercentage ?? 0) < 60
+                "
+              >
+                {{
+                  response.isScored
+                    ? ((response.scorePercentage ?? 0) | number: '1.0-2') + '%'
+                    : ('surveyDashboard.notScored' | t)
+                }}
+              </p>
+            </div>
+            <div
+              class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
+              [class.bg-slate-100]="!response.isScored"
+              [class.text-slate-600]="!response.isScored"
+              [class.bg-emerald-50]="
+                response.isScored && (response.scorePercentage ?? 0) >= 80
+              "
+              [class.text-emerald-600]="
+                response.isScored && (response.scorePercentage ?? 0) >= 80
+              "
+              [class.bg-amber-50]="
+                response.isScored &&
+                (response.scorePercentage ?? 0) >= 60 &&
+                (response.scorePercentage ?? 0) < 80
+              "
+              [class.text-amber-600]="
+                response.isScored &&
+                (response.scorePercentage ?? 0) >= 60 &&
+                (response.scorePercentage ?? 0) < 80
+              "
+              [class.bg-rose-50]="response.isScored && (response.scorePercentage ?? 0) < 60"
+              [class.text-rose-600]="response.isScored && (response.scorePercentage ?? 0) < 60"
+            >
+              <app-icon [icon]="chartIcon" [size]="16" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Custom Inputs Section (Compact) -->
+      <section class="overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-2xs">
+        <div
+          class="flex items-center justify-between border-b border-slate-100 bg-slate-50/50 px-3 py-1.5"
+        >
+          <div class="flex items-center gap-1.5">
+            <app-icon class="text-[var(--theme-color-primary)]" [icon]="fileIcon" [size]="13" />
+            <h4 class="text-xs font-black text-slate-900">
+              {{ 'surveyDashboard.customInputs' | t }}
+            </h4>
+          </div>
+          <span
+            class="rounded-full bg-slate-100 border border-slate-200/80 px-2 py-0.5 text-[10px] font-bold text-slate-600"
+          >
+            {{ response.customInputValuesCount }} {{ 'surveyDashboard.submittedFields' | t }}
+          </span>
         </div>
 
         @if (response.customInputValues.length === 0) {
-          <p class="px-3 py-3 text-center text-[11px] font-semibold text-slate-500">
-            {{ 'surveyDashboard.noCustomInputsCaptured' | t }}
+          <p class="px-3 py-3 text-center text-[11px] font-semibold text-slate-400">
+            {{ 'surveyDashboard.noCustomInputs' | t }}
           </p>
         } @else {
-          <dl class="divide-y divide-slate-100">
-            @for (input of response.customInputValues; track input.customInputValueId || input.name) {
-              <div class="grid gap-1 px-3 py-2 sm:grid-cols-[11rem_minmax(0,1fr)] sm:items-center">
-                <dt class="truncate text-[10px] font-black uppercase tracking-wide text-slate-400">
-                  {{ customInputLabel(input) }} - {{ input.typeName }}
-                </dt>
-                <dd class="break-words text-[11px] font-bold text-slate-900 [overflow-wrap:anywhere]">
+          <dl class="grid gap-2 p-2.5 sm:grid-cols-2">
+            @for (input of response.customInputValues; track input.customInputValueId) {
+              <div
+                class="rounded-lg border border-slate-100 bg-slate-50/50 p-2 transition-colors hover:border-slate-200 hover:bg-white hover:shadow-2xs"
+              >
+                <div class="flex items-center justify-between gap-1.5">
+                  <dt class="truncate text-[11px] font-bold text-slate-500">
+                    {{ customInputLabel(input) }}
+                  </dt>
+                  <span
+                    class="rounded border border-slate-200/80 bg-white px-1.5 py-0.5 text-[9px] font-bold text-[var(--theme-color-secondary)] shadow-2xs"
+                  >
+                    {{ customInputTypeLabel(input.typeName) }}
+                  </span>
+                </div>
+                <dd
+                  class="mt-0.5 break-words text-xs sm:text-sm font-black text-slate-900 [overflow-wrap:anywhere] select-all"
+                >
                   {{ customInputDisplayValue(input) }}
                 </dd>
               </div>
@@ -79,107 +271,224 @@
         }
       </section>
 
-      <section class="rounded-lg border border-slate-200 bg-white">
-        <div class="flex items-center justify-between border-b border-slate-100 px-3 py-2">
-          <div>
-            <h4 class="text-xs font-black text-slate-950">{{ 'surveyDashboard.answers' | t }}</h4>
-            <p class="text-[10px] font-semibold text-slate-500">
-              {{ response.answersCount }} {{ 'surveyDashboard.answersCaptured' | t }}
-            </p>
+      <!-- Answers Section (Responsive Grid) -->
+      <section class="overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-2xs">
+        <div
+          class="flex items-center justify-between border-b border-slate-100 bg-slate-50/50 px-3 py-1.5"
+        >
+          <div class="flex items-center gap-1.5">
+            <app-icon
+              class="text-[var(--theme-color-primary)]"
+              [icon]="listChecksIcon"
+              [size]="13"
+            />
+            <h4 class="text-xs font-black text-slate-900">
+              {{ 'surveyDashboard.answers' | t }}
+            </h4>
           </div>
-          <app-icon class="text-[var(--theme-color-accent)]" [icon]="messageIcon" [size]="15" />
+          <span class="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-600">
+            {{ response.answersCount }} {{ 'surveyDashboard.answersCaptured' | t }}
+          </span>
         </div>
 
         <ng-template #answerNode let-node let-depth="depth">
-          <article class="px-3 py-2.5">
-              <div class="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
-                <div class="min-w-0">
-                  <p class="break-words text-[11px] font-black text-slate-950 [overflow-wrap:anywhere]">
-                    {{ questionText(node.answer) }}
-                  </p>
-                  <p class="text-[10px] font-semibold text-slate-500">
-                    {{ node.answer.questionTypeName || node.answer.questionType || '-' }}
-                  </p>
-                </div>
+          <article
+            class="flex flex-col justify-between rounded-xl border border-slate-200/80 bg-white p-2.5 sm:p-3 shadow-2xs transition-all hover:border-slate-300 hover:shadow-xs"
+          >
+            <div>
+              <!-- Question Header (Order + Type + Follow-up badges) -->
+              <div class="flex flex-wrap items-center gap-1">
+                @if (node.answer.questionOrder > 0) {
+                  <span
+                    class="inline-flex items-center rounded bg-slate-100 border border-slate-200/80 px-1.5 py-0.5 text-[10px] font-black text-slate-700"
+                  >
+                    #{{ node.answer.questionOrder }}
+                  </span>
+                }
+                <span
+                  class="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold text-slate-600"
+                >
+                  {{ questionTypeLabel(node.answer) }}
+                </span>
                 @if (depth > 0) {
-                  <span class="w-fit rounded-full bg-emerald-50 px-2 py-0.5 text-[9px] font-black text-emerald-700">
-                    {{ 'branchTemplates.followUpQuestion' | t }}
+                  <span
+                    class="rounded bg-emerald-50 px-1.5 py-0.5 text-[10px] font-bold text-emerald-700"
+                  >
+                    {{ 'departmentResponseDetails.followUpQuestion' | t }}
                   </span>
                 }
               </div>
 
-              <div
-                class="mt-2 rounded-md px-2.5 py-2"
-                [class.bg-slate-50]="depth === 0"
-                [class.bg-emerald-50]="depth > 0"
+              <!-- Question Text -->
+              <p
+                class="mt-1.5 break-words text-xs font-black text-slate-900 leading-snug [overflow-wrap:anywhere]"
               >
-                @if (imageUrl(node.answer)) {
-                  <div class="space-y-1.5">
-                    <p class="flex items-center gap-1.5 text-[11px] font-bold text-slate-900">
-                      <app-icon class="text-[var(--theme-color-accent)]" [icon]="imageIcon" [size]="13" />
+                {{ localized(node.answer.questionTextEn, node.answer.questionTextAr) }}
+              </p>
+            </div>
+
+            <!-- Answer Result Box -->
+            <div class="mt-2 rounded-lg border border-slate-100 bg-slate-50/60 p-2">
+              @if (isSingleChoice(node.answer)) {
+                <div class="flex items-center justify-between gap-1.5">
+                  <div class="flex items-center gap-1.5 min-w-0">
+                    <app-icon
+                      class="text-[var(--theme-color-primary)] shrink-0"
+                      [icon]="checkCircleIcon"
+                      [size]="14"
+                    />
+                    <span
+                      class="text-xs font-extrabold text-slate-900 break-words [overflow-wrap:anywhere]"
+                    >
                       {{ answerDisplayValue(node.answer) }}
-                    </p>
+                    </span>
+                  </div>
+                  @if (node.answer.selectedOptionValue != null) {
+                    <span
+                      class="shrink-0 rounded border border-slate-200/80 bg-white px-1.5 py-0.5 text-[10px] font-bold text-slate-600 shadow-2xs"
+                    >
+                      {{ node.answer.selectedOptionValue }}
+                    </span>
+                  }
+                </div>
+              } @else if (isStarRating(node.answer)) {
+                <div class="flex items-center justify-between gap-1.5">
+                  <div class="flex items-center gap-0.5">
+                    @for (slot of scaleSlots; track slot) {
+                      <svg
+                        class="h-4 w-4"
+                        viewBox="0 0 24 24"
+                        [class.text-amber-400]="isStarActive(slot, node.answer.starRatingValue)"
+                        [class.fill-amber-400]="isStarActive(slot, node.answer.starRatingValue)"
+                        [class.text-slate-200]="!isStarActive(slot, node.answer.starRatingValue)"
+                        [class.fill-slate-100]="!isStarActive(slot, node.answer.starRatingValue)"
+                      >
+                        <polygon
+                          points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
+                          stroke="currentColor"
+                          stroke-width="1.5"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        />
+                      </svg>
+                    }
+                  </div>
+                  <span
+                    class="inline-flex items-center rounded border border-amber-200/80 bg-amber-50 px-2 py-0.5 text-[10px] font-black text-amber-800"
+                  >
+                    {{ node.answer.starRatingValue ?? '-' }} / 5
+                  </span>
+                </div>
+              } @else if (isSmiles(node.answer)) {
+                <div class="flex items-center justify-between gap-1.5">
+                  <div class="flex items-center gap-1">
+                    @for (slot of scaleSlots; track slot) {
+                      <span
+                        class="h-2.5 w-2.5 rounded-full"
+                        [class.bg-emerald-400]="isStarActive(slot, node.answer.smileValue)"
+                        [class.bg-slate-200]="!isStarActive(slot, node.answer.smileValue)"
+                      ></span>
+                    }
+                  </div>
+                  <span
+                    class="inline-flex items-center rounded border border-emerald-200/80 bg-emerald-50 px-2 py-0.5 text-[10px] font-black text-emerald-800"
+                  >
+                    {{ node.answer.smileValue ?? '-' }} / 5
+                  </span>
+                </div>
+              } @else if (isComplain(node.answer)) {
+                <div class="rounded-lg border border-slate-200/80 bg-white p-2 shadow-2xs">
+                  <div class="flex items-center gap-1.5 text-slate-400 text-[10px] font-bold">
+                    <app-icon [icon]="messageIcon" [size]="12" />
+                    <span>{{ 'questions.typeComplain' | t }}</span>
+                  </div>
+                  <p class="mt-1 text-xs font-bold text-slate-900 leading-relaxed whitespace-pre-wrap">
+                    {{ node.answer.textAnswer || ('anonymousDashboard.noComplaintText' | t) }}
+                  </p>
+                </div>
+              } @else if (isVoice(node.answer)) {
+                <div class="space-y-1.5">
+                  @if (voiceUrl(node.answer)) {
+                    <audio class="h-8 w-full" controls preload="metadata" [src]="voiceUrl(node.answer)">
+                      Your browser does not support the audio element.
+                    </audio>
                     <a
-                      class="inline-flex rounded-lg bg-white px-2 py-1 text-[11px] font-extrabold text-[var(--theme-color-secondary)] ring-1 ring-cyan-100"
+                      class="inline-flex items-center gap-1 text-[11px] font-bold text-[var(--theme-color-primary)] hover:underline"
+                      [href]="voiceUrl(node.answer)"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <app-icon [icon]="micIcon" [size]="12" />
+                      {{ 'departmentResponseDetails.openVoiceFile' | t }}
+                    </a>
+                  } @else {
+                    <p class="text-[11px] font-semibold text-slate-400">
+                      {{ 'departmentResponseDetails.noVoiceFile' | t }}
+                    </p>
+                  }
+                </div>
+              } @else if (isImage(node.answer)) {
+                <div class="space-y-1.5">
+                  @if (imageUrl(node.answer)) {
+                    <div class="overflow-hidden rounded-lg border border-slate-200/80 bg-white">
+                      <img
+                        class="h-28 w-full object-cover"
+                        [src]="imageUrl(node.answer)"
+                        [alt]="node.answer.imageFileName || 'Response image'"
+                        loading="lazy"
+                      />
+                    </div>
+                    <a
+                      class="inline-flex items-center gap-1 text-[11px] font-bold text-[var(--theme-color-primary)] hover:underline"
                       [href]="imageUrl(node.answer)"
                       target="_blank"
                       rel="noopener noreferrer"
                     >
+                      <app-icon [icon]="imageIcon" [size]="12" />
                       {{ 'operatorTemplates.openImageFile' | t }}
                     </a>
-                    <img
-                      class="max-h-56 w-full rounded-lg object-contain ring-1 ring-slate-100"
-                      [src]="imageUrl(node.answer)"
-                      [alt]="answerDisplayValue(node.answer)"
-                    />
-                  </div>
-                } @else if (voiceUrl(node.answer)) {
-                  <div class="space-y-1.5">
-                    <p class="flex items-center gap-1.5 text-[11px] font-bold text-slate-900">
-                      <app-icon class="text-[var(--theme-color-accent)]" [icon]="micIcon" [size]="13" />
-                      {{ answerDisplayValue(node.answer) }}
+                  } @else {
+                    <p class="text-[11px] font-semibold text-slate-400">
+                      {{ 'branchResponseDetails.noImageFile' | t }}
                     </p>
-                    <audio class="h-8 w-full" controls [src]="voiceUrl(node.answer)"></audio>
-                  </div>
-                } @else {
-                  <p class="break-words text-[11px] font-semibold text-slate-700 [overflow-wrap:anywhere]">
-                    {{ answerDisplayValue(node.answer) }}
-                  </p>
-                }
-              </div>
-
-              @if (node.children.length > 0) {
-                <div class="ms-4 mt-2 space-y-2 border-s-2 border-dashed border-slate-200 ps-3">
-                  @for (childNode of node.children; track childNode.answer.answerId || childNode.answer.questionId) {
-                    <ng-container
-                      [ngTemplateOutlet]="answerNode"
-                      [ngTemplateOutletContext]="{ $implicit: childNode, depth: depth + 1 }"
-                    />
                   }
                 </div>
+              } @else {
+                <p class="text-xs font-black text-slate-900">
+                  {{ answerDisplayValue(node.answer) }}
+                </p>
               }
-            </article>
+            </div>
+
+            <!-- Follow-up Children Nodes -->
+            @if (node.children.length > 0) {
+              <div
+                class="mt-2.5 space-y-2 border-s-2 border-emerald-400/60 ps-2.5 sm:ps-3"
+              >
+                @for (child of node.children; track child.answer.questionId) {
+                  <ng-container
+                    *ngTemplateOutlet="answerNode; context: { $implicit: child, depth: depth + 1 }"
+                  />
+                }
+              </div>
+            }
+          </article>
         </ng-template>
 
-        <div class="divide-y divide-slate-100">
-          @for (node of answerTree(); track node.answer.answerId || node.answer.questionId) {
-            <ng-container
-              [ngTemplateOutlet]="answerNode"
-              [ngTemplateOutletContext]="{ $implicit: node, depth: 0 }"
-            />
-          } @empty {
-            <p class="px-3 py-3 text-center text-[11px] font-semibold text-slate-500">
-              {{ 'surveyDashboard.noAnswersCaptured' | t }}
-            </p>
-          }
-        </div>
+        @if (answerTree().length === 0) {
+          <p class="px-3 py-3 text-center text-[11px] font-semibold text-slate-400">
+            {{ 'surveyDashboard.noAnswersCaptured' | t }}
+          </p>
+        } @else {
+          <div class="grid gap-2 p-2.5 sm:grid-cols-2 lg:grid-cols-3">
+            @for (rootNode of answerTree(); track rootNode.answer.questionId) {
+              <ng-container
+                *ngTemplateOutlet="answerNode; context: { $implicit: rootNode, depth: 0 }"
+              />
+            }
+          </div>
+        }
       </section>
-
-      <div class="flex justify-end">
-        <app-button type="button" size="sm" variant="secondary" (pressed)="closed.emit()">
-          {{ 'surveyDashboard.close' | t }}
-        </app-button>
-      </div>
     </div>
   }
 </app-modal>

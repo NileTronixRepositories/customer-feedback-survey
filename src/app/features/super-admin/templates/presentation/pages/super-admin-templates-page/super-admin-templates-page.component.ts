@@ -14,10 +14,12 @@ import {
   X,
 } from 'lucide-angular';
 import { I18nService } from '../../../../../../core/services/i18n.service';
+import { AuthStore } from '../../../../../auth/presentation/state/auth.store';
 import { TranslatePipe } from '../../../../../../shared/pipes/translate.pipe';
 import { ButtonComponent } from '../../../../../../shared/ui/button/button.component';
 import { PageHeaderComponent } from '../../../../../../shared/ui/page-header/page-header.component';
 import { IconComponent } from '../../../../../../shared/ui/icon/icon.component';
+import { ModalComponent } from '../../../../../../shared/ui/modal/modal.component';
 import { BranchesService } from '../../../../branches/data/branches.service';
 import { BranchSelection } from '../../../../branches/domain/branch.model';
 import {
@@ -30,7 +32,7 @@ import { SuperAdminTemplatesStore } from '../../state/super-admin-templates.stor
 @Component({
   selector: 'app-super-admin-templates-page',
   standalone: true,
-  imports: [ButtonComponent, DatePipe, IconComponent, PageHeaderComponent, ReactiveFormsModule, TranslatePipe],
+  imports: [ButtonComponent, DatePipe, IconComponent, ModalComponent, PageHeaderComponent, ReactiveFormsModule, TranslatePipe],
   templateUrl: './super-admin-templates-page.component.html',
   styleUrl: './super-admin-templates-page.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -40,6 +42,7 @@ export class SuperAdminTemplatesPageComponent implements OnInit {
   private readonly branchesService = inject(BranchesService);
   private readonly formBuilder = inject(FormBuilder);
   private readonly i18n = inject(I18nService);
+  readonly authStore = inject(AuthStore);
 
   readonly chevronLeftIcon = ChevronLeft;
   readonly chevronRightIcon = ChevronRight;
@@ -58,6 +61,8 @@ export class SuperAdminTemplatesPageComponent implements OnInit {
   readonly copiedTemplateId = signal<string | null>(null);
   readonly copyModalOpen = signal(false);
   readonly selectedTemplateForCopy = signal<SuperAdminTemplateListItem | null>(null);
+  readonly selectedLogo = signal<File | null>(null);
+  readonly logoError = signal<string | null>(null);
 
   readonly searchForm = this.formBuilder.nonNullable.group({
     searchText: [''],
@@ -70,6 +75,8 @@ export class SuperAdminTemplatesPageComponent implements OnInit {
 
   readonly copyForm = this.formBuilder.nonNullable.group({
     branchId: ['', [Validators.required]],
+    activeFrom: [''],
+    expireTo: [''],
   });
 
   ngOnInit(): void {
@@ -118,7 +125,13 @@ export class SuperAdminTemplatesPageComponent implements OnInit {
 
   openCopyModal(template: SuperAdminTemplateListItem): void {
     this.selectedTemplateForCopy.set(template);
-    this.copyForm.reset({ branchId: '' });
+    this.copyForm.reset({
+      branchId: '',
+      activeFrom: this.isGlobalSource(template) ? this.toLocalDateTime(new Date()) : '',
+      expireTo: '',
+    });
+    this.selectedLogo.set(null);
+    this.logoError.set(null);
     this.copyModalOpen.set(true);
     this.templatesStore.clearCopyState();
   }
@@ -129,7 +142,9 @@ export class SuperAdminTemplatesPageComponent implements OnInit {
     }
     this.copyModalOpen.set(false);
     this.selectedTemplateForCopy.set(null);
-    this.copyForm.reset({ branchId: '' });
+    this.copyForm.reset({ branchId: '', activeFrom: '', expireTo: '' });
+    this.selectedLogo.set(null);
+    this.logoError.set(null);
     this.templatesStore.clearCopyState();
   }
 
@@ -141,10 +156,53 @@ export class SuperAdminTemplatesPageComponent implements OnInit {
       return;
     }
 
-    this.templatesStore.copyToBranch({
-      templateId: template.templateId,
-      branchId: this.copyForm.controls.branchId.value,
-    });
+    const value = this.copyForm.getRawValue();
+    if (this.isGlobalSource(template)) {
+      if (!value.activeFrom) return;
+      this.templatesStore.assignGlobalToBranch({
+        globalTemplateId: template.templateId,
+        branchId: value.branchId,
+        activeFrom: new Date(value.activeFrom).toISOString(),
+        expireTo: value.expireTo ? new Date(value.expireTo).toISOString() : null,
+        logo: this.selectedLogo(),
+      });
+      return;
+    }
+
+    this.templatesStore.copyToBranch({ templateId: template.templateId, branchId: value.branchId });
+  }
+
+  isGlobalSource(template: SuperAdminTemplateListItem): boolean {
+    return template.templateKind === 'Anonymous' && template.isGlobal;
+  }
+
+  lifecycleLabelKey(template: SuperAdminTemplateListItem): string {
+    if (this.isGlobalSource(template)) {
+      return template.isArchived ? 'superAdminTemplates.archived' : 'superAdminTemplates.available';
+    }
+    return template.isActive ? 'common.active' : 'branches.inactive';
+  }
+
+  canOpenBranchAction(template: SuperAdminTemplateListItem): boolean {
+    return this.isGlobalSource(template)
+      ? this.authStore.hasPermission('AnonymousTemplates.AssignGlobalToBranch')
+      : true;
+  }
+
+  onLogoSelected(event: Event): void {
+    const file = (event.target as HTMLInputElement).files?.[0] ?? null;
+    this.logoError.set(null);
+    this.selectedLogo.set(null);
+    if (!file) return;
+    if (!/\.(?:jpe?g|png|webp)$/i.test(file.name)) {
+      this.logoError.set('superAdminTemplates.logoTypeError');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      this.logoError.set('superAdminTemplates.logoSizeError');
+      return;
+    }
+    this.selectedLogo.set(file);
   }
 
   templateDisplayName(template: SuperAdminTemplateListItem): string {
@@ -270,5 +328,10 @@ export class SuperAdminTemplatesPageComponent implements OnInit {
   private toPageSize(value: string): number {
     const pageSize = Number(value);
     return Number.isFinite(pageSize) && pageSize > 0 ? pageSize : 10;
+  }
+
+  private toLocalDateTime(value: Date): string {
+    const offset = value.getTimezoneOffset() * 60_000;
+    return new Date(value.getTime() - offset).toISOString().slice(0, 16);
   }
 }

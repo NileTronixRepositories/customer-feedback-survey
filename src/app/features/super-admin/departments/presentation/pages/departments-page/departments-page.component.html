@@ -256,7 +256,7 @@
 </div>
 
 <app-modal [title]="'departments.createDepartment' | t" [open]="createModalOpen()" (closed)="closeCreate()">
-  <form class="space-y-3" [formGroup]="createForm" (ngSubmit)="createDepartment()">
+  <form class="space-y-4" [formGroup]="createForm" (ngSubmit)="createDepartment()">
     <app-input
       [label]="'departments.nameEn' | t"
       [placeholder]="'departments.nameEnPlaceholder' | t"
@@ -270,19 +270,24 @@
       [error]="fieldError('nameAr')"
     />
 
-    <app-button type="submit" [fullWidth]="true" [loading]="departmentsStore.creating()">
-      <app-icon [icon]="createIcon" [size]="17" />
-      {{ 'common.create' | t }}
-    </app-button>
+    <div class="sticky bottom-0 -mx-4 -mb-4 mt-4 flex items-center justify-end gap-2 border-t border-slate-100 bg-white/95 px-4 py-3 backdrop-blur-sm sm:-mx-5 sm:-mb-5 sm:px-5 z-10">
+      <app-button type="button" variant="secondary" (pressed)="closeCreate()">
+        {{ 'common.cancel' | t }}
+      </app-button>
+      <app-button type="submit" [loading]="departmentsStore.creating()">
+        <app-icon [icon]="createIcon" [size]="17" />
+        {{ 'common.create' | t }}
+      </app-button>
+    </div>
   </form>
 </app-modal>
 
 <app-modal [title]="'departments.editDepartment' | t" [open]="editModalOpen()" (closed)="closeEdit()">
-  <form class="space-y-3" [formGroup]="editForm" (ngSubmit)="updateDepartment()">
+  <form class="space-y-4" [formGroup]="editForm" (ngSubmit)="updateDepartment()">
     @if (selectedDepartment(); as department) {
-      <div class="border border-cyan-100 bg-cyan-50 p-3 text-xs font-semibold text-slate-700">
-        {{ 'departments.selectedDepartment' | t }}:
-        <span class="text-[var(--theme-color-secondary)]">{{ departmentDisplayName(department) }}</span>
+      <div class="flex items-center gap-2 rounded-xl border border-[var(--theme-color-accent)]/20 bg-[var(--theme-color-accent-softest)]/50 p-3 text-xs font-semibold text-slate-700 shadow-2xs">
+        <span class="text-slate-500">{{ 'departments.selectedDepartment' | t }}:</span>
+        <span class="font-bold text-[var(--theme-color-secondary)]">{{ departmentDisplayName(department) }}</span>
       </div>
     }
 
@@ -297,7 +302,7 @@
       [error]="editFieldError('nameAr')"
     />
 
-    <div class="flex flex-col justify-between gap-2 sm:flex-row sm:flex-wrap">
+    <div class="sticky bottom-0 -mx-4 -mb-4 mt-4 flex flex-col justify-between gap-2 border-t border-slate-100 bg-white/95 px-4 py-3 backdrop-blur-sm sm:-mx-5 sm:-mb-5 sm:px-5 z-10 sm:flex-row sm:flex-wrap">
       @if (selectedDepartment(); as department) {
         @if (department.isActive) {
           <app-button type="button" variant="danger" [loading]="departmentsStore.deleting()" (pressed)="deleteDepartment(department)">
@@ -311,7 +316,7 @@
           </app-button>
         }
       }
-      <div class="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
+      <div class="flex items-center justify-end gap-2 sm:ms-auto">
         <app-button type="button" variant="secondary" (pressed)="closeEdit()">
           {{ 'common.cancel' | t }}
         </app-button>
