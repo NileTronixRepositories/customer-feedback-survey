@@ -20,6 +20,7 @@ import {
 } from '@angular/forms';
 import {
   ArrowLeft,
+  Check,
   Copy,
   Download,
   Edit,
@@ -47,6 +48,8 @@ import { InputComponent } from '../../../../../shared/ui/input/input.component';
 import { ModalComponent } from '../../../../../shared/ui/modal/modal.component';
 import { I18nService } from '../../../../../core/services/i18n.service';
 import { resolveMediaUrl } from '../../../../../shared/utils/media-url.util';
+import { copyToClipboard } from '../../../../../shared/utils/clipboard.util';
+import { ToastService } from '../../../../../shared/ui/toast/toast.service';
 import {
   AnonymousTemplate,
   AnonymousTemplateCustomInputType,
@@ -120,8 +123,10 @@ export class AnonymousTemplateDetailsPageComponent implements OnInit {
   private readonly i18n = inject(I18nService);
   private readonly location = inject(Location);
   private readonly route = inject(ActivatedRoute);
+  private readonly toast = inject(ToastService);
 
   readonly arrowLeftIcon = ArrowLeft;
+  readonly checkIcon = Check;
   readonly copyIcon = Copy;
   readonly downloadIcon = Download;
   readonly editIcon = Edit;
@@ -477,16 +482,22 @@ export class AnonymousTemplateDetailsPageComponent implements OnInit {
     return 'branchTemplates.fieldRequired';
   }
 
-  copyPublicUrl(publicUrl: string | null): void {
-    if (!publicUrl) return;
+  async copyPublicUrl(publicUrl: string | null): Promise<void> {
     if (!publicUrl) {
       return;
     }
 
-    if (globalThis.navigator?.clipboard) {
-      void globalThis.navigator.clipboard.writeText(publicUrl).then(() => {
-        this.copiedPublicUrl.set(true);
-      });
+    const success = await copyToClipboard(publicUrl);
+    if (success) {
+      this.copiedPublicUrl.set(true);
+      this.toast.success(
+        this.i18n.language() === 'ar' ? 'تم نسخ الرابط بنجاح' : 'Public URL copied to clipboard',
+      );
+      setTimeout(() => this.copiedPublicUrl.set(false), 2500);
+    } else {
+      this.toast.error(
+        this.i18n.language() === 'ar' ? 'تعذر نسخ الرابط تلقائياً' : 'Failed to copy URL',
+      );
     }
   }
 

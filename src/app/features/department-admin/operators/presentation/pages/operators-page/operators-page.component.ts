@@ -2,6 +2,7 @@ import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, computed, effect, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import {
+  Check,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
@@ -28,6 +29,7 @@ import {
   ResetPasswordModalValue,
 } from '../../../../../../shared/ui/reset-password-modal/reset-password-modal.component';
 import { PageHeaderComponent } from '../../../../../../shared/ui/page-header/page-header.component';
+import { ConfirmDialogService } from '../../../../../../shared/ui/confirm-dialog/confirm-dialog.service';
 import { OperatorListItem, OperatorTemplateSelectionItem } from '../../../domain/operator.model';
 import { OperatorsStore } from '../../state/operators.store';
 
@@ -37,6 +39,15 @@ interface OperatorTemplateBranchGroup {
   readonly branchCode: string;
   readonly expanded: boolean;
   readonly templates: readonly OperatorTemplateSelectionItem[];
+}
+
+interface OperatorTemplateBranchOption {
+  readonly branchKey: string;
+  readonly branchId: string;
+  readonly branchNameEn: string;
+  readonly branchNameAr: string;
+  readonly branchCode: string;
+  readonly count: number;
 }
 
 @Component({
@@ -63,6 +74,7 @@ export class OperatorsPageComponent implements OnInit {
   private readonly authStore = inject(AuthStore);
   private readonly formBuilder = inject(FormBuilder);
   private readonly i18n = inject(I18nService);
+  private readonly confirmDialog = inject(ConfirmDialogService);
 
   readonly chevronLeftIcon = ChevronLeft;
   readonly chevronDownIcon = ChevronDown;
@@ -75,6 +87,7 @@ export class OperatorsPageComponent implements OnInit {
   readonly plusIcon = Plus;
   readonly searchIcon = Search;
   readonly filterIcon = SlidersHorizontal;
+  readonly checkIcon = Check;
 
   readonly advancedFiltersOpen = signal(true);
 
@@ -87,6 +100,7 @@ export class OperatorsPageComponent implements OnInit {
   readonly templatesModalOpen = signal(false);
   readonly selectedTemplatesOperator = signal<OperatorListItem | null>(null);
   readonly templatesSearchText = signal('');
+  readonly templatesBranchFilter = signal('');
   readonly selectedTemplateIds = signal<readonly string[]>([]);
   readonly expandedTemplateBranchKeys = signal<readonly string[]>([]);
   readonly isSuperAdmin = computed(() => this.authStore.role() === 'SUPER_ADMIN');
@@ -134,9 +148,89 @@ export class OperatorsPageComponent implements OnInit {
   readonly selectedTemplateBranchGroups = computed<readonly OperatorTemplateBranchGroup[]>(() =>
     this.groupTemplatesByBranch(this.selectedTemplatesForModal(), new Set(this.expandedTemplateBranchKeys())),
   );
+  readonly templateBranchOptions = computed<readonly OperatorTemplateBranchOption[]>(() => {
+    const templates = this.allTemplatesForModal();
+    const branchMap = new Map<
+      string,
+      {
+        branchId: string;
+        branchNameEn: string;
+        branchNameAr: string;
+        branchCode: string;
+        count: number;
+      }
+    >();
+
+    for (const template of templates) {
+      const branchKey =
+        template.branchId || template.branchCode || template.branchNameEn || template.branchNameAr;
+      if (!branchKey) {
+        continue;
+      }
+      const existing = branchMap.get(branchKey);
+      if (existing) {
+        existing.count++;
+      } else {
+        branchMap.set(branchKey, {
+          branchId: template.branchId,
+          branchNameEn: template.branchNameEn,
+          branchNameAr: template.branchNameAr,
+          branchCode: template.branchCode,
+          count: 1,
+        });
+      }
+    }
+
+    const isArabic = this.i18n.language() === 'ar';
+    return Array.from(branchMap.entries())
+      .map(([branchKey, info]) => ({
+        branchKey,
+        ...info,
+      }))
+      .sort((a, b) => {
+        const nameA =
+          (isArabic ? a.branchNameAr : a.branchNameEn) ||
+          a.branchNameEn ||
+          a.branchNameAr ||
+          a.branchCode;
+        const nameB =
+          (isArabic ? b.branchNameAr : b.branchNameEn) ||
+          b.branchNameEn ||
+          b.branchNameAr ||
+          b.branchCode;
+        return nameA.localeCompare(nameB);
+      });
+  });
+  readonly activeBranchFilterName = computed(() => {
+    const branchKey = this.templatesBranchFilter().trim();
+    if (!branchKey) {
+      return '';
+    }
+    const option = this.templateBranchOptions().find((opt) => opt.branchKey === branchKey);
+    return option ? this.branchDisplayNameForOption(option) : branchKey;
+  });
+  readonly totalAvailableTemplatesCount = computed(() => {
+    const selectedIds = new Set(this.selectedTemplateIds());
+    return this.allTemplatesForModal().filter((template) => !selectedIds.has(template.templateId)).length;
+  });
   readonly availableTemplatesForModal = computed(() => {
     const selectedIds = new Set(this.selectedTemplateIds());
-    return this.allTemplatesForModal().filter((template) => !selectedIds.has(template.templateId));
+    const branchFilter = this.templatesBranchFilter().trim();
+    return this.allTemplatesForModal().filter((template) => {
+      if (selectedIds.has(template.templateId)) {
+        return false;
+      }
+      if (!branchFilter) {
+        return true;
+      }
+      const branchKey =
+        template.branchId || template.branchCode || template.branchNameEn || template.branchNameAr;
+      return (
+        branchKey === branchFilter ||
+        template.branchId === branchFilter ||
+        template.branchCode === branchFilter
+      );
+    });
   });
   readonly hasTemplateSelectionChanges = computed(() => {
     const selection = this.operatorsStore.templatesSelection();
@@ -305,6 +399,7 @@ export class OperatorsPageComponent implements OnInit {
     this.templatesModalOpen.set(false);
     this.selectedTemplatesOperator.set(null);
     this.templatesSearchText.set('');
+    this.templatesBranchFilter.set('');
     this.selectedTemplateIds.set([]);
     this.expandedTemplateBranchKeys.set([]);
     this.operatorsStore.clearTemplatesSelection();
@@ -320,12 +415,20 @@ export class OperatorsPageComponent implements OnInit {
     this.resetPasswordModalOpen.set(true);
   }
 
-  deactivateOperator(operator: OperatorListItem): void {
+  async deactivateOperator(operator: OperatorListItem): Promise<void> {
     if (!operator.isActive || !this.canDeactivateOperator() || this.operatorsStore.deactivating()) {
       return;
     }
 
-    const confirmed = globalThis.confirm(this.i18n.translate('operators.deactivateConfirm'));
+    const operatorName = this.localized(operator.nameEn, operator.nameAr);
+    const confirmed = await this.confirmDialog.confirm({
+      title: this.i18n.language() === 'ar' ? 'تعطيل المشغل' : 'Deactivate Operator',
+      message: this.i18n.translate('operators.deactivateConfirm'),
+      itemName: operatorName,
+      confirmText: this.i18n.language() === 'ar' ? 'تعطيل' : 'Deactivate',
+      cancelText: this.i18n.translate('common.cancel'),
+      variant: 'danger',
+    });
     if (!confirmed) {
       return;
     }
@@ -333,12 +436,20 @@ export class OperatorsPageComponent implements OnInit {
     this.operatorsStore.deactivateOperator(operator.operatorId, () => undefined);
   }
 
-  restoreOperator(operator: OperatorListItem): void {
+  async restoreOperator(operator: OperatorListItem): Promise<void> {
     if (operator.isActive || !this.canRestoreOperator() || this.operatorsStore.restoring()) {
       return;
     }
 
-    const confirmed = globalThis.confirm(this.i18n.translate('operators.restoreConfirm'));
+    const operatorName = this.localized(operator.nameEn, operator.nameAr);
+    const confirmed = await this.confirmDialog.confirm({
+      title: this.i18n.translate('operators.activateTitle'),
+      message: this.i18n.translate('operators.restoreConfirm'),
+      itemName: operatorName,
+      confirmText: this.i18n.translate('operators.activateAction'),
+      cancelText: this.i18n.translate('common.cancel'),
+      variant: 'success',
+    });
     if (!confirmed) {
       return;
     }
@@ -383,6 +494,31 @@ export class OperatorsPageComponent implements OnInit {
 
     this.templatesSearchText.set('');
     this.operatorsStore.loadTemplatesSelection(operator.operatorId);
+  }
+
+  updateTemplatesBranchFilter(event: Event): void {
+    const target = event.target as HTMLSelectElement | null;
+    this.templatesBranchFilter.set(target?.value ?? '');
+  }
+
+  clearBranchFilter(): void {
+    this.templatesBranchFilter.set('');
+  }
+
+  clearAllTemplatesFilters(): void {
+    this.templatesBranchFilter.set('');
+    this.clearOperatorTemplatesSearch();
+  }
+
+  branchDisplayNameForOption(branch: OperatorTemplateBranchOption): string {
+    const isArabic = this.i18n.language() === 'ar';
+    const primary = isArabic ? branch.branchNameAr : branch.branchNameEn;
+    const fallback = isArabic ? branch.branchNameEn : branch.branchNameAr;
+    const name = primary?.trim() || fallback?.trim() || branch.branchCode?.trim() || this.i18n.translate('operators.branch');
+    if (branch.branchCode?.trim() && name !== branch.branchCode.trim()) {
+      return `${name} (${branch.branchCode.trim()})`;
+    }
+    return name;
   }
 
   selectOperatorTemplate(templateId: string): void {
@@ -623,5 +759,12 @@ export class OperatorsPageComponent implements OnInit {
     }
 
     createDepartmentControl.updateValueAndValidity({ emitEvent: false });
+  }
+
+  private localized(en: string | null | undefined, ar?: string | null | undefined): string {
+    if (this.i18n.language() === 'ar') {
+      return ar || en || '';
+    }
+    return en || ar || '';
   }
 }

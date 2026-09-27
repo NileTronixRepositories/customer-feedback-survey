@@ -21,22 +21,6 @@
     </div>
   </div>
 
-  @if (anonymousTemplatesStore.success()) {
-    <div
-      class="rounded-md border border-emerald-100 bg-emerald-50 p-2 text-[11px] font-semibold text-emerald-700"
-    >
-      {{ anonymousTemplatesStore.success() ?? '' | t }}
-    </div>
-  }
-
-  @if (anonymousTemplatesStore.error()) {
-    <div
-      class="rounded-md border border-rose-100 bg-rose-50 p-2 text-[11px] font-semibold text-[var(--theme-color-danger)]"
-    >
-      {{ anonymousTemplatesStore.error() ?? '' | t }}
-    </div>
-  }
-
   @if (anonymousTemplatesStore.detailsLoading()) {
     <div
       class="flex items-center gap-2 border border-slate-100 bg-white p-3 text-xs font-semibold text-slate-600"
@@ -697,37 +681,6 @@
             }
           </div>
 
-          <!-- 1-Click Copy Public URL Bar -->
-          @if (template.publicUrl) {
-            <div class="space-y-1.5">
-              <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                {{ 'anonymousTemplates.publicUrl' | t }}
-              </label>
-              <div
-                class="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50/80 p-1.5 transition focus-within:border-[#148496] focus-within:bg-white"
-              >
-                <input
-                  type="text"
-                  readonly
-                  [value]="template.publicUrl"
-                  class="min-w-0 flex-1 bg-transparent px-2 text-xs font-mono text-slate-700 outline-none select-all"
-                />
-                <app-button
-                  type="button"
-                  size="sm"
-                  [variant]="copiedPublicUrl() ? 'primary' : 'secondary'"
-                  (pressed)="copyPublicUrl(template.publicUrl)"
-                >
-                  <app-icon [icon]="copyIcon" [size]="13" />
-                  {{
-                    (copiedPublicUrl() ? 'anonymousTemplates.copied' : 'anonymousTemplates.copyUrl')
-                      | t
-                  }}
-                </app-button>
-              </div>
-            </div>
-          }
-
           <!-- QR Download Action -->
           @if (template.qrCode) {
             <app-button
@@ -740,6 +693,74 @@
               <app-icon [icon]="downloadIcon" [size]="14" />
               {{ 'anonymousTemplates.downloadQr' | t }}
             </app-button>
+          }
+
+          <!-- Clear, Fully Visible Public URL Section -->
+          @if (template.publicUrl) {
+            <div class="space-y-2 pt-2 border-t border-slate-100">
+              <div class="flex items-center justify-between gap-2">
+                <label class="flex items-center gap-1.5 text-[11px] font-bold text-slate-700">
+                  <app-icon [icon]="globeIcon" [size]="13" class="text-[#148496]" />
+                  <span>{{ 'anonymousTemplates.publicUrl' | t }}</span>
+                </label>
+                <a
+                  [href]="template.publicUrl"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="inline-flex items-center gap-1 text-[11px] font-bold text-[#148496] hover:text-[#0f6f7f] hover:underline"
+                >
+                  <span>{{ 'anonymousTemplates.openLink' | t }}</span>
+                  <app-icon [icon]="externalLinkIcon" [size]="11" />
+                </a>
+              </div>
+
+              <!-- LTR URL Display with full break-all & click-to-copy -->
+              <div
+                dir="ltr"
+                class="group relative flex items-center justify-between gap-2 rounded-xl border border-slate-200 bg-slate-50/80 p-2.5 text-left transition hover:border-[#148496]/60 hover:bg-cyan-50/20 focus-within:border-[#148496] focus-within:bg-white cursor-pointer"
+                (click)="copyPublicUrl(template.publicUrl)"
+                [title]="'anonymousTemplates.copyPublicUrl' | t"
+              >
+                <p
+                  class="min-w-0 flex-1 break-all font-mono text-xs leading-relaxed text-slate-700 select-all selection:bg-cyan-100 selection:text-cyan-900"
+                  [title]="template.publicUrl"
+                >
+                  {{ template.publicUrl }}
+                </p>
+                <button
+                  type="button"
+                  class="shrink-0 rounded-lg p-1 text-slate-400 hover:text-[#148496] transition"
+                  [title]="'anonymousTemplates.copyPublicUrl' | t"
+                >
+                  <app-icon
+                    [icon]="copiedPublicUrl() ? checkIcon : copyIcon"
+                    [size]="14"
+                    [class.text-emerald-600]="copiedPublicUrl()"
+                  />
+                </button>
+              </div>
+
+              <!-- Action button for copying -->
+              <app-button
+                type="button"
+                size="sm"
+                [variant]="copiedPublicUrl() ? 'primary' : 'secondary'"
+                [fullWidth]="true"
+                (pressed)="copyPublicUrl(template.publicUrl)"
+              >
+                <app-icon
+                  [icon]="copiedPublicUrl() ? checkIcon : copyIcon"
+                  [size]="13"
+                  [class.text-emerald-300]="copiedPublicUrl()"
+                />
+                {{
+                  (copiedPublicUrl()
+                    ? 'anonymousTemplates.copied'
+                    : 'anonymousTemplates.copyPublicUrl'
+                  ) | t
+                }}
+              </app-button>
+            </div>
           }
         </section>
 

@@ -217,11 +217,22 @@ export class DashboardResponsesPageComponent {
       return this.localized(item.selectedOptionTextEn, item.selectedOptionTextAr);
     }
 
+    if (item.imageUrl) {
+      return this.i18n.translate('dashboardDrillDown.imageAnswer');
+    }
+
+    if (item.voiceUrl) {
+      return this.i18n.translate('branchReports.voice');
+    }
+
     return item.value || item.type || '—';
   }
 
   answerBadgeClass(value: string): string {
     const normalized = value.trim().toLowerCase();
+    if (normalized.includes('صورة') || normalized.includes('image')) {
+      return 'bg-cyan-50 text-cyan-800 border-cyan-200/70';
+    }
     if (
       normalized.includes('excellent') ||
       normalized.includes('very good') ||

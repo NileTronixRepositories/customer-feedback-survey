@@ -103,4 +103,36 @@
     width: 100%;
     justify-content: flex-start;
   }
+
+  .ph-actions > * {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .ph-root {
+    padding: 0.875rem;
+    border-radius: 0.75rem;
+  }
+
+  .ph-start {
+    width: 100%;
+    align-items: flex-start;
+    gap: 0.625rem;
+  }
+
+  .ph-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  .ph-title {
+    font-size: 1.125rem;
+    overflow-wrap: anywhere;
+  }
+
+  .ph-desc {
+    font-size: 0.8125rem;
+  }
 }

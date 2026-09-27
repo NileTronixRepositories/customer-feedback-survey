@@ -1,16 +1,13 @@
 import { ChangeDetectionStrategy, Component, HostListener, computed, effect, inject, signal } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
 import {
-  Bell,
   Briefcase,
-  ChevronDown,
   KeyRound,
   Languages,
   LogOut,
   Menu,
   ShieldCheck,
   Store,
-  UserRound,
 } from 'lucide-angular';
 import { AuthStore } from '../../features/auth/presentation/state/auth.store';
 import { BranchContextService } from '../../core/services/branch-context.service';
@@ -39,17 +36,10 @@ export class MainLayoutComponent {
   readonly changePasswordIcon = KeyRound;
   readonly logoutIcon = LogOut;
   readonly menuIcon = Menu;
-  readonly userIcon = UserRound;
-  readonly notificationIcon = Bell;
-  readonly chevronDownIcon = ChevronDown;
   readonly branchIcon = Store;
   private readonly desktopSidebarMediaQuery = '(min-width: 1280px)';
 
-  readonly userInitial = computed(
-    () => this.authStore.user()?.name?.charAt(0).toUpperCase() ?? 'U',
-  );
   readonly userDisplayName = computed(() => this.authStore.user()?.name ?? 'User');
-  readonly userEmail = computed(() => this.authStore.user()?.email ?? '');
   readonly branchDisplayName = computed(() => {
     const branch = this.branchContext.branch();
     if (branch) {

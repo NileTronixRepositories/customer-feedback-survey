@@ -15,21 +15,7 @@
       {{ templatesStore.detailsError() ?? '' | t }}
     </div>
   } @else if (templatesStore.selectedTemplate(); as template) {
-    <!-- Alerts -->
-    @if (templatesStore.success()) {
-      <div
-        class="rounded-2xl border border-emerald-200/80 bg-emerald-50/80 p-3.5 text-[11px] font-semibold text-emerald-800 shadow-xs"
-      >
-        {{ templatesStore.success() ?? '' | t }}
-      </div>
-    }
-    @if (templatesStore.error()) {
-      <div
-        class="rounded-2xl border border-rose-200/80 bg-rose-50/80 p-3.5 text-[11px] font-semibold text-[var(--theme-color-danger)] shadow-xs"
-      >
-        {{ templatesStore.error() ?? '' | t }}
-      </div>
-    }
+
 
     <!-- 1. Executive Template Hero Card -->
     <div class="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs">

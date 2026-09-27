@@ -72,14 +72,14 @@ export class OperatorsService {
   }
 
   deactivate(operatorId: string): Observable<OperatorStateChangeResult> {
-    return this.http.put<OperatorStateChangeApiResponse>(
+    return this.http.put<OperatorStateChangeApiResponse | null>(
       `${this.operatorsUrl}/${operatorId}/deactivate`,
       null,
     ).pipe(map((response) => this.toStateChange(response, operatorId, false)));
   }
 
   restore(operatorId: string): Observable<OperatorStateChangeResult> {
-    return this.http.put<OperatorStateChangeApiResponse>(
+    return this.http.put<OperatorStateChangeApiResponse | null>(
       `${this.operatorsUrl}/${operatorId}/restore`,
       null,
     ).pipe(map((response) => this.toStateChange(response, operatorId, true)));
@@ -219,15 +219,15 @@ export class OperatorsService {
   }
 
   private toStateChange(
-    response: OperatorStateChangeApiResponse,
+    response: OperatorStateChangeApiResponse | null,
     fallbackOperatorId: string,
     fallbackIsActive: boolean,
   ): OperatorStateChangeResult {
     return {
-      operatorId: this.readRecordId(response.operatorId) || fallbackOperatorId,
-      applicationUserId: this.readRecordId(response.applicationUserId),
-      departmentId: this.readRecordId(response.departmentId),
-      isActive: response.isActive ?? fallbackIsActive,
+      operatorId: this.readRecordId(response?.operatorId) || fallbackOperatorId,
+      applicationUserId: this.readRecordId(response?.applicationUserId),
+      departmentId: this.readRecordId(response?.departmentId),
+      isActive: response?.isActive ?? fallbackIsActive,
     };
   }
 

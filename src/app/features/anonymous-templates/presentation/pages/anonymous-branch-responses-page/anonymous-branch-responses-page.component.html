@@ -200,11 +200,6 @@
       </div>
     }
 
-    @if (responsesStore.error()) {
-      <div class="rounded-md border border-rose-100 bg-rose-50 p-2 text-[11px] font-semibold text-[var(--theme-color-danger)]">
-        {{ responsesStore.error() ?? '' | t }}
-      </div>
-    }
 
     <app-card
       [title]="'anonymousTemplates.branchResponsesTitle' | t"

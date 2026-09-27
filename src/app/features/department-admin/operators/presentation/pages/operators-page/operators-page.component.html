@@ -23,20 +23,6 @@
     </app-button>
   </app-page-header>
 
-  @if (operatorsStore.success()) {
-    <div class="border border-emerald-100 bg-emerald-50 p-3 text-xs font-semibold text-emerald-700">
-      {{ operatorsStore.success() ?? '' | t }}
-    </div>
-  }
-
-  @if (operatorsStore.error()) {
-    <div
-      class="border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-[var(--theme-color-danger)]"
-    >
-      {{ operatorsStore.error() ?? '' | t }}
-    </div>
-  }
-
   @if (!canCreateOperator()) {
     <div class="border border-amber-100 bg-amber-50 p-3 text-xs font-semibold text-amber-700">
       {{ 'operators.departmentScopeMissing' | t }}
@@ -262,6 +248,7 @@
                           (pressed)="restoreOperator(operator)"
                         >
                           <app-icon [icon]="restoreIcon" [size]="15" />
+                          {{ 'operators.activateAction' | t }}
                         </app-button>
                       }
                       @if (!operator.isActive && !canRestore(operator)) {
@@ -418,7 +405,7 @@
                   (pressed)="restoreOperator(operator)"
                 >
                   <app-icon [icon]="restoreIcon" [size]="15" />
-                  {{ 'common.restore' | t }}
+                  {{ 'operators.activateAction' | t }}
                 </app-button>
               }
             </div>
@@ -636,54 +623,73 @@
   [title]="'operators.templatesSelectionTitle' | t"
   [open]="templatesModalOpen()"
   (closed)="closeOperatorTemplates()"
-  size="lg"
+  size="2xl"
 >
-  <div class="min-w-0 space-y-2 overflow-x-hidden text-xs">
+  <div class="min-w-0 space-y-3 overflow-x-hidden text-xs">
+    <!-- Header Banner: Operator Info & Stats -->
     @if (selectedTemplatesOperator(); as operator) {
-      <div class="rounded-xl border border-slate-200/80 bg-slate-50/60 p-3 shadow-2xs">
-        <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <div class="min-w-0">
-            <p class="break-words text-xs font-bold text-slate-900 [overflow-wrap:anywhere]">
-              {{ operator.nameEn }}
-            </p>
-            <p
-              class="mt-0.5 break-words text-[11px] font-semibold text-slate-500 [overflow-wrap:anywhere]"
+      <div
+        class="rounded-xl border border-slate-200/90 bg-gradient-to-l from-slate-50 via-white to-cyan-50/40 p-3 shadow-2xs"
+      >
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div class="flex min-w-0 items-center gap-3">
+            <div
+              class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--theme-color-primary)] text-white shadow-xs"
             >
-              {{ operator.email }}
-            </p>
+              <app-icon [icon]="operatorIcon" [size]="20" />
+            </div>
+            <div class="min-w-0">
+              <div class="flex flex-wrap items-center gap-2">
+                <p class="truncate text-xs font-black text-slate-900">
+                  {{ operator.nameEn }}
+                </p>
+                @if (operator.nameAr) {
+                  <span class="text-[11px] font-semibold text-slate-500">
+                    ({{ operator.nameAr }})
+                  </span>
+                }
+                <span
+                  class="rounded-full bg-cyan-100/70 px-2 py-0.5 text-[10px] font-bold text-cyan-800"
+                >
+                  {{ operator.departmentNameEn || ('operators.department' | t) }}
+                </span>
+              </div>
+              <p class="truncate text-[11px] font-medium text-slate-500">
+                {{ operator.email }}
+              </p>
+            </div>
           </div>
-          <span
-            class="w-fit rounded-full bg-[var(--theme-color-accent-softest)] px-2.5 py-0.5 text-[10px] font-bold text-[var(--theme-color-secondary)]"
-          >
-            {{ operator.departmentNameEn || ('operators.department' | t) }}
-          </span>
-        </div>
-      </div>
-    }
 
-    @if (isDepartmentAdmin()) {
-      <div class="grid gap-2 sm:grid-cols-2">
-        <div
-          class="rounded-xl border border-[var(--theme-color-accent)]/20 bg-[var(--theme-color-accent-softest)]/50 p-2.5 shadow-2xs"
-        >
-          <p class="text-[10px] font-bold uppercase text-cyan-700">
-            {{ 'operators.activeTemplatesCatalog' | t }}
-          </p>
-          <p class="mt-0.5 text-sm font-bold text-slate-900">
-            @if (operatorsStore.activeTemplatesLoading()) {
-              <span
-                class="inline-block h-4 w-4 animate-spin rounded-full border-2 border-[var(--theme-color-accent)]/30 border-t-[var(--theme-color-accent)]"
-              ></span>
-            } @else {
-              {{ operatorsStore.activeTemplates().length }}
-            }
-          </p>
-        </div>
-        <div class="rounded-xl border border-slate-200/80 bg-slate-50/60 p-2.5 shadow-2xs">
-          <p class="text-[10px] font-bold uppercase text-slate-500">
-            {{ 'operators.templateBranches' | t }}
-          </p>
-          <p class="mt-0.5 text-sm font-bold text-slate-900">{{ activeTemplateBranchesCount() }}</p>
+          @if (isDepartmentAdmin()) {
+            <div class="flex shrink-0 items-center gap-2 self-end sm:self-center">
+              <div
+                class="flex items-center gap-2 rounded-lg border border-slate-200/80 bg-white/95 px-2.5 py-1.5 shadow-2xs"
+              >
+                <span class="text-[10px] font-bold uppercase text-slate-500">
+                  {{ 'operators.activeTemplatesCatalog' | t }}
+                </span>
+                <span class="rounded-md bg-cyan-50 px-2 py-0.5 text-xs font-black text-cyan-800">
+                  @if (operatorsStore.activeTemplatesLoading()) {
+                    <span
+                      class="inline-block h-3 w-3 animate-spin rounded-full border-2 border-[var(--theme-color-accent)]/30 border-t-[var(--theme-color-accent)]"
+                    ></span>
+                  } @else {
+                    {{ operatorsStore.activeTemplates().length }}
+                  }
+                </span>
+              </div>
+              <div
+                class="flex items-center gap-2 rounded-lg border border-slate-200/80 bg-white/95 px-2.5 py-1.5 shadow-2xs"
+              >
+                <span class="text-[10px] font-bold uppercase text-slate-500">
+                  {{ 'operators.templateBranches' | t }}
+                </span>
+                <span class="rounded-md bg-slate-100 px-2 py-0.5 text-xs font-black text-slate-700">
+                  {{ activeTemplateBranchesCount() }}
+                </span>
+              </div>
+            </div>
+          }
         </div>
       </div>
     }
@@ -696,46 +702,124 @@
       </div>
     }
 
-    <div class="grid min-w-0 gap-2 md:grid-cols-[minmax(0,1fr)_auto]">
-      <label class="block">
-        <span class="mb-1 block text-[11px] font-semibold text-slate-700">
-          {{ 'operators.templatesSearch' | t }}
-        </span>
-        <input
-          type="text"
-          class="h-9 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-xs text-slate-700 shadow-sm shadow-slate-200/60 outline-none transition placeholder:text-slate-400 focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15"
-          [placeholder]="'operators.templatesSearchPlaceholder' | t"
-          [value]="templatesSearchText()"
-          (input)="updateTemplatesSearchText($event)"
-        />
-      </label>
-      <div class="grid grid-cols-2 items-end gap-2 md:flex md:flex-wrap md:justify-end">
-        <app-button
-          size="sm"
-          type="button"
-          [loading]="operatorsStore.templatesSelectionLoading()"
-          (pressed)="searchOperatorTemplates()"
-        >
-          <app-icon [icon]="searchIcon" [size]="17" />
-          {{ 'branches.searchAction' | t }}
-        </app-button>
-        <app-button
-          size="sm"
-          type="button"
-          variant="secondary"
-          (pressed)="clearOperatorTemplatesSearch()"
-        >
-          {{ 'branches.clearSearch' | t }}
-        </app-button>
+    <!-- Toolbar: Branch Dropdown Filter + Search + Actions -->
+    <div class="rounded-xl border border-slate-200/90 bg-white p-3 shadow-2xs">
+      <div class="grid grid-cols-1 gap-2.5 md:grid-cols-12 md:items-end">
+        <!-- Branch Dropdown Filter (5 cols) -->
+        <div class="min-w-0 md:col-span-5">
+          <label class="mb-1 block text-[11px] font-bold text-slate-700">
+            {{ 'operators.filterByBranch' | t }}
+          </label>
+          <div class="relative">
+            <select
+              class="h-9 w-full appearance-none rounded-lg border border-slate-200 bg-slate-50/60 pe-8 ps-3 text-xs font-bold text-slate-800 shadow-2xs outline-none transition hover:border-slate-300 hover:bg-white focus:border-[var(--theme-color-primary)] focus:bg-white focus:ring-2 focus:ring-[var(--theme-color-accent)]/20"
+              [value]="templatesBranchFilter()"
+              (change)="updateTemplatesBranchFilter($event)"
+            >
+              <option value="">
+                {{ 'operators.allBranches' | t }} ({{ allTemplatesForModal().length }})
+              </option>
+              @for (branch of templateBranchOptions(); track branch.branchKey) {
+                <option [value]="branch.branchKey">
+                  {{ branchDisplayNameForOption(branch) }} ({{ branch.count }})
+                </option>
+              }
+            </select>
+            <div
+              class="pointer-events-none absolute inset-y-0 end-0 flex items-center pe-2.5 text-slate-400"
+            >
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Search Input (5 cols) -->
+        <div class="min-w-0 md:col-span-5">
+          <label class="mb-1 block text-[11px] font-bold text-slate-700">
+            {{ 'operators.templatesSearch' | t }}
+          </label>
+          <div class="relative flex items-center">
+            <input
+              type="text"
+              class="h-9 w-full rounded-lg border border-slate-200 bg-slate-50/60 pe-8 ps-3 text-xs font-semibold text-slate-800 shadow-2xs outline-none transition placeholder:font-normal placeholder:text-slate-400 hover:border-slate-300 hover:bg-white focus:border-[var(--theme-color-primary)] focus:bg-white focus:ring-2 focus:ring-[var(--theme-color-accent)]/20"
+              [placeholder]="'operators.templatesSearchPlaceholder' | t"
+              [value]="templatesSearchText()"
+              (input)="updateTemplatesSearchText($event)"
+              (keydown.enter)="searchOperatorTemplates()"
+            />
+            @if (templatesSearchText()) {
+              <button
+                type="button"
+                class="absolute end-2 text-slate-400 hover:text-slate-600 focus:outline-none"
+                (click)="clearOperatorTemplatesSearch()"
+              >
+                <app-icon [icon]="restoreIcon" [size]="13" />
+              </button>
+            }
+          </div>
+        </div>
+
+        <!-- Action Buttons (2 cols) -->
+        <div class="flex items-center gap-1.5 md:col-span-2">
+          <app-button
+            size="sm"
+            type="button"
+            class="flex-1"
+            [loading]="operatorsStore.templatesSelectionLoading()"
+            (pressed)="searchOperatorTemplates()"
+          >
+            <app-icon [icon]="searchIcon" [size]="14" />
+            {{ 'branches.searchAction' | t }}
+          </app-button>
+          @if (templatesSearchText() || templatesBranchFilter()) {
+            <app-button
+              size="sm"
+              type="button"
+              variant="secondary"
+              (pressed)="clearAllTemplatesFilters()"
+              [title]="'branches.clearSearch' | t"
+            >
+              <app-icon [icon]="restoreIcon" [size]="14" />
+            </app-button>
+          }
+        </div>
       </div>
+
+      <!-- Active Branch Filter Chip -->
+      @if (activeBranchFilterName(); as branchName) {
+        <div class="mt-2.5 flex items-center gap-2 border-t border-slate-100 pt-2">
+          <span class="text-[11px] font-bold text-slate-500">
+            {{ 'operators.filterByBranch' | t }}:
+          </span>
+          <span
+            class="inline-flex items-center gap-1.5 rounded-full border border-cyan-200 bg-cyan-50 px-2.5 py-0.5 text-[11px] font-bold text-cyan-800"
+          >
+            {{ branchName }}
+            <button
+              type="button"
+              class="inline-flex h-3.5 w-3.5 items-center justify-center rounded-full hover:bg-cyan-200/80 hover:text-cyan-950 focus:outline-none"
+              (click)="clearBranchFilter()"
+            >
+              ✕
+            </button>
+          </span>
+        </div>
+      }
     </div>
 
     @if (operatorsStore.templatesSelectionLoading()) {
       <div
-        class="rounded-lg border border-slate-100 bg-white p-3 text-center text-[11px] font-semibold text-slate-500"
+        class="rounded-xl border border-slate-200/80 bg-white p-6 text-center text-xs font-semibold text-slate-500 shadow-2xs"
       >
         <span
-          class="mx-auto mb-1.5 block h-4 w-4 animate-spin rounded-full border-2 border-[var(--theme-color-accent)]/30 border-t-[var(--theme-color-accent)]"
+          class="mx-auto mb-2 block h-5 w-5 animate-spin rounded-full border-2 border-[var(--theme-color-accent)]/30 border-t-[var(--theme-color-accent)]"
         ></span>
         {{ 'operators.templatesSelectionLoading' | t }}
       </div>
@@ -743,205 +827,244 @@
 
     @if (operatorsStore.templatesSelectionError()) {
       <div
-        class="rounded-lg border border-rose-100 bg-rose-50 p-2.5 text-[11px] font-semibold text-[var(--theme-color-danger)]"
+        class="rounded-xl border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-[var(--theme-color-danger)] shadow-2xs"
       >
         {{ operatorsStore.templatesSelectionError() ?? '' | t }}
       </div>
     }
 
     @if (operatorsStore.templatesSelection(); as selection) {
-      <div class="grid gap-2 sm:grid-cols-2">
-        <div class="rounded-lg border border-cyan-100 bg-cyan-50 p-2.5">
-          <p class="text-[10px] font-bold uppercase text-cyan-700">
-            {{ 'operators.selectedTemplates' | t }}
-          </p>
-          <p class="mt-0.5 text-sm font-bold text-slate-900">
-            {{ selectedTemplatesForModal().length }}
-          </p>
-        </div>
-        <div class="rounded-lg border border-slate-100 bg-slate-50 p-2.5">
-          <p class="text-[10px] font-bold uppercase text-slate-500">
-            {{ 'operators.availableTemplates' | t }}
-          </p>
-          <p class="mt-0.5 text-sm font-bold text-slate-900">
-            {{ availableTemplatesForModal().length }}
-          </p>
-        </div>
-      </div>
-
-      <section class="space-y-2">
-        <div class="flex items-center justify-between gap-3">
-          <h3 class="text-xs font-bold text-slate-900">{{ 'operators.selectedTemplates' | t }}</h3>
-          <span
-            class="rounded-full bg-cyan-50 px-2 py-0.5 text-[10px] font-bold text-[var(--theme-color-accent)]"
+      <!-- 2-Column Split: Available Templates & Selected Templates -->
+      <div class="grid gap-3.5 lg:grid-cols-2">
+        <!-- Column 1: Available Templates (النماذج المتاحة) -->
+        <section
+          class="flex flex-col rounded-xl border border-slate-200/80 bg-slate-50/40 shadow-2xs overflow-hidden"
+        >
+          <div
+            class="flex items-center justify-between border-b border-slate-200/80 bg-slate-100/70 px-3.5 py-2.5"
           >
-            {{ selectedTemplatesForModal().length }}
-          </span>
-        </div>
-
-        @if (selectedTemplateBranchGroups().length > 0) {
-          <div class="grid min-w-0 gap-2">
-            @for (group of selectedTemplateBranchGroups(); track group.branchKey) {
-              <section
-                class="min-w-0 overflow-hidden rounded-xl border border-cyan-100 bg-white shadow-sm shadow-cyan-100/40"
+            <div class="flex items-center gap-2">
+              <span class="h-2 w-2 rounded-full bg-[var(--theme-color-primary)]"></span>
+              <h3 class="text-xs font-black text-slate-900">
+                {{ 'operators.availableTemplates' | t }}
+              </h3>
+              <span
+                class="rounded-full bg-slate-200 px-2 py-0.5 text-[10px] font-black text-slate-700"
               >
-                <button
-                  type="button"
-                  class="flex w-full min-w-0 items-center justify-between gap-3 bg-cyan-50/70 p-2.5 text-start transition hover:bg-cyan-50"
-                  [attr.aria-expanded]="group.expanded"
-                  (click)="toggleTemplateBranch(group.branchKey)"
-                >
-                  <span class="flex min-w-0 items-center gap-2">
-                    <span
-                      class="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-white text-[var(--theme-color-accent)] shadow-sm shadow-cyan-100/70"
-                    >
-                      <app-icon
-                        [icon]="group.expanded ? chevronDownIcon : chevronRightIcon"
-                        [size]="15"
-                      />
-                    </span>
-                    <span class="min-w-0">
-                      <span class="block truncate text-xs font-bold text-slate-900">
-                        {{ group.branchName }}
-                      </span>
-                      @if (group.branchCode) {
-                        <span class="mt-0.5 block truncate text-[10px] font-bold text-cyan-700">
-                          {{ group.branchCode }}
-                        </span>
-                      }
-                    </span>
-                  </span>
-                  <span
-                    class="shrink-0 rounded-full bg-white px-2 py-0.5 text-[10px] font-bold text-[var(--theme-color-accent)]"
-                  >
-                    {{ group.templates.length }}
-                  </span>
-                </button>
-
-                @if (group.expanded) {
-                  <div class="divide-y divide-cyan-50 border-t border-cyan-100">
-                    @for (template of group.templates; track template.templateId) {
-                      <article class="min-w-0 p-3">
-                        <div
-                          class="grid min-w-0 gap-2 md:grid-cols-[minmax(0,1fr)_auto] md:items-start"
-                        >
-                          <div class="min-w-0">
-                            <p
-                              class="break-words text-xs font-bold text-slate-900 [overflow-wrap:anywhere]"
-                            >
-                              {{ template.nameEn }}
-                            </p>
-                            @if (template.nameAr) {
-                              <p
-                                class="mt-0.5 break-words text-[11px] font-semibold text-slate-500 [overflow-wrap:anywhere]"
-                              >
-                                {{ template.nameAr }}
-                              </p>
-                            }
-                            @if (template.description) {
-                              <p
-                                class="mt-1 line-clamp-2 break-words text-[11px] leading-4 text-slate-500 [overflow-wrap:anywhere]"
-                              >
-                                {{ template.description }}
-                              </p>
-                            }
-                          </div>
-                          <div class="flex min-w-0 flex-wrap gap-1.5 md:justify-end">
-                            <app-button
-                              size="sm"
-                              type="button"
-                              variant="secondary"
-                              (pressed)="removeOperatorTemplate(template.templateId)"
-                            >
-                              {{ 'operators.removeTemplate' | t }}
-                            </app-button>
-                          </div>
-                        </div>
-                      </article>
-                    }
-                  </div>
-                }
-              </section>
+                {{ availableTemplatesForModal().length }}
+              </span>
+            </div>
+            @if (templatesBranchFilter()) {
+              <span class="text-[10px] font-semibold text-slate-500">
+                ({{ 'operators.allBranches' | t }}: {{ totalAvailableTemplatesCount() }})
+              </span>
             }
           </div>
-        } @else {
+
           <div
-            class="rounded-lg border border-dashed border-slate-200 bg-white p-4 text-center text-xs font-semibold text-slate-500"
+            class="h-[340px] max-h-[38vh] flex-1 overflow-y-auto custom-scrollbar p-2.5 space-y-2 pe-1.5"
           >
-            {{ 'operators.noSelectedTemplates' | t }}
-          </div>
-        }
-      </section>
-
-      <section class="space-y-2">
-        <div class="flex items-center justify-between gap-3">
-          <h3 class="text-xs font-bold text-slate-900">{{ 'operators.availableTemplates' | t }}</h3>
-          <span class="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-600">
-            {{ availableTemplatesForModal().length }}
-          </span>
-        </div>
-
-        <div class="grid min-w-0 gap-2">
-          @for (template of availableTemplatesForModal(); track template.templateId) {
-            <article
-              class="min-w-0 rounded-xl border border-slate-100 bg-white p-3 shadow-sm shadow-slate-100/70 transition hover:border-cyan-100 hover:bg-slate-50"
-            >
-              <div class="grid min-w-0 gap-2 md:grid-cols-[minmax(0,1fr)_auto] md:items-start">
-                <div class="min-w-0">
-                  <p class="break-words text-xs font-bold text-slate-900 [overflow-wrap:anywhere]">
-                    {{ template.nameEn }}
-                  </p>
-                  @if (template.nameAr) {
-                    <p
-                      class="mt-0.5 break-words text-[11px] font-semibold text-slate-500 [overflow-wrap:anywhere]"
+            @for (template of availableTemplatesForModal(); track template.templateId) {
+              <article
+                class="group min-w-0 rounded-xl border border-slate-200/80 bg-white p-3 shadow-2xs transition-all duration-150 hover:border-[var(--theme-color-accent)] hover:shadow-xs"
+              >
+                <div class="flex flex-col gap-2.5 sm:flex-row sm:items-start sm:justify-between">
+                  <div class="min-w-0 flex-1">
+                    <h4
+                      class="break-words text-xs font-bold leading-snug text-slate-900 group-hover:text-[var(--theme-color-primary)] transition-colors [overflow-wrap:anywhere]"
                     >
-                      {{ template.nameAr }}
-                    </p>
-                  }
-                  @if (template.description) {
-                    <p
-                      class="mt-1 line-clamp-2 break-words text-[11px] leading-4 text-slate-500 [overflow-wrap:anywhere]"
+                      {{ template.nameEn }}
+                    </h4>
+                    @if (template.nameAr) {
+                      <p
+                        class="mt-0.5 break-words text-[11px] font-semibold text-slate-500 [overflow-wrap:anywhere]"
+                      >
+                        {{ template.nameAr }}
+                      </p>
+                    }
+                    @if (template.description) {
+                      <p
+                        class="mt-1 line-clamp-2 break-words text-[11px] leading-relaxed text-slate-500 [overflow-wrap:anywhere]"
+                      >
+                        {{ template.description }}
+                      </p>
+                    }
+                    <div class="mt-2.5 flex flex-wrap items-center gap-1.5 text-[10px] font-bold">
+                      <span
+                        class="inline-flex items-center rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 text-slate-700"
+                      >
+                        {{ templateBranchName(template) }}
+                      </span>
+                      @if (template.branchCode) {
+                        <span
+                          class="inline-flex items-center rounded-md border border-slate-200 bg-slate-100/80 px-1.5 py-0.5 text-slate-600"
+                        >
+                          {{ template.branchCode }}
+                        </span>
+                      }
+                      @if (template.questionsCount) {
+                        <span
+                          class="inline-flex items-center rounded-md border border-cyan-200/60 bg-cyan-50 px-2 py-0.5 text-cyan-800 font-extrabold"
+                        >
+                          {{ template.questionsCount }} {{ 'operators.questions' | t }}
+                        </span>
+                      }
+                    </div>
+                  </div>
+                  <div class="shrink-0 self-end sm:self-center">
+                    <app-button
+                      size="sm"
+                      type="button"
+                      variant="secondary"
+                      (pressed)="selectOperatorTemplate(template.templateId)"
                     >
-                      {{ template.description }}
-                    </p>
-                  }
-                  <div class="mt-2 flex flex-wrap gap-1.5 text-[10px] font-bold text-slate-500">
-                    <span class="rounded-full bg-slate-50 px-2 py-0.5">
-                      {{ templateBranchName(template) }}
-                    </span>
+                      <app-icon [icon]="plusIcon" [size]="13" />
+                      {{ 'operators.selectTemplate' | t }}
+                    </app-button>
                   </div>
                 </div>
-                <div class="flex min-w-0 flex-wrap gap-1.5 md:justify-end">
-                  <span
-                    class="max-w-full truncate rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-600"
-                  >
-                    {{ template.branchCode || '-' }}
-                  </span>
-                  <app-button
-                    size="sm"
-                    type="button"
-                    variant="secondary"
-                    (pressed)="selectOperatorTemplate(template.templateId)"
-                  >
-                    {{ 'operators.selectTemplate' | t }}
-                  </app-button>
-                </div>
+              </article>
+            } @empty {
+              <div
+                class="flex h-full min-h-[160px] flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 bg-white p-6 text-center text-xs font-semibold text-slate-500"
+              >
+                {{ 'operators.noAvailableTemplates' | t }}
               </div>
-            </article>
-          } @empty {
-            <div
-              class="rounded-lg border border-dashed border-slate-200 bg-white p-4 text-center text-xs font-semibold text-slate-500"
-            >
-              {{ 'operators.noAvailableTemplates' | t }}
+            }
+          </div>
+        </section>
+
+        <!-- Column 2: Selected Templates (النماذج المختارة) -->
+        <section
+          class="flex flex-col rounded-xl border border-cyan-200/70 bg-cyan-50/20 shadow-2xs overflow-hidden"
+        >
+          <div
+            class="flex items-center justify-between border-b border-cyan-100 bg-cyan-50/70 px-3.5 py-2.5"
+          >
+            <div class="flex items-center gap-2">
+              <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
+              <h3 class="text-xs font-black text-slate-900">
+                {{ 'operators.selectedTemplates' | t }}
+              </h3>
+              <span
+                class="rounded-full bg-[var(--theme-color-primary)] px-2 py-0.5 text-[10px] font-black text-white"
+              >
+                {{ selectedTemplatesForModal().length }}
+              </span>
             </div>
+            <span class="text-[10px] font-bold text-cyan-800">
+              {{ selectedTemplateBranchGroups().length }} {{ 'operators.templateBranches' | t }}
+            </span>
+          </div>
+
+          <div
+            class="h-[340px] max-h-[38vh] flex-1 overflow-y-auto custom-scrollbar p-2.5 space-y-2 pe-1.5"
+          >
+            @if (selectedTemplateBranchGroups().length > 0) {
+              @for (group of selectedTemplateBranchGroups(); track group.branchKey) {
+                <div
+                  class="min-w-0 overflow-hidden rounded-xl border border-cyan-100 bg-white shadow-2xs"
+                >
+                  <button
+                    type="button"
+                    class="flex w-full min-w-0 items-center justify-between gap-3 bg-gradient-to-r from-cyan-50/80 to-white p-2.5 text-start transition hover:bg-cyan-50"
+                    [attr.aria-expanded]="group.expanded"
+                    (click)="toggleTemplateBranch(group.branchKey)"
+                  >
+                    <span class="flex min-w-0 items-center gap-2">
+                      <span
+                        class="grid h-6 w-6 shrink-0 place-items-center rounded-lg bg-white text-[var(--theme-color-accent)] shadow-2xs"
+                      >
+                        <app-icon
+                          [icon]="group.expanded ? chevronDownIcon : chevronRightIcon"
+                          [size]="14"
+                        />
+                      </span>
+                      <span class="min-w-0">
+                        <span class="block truncate text-xs font-bold text-slate-900">
+                          {{ group.branchName }}
+                        </span>
+                        @if (group.branchCode) {
+                          <span class="block truncate text-[10px] font-bold text-cyan-700">
+                            {{ group.branchCode }}
+                          </span>
+                        }
+                      </span>
+                    </span>
+                    <span
+                      class="shrink-0 rounded-full bg-cyan-100 px-2 py-0.5 text-[10px] font-extrabold text-cyan-800"
+                    >
+                      {{ group.templates.length }}
+                    </span>
+                  </button>
+
+                  @if (group.expanded) {
+                    <div class="divide-y divide-slate-100 border-t border-cyan-100">
+                      @for (template of group.templates; track template.templateId) {
+                        <article class="min-w-0 p-2.5 hover:bg-slate-50/50 transition">
+                          <div class="flex items-center justify-between gap-2">
+                            <div class="min-w-0 flex-1">
+                              <p
+                                class="break-words text-xs font-bold text-slate-900 [overflow-wrap:anywhere]"
+                              >
+                                {{ template.nameEn }}
+                              </p>
+                              @if (template.nameAr) {
+                                <p class="truncate text-[11px] font-semibold text-slate-500">
+                                  {{ template.nameAr }}
+                                </p>
+                              }
+                            </div>
+                            <button
+                              type="button"
+                              class="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2 py-1 text-[11px] font-bold text-slate-600 shadow-2xs transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-700 focus:outline-none"
+                              (click)="removeOperatorTemplate(template.templateId)"
+                            >
+                              <app-icon [icon]="restoreIcon" [size]="12" />
+                              {{ 'operators.removeTemplate' | t }}
+                            </button>
+                          </div>
+                        </article>
+                      }
+                    </div>
+                  }
+                </div>
+              }
+            } @else {
+              <div
+                class="flex h-full min-h-[160px] flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 bg-white p-6 text-center text-xs font-semibold text-slate-500"
+              >
+                {{ 'operators.noSelectedTemplates' | t }}
+              </div>
+            }
+          </div>
+        </section>
+      </div>
+
+      <!-- Integrated Themed Footer Bar -->
+      <div
+        class="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200/90 bg-slate-50/80 px-4 py-2.5 shadow-2xs sm:flex-nowrap"
+      >
+        <div class="flex items-center gap-3">
+          <div class="flex items-center gap-1.5 text-xs font-bold text-slate-800">
+            <span
+              class="flex h-5 min-w-5 items-center justify-center rounded-full bg-[var(--theme-color-primary)] px-1.5 text-[11px] font-black text-white"
+            >
+              {{ selectedTemplatesForModal().length }}
+            </span>
+            <span>{{ 'operators.selectedTemplates' | t }}</span>
+          </div>
+          @if (hasTemplateSelectionChanges()) {
+            <span
+              class="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-0.5 text-[10px] font-bold text-amber-700"
+            >
+              <span class="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+              {{ 'operators.unsavedChanges' | t }}
+            </span>
           }
         </div>
-      </section>
 
-      <div
-        class="sticky bottom-0 rounded-xl border border-slate-200/80 bg-white/95 p-3 backdrop-blur shadow-sm"
-      >
-        <div class="flex items-center justify-end gap-2">
+        <div class="flex items-center gap-2">
           <app-button
             size="sm"
             type="button"
@@ -957,6 +1080,7 @@
             [loading]="operatorsStore.templatesSelectionSaving()"
             (pressed)="saveOperatorTemplates()"
           >
+            <app-icon [icon]="checkIcon" [size]="14" />
             {{ 'operators.saveTemplates' | t }}
           </app-button>
         </div>

@@ -294,6 +294,27 @@ export class AnonymousTemplatesStore {
       .subscribe({
         next: (template) => {
           this.selectedTemplateSignal.set(template);
+          this.templatesSignal.update((templates) =>
+            templates.map((item) =>
+              item.anonymousTemplateId === template.anonymousTemplateId
+                ? {
+                    ...item,
+                    nameEn: template.nameEn,
+                    nameAr: template.nameAr,
+                    description: template.description,
+                    activeFrom: template.activeFrom,
+                    expireTo: template.expireTo,
+                    isActive: template.isActive,
+                    isArchived: template.isArchived,
+                    logoPath: template.logoPath,
+                    publicUrl: template.publicUrl,
+                    qrCode: template.qrCode,
+                    customInputsCount: template.customInputsCount,
+                    questionsCount: template.questionsCount,
+                  }
+                : item,
+            ),
+          );
           this.successSignal.set('anonymousTemplates.updateSuccess');
           onUpdated();
         },

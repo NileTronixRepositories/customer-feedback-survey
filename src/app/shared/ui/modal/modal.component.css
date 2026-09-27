@@ -12,3 +12,16 @@
 section[role='dialog'] {
   animation: modalEnter 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
+@media (max-width: 575.98px) {
+  section[role='dialog'] {
+    max-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 1rem);
+    border-radius: 0.875rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  section[role='dialog'] {
+    animation: none;
+  }
+}

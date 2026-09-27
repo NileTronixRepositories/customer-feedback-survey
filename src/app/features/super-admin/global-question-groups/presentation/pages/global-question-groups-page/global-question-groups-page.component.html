@@ -24,21 +24,7 @@
     }
   </app-page-header>
 
-  @if (globalQuestionGroupsStore.success()) {
-    <div
-      class="border border-emerald-100 bg-emerald-50 p-3 text-xs font-semibold text-emerald-700"
-    >
-      {{ globalQuestionGroupsStore.success() ?? '' | t }}
-    </div>
-  }
 
-  @if (globalQuestionGroupsStore.error()) {
-    <div
-      class="border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-[var(--theme-color-danger)]"
-    >
-      {{ globalQuestionGroupsStore.error() ?? '' | t }}
-    </div>
-  }
 
   <app-card [title]="''" [subtitle]="''">
     <div

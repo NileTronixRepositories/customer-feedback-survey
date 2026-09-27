@@ -271,10 +271,16 @@ export class OperatorsStore {
         next: (stateChange) => {
           this.successSignal.set('operators.deactivateSuccess');
           this.markOperatorActive(stateChange.operatorId || operatorId, stateChange.isActive);
-          this.load();
           onDeactivated();
         },
         error: (error: unknown) => {
+          if (this.isOperatorAlreadyInState(error, 'alreadyinactive')) {
+            this.markOperatorActive(operatorId, false);
+            this.successSignal.set('operators.alreadyInactiveSynced');
+            onDeactivated();
+            return;
+          }
+
           this.errorSignal.set(this.readErrorKey(error, 'operators.deactivateError'));
         },
       });
@@ -299,10 +305,16 @@ export class OperatorsStore {
         next: (stateChange) => {
           this.successSignal.set('operators.restoreSuccess');
           this.markOperatorActive(stateChange.operatorId || operatorId, stateChange.isActive);
-          this.load();
           onRestored();
         },
         error: (error: unknown) => {
+          if (this.isOperatorAlreadyInState(error, 'alreadyactive')) {
+            this.markOperatorActive(operatorId, true);
+            this.successSignal.set('operators.alreadyActiveSynced');
+            onRestored();
+            return;
+          }
+
           this.errorSignal.set(this.readErrorKey(error, 'operators.restoreError'));
         },
       });
@@ -515,6 +527,15 @@ export class OperatorsStore {
       (marker.includes('template') &&
         (marker.includes('inactive') || marker.includes('expired') || marker.includes('notfound')))
     );
+  }
+
+  private isOperatorAlreadyInState(error: unknown, stateMarker: string): boolean {
+    if (!(error instanceof HttpErrorResponse)) {
+      return false;
+    }
+
+    const marker = this.readErrorMarker(error.error).replace(/[\s_.-]/g, '').toLowerCase();
+    return (error.status === 400 || error.status === 422) && marker.includes(stateMarker);
   }
 
   private readErrorMarker(errorBody: unknown): string {

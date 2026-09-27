@@ -33,6 +33,7 @@ import { DepartmentAdminsStore } from '../../../../../department-admin/departmen
 import { OperatorsStore } from '../../../../../department-admin/operators/presentation/state/operators.store';
 import { DepartmentDetailsUser } from '../../../domain/department.model';
 import { DepartmentsStore } from '../../state/departments.store';
+import { ConfirmDialogService } from '../../../../../../shared/ui/confirm-dialog/confirm-dialog.service';
 
 interface ResetPasswordTarget {
   readonly applicationUserId: string;
@@ -68,6 +69,7 @@ export class DepartmentDetailsPageComponent implements OnInit {
   private readonly location = inject(Location);
   private readonly route = inject(ActivatedRoute);
   private readonly userPasswordResetService = inject(UserPasswordResetService);
+  private readonly confirmDialog = inject(ConfirmDialogService);
 
   readonly arrowLeftIcon = ArrowLeft;
   readonly cancelIcon = X;
@@ -173,13 +175,21 @@ export class DepartmentDetailsPageComponent implements OnInit {
     });
   }
 
-  deleteDepartment(): void {
+  async deleteDepartment(): Promise<void> {
     const department = this.departmentsStore.selectedDetails();
     if (!department || !department.isActive || this.departmentsStore.deleting()) {
       return;
     }
 
-    const confirmed = globalThis.confirm(this.i18n.translate('departments.deleteConfirm'));
+    const deptName = this.localized(department.nameEn, department.nameAr);
+    const confirmed = await this.confirmDialog.confirm({
+      title: this.i18n.language() === 'ar' ? 'حذف القسم' : 'Delete Department',
+      message: this.i18n.translate('departments.deleteConfirm'),
+      itemName: deptName,
+      confirmText: this.i18n.translate('common.delete'),
+      cancelText: this.i18n.translate('common.cancel'),
+      variant: 'danger',
+    });
     if (!confirmed) {
       return;
     }
@@ -189,7 +199,7 @@ export class DepartmentDetailsPageComponent implements OnInit {
     });
   }
 
-  restoreDepartment(): void {
+  async restoreDepartment(): Promise<void> {
     const department = this.departmentsStore.selectedDetails();
     if (
       !department ||
@@ -200,7 +210,15 @@ export class DepartmentDetailsPageComponent implements OnInit {
       return;
     }
 
-    const confirmed = globalThis.confirm(this.i18n.translate('departments.restoreConfirm'));
+    const deptName = this.localized(department.nameEn, department.nameAr);
+    const confirmed = await this.confirmDialog.confirm({
+      title: this.i18n.language() === 'ar' ? 'استعادة القسم' : 'Restore Department',
+      message: this.i18n.translate('departments.restoreConfirm'),
+      itemName: deptName,
+      confirmText: this.i18n.translate('common.restore'),
+      cancelText: this.i18n.translate('common.cancel'),
+      variant: 'success',
+    });
     if (!confirmed) {
       return;
     }
@@ -320,7 +338,7 @@ export class DepartmentDetailsPageComponent implements OnInit {
     );
   }
 
-  deactivateDepartmentAdmin(admin: DepartmentDetailsUser, event?: MouseEvent): void {
+  async deactivateDepartmentAdmin(admin: DepartmentDetailsUser, event?: MouseEvent): Promise<void> {
     event?.stopPropagation();
     if (
       !admin.departmentAdminId ||
@@ -330,7 +348,15 @@ export class DepartmentDetailsPageComponent implements OnInit {
       return;
     }
 
-    const confirmed = globalThis.confirm(this.i18n.translate('departmentAdmins.deactivateConfirm'));
+    const adminName = this.localized(admin.nameEn, admin.nameAr);
+    const confirmed = await this.confirmDialog.confirm({
+      title: this.i18n.language() === 'ar' ? 'تعطيل مسؤول القسم' : 'Deactivate Department Admin',
+      message: this.i18n.translate('departmentAdmins.deactivateConfirm'),
+      itemName: adminName,
+      confirmText: this.i18n.language() === 'ar' ? 'تعطيل' : 'Deactivate',
+      cancelText: this.i18n.translate('common.cancel'),
+      variant: 'danger',
+    });
     if (!confirmed) {
       return;
     }
@@ -343,7 +369,7 @@ export class DepartmentDetailsPageComponent implements OnInit {
     });
   }
 
-  restoreDepartmentAdmin(admin: DepartmentDetailsUser, event?: MouseEvent): void {
+  async restoreDepartmentAdmin(admin: DepartmentDetailsUser, event?: MouseEvent): Promise<void> {
     event?.stopPropagation();
     if (
       !admin.departmentAdminId ||
@@ -353,7 +379,15 @@ export class DepartmentDetailsPageComponent implements OnInit {
       return;
     }
 
-    const confirmed = globalThis.confirm(this.i18n.translate('departmentAdmins.restoreConfirm'));
+    const adminName = this.localized(admin.nameEn, admin.nameAr);
+    const confirmed = await this.confirmDialog.confirm({
+      title: this.i18n.language() === 'ar' ? 'استعادة مسؤول القسم' : 'Restore Department Admin',
+      message: this.i18n.translate('departmentAdmins.restoreConfirm'),
+      itemName: adminName,
+      confirmText: this.i18n.translate('common.restore'),
+      cancelText: this.i18n.translate('common.cancel'),
+      variant: 'success',
+    });
     if (!confirmed) {
       return;
     }
@@ -366,7 +400,7 @@ export class DepartmentDetailsPageComponent implements OnInit {
     });
   }
 
-  deactivateOperator(operator: DepartmentDetailsUser, event?: MouseEvent): void {
+  async deactivateOperator(operator: DepartmentDetailsUser, event?: MouseEvent): Promise<void> {
     event?.stopPropagation();
     if (
       !operator.operatorId ||
@@ -376,7 +410,15 @@ export class DepartmentDetailsPageComponent implements OnInit {
       return;
     }
 
-    const confirmed = globalThis.confirm(this.i18n.translate('operators.deactivateConfirm'));
+    const operatorName = this.localized(operator.nameEn, operator.nameAr);
+    const confirmed = await this.confirmDialog.confirm({
+      title: this.i18n.language() === 'ar' ? 'تعطيل المشغل' : 'Deactivate Operator',
+      message: this.i18n.translate('operators.deactivateConfirm'),
+      itemName: operatorName,
+      confirmText: this.i18n.language() === 'ar' ? 'تعطيل' : 'Deactivate',
+      cancelText: this.i18n.translate('common.cancel'),
+      variant: 'danger',
+    });
     if (!confirmed) {
       return;
     }
@@ -389,7 +431,7 @@ export class DepartmentDetailsPageComponent implements OnInit {
     });
   }
 
-  restoreOperator(operator: DepartmentDetailsUser, event?: MouseEvent): void {
+  async restoreOperator(operator: DepartmentDetailsUser, event?: MouseEvent): Promise<void> {
     event?.stopPropagation();
     if (
       !operator.operatorId ||
@@ -399,7 +441,15 @@ export class DepartmentDetailsPageComponent implements OnInit {
       return;
     }
 
-    const confirmed = globalThis.confirm(this.i18n.translate('operators.restoreConfirm'));
+    const operatorName = this.localized(operator.nameEn, operator.nameAr);
+    const confirmed = await this.confirmDialog.confirm({
+      title: this.i18n.language() === 'ar' ? 'استعادة المشغل' : 'Restore Operator',
+      message: this.i18n.translate('operators.restoreConfirm'),
+      itemName: operatorName,
+      confirmText: this.i18n.translate('common.restore'),
+      cancelText: this.i18n.translate('common.cancel'),
+      variant: 'success',
+    });
     if (!confirmed) {
       return;
     }
@@ -570,6 +620,10 @@ export class DepartmentDetailsPageComponent implements OnInit {
     }
 
     return englishText || arabicText || fallback;
+  }
+
+  private localized(en: string | null | undefined, ar?: string | null | undefined): string {
+    return this.localizedText(en, ar, '');
   }
 
   private departmentAdminMaxLengthError(

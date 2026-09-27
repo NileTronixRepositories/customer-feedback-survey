@@ -53,6 +53,8 @@ import { InputComponent } from '../../../../../shared/ui/input/input.component';
 import { ModalComponent } from '../../../../../shared/ui/modal/modal.component';
 import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
 import { I18nService } from '../../../../../core/services/i18n.service';
+import { copyToClipboard } from '../../../../../shared/utils/clipboard.util';
+import { ToastService } from '../../../../../shared/ui/toast/toast.service';
 import { AnonymousTemplatesService } from '../../../data/anonymous-templates.service';
 import {
   AnonymousTemplate,
@@ -60,6 +62,7 @@ import {
   AnonymousTemplateCustomInputType,
   AnonymousTemplateScope,
   CreateAnonymousTemplateCustomInputPayload,
+  UpdateAnonymousTemplateCustomInputPayload,
 } from '../../../domain/anonymous-template.model';
 import { AnonymousTemplatesStore } from '../../state/anonymous-templates.store';
 
@@ -93,6 +96,24 @@ interface CustomInputFormControls {
 }
 
 type CustomInputFormGroup = FormGroup<CustomInputFormControls>;
+
+interface EditCustomInputFormControls {
+  customInputId: FormControl<string | null>;
+  originalType: FormControl<CustomInputTypeFormValue | null>;
+  name: FormControl<string>;
+  labelEn: FormControl<string>;
+  labelAr: FormControl<string>;
+  type: FormControl<CustomInputTypeFormValue>;
+  isRequired: FormControl<boolean>;
+  minLength: FormControl<number | null>;
+  maxLength: FormControl<number | null>;
+  minValue: FormControl<number | null>;
+  maxValue: FormControl<number | null>;
+  startWith: FormControl<string>;
+  order: FormControl<number>;
+}
+
+type EditCustomInputFormGroup = FormGroup<EditCustomInputFormControls>;
 
 interface AssignmentApiErrorItem {
   code?: string;
@@ -134,6 +155,7 @@ export class AnonymousTemplatesPageComponent implements OnInit {
   private readonly formBuilder = inject(FormBuilder);
   private readonly i18n = inject(I18nService);
   private readonly router = inject(Router);
+  private readonly toast = inject(ToastService);
 
   readonly dashboardIcon = BarChart3;
   readonly branchIcon = Building2;
@@ -172,6 +194,9 @@ export class AnonymousTemplatesPageComponent implements OnInit {
   readonly assignmentLogo = signal<File | null>(null);
   readonly assignmentLogoError = signal<string | null>(null);
   readonly createModalOpen = signal(false);
+  readonly editModalOpen = signal(false);
+  readonly editLoadingTemplateId = signal<string | null>(null);
+  readonly templatePendingEdit = signal<AnonymousTemplate | null>(null);
   readonly deleteModalOpen = signal(false);
   readonly restoreModalOpen = signal(false);
   readonly templatePendingDelete = signal<AnonymousTemplateListItem | null>(null);
@@ -238,6 +263,19 @@ export class AnonymousTemplatesPageComponent implements OnInit {
     expireTo: [''],
     customInputs: this.formBuilder.array<CustomInputFormGroup>([]),
   });
+
+  readonly editForm = this.formBuilder.nonNullable.group({
+    nameEn: ['', [Validators.required, Validators.maxLength(200)]],
+    nameAr: ['', [Validators.maxLength(200)]],
+    description: ['', [Validators.maxLength(1000)]],
+    activeFrom: ['', [Validators.required]],
+    expireTo: [''],
+    customInputs: this.formBuilder.array<EditCustomInputFormGroup>([]),
+  });
+
+  get editCustomInputsArray(): FormArray<EditCustomInputFormGroup> {
+    return this.editForm.controls.customInputs;
+  }
 
   toggleAdvancedFilters(): void {
     this.advancedFiltersOpen.update((open) => !open);
@@ -352,13 +390,59 @@ export class AnonymousTemplatesPageComponent implements OnInit {
   }
 
   openTemplateEdit(template: AnonymousTemplateListItem): void {
-    if (!this.canUpdateTemplate(template)) {
+    if (!this.canUpdateTemplate(template) || this.editLoadingTemplateId() !== null) {
       return;
     }
 
-    void this.router.navigate(['/anonymous-templates', template.anonymousTemplateId], {
-      queryParams: { edit: 'true' },
-    });
+    this.editLoadingTemplateId.set(template.anonymousTemplateId);
+    this.anonymousTemplatesStore.clearMessages();
+    this.anonymousTemplatesService
+      .details(template.anonymousTemplateId)
+      .pipe(
+        take(1),
+        finalize(() => this.editLoadingTemplateId.set(null)),
+      )
+      .subscribe({
+        next: (fullTemplate) => {
+          this.templatePendingEdit.set(fullTemplate);
+          this.populateEditForm(fullTemplate);
+          this.editModalOpen.set(true);
+        },
+      });
+  }
+
+  closeEditTemplate(): void {
+    this.editModalOpen.set(false);
+    this.templatePendingEdit.set(null);
+    this.resetEditForm();
+  }
+
+  updateTemplate(template: AnonymousTemplate): void {
+    this.editForm.markAllAsTouched();
+    this.validateEditTemplateDates();
+    this.validateEditCustomInputs();
+
+    if (this.editForm.invalid || this.anonymousTemplatesStore.updating()) {
+      return;
+    }
+
+    const formValue = this.editForm.getRawValue();
+    this.anonymousTemplatesStore.updateTemplate(
+      template.anonymousTemplateId,
+      {
+        nameEn: formValue.nameEn.trim(),
+        nameAr: this.toNullableTrimmedText(formValue.nameAr),
+        description: this.toNullableTrimmedText(formValue.description),
+        activeFrom: this.toUtcIsoDateTime(formValue.activeFrom),
+        expireTo: formValue.expireTo ? this.toUtcIsoDateTime(formValue.expireTo) : null,
+        customInputs: this.toEditCustomInputsPayload(),
+      },
+      () => {
+        this.editModalOpen.set(false);
+        this.templatePendingEdit.set(null);
+        this.resetEditForm();
+      },
+    );
   }
 
   openTemplateResponses(template: AnonymousTemplateListItem): void {
@@ -669,36 +753,42 @@ export class AnonymousTemplatesPageComponent implements OnInit {
     return 'branchTemplates.fieldRequired';
   }
 
-  copyPublicUrl(publicUrl: string | null): void {
+  async copyPublicUrl(publicUrl: string | null): Promise<void> {
     if (!publicUrl) return;
-    if (!publicUrl) {
-      return;
-    }
 
-    if (globalThis.navigator?.clipboard) {
-      void globalThis.navigator.clipboard.writeText(publicUrl).then(() => {
-        this.copiedPublicUrl.set(true);
-      });
-      return;
+    const success = await copyToClipboard(publicUrl);
+    if (success) {
+      this.copiedPublicUrl.set(true);
+      this.toast.success(
+        this.i18n.language() === 'ar' ? 'تم نسخ الرابط بنجاح' : 'Public URL copied to clipboard',
+      );
+      setTimeout(() => this.copiedPublicUrl.set(false), 2500);
+    } else {
+      this.toast.error(
+        this.i18n.language() === 'ar' ? 'تعذر نسخ الرابط تلقائياً' : 'Failed to copy URL',
+      );
     }
-
-    this.copiedPublicUrl.set(false);
   }
 
-  copyTemplatePublicUrl(templateId: string, publicUrl: string | null): void {
+  async copyTemplatePublicUrl(templateId: string, publicUrl: string | null): Promise<void> {
     if (!publicUrl) return;
-    if (!publicUrl) {
-      return;
-    }
 
-    if (globalThis.navigator?.clipboard) {
-      void globalThis.navigator.clipboard.writeText(publicUrl).then(() => {
-        this.copiedTemplateId.set(templateId);
-      });
-      return;
+    const success = await copyToClipboard(publicUrl);
+    if (success) {
+      this.copiedTemplateId.set(templateId);
+      this.toast.success(
+        this.i18n.language() === 'ar' ? 'تم نسخ الرابط بنجاح' : 'Public URL copied to clipboard',
+      );
+      setTimeout(() => {
+        if (this.copiedTemplateId() === templateId) {
+          this.copiedTemplateId.set(null);
+        }
+      }, 2500);
+    } else {
+      this.toast.error(
+        this.i18n.language() === 'ar' ? 'تعذر نسخ الرابط تلقائياً' : 'Failed to copy URL',
+      );
     }
-
-    this.copiedTemplateId.set(null);
   }
 
   downloadQrCode(qrCode: string | null): void {
@@ -831,7 +921,9 @@ export class AnonymousTemplatesPageComponent implements OnInit {
     );
   }
 
-  private isAssignmentApiErrorResponse(errorBody: unknown): errorBody is AssignmentApiErrorResponse {
+  private isAssignmentApiErrorResponse(
+    errorBody: unknown,
+  ): errorBody is AssignmentApiErrorResponse {
     return typeof errorBody === 'object' && errorBody !== null;
   }
 
@@ -1090,8 +1182,428 @@ export class AnonymousTemplatesPageComponent implements OnInit {
     return Number.isNaN(date.getTime()) ? '' : date.toISOString();
   }
 
-  private toDateTimeLocalValue(date: Date): string {
+  private toDateTimeLocalValue(value: string | Date): string {
+    const date = typeof value === 'string' ? new Date(value) : value;
+    if (Number.isNaN(date.getTime())) {
+      return '';
+    }
+
     const offsetDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
     return offsetDate.toISOString().slice(0, 16);
+  }
+
+  addEditCustomInput(): void {
+    this.editCustomInputsArray.push(
+      this.createEditCustomInputGroup({
+        customInputId: null,
+        name: '',
+        labelEn: '',
+        labelAr: '',
+        type: 1,
+        isRequired: true,
+        minLength: null,
+        maxLength: null,
+        minValue: null,
+        maxValue: null,
+        startWith: '',
+        order: this.editCustomInputsArray.length + 1,
+      }),
+    );
+  }
+
+  removeEditCustomInput(index: number): void {
+    this.editCustomInputsArray.removeAt(index);
+    this.validateEditCustomInputs();
+  }
+
+  changeEditCustomInputType(inputGroup: EditCustomInputFormGroup): void {
+    if (this.hasExistingCustomInput(inputGroup)) {
+      return;
+    }
+
+    const type = inputGroup.controls.type.value;
+
+    if (type === '1') {
+      inputGroup.controls.minValue.setValue(null);
+      inputGroup.controls.maxValue.setValue(null);
+    } else {
+      inputGroup.controls.minLength.setValue(null);
+      inputGroup.controls.maxLength.setValue(null);
+      inputGroup.controls.startWith.setValue('');
+    }
+
+    this.validateEditCustomInputs();
+  }
+
+  hasExistingCustomInput(inputGroup: EditCustomInputFormGroup): boolean {
+    return Boolean(inputGroup.controls.customInputId.value);
+  }
+
+  editTemplateFieldError(field: AnonymousTemplateFieldName): string {
+    const control = this.editForm.controls[field];
+    if (!control.touched || control.valid) {
+      return '';
+    }
+
+    if (control.hasError('required')) {
+      return field === 'activeFrom'
+        ? 'branchTemplates.activeFromRequired'
+        : 'branchTemplates.nameEnRequired';
+    }
+
+    if (control.hasError('maxlength')) {
+      return this.maxLengthErrorKey(field);
+    }
+
+    if (control.hasError('dateRange')) {
+      return 'branchTemplates.expireToAfterActiveFrom';
+    }
+
+    return 'branchTemplates.fieldRequired';
+  }
+
+  editCustomInputFieldError(index: number, field: CustomInputFieldName): string {
+    const group = this.editCustomInputsArray.at(index);
+    if (!group) {
+      return '';
+    }
+
+    const control = group.controls[field];
+    if (!control.touched || control.valid) {
+      return '';
+    }
+
+    if (control.hasError('required')) {
+      return `branchTemplates.customInput${this.capitalizeField(field)}Required`;
+    }
+
+    if (control.hasError('maxlength')) {
+      return this.customInputMaxLengthErrorKey(field);
+    }
+
+    if (control.hasError('max')) {
+      return 'branchTemplates.customInputLengthMax';
+    }
+
+    if (control.hasError('min')) {
+      return 'branchTemplates.customInputOrderMin';
+    }
+
+    if (control.hasError('duplicatedName')) {
+      return 'branchTemplates.customInputDuplicatedName';
+    }
+
+    if (control.hasError('duplicatedOrder')) {
+      return 'branchTemplates.customInputDuplicatedOrder';
+    }
+
+    if (control.hasError('range') || control.hasError('integerValidation')) {
+      return 'branchTemplates.customInputRangeInvalid';
+    }
+
+    if (control.hasError('lengthRange')) {
+      return 'branchTemplates.customInputLengthRangeInvalid';
+    }
+
+    if (control.hasError('startWithInvalid')) {
+      return 'branchTemplates.customInputStartWithInvalid';
+    }
+
+    if (control.hasError('startWithEmpty')) {
+      return 'branchTemplates.customInputStartWithEmpty';
+    }
+
+    if (control.hasError('stringValidationInvalid') || control.hasError('stringValidation')) {
+      return 'branchTemplates.customInputStringValidationInvalid';
+    }
+
+    if (control.hasError('typeChanged')) {
+      return 'anonymousTemplates.customInputTypeCannotChange';
+    }
+
+    return 'branchTemplates.fieldRequired';
+  }
+
+  private customInputMaxLengthErrorKey(field: CustomInputFieldName): string {
+    return `branchTemplates.customInput${this.capitalizeField(field)}MaxLength`;
+  }
+
+  private populateEditForm(template: AnonymousTemplate): void {
+    this.editForm.reset({
+      nameEn: template.nameEn,
+      nameAr: template.nameAr ?? '',
+      description: template.description ?? '',
+      activeFrom: this.toDateTimeLocalValue(template.activeFrom),
+      expireTo: template.expireTo ? this.toDateTimeLocalValue(template.expireTo) : '',
+    });
+    this.editCustomInputsArray.clear();
+    template.customInputs.forEach((customInput) => {
+      this.editCustomInputsArray.push(
+        this.createEditCustomInputGroup({
+          customInputId: customInput.customInputId,
+          name: customInput.name,
+          labelEn: customInput.labelEn ?? '',
+          labelAr: customInput.labelAr ?? '',
+          type: customInput.type,
+          isRequired: customInput.isRequired,
+          minLength: customInput.minLength,
+          maxLength: customInput.maxLength,
+          minValue: customInput.minValue,
+          maxValue: customInput.maxValue,
+          startWith: customInput.startWith ?? '',
+          order: customInput.order,
+        }),
+      );
+    });
+  }
+
+  private resetEditForm(): void {
+    this.editForm.reset({
+      nameEn: '',
+      nameAr: '',
+      description: '',
+      activeFrom: '',
+      expireTo: '',
+    });
+    this.editCustomInputsArray.clear();
+  }
+
+  private createEditCustomInputGroup(value: {
+    customInputId: string | null;
+    name: string;
+    labelEn: string;
+    labelAr: string;
+    type: AnonymousTemplateCustomInputType;
+    isRequired: boolean;
+    minLength: number | null;
+    maxLength: number | null;
+    minValue: number | null;
+    maxValue: number | null;
+    startWith: string;
+    order: number;
+  }): EditCustomInputFormGroup {
+    const type = String(value.type) === '2' ? '2' : '1';
+    const group = this.formBuilder.group<EditCustomInputFormControls>({
+      customInputId: new FormControl<string | null>(value.customInputId),
+      originalType: new FormControl<CustomInputTypeFormValue | null>(
+        value.customInputId ? type : null,
+      ),
+      name: this.formBuilder.nonNullable.control(value.name, [
+        Validators.required,
+        Validators.maxLength(100),
+      ]),
+      labelEn: this.formBuilder.nonNullable.control(value.labelEn, [Validators.maxLength(200)]),
+      labelAr: this.formBuilder.nonNullable.control(value.labelAr, [Validators.maxLength(200)]),
+      type: this.formBuilder.nonNullable.control<CustomInputTypeFormValue>(type, [
+        Validators.required,
+      ]),
+      isRequired: this.formBuilder.nonNullable.control(value.isRequired),
+      minLength: new FormControl<number | null>(value.minLength, [Validators.max(3000)]),
+      maxLength: new FormControl<number | null>(value.maxLength, [Validators.max(3000)]),
+      minValue: new FormControl<number | null>(value.minValue),
+      maxValue: new FormControl<number | null>(value.maxValue),
+      startWith: this.formBuilder.nonNullable.control(value.startWith, [Validators.maxLength(100)]),
+      order: this.formBuilder.nonNullable.control(value.order, [
+        Validators.required,
+        Validators.min(1),
+      ]),
+    });
+
+    if (value.customInputId) {
+      group.controls.type.disable({ emitEvent: false });
+    }
+
+    return group;
+  }
+
+  private validateEditTemplateDates(): void {
+    const activeFrom = this.editForm.controls.activeFrom.value;
+    const expireTo = this.editForm.controls.expireTo.value;
+    const expireToControl = this.editForm.controls.expireTo;
+
+    if (!expireTo) {
+      const { dateRange: _dateRange, ...remainingErrors } = expireToControl.errors ?? {};
+      expireToControl.setErrors(Object.keys(remainingErrors).length > 0 ? remainingErrors : null);
+      return;
+    }
+
+    const activeFromTime = new Date(activeFrom).getTime();
+    const expireToTime = new Date(expireTo).getTime();
+
+    if (
+      Number.isNaN(activeFromTime) ||
+      Number.isNaN(expireToTime) ||
+      expireToTime <= activeFromTime
+    ) {
+      expireToControl.setErrors({ ...(expireToControl.errors ?? {}), dateRange: true });
+      return;
+    }
+
+    const { dateRange: _dateRange, ...remainingErrors } = expireToControl.errors ?? {};
+    expireToControl.setErrors(Object.keys(remainingErrors).length > 0 ? remainingErrors : null);
+  }
+
+  private validateEditCustomInputs(): void {
+    const names = new Map<string, number[]>();
+    const orders = new Map<number, number[]>();
+    const ids = new Map<string, number[]>();
+
+    this.editCustomInputsArray.controls.forEach((inputGroup, index) => {
+      this.clearEditCustomInputManualErrors(inputGroup);
+
+      const value = inputGroup.getRawValue();
+      const name = value.name.trim().toLowerCase();
+      if (name.length === 0) {
+        this.setControlError(inputGroup.controls.name, 'required');
+      } else {
+        names.set(name, [...(names.get(name) ?? []), index]);
+      }
+
+      if (value.customInputId) {
+        ids.set(value.customInputId, [...(ids.get(value.customInputId) ?? []), index]);
+      }
+
+      if (!Number.isInteger(value.order) || value.order <= 0) {
+        this.setControlError(inputGroup.controls.order, 'invalidOrder');
+      } else {
+        orders.set(value.order, [...(orders.get(value.order) ?? []), index]);
+      }
+
+      if (value.originalType !== null && value.originalType !== value.type) {
+        this.setControlError(inputGroup.controls.type, 'typeChanged');
+      }
+
+      if (value.type === '1') {
+        inputGroup.controls.minValue.setValue(null, { emitEvent: false });
+        inputGroup.controls.maxValue.setValue(null, { emitEvent: false });
+        this.validateEditStringCustomInput(inputGroup);
+      } else {
+        inputGroup.controls.minLength.setValue(null, { emitEvent: false });
+        inputGroup.controls.maxLength.setValue(null, { emitEvent: false });
+        inputGroup.controls.startWith.setValue('', { emitEvent: false });
+        this.validateEditIntegerCustomInput(inputGroup);
+      }
+    });
+
+    names.forEach((indexes) => {
+      if (indexes.length > 1) {
+        indexes.forEach((index) =>
+          this.setControlError(
+            this.editCustomInputsArray.at(index).controls.name,
+            'duplicatedName',
+          ),
+        );
+      }
+    });
+
+    orders.forEach((indexes) => {
+      if (indexes.length > 1) {
+        indexes.forEach((index) =>
+          this.setControlError(
+            this.editCustomInputsArray.at(index).controls.order,
+            'duplicatedOrder',
+          ),
+        );
+      }
+    });
+
+    ids.forEach((indexes) => {
+      if (indexes.length > 1) {
+        indexes.forEach((index) =>
+          this.setControlError(
+            this.editCustomInputsArray.at(index).controls.name,
+            'duplicatedName',
+          ),
+        );
+      }
+    });
+  }
+
+  private validateEditStringCustomInput(inputGroup: EditCustomInputFormGroup): void {
+    const minLength = inputGroup.controls.minLength.value;
+    const maxLength = inputGroup.controls.maxLength.value;
+
+    if (minLength !== null && minLength < 0) {
+      this.setControlError(inputGroup.controls.minLength, 'stringValidation');
+    }
+
+    if (maxLength !== null && maxLength > 3000) {
+      this.setControlError(inputGroup.controls.maxLength, 'stringValidation');
+    }
+
+    if (minLength !== null && maxLength !== null && maxLength < minLength) {
+      this.setControlError(inputGroup.controls.maxLength, 'stringValidation');
+    }
+
+    const startWith = inputGroup.controls.startWith.value;
+    if (startWith.length > 0 && startWith.trim().length === 0) {
+      this.setControlError(inputGroup.controls.startWith, 'startWithEmpty');
+    }
+  }
+
+  private validateEditIntegerCustomInput(inputGroup: EditCustomInputFormGroup): void {
+    const minValue = inputGroup.controls.minValue.value;
+    const maxValue = inputGroup.controls.maxValue.value;
+
+    if (minValue !== null && maxValue !== null && maxValue < minValue) {
+      this.setControlError(inputGroup.controls.maxValue, 'integerValidation');
+    }
+  }
+
+  private clearEditCustomInputManualErrors(inputGroup: EditCustomInputFormGroup): void {
+    Object.values(inputGroup.controls).forEach((control) => {
+      const errors = control.errors;
+      if (!errors) {
+        return;
+      }
+
+      const {
+        duplicatedName: _duplicatedName,
+        duplicatedOrder: _duplicatedOrder,
+        invalidOrder: _invalidOrder,
+        stringValidation: _stringValidation,
+        integerValidation: _integerValidation,
+        typeChanged: _typeChanged,
+        startWithEmpty: _startWithEmpty,
+        required: _manualRequired,
+        ...remainingErrors
+      } = errors;
+
+      const shouldKeepRequired =
+        control.hasValidator(Validators.required) &&
+        (control.value === null ||
+          (typeof control.value === 'string' && control.value.trim().length === 0));
+
+      control.setErrors({
+        ...(shouldKeepRequired ? { required: true } : {}),
+        ...remainingErrors,
+      });
+
+      if (control.errors && Object.keys(control.errors).length === 0) {
+        control.setErrors(null);
+      }
+    });
+  }
+
+  private toEditCustomInputsPayload(): readonly UpdateAnonymousTemplateCustomInputPayload[] {
+    return this.editCustomInputsArray.controls.map((inputGroup) => {
+      const value = inputGroup.getRawValue();
+      const type: AnonymousTemplateCustomInputType = Number(value.type) === 2 ? 2 : 1;
+
+      return {
+        customInputId: value.customInputId,
+        name: value.name.trim(),
+        labelEn: this.toNullableTrimmedText(value.labelEn),
+        labelAr: this.toNullableTrimmedText(value.labelAr),
+        type,
+        isRequired: value.isRequired,
+        minLength: type === 1 ? value.minLength : null,
+        maxLength: type === 1 ? value.maxLength : null,
+        minValue: type === 2 ? value.minValue : null,
+        maxValue: type === 2 ? value.maxValue : null,
+        startWith: type === 1 ? this.toNullableTrimmedText(value.startWith) : null,
+        order: value.order,
+      };
+    });
   }
 }

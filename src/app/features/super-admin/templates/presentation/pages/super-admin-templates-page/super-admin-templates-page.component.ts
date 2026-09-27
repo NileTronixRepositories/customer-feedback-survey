@@ -21,6 +21,8 @@ import {
 } from 'lucide-angular';
 import { I18nService } from '../../../../../../core/services/i18n.service';
 import { AuthStore } from '../../../../../auth/presentation/state/auth.store';
+import { copyToClipboard } from '../../../../../../shared/utils/clipboard.util';
+import { ToastService } from '../../../../../../shared/ui/toast/toast.service';
 import { TranslatePipe } from '../../../../../../shared/pipes/translate.pipe';
 import { ButtonComponent } from '../../../../../../shared/ui/button/button.component';
 import { PageHeaderComponent } from '../../../../../../shared/ui/page-header/page-header.component';
@@ -48,6 +50,7 @@ export class SuperAdminTemplatesPageComponent implements OnInit {
   private readonly branchesService = inject(BranchesService);
   private readonly formBuilder = inject(FormBuilder);
   private readonly i18n = inject(I18nService);
+  private readonly toast = inject(ToastService);
   readonly authStore = inject(AuthStore);
 
   readonly chevronLeftIcon = ChevronLeft;
@@ -351,11 +354,17 @@ export class SuperAdminTemplatesPageComponent implements OnInit {
   }
 
   private async copyText(value: string, messageKey: string): Promise<void> {
-    try {
-      await navigator.clipboard.writeText(value);
+    const success = await copyToClipboard(value);
+    if (success) {
       this.showCopiedMessage(messageKey);
-    } catch {
+      this.toast.success(
+        this.i18n.language() === 'ar' ? 'تم النسخ بنجاح' : 'Copied successfully',
+      );
+    } else {
       this.showCopiedMessage('superAdminTemplates.copyUnavailable');
+      this.toast.error(
+        this.i18n.language() === 'ar' ? 'تعذر النسخ تلقائياً' : 'Failed to copy',
+      );
     }
   }
 

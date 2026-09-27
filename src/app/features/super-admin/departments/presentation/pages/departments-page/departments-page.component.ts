@@ -14,6 +14,7 @@ import { PageHeaderComponent } from '../../../../../../shared/ui/page-header/pag
 import { AuthStore } from '../../../../../auth/presentation/state/auth.store';
 import { Department } from '../../../domain/department.model';
 import { DepartmentsStore } from '../../state/departments.store';
+import { ConfirmDialogService } from '../../../../../../shared/ui/confirm-dialog/confirm-dialog.service';
 
 @Component({
   selector: 'app-departments-page',
@@ -39,6 +40,7 @@ export class DepartmentsPageComponent implements OnInit {
   private readonly formBuilder = inject(FormBuilder);
   private readonly router = inject(Router);
   private readonly i18n = inject(I18nService);
+  private readonly confirmDialog = inject(ConfirmDialogService);
 
   readonly createModalOpen = signal(false);
   readonly editModalOpen = signal(false);
@@ -143,13 +145,24 @@ export class DepartmentsPageComponent implements OnInit {
     });
   }
 
-  deleteDepartment(department: Department, event?: MouseEvent): void {
+  async deleteDepartment(department: Department, event?: MouseEvent): Promise<void> {
     event?.stopPropagation();
     if (!department.isActive || this.departmentsStore.deleting()) {
       return;
     }
 
-    const confirmed = globalThis.confirm(this.i18n.translate('departments.deleteConfirm'));
+    const deptName =
+      this.i18n.language() === 'ar'
+        ? department.nameAr || department.nameEn
+        : department.nameEn || department.nameAr;
+    const confirmed = await this.confirmDialog.confirm({
+      title: this.i18n.language() === 'ar' ? 'حذف القسم' : 'Delete Department',
+      message: this.i18n.translate('departments.deleteConfirm'),
+      itemName: deptName,
+      confirmText: this.i18n.translate('common.delete'),
+      cancelText: this.i18n.translate('common.cancel'),
+      variant: 'danger',
+    });
     if (!confirmed) {
       return;
     }
@@ -159,13 +172,24 @@ export class DepartmentsPageComponent implements OnInit {
     });
   }
 
-  restoreDepartment(department: Department, event?: MouseEvent): void {
+  async restoreDepartment(department: Department, event?: MouseEvent): Promise<void> {
     event?.stopPropagation();
     if (department.isActive || !this.canRestoreDepartments() || this.departmentsStore.restoring()) {
       return;
     }
 
-    const confirmed = globalThis.confirm(this.i18n.translate('departments.restoreConfirm'));
+    const deptName =
+      this.i18n.language() === 'ar'
+        ? department.nameAr || department.nameEn
+        : department.nameEn || department.nameAr;
+    const confirmed = await this.confirmDialog.confirm({
+      title: this.i18n.language() === 'ar' ? 'استعادة القسم' : 'Restore Department',
+      message: this.i18n.translate('departments.restoreConfirm'),
+      itemName: deptName,
+      confirmText: this.i18n.translate('common.restore'),
+      cancelText: this.i18n.translate('common.cancel'),
+      variant: 'success',
+    });
     if (!confirmed) {
       return;
     }

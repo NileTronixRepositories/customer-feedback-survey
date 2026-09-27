@@ -1,5 +1,5 @@
 <div
-  class="h-dvh overflow-hidden bg-[var(--color-background)] xl:grid xl:grid-cols-[var(--sidebar-width)_minmax(0,1fr)] xl:transition-[grid-template-columns] xl:duration-300"
+  class="app-shell h-dvh overflow-hidden bg-[var(--color-background)] xl:grid xl:grid-cols-[var(--sidebar-width)_minmax(0,1fr)] xl:transition-[grid-template-columns] xl:duration-300"
   [style.--sidebar-width]="sidebarCollapsed() ? '5.25rem' : '18rem'"
 >
   @if (mobileSidebarOpen()) {
@@ -21,14 +21,6 @@
     <header class="app-header sticky top-0 z-30 shrink-0">
       <div class="header-container flex items-center justify-between gap-2 sm:gap-3">
         <div class="header-left flex min-w-0 items-center gap-2 sm:gap-3">
-          <button
-            type="button"
-            class="mobile-menu-btn xl:!hidden"
-            [attr.aria-label]="'common.openSidebar' | t"
-            (click)="openMobileSidebar()"
-          >
-            <app-icon [icon]="menuIcon" [size]="18" />
-          </button>
           <div class="role-icon-tile">
             <app-icon [icon]="roleIcon()" [size]="20" />
           </div>
@@ -62,7 +54,7 @@
             <span class="icon-circle">
               <app-icon [icon]="languagesIcon" [size]="14" />
             </span>
-            <span>{{ i18n.nextLanguageLabel() }}</span>
+            <span class="header-action-label">{{ i18n.nextLanguageLabel() }}</span>
           </button>
 
           <button
@@ -77,29 +69,6 @@
             <span class="hidden sm:inline">{{ 'common.changePassword' | t }}</span>
           </button>
 
-          <!-- <button
-            type="button"
-            class="icon-action-btn"
-            [attr.aria-label]="'common.notifications' | t"
-          >
-            <app-icon [icon]="notificationIcon" [size]="17" />
-            <span class="notification-dot"></span>
-          </button> -->
-
-          <!-- <div class="user-profile hidden md:flex items-center gap-3">
-            <div class="user-avatar">
-              {{ userInitial() }}
-            </div>
-            <div class="user-info">
-              <p class="user-name">
-                <app-icon [icon]="userIcon" [size]="13" class="text-slate-400" />
-                <span>{{ userDisplayName() }}</span>
-              </p>
-              <p class="user-email">{{ userEmail() }}</p>
-            </div>
-            <app-icon [icon]="chevronDownIcon" [size]="14" class="text-slate-400" />
-          </div> -->
-
           <button type="button" class="logout-btn" (click)="logout()">
             <app-icon [icon]="logoutIcon" [size]="16" />
             <span class="hidden sm:inline">{{ 'common.logout' | t }}</span>
@@ -107,7 +76,7 @@
         </div>
       </div>
     </header>
-    <main class="flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto p-4 lg:p-5 xl:p-6">
+    <main class="app-content container-fluid flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto">
       <router-outlet />
     </main>
     <app-footer class="shrink-0" />

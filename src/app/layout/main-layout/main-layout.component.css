@@ -1,3 +1,19 @@
+.app-shell {
+  min-width: 0;
+}
+
+.app-content {
+  --bs-gutter-x: 0;
+  padding: 1rem;
+  overscroll-behavior: contain;
+}
+
+.app-content > :not(router-outlet) {
+  display: block;
+  width: 100%;
+  min-width: 0;
+}
+
 .app-header {
   background: rgb(var(--theme-surface-rgb) / 92%);
   backdrop-filter: blur(16px);
@@ -9,6 +25,20 @@
 @media (min-width: 1024px) {
   .app-header {
     padding: 0.9rem 2rem;
+  }
+
+  .app-content {
+    padding: 1.25rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .app-content {
+    padding: 1.5rem;
+  }
+
+  .mobile-menu-btn {
+    display: none;
   }
 }
 
@@ -202,5 +232,34 @@
   .logout-btn {
     width: 2.25rem;
     padding: 0;
+  }
+}
+
+@media (max-width: 419.98px) {
+  .app-header {
+    padding-inline: max(0.625rem, env(safe-area-inset-left));
+  }
+
+  .header-action-label,
+  .role-badge {
+    display: none;
+  }
+
+  .page-meta {
+    max-width: calc(100vw - 11.5rem);
+  }
+
+  .lang-toggle-btn {
+    width: 2.25rem;
+    padding: 0;
+  }
+}
+
+@media (pointer: coarse) {
+  .mobile-menu-btn,
+  .lang-toggle-btn,
+  .logout-btn {
+    min-width: 2.75rem;
+    min-height: 2.75rem;
   }
 }

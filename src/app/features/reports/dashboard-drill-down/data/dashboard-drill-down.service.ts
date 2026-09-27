@@ -3,6 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, map } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
+import { resolveMediaUrl } from '../../../../shared/utils/media-url.util';
 import {
   DashboardDetailsNavigation,
   DashboardDrillDownContext,
@@ -51,7 +52,9 @@ export class DashboardDrillDownService {
 
   updatePath(
     originalPath: string,
-    updates: Readonly<Partial<Record<'pageNumber' | 'pageSize' | 'searchText' | 'orderSort', string | number>>>,
+    updates: Readonly<
+      Partial<Record<'pageNumber' | 'pageSize' | 'searchText' | 'orderSort', string | number>>
+    >,
   ): string {
     if (!this.parsePath(originalPath)) {
       return originalPath;
@@ -65,7 +68,9 @@ export class DashboardDrillDownService {
     return path;
   }
 
-  isSupported(navigation: DashboardDetailsNavigation | null | undefined): navigation is DashboardDetailsNavigation {
+  isSupported(
+    navigation: DashboardDetailsNavigation | null | undefined,
+  ): navigation is DashboardDetailsNavigation {
     return (
       navigation?.method === 'GET' &&
       navigation.path.startsWith('/api/') &&
@@ -149,8 +154,7 @@ export class DashboardDrillDownService {
       templateId:
         this.readString(item, 'templateId') || this.readString(item, 'anonymousTemplateId'),
       templateNameEn:
-        this.readString(item, 'templateNameEn') ||
-        this.readString(item, 'anonymousTemplateNameEn'),
+        this.readString(item, 'templateNameEn') || this.readString(item, 'anonymousTemplateNameEn'),
       templateNameAr:
         this.readNullableString(item, 'templateNameAr') ??
         this.readNullableString(item, 'anonymousTemplateNameAr'),
@@ -190,8 +194,7 @@ export class DashboardDrillDownService {
         this.readNullableString(response, 'templateNameAr') ??
         this.readNullableString(response, 'anonymousTemplateNameAr') ??
         this.readNullableString(template, 'nameAr'),
-      branchNameEn:
-        this.readString(response, 'branchNameEn') || this.readString(branch, 'nameEn'),
+      branchNameEn: this.readString(response, 'branchNameEn') || this.readString(branch, 'nameEn'),
       branchNameAr:
         this.readNullableString(response, 'branchNameAr') ??
         this.readNullableString(branch, 'nameAr'),
@@ -220,25 +223,56 @@ export class DashboardDrillDownService {
     const labelAr = customInput
       ? this.readNullableString(item, 'labelAr')
       : this.readNullableString(item, 'questionTextAr');
+    const value =
+      this.readString(item, 'displayValue') ||
+      this.readString(item, 'textAnswer') ||
+      this.readString(item, 'selectedOptionTextEn') ||
+      this.readDisplayValue(item['stringValue'] ?? item['integerValue']);
+    const type = this.readString(item, customInput ? 'typeName' : 'questionTypeName');
+
+    const rawVoice =
+      this.readNullableString(item, 'voiceFileUrl') ??
+      this.readNullableString(item, 'voiceUrl') ??
+      (this.isVoicePath(value) ? value : null);
+
+    const rawImage =
+      this.readNullableString(item, 'imageFileUrl') ??
+      this.readNullableString(item, 'imageUrl') ??
+      (this.isImagePath(value) ? value : null);
+
     return {
       labelEn,
       labelAr,
-      value:
-        this.readString(item, 'displayValue') ||
-        this.readString(item, 'textAnswer') ||
-        this.readString(item, 'selectedOptionTextEn') ||
-        this.readDisplayValue(item['stringValue'] ?? item['integerValue']),
+      value,
       selectedOptionTextEn: this.readNullableString(item, 'selectedOptionTextEn'),
       selectedOptionTextAr: this.readNullableString(item, 'selectedOptionTextAr'),
-      type: this.readString(item, customInput ? 'typeName' : 'questionTypeName'),
-      voiceUrl:
-        this.readNullableString(item, 'voiceFileUrl') ?? this.readNullableString(item, 'voiceUrl'),
-      imageUrl:
-        this.readNullableString(item, 'imageFileUrl') ?? this.readNullableString(item, 'imageUrl'),
+      type,
+      voiceUrl: resolveMediaUrl(rawVoice),
+      imageUrl: resolveMediaUrl(rawImage),
       children: this.readArray(item['children'] ?? item['childAnswers']).map((child) =>
         this.toDetailItem(child, false),
       ),
     };
+  }
+
+  private isImagePath(value: string | null | undefined): boolean {
+    if (!value) return false;
+    const trimmed = value.trim();
+    return (
+      /\.(?:png|jpe?g|webp|gif|svg|bmp)(?:\?.*)?$/i.test(trimmed) ||
+      trimmed.startsWith('Media/SurveyAnswerImages') ||
+      trimmed.includes('/SurveyAnswerImages/')
+    );
+  }
+
+  private isVoicePath(value: string | null | undefined): boolean {
+    if (!value) return false;
+    const trimmed = value.trim();
+    return (
+      /\.(?:mp3|wav|ogg|m4a|aac|webm)(?:\?.*)?$/i.test(trimmed) ||
+      trimmed.startsWith('Media/SurveyAnswerVoices') ||
+      trimmed.includes('/SurveyAnswerVoices/')
+    );
   }
 
   private toNavigation(record: ApiRecord | null): DashboardDetailsNavigation | null {
@@ -262,7 +296,8 @@ export class DashboardDrillDownService {
   private readArray(value: unknown): ApiRecord[] {
     return Array.isArray(value)
       ? value.filter(
-          (item): item is ApiRecord => typeof item === 'object' && item !== null && !Array.isArray(item),
+          (item): item is ApiRecord =>
+            typeof item === 'object' && item !== null && !Array.isArray(item),
         )
       : [];
   }
