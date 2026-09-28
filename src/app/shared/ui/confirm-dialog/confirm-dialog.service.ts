@@ -20,22 +20,16 @@ export class ConfirmDialogService {
       const opts: ConfirmDialogOptions =
         typeof options === 'string' ? { message: options } : options;
 
-      const isAr = this.i18n.language() === 'ar';
       const variant = opts.variant ?? 'danger';
-
-      const defaultTitle = isAr ? 'تأكيد العملية' : 'Confirm Action';
-      const defaultConfirmText =
-        opts.confirmText ?? (isAr ? 'تأكيد' : 'Confirm');
-      const defaultCancelText = opts.cancelText ?? (isAr ? 'إلغاء' : 'Cancel');
 
       const dialog: ActiveConfirmDialog = {
         id: this.nextId++,
-        title: opts.title ?? defaultTitle,
+        title: opts.title ?? this.i18n.translate('common.confirmAction'),
         message: opts.message,
         description: opts.description,
         itemName: opts.itemName,
-        confirmText: defaultConfirmText,
-        cancelText: defaultCancelText,
+        confirmText: opts.confirmText ?? this.i18n.translate('common.confirm'),
+        cancelText: opts.cancelText ?? this.i18n.translate('common.cancel'),
         variant,
         resolve: (result: boolean) => {
           this.dialogSignal.set(null);

@@ -759,14 +759,10 @@ export class AnonymousTemplatesPageComponent implements OnInit {
     const success = await copyToClipboard(publicUrl);
     if (success) {
       this.copiedPublicUrl.set(true);
-      this.toast.success(
-        this.i18n.language() === 'ar' ? 'تم نسخ الرابط بنجاح' : 'Public URL copied to clipboard',
-      );
+      this.toast.success(this.i18n.translate('anonymousTemplates.publicUrlCopied'));
       setTimeout(() => this.copiedPublicUrl.set(false), 2500);
     } else {
-      this.toast.error(
-        this.i18n.language() === 'ar' ? 'تعذر نسخ الرابط تلقائياً' : 'Failed to copy URL',
-      );
+      this.toast.error(this.i18n.translate('anonymousTemplates.copyUnavailable'));
     }
   }
 
@@ -776,18 +772,14 @@ export class AnonymousTemplatesPageComponent implements OnInit {
     const success = await copyToClipboard(publicUrl);
     if (success) {
       this.copiedTemplateId.set(templateId);
-      this.toast.success(
-        this.i18n.language() === 'ar' ? 'تم نسخ الرابط بنجاح' : 'Public URL copied to clipboard',
-      );
+      this.toast.success(this.i18n.translate('anonymousTemplates.publicUrlCopied'));
       setTimeout(() => {
         if (this.copiedTemplateId() === templateId) {
           this.copiedTemplateId.set(null);
         }
       }, 2500);
     } else {
-      this.toast.error(
-        this.i18n.language() === 'ar' ? 'تعذر نسخ الرابط تلقائياً' : 'Failed to copy URL',
-      );
+      this.toast.error(this.i18n.translate('anonymousTemplates.copyUnavailable'));
     }
   }
 

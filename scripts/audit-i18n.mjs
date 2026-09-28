@@ -61,7 +61,11 @@ const ar = dictionaries.get('ar') ?? new Map();
 const missingEnglish = [...ar.keys()].filter((key) => !en.has(key));
 const missingArabic = [...en.keys()].filter((key) => !ar.has(key));
 const missingUsed = [...used].filter(([key]) => !en.has(key) && !ar.has(key));
+const untranslatedArabicTerms = [...ar].filter(([, value]) =>
+  /\b(?:anonymous|authorized|dashboard)\b/i.test(value),
+);
 const hardcodedTemplateText = [];
+const hardcodedToastMessages = [];
 for (const filename of files.filter((name) => name.endsWith('.html'))) {
   const template = parseTemplate(fs.readFileSync(filename, 'utf8'), filename);
   function inspect(node) {
@@ -80,12 +84,25 @@ for (const filename of files.filter((name) => name.endsWith('.html'))) {
   for (const node of template.nodes) inspect(node);
 }
 
+for (const filename of files.filter((name) => name.endsWith('.ts'))) {
+  const contents = fs.readFileSync(filename, 'utf8');
+  const directToastPattern = /\b(?:this\.)?toast(?:Service)?\.(?:success|error|warning|info)\(\s*['"`]/g;
+  const languageBranchToastPattern =
+    /\b(?:this\.)?toast(?:Service)?\.(?:success|error|warning|info)\(\s*(?:this\.)?i18n\.language\(\)/g;
+
+  if (directToastPattern.test(contents) || languageBranchToastPattern.test(contents)) {
+    hardcodedToastMessages.push(path.relative(root, filename));
+  }
+}
+
 const errors = [
   ...duplicateKeys.map((key) => `Duplicate translation: ${key}`),
   ...missingEnglish.map((key) => `Missing English translation: ${key}`),
   ...missingArabic.map((key) => `Missing Arabic translation: ${key}`),
   ...missingUsed.map(([key, locations]) => `Missing translation: ${key} (${locations[0]})`),
+  ...untranslatedArabicTerms.map(([key]) => `Untranslated Arabic terminology: ${key}`),
   ...hardcodedTemplateText.map(({ file, text }) => `Untranslated template text: ${text} (${file})`),
+  ...hardcodedToastMessages.map((file) => `Hardcoded toast message: ${file}`),
 ];
 console.log(`Checked ${en.size} English and ${ar.size} Arabic translations across ${files.length} source files.`);
 if (errors.length) {

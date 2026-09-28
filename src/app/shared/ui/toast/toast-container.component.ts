@@ -10,6 +10,7 @@ import {
 import { IconComponent } from '../icon/icon.component';
 import { ToastMessage, ToastVariant } from './toast.model';
 import { ToastService } from './toast.service';
+import { I18nService } from '../../../core/services/i18n.service';
 
 @Component({
   selector: 'app-toast-container',
@@ -20,6 +21,7 @@ import { ToastService } from './toast.service';
 })
 export class ToastContainerComponent {
   readonly toastService = inject(ToastService);
+  readonly i18n = inject(I18nService);
   readonly closeIcon = X;
 
   iconFor(toast: ToastMessage): LucideIconData {

@@ -38,7 +38,7 @@ export const errorToastInterceptor: HttpInterceptorFn = (request, next) => {
     }),
     catchError((error: unknown) => {
       if (error instanceof HttpErrorResponse && !request.context.get(SKIP_ERROR_TOAST)) {
-        return resolveProblemDetails(error).pipe(
+        return resolveProblemDetails(error, i18n).pipe(
           mergeMap((problem) => {
             toastService.error(problem.title, problem.detail || problem.errors.join('\n'));
             return throwError(() => error);
@@ -59,25 +59,33 @@ function isAuthRequest(url: string): boolean {
   return url.includes('/api/auth/');
 }
 
-function resolveProblemDetails(error: HttpErrorResponse) {
+function resolveProblemDetails(error: HttpErrorResponse, i18n: I18nService) {
   const body = error.error;
   if (body instanceof Blob) {
-    return from(readBlobProblemDetails(error, body));
+    return from(readBlobProblemDetails(error, body, i18n));
   }
 
-  return of(readProblemDetails(error, body));
+  return of(readProblemDetails(error, body, i18n));
 }
 
-async function readBlobProblemDetails(error: HttpErrorResponse, blob: Blob): Promise<ApiProblemDetails> {
+async function readBlobProblemDetails(
+  error: HttpErrorResponse,
+  blob: Blob,
+  i18n: I18nService,
+): Promise<ApiProblemDetails> {
   const text = (await blob.text()).trim();
   if (!text) {
-    return readProblemDetails(error, {});
+    return readProblemDetails(error, {}, i18n);
   }
 
-  return readProblemDetails(error, parseProblemText(text));
+  return readProblemDetails(error, parseProblemText(text), i18n);
 }
 
-function readProblemDetails(error: HttpErrorResponse, body: unknown): ApiProblemDetails {
+function readProblemDetails(
+  error: HttpErrorResponse,
+  body: unknown,
+  i18n: I18nService,
+): ApiProblemDetails {
   const problem = isRecord(body) ? body : {};
   const errors = readErrorMessages(problem['errors']);
   const detail =
@@ -85,11 +93,14 @@ function readProblemDetails(error: HttpErrorResponse, body: unknown): ApiProblem
     readString(problem['message']) ||
     (typeof body === 'string' ? body.trim() : '');
   const safeDetail = isHttpClientFailureMessage(detail) ? '' : detail;
-  const title = readString(problem['title']) || statusTitle(error.status);
+  const title = readString(problem['title']) || statusTitle(error.status, i18n);
 
   return {
     title,
-    detail: errors.length > 0 ? errors.slice(0, 3).join('\n') : safeDetail || statusDescription(error.status),
+    detail:
+      errors.length > 0
+        ? errors.slice(0, 3).join('\n')
+        : safeDetail || statusDescription(error.status, i18n),
     errors,
   };
 }
@@ -118,44 +129,44 @@ function readErrorMessages(errors: unknown): readonly string[] {
     .filter((message) => message.length > 0);
 }
 
-function statusTitle(status: number): string {
+function statusTitle(status: number, i18n: I18nService): string {
   if (status === 0) {
-    return 'Network error';
+    return i18n.translate('toast.networkErrorTitle');
   }
   if (status === 401) {
-    return 'Unauthorized';
+    return i18n.translate('toast.unauthorizedTitle');
   }
   if (status === 403) {
-    return 'Forbidden';
+    return i18n.translate('toast.forbiddenTitle');
   }
   if (status === 404) {
-    return 'Not found';
+    return i18n.translate('toast.notFoundTitle');
   }
   if (status === 422 || status === 400) {
-    return 'Validation error';
+    return i18n.translate('toast.validationErrorTitle');
   }
 
-  return 'Request failed';
+  return i18n.translate('toast.requestFailedTitle');
 }
 
-function statusDescription(status: number): string {
+function statusDescription(status: number, i18n: I18nService): string {
   if (status === 0) {
-    return 'Unable to reach the server. Please check your connection.';
+    return i18n.translate('toast.networkErrorDescription');
   }
   if (status === 401) {
-    return 'Please sign in again to continue.';
+    return i18n.translate('toast.unauthorizedDescription');
   }
   if (status === 403) {
-    return 'You do not have permission to complete this action.';
+    return i18n.translate('toast.forbiddenDescription');
   }
   if (status === 404) {
-    return 'The requested resource was not found.';
+    return i18n.translate('toast.notFoundDescription');
   }
   if (status === 422 || status === 400) {
-    return 'Please review the submitted data and try again.';
+    return i18n.translate('toast.validationErrorDescription');
   }
 
-  return 'The request could not be completed. Please try again.';
+  return i18n.translate('toast.requestFailedDescription');
 }
 
 function isHttpClientFailureMessage(value: string): boolean {

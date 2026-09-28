@@ -357,14 +357,10 @@ export class SuperAdminTemplatesPageComponent implements OnInit {
     const success = await copyToClipboard(value);
     if (success) {
       this.showCopiedMessage(messageKey);
-      this.toast.success(
-        this.i18n.language() === 'ar' ? 'تم النسخ بنجاح' : 'Copied successfully',
-      );
+      this.toast.success(this.i18n.translate(messageKey));
     } else {
       this.showCopiedMessage('superAdminTemplates.copyUnavailable');
-      this.toast.error(
-        this.i18n.language() === 'ar' ? 'تعذر النسخ تلقائياً' : 'Failed to copy',
-      );
+      this.toast.error(this.i18n.translate('superAdminTemplates.copyUnavailable'));
     }
   }
 

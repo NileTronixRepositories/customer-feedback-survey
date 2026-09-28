@@ -137,16 +137,13 @@
   background: var(--theme-color-surface);
   border: 1px solid var(--theme-color-border);
   height: 2.5rem;
-  padding: 0 0.8rem 0 0.45rem;
+  padding-block: 0;
+  padding-inline: 0.45rem 0.8rem;
   gap: 0.5rem;
   font-weight: 700;
   font-size: 0.85rem;
   color: var(--theme-color-muted-text);
   box-shadow: 0 8px 20px rgb(var(--theme-shadow-rgb) / 4%);
-}
-
-:host-context([dir='rtl']) .lang-toggle-btn {
-  padding: 0 0.45rem 0 0.8rem;
 }
 
 .lang-toggle-btn:hover {

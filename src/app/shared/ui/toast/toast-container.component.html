@@ -31,7 +31,7 @@
       <button
         type="button"
         class="absolute end-2 top-2 flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
-        [attr.aria-label]="'Dismiss notification'"
+        [attr.aria-label]="i18n.translate('common.dismissNotification')"
         (click)="toastService.dismiss(toast.id)"
       >
         <app-icon [icon]="closeIcon" [size]="15" />

@@ -274,26 +274,38 @@
               <h2 class="truncate text-sm sm:text-base font-black text-slate-900 mt-0.5">
                 {{ assignedBranchName(branch) }}
               </h2>
-              <div class="mt-1.5 flex flex-wrap items-center gap-1.5 text-[11px] font-semibold text-slate-600">
+              <div
+                class="mt-1.5 flex flex-wrap items-center gap-1.5 text-[11px] font-semibold text-slate-600"
+              >
                 @if (branch.code) {
-                  <span class="inline-flex items-center gap-1 rounded-lg bg-white px-2 py-0.5 border border-slate-200/70 shadow-2xs">
+                  <span
+                    class="inline-flex items-center gap-1 rounded-lg bg-white px-2 py-0.5 border border-slate-200/70 shadow-2xs"
+                  >
                     <app-icon class="text-slate-400" [icon]="hashIcon" [size]="11" />
                     <span class="text-slate-400">{{ 'surveyDashboard.branchCode' | t }}:</span>
                     <span class="font-bold text-slate-800">{{ branch.code }}</span>
                   </span>
                 }
                 @if (branch.address) {
-                  <span class="inline-flex items-center gap-1 rounded-lg bg-white px-2 py-0.5 border border-slate-200/70 shadow-2xs">
+                  <span
+                    class="inline-flex items-center gap-1 rounded-lg bg-white px-2 py-0.5 border border-slate-200/70 shadow-2xs"
+                  >
                     <app-icon class="text-slate-400" [icon]="mapPinIcon" [size]="11" />
                     <span class="text-slate-400">{{ 'branches.address' | t }}:</span>
-                    <span class="font-bold text-slate-800 truncate max-w-[220px] sm:max-w-none">{{ branch.address }}</span>
+                    <span class="font-bold text-slate-800 truncate max-w-[220px] sm:max-w-none">{{
+                      branch.address
+                    }}</span>
                   </span>
                 }
                 @if (branch.createdOnUtc) {
-                  <span class="inline-flex items-center gap-1 rounded-lg bg-white px-2 py-0.5 border border-slate-200/70 shadow-2xs">
+                  <span
+                    class="inline-flex items-center gap-1 rounded-lg bg-white px-2 py-0.5 border border-slate-200/70 shadow-2xs"
+                  >
                     <app-icon class="text-slate-400" [icon]="calendarIcon" [size]="11" />
                     <span class="text-slate-400">{{ 'branches.createdOn' | t }}:</span>
-                    <span class="font-bold text-slate-800">{{ branch.createdOnUtc | date: 'mediumDate' }}</span>
+                    <span class="font-bold text-slate-800">{{
+                      branch.createdOnUtc | date: 'mediumDate'
+                    }}</span>
                   </span>
                 }
               </div>
@@ -328,9 +340,13 @@
         >
           <div class="min-h-0 overflow-hidden">
             <!-- 5 Compact Summary Stat Cards Strip -->
-            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 bg-slate-50/50 p-2.5 sm:p-3 border-b border-slate-100">
+            <div
+              class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 bg-slate-50/50 p-2.5 sm:p-3 border-b border-slate-100"
+            >
               <!-- 1. Branch Admins -->
-              <div class="flex items-center justify-between gap-2 rounded-xl border border-slate-200/70 bg-white px-3 py-2 shadow-2xs transition hover:border-slate-300 hover:shadow-xs">
+              <div
+                class="flex items-center justify-between gap-2 rounded-xl border border-slate-200/70 bg-white px-3 py-2 shadow-2xs transition hover:border-slate-300 hover:shadow-xs"
+              >
                 <div class="min-w-0">
                   <p class="text-[10px] font-bold text-slate-500 truncate">
                     {{ 'branches.branchAdminsCount' | t }}
@@ -339,13 +355,17 @@
                     {{ branch.summary.branchAdminsCount }}
                   </p>
                 </div>
-                <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-cyan-50 text-[var(--theme-color-secondary)]">
+                <span
+                  class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-cyan-50 text-[var(--theme-color-secondary)]"
+                >
                   <app-icon [icon]="shieldCheckIcon" [size]="14" />
                 </span>
               </div>
 
               <!-- 2. Branch Users -->
-              <div class="flex items-center justify-between gap-2 rounded-xl border border-slate-200/70 bg-white px-3 py-2 shadow-2xs transition hover:border-slate-300 hover:shadow-xs">
+              <div
+                class="flex items-center justify-between gap-2 rounded-xl border border-slate-200/70 bg-white px-3 py-2 shadow-2xs transition hover:border-slate-300 hover:shadow-xs"
+              >
                 <div class="min-w-0">
                   <p class="text-[10px] font-bold text-slate-500 truncate">
                     {{ 'branches.branchUsersCount' | t }}
@@ -354,13 +374,17 @@
                     {{ branch.summary.branchUsersCount }}
                   </p>
                 </div>
-                <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
+                <span
+                  class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600"
+                >
                   <app-icon [icon]="responsesIcon" [size]="14" />
                 </span>
               </div>
 
               <!-- 3. Templates -->
-              <div class="flex items-center justify-between gap-2 rounded-xl border border-slate-200/70 bg-white px-3 py-2 shadow-2xs transition hover:border-slate-300 hover:shadow-xs">
+              <div
+                class="flex items-center justify-between gap-2 rounded-xl border border-slate-200/70 bg-white px-3 py-2 shadow-2xs transition hover:border-slate-300 hover:shadow-xs"
+              >
                 <div class="min-w-0">
                   <p class="text-[10px] font-bold text-slate-500 truncate">
                     {{ 'branches.templatesCount' | t }}
@@ -369,13 +393,17 @@
                     {{ branch.summary.templatesCount }}
                   </p>
                 </div>
-                <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+                <span
+                  class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600"
+                >
                   <app-icon [icon]="templateIcon" [size]="14" />
                 </span>
               </div>
 
               <!-- 4. Question Groups -->
-              <div class="flex items-center justify-between gap-2 rounded-xl border border-slate-200/70 bg-white px-3 py-2 shadow-2xs transition hover:border-slate-300 hover:shadow-xs">
+              <div
+                class="flex items-center justify-between gap-2 rounded-xl border border-slate-200/70 bg-white px-3 py-2 shadow-2xs transition hover:border-slate-300 hover:shadow-xs"
+              >
                 <div class="min-w-0">
                   <p class="text-[10px] font-bold text-slate-500 truncate">
                     {{ 'branches.questionGroupsCount' | t }}
@@ -384,13 +412,17 @@
                     {{ branch.summary.questionGroupsCount }}
                   </p>
                 </div>
-                <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-violet-50 text-violet-600">
+                <span
+                  class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-violet-50 text-violet-600"
+                >
                   <app-icon [icon]="layersIcon" [size]="14" />
                 </span>
               </div>
 
               <!-- 5. Questions -->
-              <div class="col-span-2 sm:col-span-1 flex items-center justify-between gap-2 rounded-xl border border-slate-200/70 bg-white px-3 py-2 shadow-2xs transition hover:border-slate-300 hover:shadow-xs">
+              <div
+                class="col-span-2 sm:col-span-1 flex items-center justify-between gap-2 rounded-xl border border-slate-200/70 bg-white px-3 py-2 shadow-2xs transition hover:border-slate-300 hover:shadow-xs"
+              >
                 <div class="min-w-0">
                   <p class="text-[10px] font-bold text-slate-500 truncate">
                     {{ 'branches.questionsCount' | t }}
@@ -399,7 +431,9 @@
                     {{ branch.summary.questionsCount }}
                   </p>
                 </div>
-                <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-amber-50 text-amber-600">
+                <span
+                  class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-amber-50 text-amber-600"
+                >
                   <app-icon [icon]="questionsIcon" [size]="14" />
                 </span>
               </div>
@@ -408,17 +442,23 @@
             <!-- Admins and Users Compact Panels -->
             <div class="grid gap-3 p-3 sm:p-4 lg:grid-cols-2">
               <!-- Branch Admins Column -->
-              <article class="flex flex-col rounded-xl border border-slate-200/70 bg-slate-50/40 p-3">
+              <article
+                class="flex flex-col rounded-xl border border-slate-200/70 bg-slate-50/40 p-3"
+              >
                 <div class="mb-2.5 flex items-center justify-between gap-2">
                   <div class="flex items-center gap-2">
-                    <span class="flex h-6 w-6 items-center justify-center rounded-lg bg-cyan-50 text-[var(--theme-color-secondary)]">
+                    <span
+                      class="flex h-6 w-6 items-center justify-center rounded-lg bg-cyan-50 text-[var(--theme-color-secondary)]"
+                    >
                       <app-icon [icon]="shieldCheckIcon" [size]="13" />
                     </span>
                     <h3 class="text-xs font-black text-slate-900">
                       {{ 'branches.branchAdmins' | t }}
                     </h3>
                   </div>
-                  <span class="rounded-full bg-cyan-50 px-2 py-0.5 text-[10px] font-bold text-[var(--theme-color-secondary)] border border-cyan-100/60">
+                  <span
+                    class="rounded-full bg-cyan-50 px-2 py-0.5 text-[10px] font-bold text-[var(--theme-color-secondary)] border border-cyan-100/60"
+                  >
                     {{ branch.branchAdmins.length }}
                   </span>
                 </div>
@@ -440,25 +480,37 @@
                               {{ branchAdminName(admin) }}
                             </span>
                             @if (admin.userName) {
-                              <span class="rounded bg-slate-100/80 px-1.5 py-0.2 text-[10px] font-semibold text-slate-500">
+                              <span
+                                class="rounded bg-slate-100/80 px-1.5 py-0.2 text-[10px] font-semibold text-slate-500"
+                              >
                                 @{{ admin.userName }}
                               </span>
                             }
                           </div>
                           @if (admin.email) {
-                            <div class="mt-0.5 flex items-center gap-1 text-[11px] font-medium text-slate-500">
-                              <app-icon class="text-slate-400 shrink-0" [icon]="mailIcon" [size]="11" />
+                            <div
+                              class="mt-0.5 flex items-center gap-1 text-[11px] font-medium text-slate-500"
+                            >
+                              <app-icon
+                                class="text-slate-400 shrink-0"
+                                [icon]="mailIcon"
+                                [size]="11"
+                              />
                               <span class="truncate">{{ admin.email }}</span>
                             </div>
                           }
                         </div>
                       </div>
-                      <span class="shrink-0 rounded-md bg-cyan-50/80 px-2 py-0.5 text-[10px] font-bold text-[var(--theme-color-secondary)] border border-cyan-100/60">
+                      <span
+                        class="shrink-0 rounded-md bg-cyan-50/80 px-2 py-0.5 text-[10px] font-bold text-[var(--theme-color-secondary)] border border-cyan-100/60"
+                      >
                         {{ 'common.branchAdmin' | t }}
                       </span>
                     </div>
                   } @empty {
-                    <div class="flex items-center justify-center py-4 text-xs font-medium text-slate-400">
+                    <div
+                      class="flex items-center justify-center py-4 text-xs font-medium text-slate-400"
+                    >
                       -
                     </div>
                   }
@@ -466,17 +518,23 @@
               </article>
 
               <!-- Branch Users Column -->
-              <article class="flex flex-col rounded-xl border border-slate-200/70 bg-slate-50/40 p-3">
+              <article
+                class="flex flex-col rounded-xl border border-slate-200/70 bg-slate-50/40 p-3"
+              >
                 <div class="mb-2.5 flex items-center justify-between gap-2">
                   <div class="flex items-center gap-2">
-                    <span class="flex h-6 w-6 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
+                    <span
+                      class="flex h-6 w-6 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600"
+                    >
                       <app-icon [icon]="userCogIcon" [size]="13" />
                     </span>
                     <h3 class="text-xs font-black text-slate-900">
                       {{ 'branches.branchUsers' | t }}
                     </h3>
                   </div>
-                  <span class="rounded-full bg-indigo-50 px-2 py-0.5 text-[10px] font-bold text-indigo-600 border border-indigo-100/60">
+                  <span
+                    class="rounded-full bg-indigo-50 px-2 py-0.5 text-[10px] font-bold text-indigo-600 border border-indigo-100/60"
+                  >
                     {{ branch.branchUsers.length }}
                   </span>
                 </div>
@@ -498,14 +556,22 @@
                               {{ branchUserName(user) }}
                             </span>
                             @if (user.userName) {
-                              <span class="rounded bg-slate-100/80 px-1.5 py-0.2 text-[10px] font-semibold text-slate-500">
+                              <span
+                                class="rounded bg-slate-100/80 px-1.5 py-0.2 text-[10px] font-semibold text-slate-500"
+                              >
                                 @{{ user.userName }}
                               </span>
                             }
                           </div>
                           @if (user.email) {
-                            <div class="mt-0.5 flex items-center gap-1 text-[11px] font-medium text-slate-500">
-                              <app-icon class="text-slate-400 shrink-0" [icon]="mailIcon" [size]="11" />
+                            <div
+                              class="mt-0.5 flex items-center gap-1 text-[11px] font-medium text-slate-500"
+                            >
+                              <app-icon
+                                class="text-slate-400 shrink-0"
+                                [icon]="mailIcon"
+                                [size]="11"
+                              />
                               <span class="truncate">{{ user.email }}</span>
                             </div>
                           }
@@ -526,7 +592,9 @@
                       </div>
                     </div>
                   } @empty {
-                    <div class="flex items-center justify-center py-4 text-xs font-medium text-slate-400">
+                    <div
+                      class="flex items-center justify-center py-4 text-xs font-medium text-slate-400"
+                    >
                       -
                     </div>
                   }
@@ -1035,113 +1103,118 @@
       <!-- ==================== DETAILED INSIGHTS HUB (SEGMENTED TABS) ==================== -->
       <section class="space-y-4 pt-2">
         <!-- Segmented Tab Navigation -->
-        <div class="flex flex-wrap items-center gap-2 border-b border-slate-200 pb-2">
-          <!-- Tab 1: Template Performance -->
-          <button
-            type="button"
-            class="inline-flex items-center gap-2 rounded-xl px-3.5 py-2 text-xs font-black transition"
-            [class.bg-[var(--theme-color-primary)]]="activeTableTab() === 'templates'"
-            [class.text-white]="activeTableTab() === 'templates'"
-            [class.shadow-xs]="activeTableTab() === 'templates'"
-            [class.bg-white]="activeTableTab() !== 'templates'"
-            [class.text-slate-600]="activeTableTab() !== 'templates'"
-            [class.hover:bg-slate-50]="activeTableTab() !== 'templates'"
-            (click)="setTableTab('templates')"
-          >
-            <app-icon [icon]="templateIcon" [size]="14" />
-            <span>{{ 'surveyDashboard.templatePerformance' | t }}</span>
-            <span
-              class="rounded-full px-2 py-0.5 text-[10px] font-black"
-              [class.bg-white/20]="activeTableTab() === 'templates'"
-              [class.text-white]="activeTableTab() === 'templates'"
-              [class.bg-slate-100]="activeTableTab() !== 'templates'"
-              [class.text-slate-600]="activeTableTab() !== 'templates'"
-            >
-              {{ dashboard.templatePerformance.length }}
-            </span>
-          </button>
-
-          <!-- Tab 2: Lowest Rated Questions -->
-          <button
-            type="button"
-            class="inline-flex items-center gap-2 rounded-xl px-3.5 py-2 text-xs font-black transition"
-            [class.bg-[var(--theme-color-primary)]]="activeTableTab() === 'questions'"
-            [class.text-white]="activeTableTab() === 'questions'"
-            [class.shadow-xs]="activeTableTab() === 'questions'"
-            [class.bg-white]="activeTableTab() !== 'questions'"
-            [class.text-slate-600]="activeTableTab() !== 'questions'"
-            [class.hover:bg-slate-50]="activeTableTab() !== 'questions'"
-            (click)="setTableTab('questions')"
-          >
-            <app-icon [icon]="questionsIcon" [size]="14" />
-            <span>{{ 'surveyDashboard.lowestRatedQuestions' | t }}</span>
-            <span
-              class="rounded-full px-2 py-0.5 text-[10px] font-black"
-              [class.bg-white/20]="activeTableTab() === 'questions'"
-              [class.text-white]="activeTableTab() === 'questions'"
-              [class.bg-amber-100]="activeTableTab() !== 'questions'"
-              [class.text-amber-800]="activeTableTab() !== 'questions'"
-            >
-              {{ dashboard.lowestRatedQuestions.length }}
-            </span>
-          </button>
-
-          <!-- Tab 3: Critical Responses -->
-          <button
-            type="button"
-            class="inline-flex items-center gap-2 rounded-xl px-3.5 py-2 text-xs font-black transition"
-            [class.bg-rose-600]="activeTableTab() === 'critical'"
-            [class.text-white]="activeTableTab() === 'critical'"
-            [class.shadow-xs]="activeTableTab() === 'critical'"
-            [class.bg-white]="activeTableTab() !== 'critical'"
-            [class.text-slate-600]="activeTableTab() !== 'critical'"
-            [class.hover:bg-slate-50]="activeTableTab() !== 'critical'"
-            (click)="setTableTab('critical')"
-          >
-            <app-icon [icon]="complaintIcon" [size]="14" />
-            <span>{{ 'surveyDashboard.criticalResponses' | t }}</span>
-            <span
-              class="rounded-full px-2 py-0.5 text-[10px] font-black"
-              [class.bg-white/20]="activeTableTab() === 'critical'"
-              [class.text-white]="activeTableTab() === 'critical'"
-              [class.bg-rose-100]="activeTableTab() !== 'critical'"
-              [class.text-rose-700]="activeTableTab() !== 'critical'"
-            >
-              {{ dashboard.criticalResponses.length }}
-            </span>
-          </button>
-
-          <!-- Tab 4: Branches Summary (if branches available) -->
-          @if (dashboard.branchesSummary.length > 0) {
+        <div
+          class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-2"
+        >
+          <!-- Left/Right Tabs Group -->
+          <div class="flex flex-wrap items-center gap-2">
+            <!-- Tab 1: Template Performance -->
             <button
               type="button"
               class="inline-flex items-center gap-2 rounded-xl px-3.5 py-2 text-xs font-black transition"
-              [class.bg-[var(--theme-color-primary)]]="activeTableTab() === 'branches'"
-              [class.text-white]="activeTableTab() === 'branches'"
-              [class.shadow-xs]="activeTableTab() === 'branches'"
-              [class.bg-white]="activeTableTab() !== 'branches'"
-              [class.text-slate-600]="activeTableTab() !== 'branches'"
-              [class.hover:bg-slate-50]="activeTableTab() !== 'branches'"
-              (click)="setTableTab('branches')"
+              [class.bg-[var(--theme-color-primary)]]="activeTableTab() === 'templates'"
+              [class.text-white]="activeTableTab() === 'templates'"
+              [class.shadow-xs]="activeTableTab() === 'templates'"
+              [class.bg-white]="activeTableTab() !== 'templates'"
+              [class.text-slate-600]="activeTableTab() !== 'templates'"
+              [class.hover:bg-slate-50]="activeTableTab() !== 'templates'"
+              (click)="setTableTab('templates')"
             >
-              <app-icon [icon]="branchIcon" [size]="14" />
-              <span>{{ 'surveyDashboard.branchesSummary' | t }}</span>
+              <app-icon [icon]="templateIcon" [size]="14" />
+              <span>{{ 'surveyDashboard.templatePerformance' | t }}</span>
               <span
                 class="rounded-full px-2 py-0.5 text-[10px] font-black"
-                [class.bg-white/20]="activeTableTab() === 'branches'"
-                [class.text-white]="activeTableTab() === 'branches'"
-                [class.bg-slate-100]="activeTableTab() !== 'branches'"
-                [class.text-slate-600]="activeTableTab() !== 'branches'"
+                [class.bg-white/20]="activeTableTab() === 'templates'"
+                [class.text-white]="activeTableTab() === 'templates'"
+                [class.bg-slate-100]="activeTableTab() !== 'templates'"
+                [class.text-slate-600]="activeTableTab() !== 'templates'"
               >
-                {{ dashboard.branchesSummary.length }}
+                {{ dashboard.templatePerformance.length }}
               </span>
             </button>
-          }
+
+            <!-- Tab 2: Lowest Rated Questions -->
+            <button
+              type="button"
+              class="inline-flex items-center gap-2 rounded-xl px-3.5 py-2 text-xs font-black transition"
+              [class.bg-[var(--theme-color-primary)]]="activeTableTab() === 'questions'"
+              [class.text-white]="activeTableTab() === 'questions'"
+              [class.shadow-xs]="activeTableTab() === 'questions'"
+              [class.bg-white]="activeTableTab() !== 'questions'"
+              [class.text-slate-600]="activeTableTab() !== 'questions'"
+              [class.hover:bg-slate-50]="activeTableTab() !== 'questions'"
+              (click)="setTableTab('questions')"
+            >
+              <app-icon [icon]="questionsIcon" [size]="14" />
+              <span>{{ 'surveyDashboard.lowestRatedQuestions' | t }}</span>
+              <span
+                class="rounded-full px-2 py-0.5 text-[10px] font-black"
+                [class.bg-white/20]="activeTableTab() === 'questions'"
+                [class.text-white]="activeTableTab() === 'questions'"
+                [class.bg-amber-100]="activeTableTab() !== 'questions'"
+                [class.text-amber-800]="activeTableTab() !== 'questions'"
+              >
+                {{ dashboard.lowestRatedQuestions.length }}
+              </span>
+            </button>
+
+            <!-- Tab 3: Critical Responses -->
+            <button
+              type="button"
+              class="inline-flex items-center gap-2 rounded-xl px-3.5 py-2 text-xs font-black transition"
+              [class.bg-rose-600]="activeTableTab() === 'critical'"
+              [class.text-white]="activeTableTab() === 'critical'"
+              [class.shadow-xs]="activeTableTab() === 'critical'"
+              [class.bg-white]="activeTableTab() !== 'critical'"
+              [class.text-slate-600]="activeTableTab() !== 'critical'"
+              [class.hover:bg-slate-50]="activeTableTab() !== 'critical'"
+              (click)="setTableTab('critical')"
+            >
+              <app-icon [icon]="complaintIcon" [size]="14" />
+              <span>{{ 'surveyDashboard.criticalResponses' | t }}</span>
+              <span
+                class="rounded-full px-2 py-0.5 text-[10px] font-black"
+                [class.bg-white/20]="activeTableTab() === 'critical'"
+                [class.text-white]="activeTableTab() === 'critical'"
+                [class.bg-rose-100]="activeTableTab() !== 'critical'"
+                [class.text-rose-700]="activeTableTab() !== 'critical'"
+              >
+                {{ dashboard.criticalResponses.length }}
+              </span>
+            </button>
+
+            <!-- Tab 4: Branches Summary (if branches available) -->
+            @if (dashboard.branchesSummary.length > 0) {
+              <button
+                type="button"
+                class="inline-flex items-center gap-2 rounded-xl px-3.5 py-2 text-xs font-black transition"
+                [class.bg-[var(--theme-color-primary)]]="activeTableTab() === 'branches'"
+                [class.text-white]="activeTableTab() === 'branches'"
+                [class.shadow-xs]="activeTableTab() === 'branches'"
+                [class.bg-white]="activeTableTab() !== 'branches'"
+                [class.text-slate-600]="activeTableTab() !== 'branches'"
+                [class.hover:bg-slate-50]="activeTableTab() !== 'branches'"
+                (click)="setTableTab('branches')"
+              >
+                <app-icon [icon]="branchIcon" [size]="14" />
+                <span>{{ 'surveyDashboard.branchesSummary' | t }}</span>
+                <span
+                  class="rounded-full px-2 py-0.5 text-[10px] font-black"
+                  [class.bg-white/20]="activeTableTab() === 'branches'"
+                  [class.text-white]="activeTableTab() === 'branches'"
+                  [class.bg-slate-100]="activeTableTab() !== 'branches'"
+                  [class.text-slate-600]="activeTableTab() !== 'branches'"
+                >
+                  {{ dashboard.branchesSummary.length }}
+                </span>
+              </button>
+            }
+          </div>
 
           <!-- Tab 5: All Views / Toggle All -->
           <button
             type="button"
-            class="ms-auto inline-flex items-center gap-2 rounded-xl border px-3 py-1.5 text-[11px] font-extrabold transition-all duration-300 cursor-pointer shadow-2xs hover:shadow-xs focus:outline-none focus:ring-2 focus:ring-[var(--theme-color-accent)]/20"
+            class="inline-flex items-center gap-2 rounded-xl border px-3 py-1.5 text-[11px] font-extrabold transition-all duration-300 cursor-pointer shadow-2xs hover:shadow-xs focus:outline-none focus:ring-2 focus:ring-[var(--theme-color-accent)]/20"
             [class.border-slate-800]="activeTableTab() === 'all'"
             [class.bg-slate-900]="activeTableTab() === 'all'"
             [class.text-white]="activeTableTab() === 'all'"
