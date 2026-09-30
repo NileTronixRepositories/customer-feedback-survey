@@ -1,4 +1,5 @@
 import { DatePipe } from '@angular/common';
+import { Router } from '@angular/router';
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import {
@@ -50,6 +51,7 @@ export class GlobalQuestionGroupsPageComponent implements OnInit {
   private readonly authStore = inject(AuthStore);
   private readonly formBuilder = inject(FormBuilder);
   private readonly i18n = inject(I18nService);
+  private readonly router = inject(Router);
 
   readonly chevronLeftIcon = ChevronLeft;
   readonly chevronRightIcon = ChevronRight;
@@ -239,6 +241,14 @@ export class GlobalQuestionGroupsPageComponent implements OnInit {
 
   canRestoreGroup(group: GlobalQuestionGroupListItem): boolean {
     return group.isEditable && !group.isActive && this.authStore.canManageGlobalQuestionGroups('Restore');
+  }
+
+  openGroupQuestions(group: GlobalQuestionGroupListItem): void {
+    if (group.groupId.length === 0) {
+      return;
+    }
+
+    void this.router.navigate(['/global-question-groups', group.groupId, 'questions']);
   }
 
   groupFieldError(field: keyof typeof this.groupForm.controls): string {

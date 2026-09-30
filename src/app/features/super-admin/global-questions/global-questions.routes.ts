@@ -14,5 +14,13 @@ export const GLOBAL_QUESTIONS_ROUTES: Routes = [
         (m) => m.GlobalQuestionCreatePageComponent,
       ),
   },
+  {
+    path: ':groupId',
+    canActivate: [globalQuestionsAccessGuard],
+    providers: [GlobalQuestionGroupsService, GlobalQuestionsService, GlobalQuestionsStore],
+    loadComponent: () =>
+      import('./presentation/pages/global-question-create-page/global-question-create-page.component').then(
+        (m) => m.GlobalQuestionCreatePageComponent,
+      ),
+  },
 ];
-

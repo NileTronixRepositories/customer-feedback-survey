@@ -1099,59 +1099,337 @@
         </article>
       </section>
 
-      <section class="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs">
-        <div class="mb-4 flex items-center justify-between gap-3">
+      <!-- ==================== QUESTION GROUPS SATISFACTION HUB ==================== -->
+      <section
+        class="rounded-2xl border border-slate-200/80 bg-white p-4 sm:p-5 shadow-xs space-y-4"
+      >
+        <!-- Section Header with KPIs -->
+        <div
+          class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 pb-4"
+        >
           <div>
-            <h2 class="text-sm font-black text-slate-950">
-              {{ 'surveyDashboard.questionGroupSatisfaction' | t }}
-            </h2>
-            <p class="mt-1 text-xs text-slate-500">
-              {{ 'surveyDashboard.questionGroupSatisfactionHint' | t }}
-            </p>
+            <div class="flex items-center gap-2">
+              <span
+                class="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--theme-color-accent-softest,#e9fbff)] text-[var(--theme-color-primary,#148496)]"
+              >
+                <app-icon [icon]="layersIcon" [size]="18" />
+              </span>
+              <div>
+                <h2 class="text-sm sm:text-base font-black text-slate-900">
+                  {{ 'surveyDashboard.questionGroupSatisfaction' | t }}
+                </h2>
+                <p class="text-xs text-slate-500">
+                  {{ 'surveyDashboard.questionGroupSatisfactionHint' | t }}
+                </p>
+              </div>
+            </div>
           </div>
-          @if (store.questionGroupsLoading()) {
-            <span class="text-xs font-bold text-slate-400">{{ 'common.loading' | t }}</span>
-          }
+
+          <!-- Quick Stats Pills -->
+          <div class="flex flex-wrap items-center gap-2">
+            @if (store.questionGroupsLoading()) {
+              <span
+                class="inline-flex items-center gap-1.5 rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-500 border border-slate-200/60"
+              >
+                <span
+                  class="inline-block h-2 w-2 animate-pulse rounded-full bg-[var(--theme-color-primary,#148496)]"
+                ></span>
+                {{ 'common.loading' | t }}
+              </span>
+            } @else {
+              <!-- Overall Avg Satisfaction -->
+              <div
+                class="flex items-center gap-1.5 rounded-xl bg-slate-50 px-3 py-1.5 border border-slate-200/60"
+              >
+                <span class="text-[11px] font-bold text-slate-500"
+                  >{{ 'surveyDashboard.averageSatisfaction' | t }}:</span
+                >
+                @if (questionGroupOverallStats().averageScorePercentage !== null) {
+                  <span
+                    class="rounded-md px-2 py-0.5 text-xs font-black border border-slate-200/60 {{
+                      getQuestionGroupScoreBadgeClass(
+                        questionGroupOverallStats().averageScorePercentage
+                      )
+                    }}"
+                  >
+                    {{ questionGroupOverallStats().averageScorePercentage | number: '1.1-1' }}%
+                  </span>
+                } @else {
+                  <span class="text-xs font-bold text-slate-400">{{
+                    'surveyDashboard.noResponsesYet' | t
+                  }}</span>
+                }
+              </div>
+
+              <!-- Evaluated Groups Pill -->
+              <div
+                class="flex items-center gap-1.5 rounded-xl bg-slate-50 px-3 py-1.5 border border-slate-200/60"
+              >
+                <span class="text-[11px] font-bold text-slate-500"
+                  >{{ 'surveyDashboard.evaluatedGroups' | t }}:</span
+                >
+                <span class="text-xs font-black text-slate-900">
+                  {{ questionGroupOverallStats().activeGroupsCount }} /
+                  {{ questionGroupOverallStats().totalGroups }}
+                </span>
+              </div>
+
+              <!-- Total Responses Pill -->
+              <div
+                class="flex items-center gap-1.5 rounded-xl bg-slate-50 px-3 py-1.5 border border-slate-200/60"
+              >
+                <span class="text-[11px] font-bold text-slate-500"
+                  >{{ 'surveyDashboard.total' | t }}:</span
+                >
+                <span class="text-xs font-black text-slate-900">
+                  {{ questionGroupOverallStats().totalScoredResponses }}
+                </span>
+              </div>
+            }
+          </div>
         </div>
 
-        @if (questionGroupSections().length > 0) {
-          <div class="space-y-5">
-            @for (section of questionGroupSections(); track section.templateId) {
-              <div>
-                @if (questionGroupSections().length > 1) {
-                  <h3 class="mb-2 text-xs font-black text-slate-700">{{ section.templateName }}</h3>
-                }
-                <div class="space-y-3">
+        <!-- Filter & Control Toolbar -->
+        @if (allQuestionGroupSections().length > 0) {
+          <div
+            class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between bg-slate-50/80 p-3 rounded-xl border border-slate-200/60"
+          >
+            <!-- Left: Search & Template Selector -->
+            <div class="flex flex-1 flex-wrap items-center gap-2">
+              <!-- Quick Search Input -->
+              <div class="relative w-full sm:w-64">
+                <span
+                  class="pointer-events-none absolute inset-y-0 start-0 z-10 flex items-center ps-2.5 text-slate-400"
+                >
+                  <app-icon [icon]="searchIcon" [size]="15" />
+                </span>
+                <input
+                  type="text"
+                  [value]="questionGroupSearchQuery()"
+                  (input)="setQuestionGroupSearchQuery($any($event.target).value)"
+                  [placeholder]="'surveyDashboard.searchQuestionGroupsPlaceholder' | t"
+                  style="padding-inline-start: 2.25rem; padding-inline-end: 0.75rem"
+                  class="w-full rounded-lg border border-slate-200 bg-white py-1.5 text-xs font-semibold text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:outline-hidden"
+                />
+              </div>
+
+              <!-- Template Select Dropdown -->
+              <div class="relative w-full sm:w-64">
+                <select
+                  [value]="selectedQuestionGroupTemplate()"
+                  (change)="setSelectedQuestionGroupTemplate($any($event.target).value)"
+                  style="padding-inline-start: 0.75rem; padding-inline-end: 2rem"
+                  class="w-full appearance-none rounded-lg border border-slate-200 bg-white py-1.5 text-xs font-bold text-slate-800 focus:border-slate-400 focus:outline-hidden cursor-pointer"
+                >
+                  <option value="all">
+                    {{ 'surveyDashboard.allTemplates' | t }} ({{
+                      allQuestionGroupSections().length
+                    }})
+                  </option>
+                  @for (section of allQuestionGroupSections(); track section.sectionKey) {
+                    <option [value]="section.sectionKey">
+                      {{ section.templateName }} ({{ section.totalScoredResponses }}
+                      {{ 'surveyDashboard.responses' | t }})
+                    </option>
+                  }
+                </select>
+                <span
+                  class="pointer-events-none absolute inset-y-0 end-0 z-10 flex items-center pe-2.5 text-slate-400"
+                >
+                  <app-icon [icon]="chevronDownIcon" [size]="14" />
+                </span>
+              </div>
+            </div>
+
+            <!-- Right: Filter Toggle (All vs Active) -->
+            <div class="flex items-center gap-1.5 shrink-0 self-end md:self-center">
+              <button
+                type="button"
+                (click)="setQuestionGroupFilterMode('all')"
+                class="flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[11px] font-bold transition-all cursor-pointer border {{
+                  questionGroupFilterMode() === 'all'
+                    ? 'bg-white text-slate-900 border-slate-200/80 shadow-2xs'
+                    : 'text-slate-500 hover:text-slate-800 border-transparent'
+                }}"
+              >
+                <span>{{ 'surveyDashboard.allGroups' | t }}</span>
+                <span
+                  class="rounded-full px-1.5 py-0.2 text-[10px] font-black {{
+                    questionGroupFilterMode() === 'all'
+                      ? 'bg-slate-100 text-slate-700'
+                      : 'bg-slate-200/70 text-slate-500'
+                  }}"
+                >
+                  {{ questionGroupFilterCounts().allCount }}
+                </span>
+              </button>
+              <button
+                type="button"
+                (click)="setQuestionGroupFilterMode('active')"
+                class="flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[11px] font-bold transition-all cursor-pointer border {{
+                  questionGroupFilterMode() === 'active'
+                    ? 'bg-white text-slate-900 border-slate-200/80 shadow-2xs'
+                    : 'text-slate-500 hover:text-slate-800 border-transparent'
+                }}"
+              >
+                <span>{{ 'surveyDashboard.activeGroupsOnly' | t }}</span>
+                <span
+                  class="rounded-full px-1.5 py-0.2 text-[10px] font-black {{
+                    questionGroupFilterMode() === 'active'
+                      ? 'bg-emerald-50 text-emerald-800'
+                      : 'bg-slate-200/70 text-slate-500'
+                  }}"
+                >
+                  {{ questionGroupFilterCounts().activeCount }}
+                </span>
+              </button>
+            </div>
+          </div>
+        }
+
+        <!-- Template Sections Grid -->
+        @if (filteredQuestionGroupSections().length > 0) {
+          <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 items-start">
+            @for (section of filteredQuestionGroupSections(); track section.sectionKey) {
+              <div
+                class="flex flex-col rounded-xl border border-slate-200/80 bg-white p-3.5 sm:p-4 shadow-2xs transition-all hover:shadow-xs"
+              >
+                <!-- Template Header Info -->
+                <div
+                  class="mb-3 flex items-start justify-between gap-2 border-b border-slate-100 pb-2.5"
+                >
+                  <div class="min-w-0">
+                    <div class="flex items-center gap-1.5 flex-wrap">
+                      <span
+                        class="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-slate-100 text-slate-600"
+                      >
+                        <app-icon [icon]="templateIcon" [size]="13" />
+                      </span>
+                      <h3
+                        class="truncate text-xs sm:text-sm font-black text-slate-900"
+                        [title]="section.templateName"
+                      >
+                        {{ section.templateName }}
+                      </h3>
+                    </div>
+                    <div class="mt-1 flex items-center gap-2">
+                      <span
+                        class="rounded-full px-2 py-0.2 text-[9px] font-black border border-slate-200/60 {{
+                          section.templateKind === 'Anonymous'
+                            ? 'bg-violet-50 text-violet-700'
+                            : 'bg-cyan-50 text-cyan-800'
+                        }}"
+                      >
+                        {{ templateKindLabel(section.templateKind) }}
+                      </span>
+                      <span class="text-[10px] font-semibold text-slate-400">
+                        {{ section.totalScoredResponses }} {{ 'surveyDashboard.responses' | t }}
+                      </span>
+                    </div>
+                  </div>
+
+                  <!-- Template Overall Score Pill -->
+                  <div class="shrink-0 text-end">
+                    @if (section.averageScorePercentage !== null) {
+                      <span
+                        class="inline-flex items-center gap-1 rounded-lg px-2 py-0.5 text-xs font-black border border-slate-200/60 {{
+                          getQuestionGroupScoreBadgeClass(section.averageScorePercentage)
+                        }}"
+                      >
+                        <span>{{ section.averageScorePercentage | number: '1.1-1' }}%</span>
+                        <span class="text-[9px] font-normal opacity-75">
+                          {{ getQuestionGroupSentimentLabel(section.averageScorePercentage) }}
+                        </span>
+                      </span>
+                    } @else {
+                      <span
+                        class="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-400 border border-slate-200/60"
+                      >
+                        {{ 'surveyDashboard.noResponsesYet' | t }}
+                      </span>
+                    }
+                  </div>
+                </div>
+
+                <!-- Groups in this template (Compact Rows with max height) -->
+                <div class="space-y-2 max-h-[22rem] overflow-y-auto pe-1 scrollbar-thin">
                   @for (
                     group of section.groups;
                     track group.templateId + ':' + group.questionGroupId
                   ) {
                     <div
-                      class="grid gap-2 sm:grid-cols-[minmax(10rem,15rem)_1fr_auto] sm:items-center"
+                      class="rounded-lg border border-slate-100 bg-slate-50/50 p-2.5 transition-colors hover:bg-slate-50 hover:border-slate-200/80"
                     >
-                      <div>
-                        <p class="text-xs font-bold text-slate-800">
-                          {{ questionGroupName(group) }}
-                        </p>
-                        <p class="text-[10px] font-semibold text-slate-400">
-                          {{ group.scoredResponsesCount }} {{ 'surveyDashboard.responses' | t }}
-                        </p>
+                      <!-- Row 1: Name and Counts -->
+                      <div class="flex items-center justify-between gap-2 mb-1.5">
+                        <div class="flex items-center gap-1.5 min-w-0">
+                          <span
+                            class="h-1.5 w-1.5 shrink-0 rounded-full {{
+                              group.scoredResponsesCount > 0 ? 'bg-emerald-500' : 'bg-slate-300'
+                            }}"
+                          ></span>
+                          <p
+                            class="truncate text-xs font-bold text-slate-800"
+                            [title]="questionGroupName(group)"
+                          >
+                            {{ questionGroupName(group) }}
+                          </p>
+                        </div>
+                        <div class="shrink-0 flex items-center gap-1 text-[10px] text-slate-400">
+                          <span class="font-semibold"
+                            >{{ group.questionsCount }}
+                            {{ 'surveyDashboard.questionsCount' | t }}</span
+                          >
+                          <span>•</span>
+                          <span
+                            class="font-semibold {{
+                              group.scoredResponsesCount > 0 ? 'text-slate-700' : 'text-slate-400'
+                            }}"
+                          >
+                            {{ group.scoredResponsesCount }} {{ 'surveyDashboard.responses' | t }}
+                          </span>
+                        </div>
                       </div>
-                      <div
-                        class="h-2.5 overflow-hidden rounded-full bg-slate-100"
-                        role="progressbar"
-                        [attr.aria-valuenow]="group.averageScorePercentage ?? 0"
-                        aria-valuemin="0"
-                        aria-valuemax="100"
-                      >
-                        <div
-                          class="h-full rounded-full bg-[var(--theme-color-accent)] transition-[width]"
-                          [style.width]="barWidth(group.averageScorePercentage)"
-                        ></div>
+
+                      <!-- Row 2: Progress Bar and Score Pill -->
+                      <div class="flex items-center gap-2">
+                        <div class="flex-1">
+                          <div
+                            class="h-2 overflow-hidden rounded-full bg-slate-200/70"
+                            role="progressbar"
+                            [attr.aria-valuenow]="group.averageScorePercentage ?? 0"
+                            aria-valuemin="0"
+                            aria-valuemax="100"
+                          >
+                            <div
+                              class="h-full rounded-full transition-all duration-500 {{
+                                getQuestionGroupScoreBarClass(group.averageScorePercentage)
+                              }}"
+                              [style.width]="barWidth(group.averageScorePercentage)"
+                            ></div>
+                          </div>
+                        </div>
+
+                        <div class="shrink-0">
+                          @if (
+                            group.scoredResponsesCount > 0 && group.averageScorePercentage !== null
+                          ) {
+                            <span
+                              class="inline-flex items-center gap-1 rounded-md px-1.5 py-0.2 text-[11px] font-black border border-slate-200/60 {{
+                                getQuestionGroupScoreBadgeClass(group.averageScorePercentage)
+                              }}"
+                            >
+                              <span>{{ group.averageScorePercentage | number: '1.1-1' }}%</span>
+                            </span>
+                          } @else {
+                            <span
+                              class="inline-flex items-center rounded-md bg-slate-100 px-1.5 py-0.2 text-[9px] font-bold text-slate-400 border border-slate-200/60"
+                            >
+                              {{ 'surveyDashboard.noData' | t }}
+                            </span>
+                          }
+                        </div>
                       </div>
-                      <span class="text-xs font-black text-slate-900">{{
-                        scoreLabel(group.averageScorePercentage)
-                      }}</span>
                     </div>
                   }
                 </div>
@@ -1159,9 +1437,32 @@
             }
           </div>
         } @else if (!store.questionGroupsLoading()) {
-          <p class="rounded-xl bg-slate-50 p-6 text-center text-xs font-bold text-slate-400">
-            {{ 'surveyDashboard.noQuestionGroupData' | t }}
-          </p>
+          <!-- Empty State -->
+          <div
+            class="flex flex-col items-center justify-center rounded-xl bg-slate-50 p-8 text-center border border-slate-100"
+          >
+            <span
+              class="mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-slate-200/70 text-slate-400"
+            >
+              <app-icon [icon]="layersIcon" [size]="20" />
+            </span>
+            <p class="text-xs font-bold text-slate-600">
+              {{
+                questionGroupFilterMode() === 'active'
+                  ? ('surveyDashboard.noActiveQuestionGroups' | t)
+                  : ('surveyDashboard.noQuestionGroupData' | t)
+              }}
+            </p>
+            @if (questionGroupFilterMode() === 'active' && allQuestionGroupSections().length > 0) {
+              <button
+                type="button"
+                (click)="setQuestionGroupFilterMode('all')"
+                class="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-white px-3 py-1 text-xs font-bold text-slate-700 border border-slate-200/80 shadow-2xs hover:bg-slate-100 cursor-pointer"
+              >
+                {{ 'surveyDashboard.allGroups' | t }}
+              </button>
+            }
+          </div>
         }
       </section>
 

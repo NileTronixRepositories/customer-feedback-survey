@@ -36,7 +36,7 @@ import {
   TrendingUp,
   UserCog,
   UsersRound,
-Hash,
+  Hash,
   Mail,
   MapPin,
   ShieldCheck,
@@ -79,6 +79,18 @@ import {
   SurveyDashboardTemplatePerformance,
   SurveyDashboardTrendPoint,
 } from '../../../domain/survey-dashboard.model';
+
+export interface QuestionGroupSectionData {
+  sectionKey: string;
+  templateId: string;
+  templateKind: SurveyDashboardTemplateKind;
+  templateName: string;
+  groups: SurveyDashboardQuestionGroup[];
+  totalScoredResponses: number;
+  averageScorePercentage: number | null;
+  activeGroupsCount: number;
+  totalQuestionsCount: number;
+}
 
 Chart.register(...registerables);
 
@@ -144,7 +156,9 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
   readonly mapPinIcon = MapPin;
   readonly shieldCheckIcon = ShieldCheck;
   readonly userIcon = User;
-  readonly activeTableTab = signal<'templates' | 'questions' | 'critical' | 'branches' | 'all'>('templates');
+  readonly activeTableTab = signal<'templates' | 'questions' | 'critical' | 'branches' | 'all'>(
+    'templates',
+  );
   private lastSingleTab: 'templates' | 'questions' | 'critical' | 'branches' = 'templates';
   readonly collapsedSections = signal<ReadonlySet<string>>(new Set());
   readonly calculationOptionsOpen = signal(false);
@@ -184,20 +198,184 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
   });
 
   readonly templateOptions = computed(() => this.filterTemplatesByBranch(this.store.templates()));
-  readonly questionGroupSections = computed(() => {
-    const sections = new Map<string, { templateId: string; templateName: string; groups: SurveyDashboardQuestionGroup[] }>();
+  readonly selectedQuestionGroupTemplate = signal<string>('all');
+  readonly questionGroupFilterMode = signal<'all' | 'active'>('all');
+
+  readonly questionGroupOverallStats = computed(() => {
+    const groups = this.store.questionGroups();
+    const totalGroups = groups.length;
+    const activeGroups = groups.filter(
+      (g) => (g.scoredResponsesCount ?? 0) > 0 && g.averageScorePercentage !== null,
+    );
+    const totalScoredResponses = groups.reduce((acc, g) => acc + (g.scoredResponsesCount ?? 0), 0);
+
+    let averageScorePercentage: number | null = null;
+    if (activeGroups.length > 0) {
+      let weightedSum = 0;
+      let totalWeight = 0;
+      for (const g of activeGroups) {
+        const count = g.scoredResponsesCount;
+        weightedSum += (g.averageScorePercentage ?? 0) * count;
+        totalWeight += count;
+      }
+      averageScorePercentage =
+        totalWeight > 0
+          ? weightedSum / totalWeight
+          : activeGroups.reduce((acc, g) => acc + (g.averageScorePercentage ?? 0), 0) /
+            activeGroups.length;
+    }
+
+    return {
+      totalGroups,
+      activeGroupsCount: activeGroups.length,
+      totalScoredResponses,
+      averageScorePercentage,
+    };
+  });
+
+  readonly allQuestionGroupSections = computed<readonly QuestionGroupSectionData[]>(() => {
+    const sections = new Map<string, QuestionGroupSectionData>();
     for (const group of this.store.questionGroups()) {
       const key = `${group.templateKind}:${group.templateId}`;
-      const section = sections.get(key) ?? {
-        templateId: key,
-        templateName: this.localized(group.templateNameEn, group.templateNameAr),
-        groups: [],
-      };
+      let section = sections.get(key);
+      if (!section) {
+        section = {
+          sectionKey: key,
+          templateId: group.templateId,
+          templateKind: group.templateKind,
+          templateName: this.localized(group.templateNameEn, group.templateNameAr),
+          groups: [],
+          totalScoredResponses: 0,
+          averageScorePercentage: null,
+          activeGroupsCount: 0,
+          totalQuestionsCount: 0,
+        };
+        sections.set(key, section);
+      }
       section.groups.push(group);
-      sections.set(key, section);
+      section.totalScoredResponses += group.scoredResponsesCount ?? 0;
+      section.totalQuestionsCount += group.questionsCount ?? 0;
+      if ((group.scoredResponsesCount ?? 0) > 0 && group.averageScorePercentage !== null) {
+        section.activeGroupsCount++;
+      }
     }
-    return [...sections.values()];
+
+    for (const section of sections.values()) {
+      const scoredGroups = section.groups.filter(
+        (g) => (g.scoredResponsesCount ?? 0) > 0 && g.averageScorePercentage !== null,
+      );
+      if (scoredGroups.length > 0) {
+        let weightedSum = 0;
+        let totalWeight = 0;
+        for (const g of scoredGroups) {
+          const count = g.scoredResponsesCount;
+          weightedSum += (g.averageScorePercentage ?? 0) * count;
+          totalWeight += count;
+        }
+        section.averageScorePercentage =
+          totalWeight > 0
+            ? weightedSum / totalWeight
+            : scoredGroups.reduce((acc, g) => acc + (g.averageScorePercentage ?? 0), 0) /
+              scoredGroups.length;
+      }
+
+      section.groups.sort((a, b) => {
+        const aHas = (a.scoredResponsesCount ?? 0) > 0 ? 1 : 0;
+        const bHas = (b.scoredResponsesCount ?? 0) > 0 ? 1 : 0;
+        if (aHas !== bHas) return bHas - aHas;
+        return (b.averageScorePercentage ?? -1) - (a.averageScorePercentage ?? -1);
+      });
+    }
+
+    return [...sections.values()].sort((a, b) => {
+      const aHas = a.totalScoredResponses > 0 ? 1 : 0;
+      const bHas = b.totalScoredResponses > 0 ? 1 : 0;
+      if (aHas !== bHas) return bHas - aHas;
+      return a.templateName.localeCompare(b.templateName);
+    });
   });
+
+  readonly questionGroupSearchQuery = signal<string>('');
+
+  readonly filteredQuestionGroupSections = computed<readonly QuestionGroupSectionData[]>(() => {
+    const selectedTemplate = this.selectedQuestionGroupTemplate();
+    const filterMode = this.questionGroupFilterMode();
+    const query = this.questionGroupSearchQuery().trim().toLowerCase();
+    let sections = this.allQuestionGroupSections();
+
+    if (selectedTemplate !== 'all') {
+      sections = sections.filter((s) => s.sectionKey === selectedTemplate);
+    }
+
+    if (query.length > 0) {
+      sections = sections
+        .map((s) => {
+          const matchTemplate = s.templateName.toLowerCase().includes(query);
+          const filteredGroups = s.groups.filter((g) => {
+            const name = this.questionGroupName(g).toLowerCase();
+            return matchTemplate || name.includes(query);
+          });
+          return {
+            ...s,
+            groups: filteredGroups,
+          };
+        })
+        .filter((s) => s.groups.length > 0);
+    }
+
+    if (filterMode === 'active') {
+      return sections
+        .map((s) => ({
+          ...s,
+          groups: s.groups.filter((g) => g.scoredResponsesCount > 0),
+        }))
+        .filter((s) => s.groups.length > 0);
+    }
+
+    return sections;
+  });
+
+  readonly questionGroupFilterCounts = computed(() => {
+    const selectedTemplate = this.selectedQuestionGroupTemplate();
+    const query = this.questionGroupSearchQuery().trim().toLowerCase();
+    let sections = this.allQuestionGroupSections();
+
+    if (selectedTemplate !== 'all') {
+      sections = sections.filter((s) => s.sectionKey === selectedTemplate);
+    }
+
+    if (query.length > 0) {
+      sections = sections
+        .map((s) => {
+          const matchTemplate = s.templateName.toLowerCase().includes(query);
+          const filteredGroups = s.groups.filter((g) => {
+            const name = this.questionGroupName(g).toLowerCase();
+            return matchTemplate || name.includes(query);
+          });
+          return {
+            ...s,
+            groups: filteredGroups,
+          };
+        })
+        .filter((s) => s.groups.length > 0);
+    }
+
+    let allCount = 0;
+    let activeCount = 0;
+    for (const s of sections) {
+      for (const g of s.groups) {
+        allCount++;
+        if (g.scoredResponsesCount > 0) {
+          activeCount++;
+        }
+      }
+    }
+
+    return { allCount, activeCount };
+  });
+
+  readonly questionGroupSections = computed(() => this.filteredQuestionGroupSections());
+
   readonly templatesSelectionDisabled = computed(
     () => this.isSuperAdmin() && this.selectedBranchId().length === 0,
   );
@@ -413,6 +591,42 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
 
   questionGroupName(group: SurveyDashboardQuestionGroup): string {
     return this.localized(group.questionGroupNameEn, group.questionGroupNameAr);
+  }
+
+  setSelectedQuestionGroupTemplate(key: string): void {
+    this.selectedQuestionGroupTemplate.set(key);
+  }
+
+  setQuestionGroupFilterMode(mode: 'all' | 'active'): void {
+    this.questionGroupFilterMode.set(mode);
+  }
+
+  setQuestionGroupSearchQuery(query: string): void {
+    this.questionGroupSearchQuery.set(query);
+  }
+
+  getQuestionGroupScoreBarClass(percentage: number | null): string {
+    if (percentage === null) return 'bg-slate-300';
+    if (percentage >= 80) return 'bg-emerald-500';
+    if (percentage >= 60) return 'bg-[var(--theme-color-primary,#148496)]';
+    if (percentage >= 40) return 'bg-amber-500';
+    return 'bg-rose-500';
+  }
+
+  getQuestionGroupScoreBadgeClass(percentage: number | null): string {
+    if (percentage === null) return 'bg-slate-100 text-slate-500 border border-slate-200/60';
+    if (percentage >= 80) return 'bg-emerald-50 text-emerald-800 border border-slate-200/60';
+    if (percentage >= 60) return 'bg-cyan-50 text-cyan-800 border border-slate-200/60';
+    if (percentage >= 40) return 'bg-amber-50 text-amber-800 border border-slate-200/60';
+    return 'bg-rose-50 text-rose-800 border border-slate-200/60';
+  }
+
+  getQuestionGroupSentimentLabel(percentage: number | null): string {
+    if (percentage === null) return this.i18n.translate('surveyDashboard.noData');
+    if (percentage >= 80) return this.i18n.translate('surveyDashboard.excellentSatisfaction');
+    if (percentage >= 60) return this.i18n.translate('surveyDashboard.goodSatisfaction');
+    if (percentage >= 40) return this.i18n.translate('surveyDashboard.averageSatisfactionLabel');
+    return this.i18n.translate('surveyDashboard.lowSatisfaction');
   }
 
   openDrillDown(event: { title: string; navigation: DashboardDetailsNavigation }): void {

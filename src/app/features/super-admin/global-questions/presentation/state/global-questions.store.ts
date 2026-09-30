@@ -97,8 +97,11 @@ export class GlobalQuestionsStore {
     this.orderSortSignal.set(nextQuery.orderSort);
     this.isActiveSignal.set(nextQuery.isActive);
 
-    this.globalQuestionsService
-      .list(nextQuery)
+    const questionsPage$ = nextQuery.groupId
+      ? this.globalQuestionsService.listByGroup(nextQuery.groupId, nextQuery)
+      : this.globalQuestionsService.list(nextQuery);
+
+    questionsPage$
       .pipe(
         take(1),
         finalize(() => this.loadingSignal.set(false)),
@@ -116,6 +119,18 @@ export class GlobalQuestionsStore {
           this.errorSignal.set(this.readErrorKey(error, 'globalQuestions.loadError'));
         },
       });
+  }
+
+  loadForGroup(groupId: string, query: Partial<GlobalQuestionsFilter> = {}): void {
+    this.groupIdSignal.set(groupId);
+    this.load({
+      pageNumber: query.pageNumber ?? this.defaultQuery.pageNumber,
+      pageSize: query.pageSize ?? this.defaultQuery.pageSize,
+      searchText: query.searchText ?? this.defaultQuery.searchText,
+      groupId,
+      orderSort: query.orderSort ?? this.defaultQuery.orderSort,
+      isActive: query.isActive !== undefined ? query.isActive : this.defaultQuery.isActive,
+    });
   }
 
   loadGroupsSelection(): void {

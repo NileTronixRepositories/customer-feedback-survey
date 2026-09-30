@@ -58,6 +58,10 @@ export class GlobalQuestionsService {
       .pipe(map((response) => this.toPageResult(response, query)));
   }
 
+  listByGroup(groupId: string, query: GlobalQuestionsFilter): Observable<GlobalQuestionsPageResult> {
+    return this.list({ ...query, groupId });
+  }
+
   create(payload: CreateGlobalQuestionRequest): Observable<GlobalQuestionListItem> {
     return this.http
       .post<GlobalQuestionApiResponse>(this.globalQuestionsUrl, payload)

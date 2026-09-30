@@ -88,7 +88,7 @@ export class SurveyDashboardService {
       })
       .pipe(
         map((response) =>
-          this.readPageArray(response).map((item) => this.toQuestionGroup(item)),
+          this.readPageArray(response, 'questionGroups').map((item) => this.toQuestionGroup(item)),
         ),
       );
   }
@@ -1185,12 +1185,13 @@ export class SurveyDashboardService {
     ).size;
   }
 
-  private readPageArray(value: unknown): ApiRecord[] {
+  private readPageArray(value: unknown, collectionKey = 'data'): ApiRecord[] {
     if (Array.isArray(value)) {
       return value.filter((item): item is ApiRecord => typeof item === 'object' && item !== null);
     }
 
-    return this.readArray(this.readRecord(value)?.['data']);
+    const record = this.readRecord(value);
+    return this.readArray(record?.[collectionKey] ?? record?.['data']);
   }
 
   private readRecord(value: unknown): ApiRecord | null {

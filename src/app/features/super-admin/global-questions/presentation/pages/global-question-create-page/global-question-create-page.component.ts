@@ -1,5 +1,13 @@
 import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import {
   FormArray,
   FormBuilder,
@@ -93,6 +101,40 @@ export class GlobalQuestionCreatePageComponent implements OnInit {
   private readonly authStore = inject(AuthStore);
   private readonly formBuilder = inject(FormBuilder);
   private readonly i18n = inject(I18nService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+
+  readonly scopedGroupId = signal<string | null>(null);
+  readonly isGroupScoped = computed(() => this.scopedGroupId() !== null);
+  readonly canSubmitQuestionForm = computed(
+    () => this.isGroupScoped() || this.globalQuestionsStore.groupsSelection().length > 0,
+  );
+  readonly selectedGroupLabel = computed(() => {
+    const scopedGroupId = this.scopedGroupId();
+    if (!scopedGroupId) {
+      return '';
+    }
+
+    const group = this.globalQuestionsStore
+      .groupsSelection()
+      .find((item) => item.groupId === scopedGroupId);
+    if (group) {
+      return this.localizedText(group.nameEn, group.nameAr);
+    }
+
+    const question = this.globalQuestionsStore
+      .questions()
+      .find((item) => item.groupId === scopedGroupId);
+    if (question) {
+      if (!question.groupNameEn && !question.groupNameAr) {
+        return scopedGroupId;
+      }
+
+      return this.localizedText(question.groupNameEn, question.groupNameAr);
+    }
+
+    return scopedGroupId;
+  });
 
   readonly chevronLeftIcon = ChevronLeft;
   readonly chevronRightIcon = ChevronRight;
@@ -115,7 +157,9 @@ export class GlobalQuestionCreatePageComponent implements OnInit {
   readonly selectedQuestion = signal<GlobalQuestionListItem | null>(null);
   readonly answerType = signal<GlobalQuestionType>(GLOBAL_QUESTION_TYPE.SingleChoice);
   readonly optionsError = signal('');
-  readonly canViewGlobalQuestionGroups = computed(() => this.authStore.canAccessGlobalQuestionGroups());
+  readonly canViewGlobalQuestionGroups = computed(() =>
+    this.authStore.canAccessGlobalQuestionGroups(),
+  );
   readonly canCreate = computed(() => this.authStore.canManageGlobalQuestions('Create'));
   readonly canDelete = computed(() => this.authStore.canManageGlobalQuestions('Delete'));
   readonly canRestore = computed(() => this.authStore.canManageGlobalQuestions('Restore'));
@@ -157,6 +201,16 @@ export class GlobalQuestionCreatePageComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    const groupId =
+      this.route.snapshot.paramMap.get('groupId') ??
+      this.route.snapshot.queryParamMap.get('groupId');
+    if (groupId) {
+      this.scopedGroupId.set(groupId);
+      this.searchForm.controls.groupId.setValue(groupId);
+      this.globalQuestionsStore.loadForGroup(groupId);
+      this.loadGroupsSelection();
+      return;
+    }
     this.globalQuestionsStore.load();
     this.loadGroupsSelection();
   }
@@ -165,7 +219,7 @@ export class GlobalQuestionCreatePageComponent implements OnInit {
     const formValue = this.searchForm.getRawValue();
     this.globalQuestionsStore.search(
       formValue.searchText,
-      formValue.groupId,
+      this.scopedGroupId() ?? formValue.groupId,
       this.toIsActiveFilter(formValue.isActive),
       this.toPageSize(formValue.pageSize),
       formValue.orderSort,
@@ -175,11 +229,15 @@ export class GlobalQuestionCreatePageComponent implements OnInit {
   clearQuestionSearch(): void {
     this.searchForm.setValue({
       searchText: '',
-      groupId: '',
+      groupId: this.scopedGroupId() ?? '',
       isActive: '',
       pageSize: '10',
       orderSort: '',
     });
+    if (this.scopedGroupId()) {
+      this.globalQuestionsStore.loadForGroup(this.scopedGroupId()!);
+      return;
+    }
     this.globalQuestionsStore.search('', '', null, 10, '');
   }
 
@@ -197,8 +255,13 @@ export class GlobalQuestionCreatePageComponent implements OnInit {
     }
 
     this.globalQuestionsStore.clearMessages();
-    this.loadGroupsSelection();
+    if (!this.isGroupScoped()) {
+      this.loadGroupsSelection();
+    }
     this.resetQuestionForm();
+    if (this.scopedGroupId()) {
+      this.questionForm.controls.groupId.setValue(this.scopedGroupId()!);
+    }
     this.createModalOpen.set(true);
   }
 
@@ -215,15 +278,18 @@ export class GlobalQuestionCreatePageComponent implements OnInit {
       this.questionForm.invalid ||
       this.optionsError().length > 0 ||
       this.globalQuestionsStore.creating() ||
-      this.globalQuestionsStore.groupsSelection().length === 0 ||
+      (!this.isGroupScoped() && this.globalQuestionsStore.groupsSelection().length === 0) ||
       !this.canCreate()
     ) {
       return;
     }
 
-    this.globalQuestionsStore.createQuestion(this.toPayload(this.questionForm.getRawValue()), () => {
-      this.closeCreateQuestion();
-    });
+    this.globalQuestionsStore.createQuestion(
+      this.toPayload(this.questionForm.getRawValue()),
+      () => {
+        this.closeCreateQuestion();
+      },
+    );
   }
 
   submitQuestionModal(): void {
@@ -313,11 +379,7 @@ export class GlobalQuestionCreatePageComponent implements OnInit {
 
   deleteSelectedQuestion(): void {
     const question = this.questionPendingDelete();
-    if (
-      !question ||
-      this.globalQuestionsStore.deleting() ||
-      !this.canDeleteQuestion(question)
-    ) {
+    if (!question || this.globalQuestionsStore.deleting() || !this.canDeleteQuestion(question)) {
       return;
     }
 
@@ -486,7 +548,7 @@ export class GlobalQuestionCreatePageComponent implements OnInit {
   }
 
   private resetQuestionForm(): void {
-    const groupId = this.questionForm.controls.groupId.value;
+    const groupId = this.scopedGroupId() ?? this.questionForm.controls.groupId.value;
     this.questionForm.reset({
       groupId,
       textEn: '',
@@ -621,7 +683,7 @@ export class GlobalQuestionCreatePageComponent implements OnInit {
     const answerType = toGlobalQuestionType(value.type) ?? GLOBAL_QUESTION_TYPE.SingleChoice;
 
     return {
-      groupId: value.groupId,
+      groupId: this.scopedGroupId() ?? value.groupId,
       textEn: value.textEn.trim(),
       textAr: textAr.length > 0 ? textAr : null,
       type: answerType,
