@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ArrowLeft, Building2, LogIn } from 'lucide-angular';
 import { I18nService } from '../../../../../core/services/i18n.service';
@@ -40,6 +41,14 @@ export class LoginPageComponent {
     userNameOrEmail: ['', [Validators.required, Validators.maxLength(200)]],
     password: ['', [Validators.required, Validators.maxLength(200)]],
   });
+
+  constructor() {
+    this.form.valueChanges.pipe(takeUntilDestroyed()).subscribe(() => {
+      if (this.authStore.error()) {
+        this.authStore.clearError();
+      }
+    });
+  }
 
   userNameOrEmailError(): string {
     const control = this.form.controls.userNameOrEmail;

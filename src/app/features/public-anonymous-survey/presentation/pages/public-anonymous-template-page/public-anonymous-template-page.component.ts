@@ -156,7 +156,7 @@ export class PublicAnonymousTemplatePageComponent implements OnInit, OnDestroy {
   }
 
   customInputLabel(input: PublicAnonymousTemplateCustomInput): string {
-    return this.localizedText(input.labelEn ?? input.name, input.labelAr);
+    return this.localizedText(input.labelEn ?? '', input.labelAr);
   }
 
   customInputValue(input: PublicAnonymousTemplateCustomInput): string {
@@ -341,6 +341,9 @@ export class PublicAnonymousTemplatePageComponent implements OnInit, OnDestroy {
     if (answerType === QUESTION_ANSWER_TYPE.Complain) {
       return 'complain';
     }
+    if (answerType === QUESTION_ANSWER_TYPE.FreeText) {
+      return 'freeText';
+    }
     if (answerType === QUESTION_ANSWER_TYPE.Image) {
       return 'image';
     }
@@ -454,7 +457,7 @@ export class PublicAnonymousTemplatePageComponent implements OnInit, OnDestroy {
       selectedQuestionOptionId: kind === 'singleChoice' ? answer.selectedQuestionOptionId : null,
       starRatingValue: kind === 'starRating' ? answer.starRatingValue : null,
       smileValue: kind === 'smiles' ? answer.smileValue : null,
-      textAnswer: kind === 'complain' ? answer.textAnswer.trim() : null,
+      textAnswer: kind === 'complain' || kind === 'freeText' ? answer.textAnswer.trim() : null,
       voiceFileName: kind === 'voice' ? answer.voiceFileName : null,
       imageFile: kind === 'image' ? answer.imageFile : null,
     };
@@ -479,7 +482,7 @@ export class PublicAnonymousTemplatePageComponent implements OnInit, OnDestroy {
     if (kind === 'smiles') {
       return answer.smileValue !== null ? '' : 'publicAnonymousTemplates.questionRequiredError';
     }
-    if (kind === 'complain') {
+    if (kind === 'complain' || kind === 'freeText') {
       return answer.textAnswer.trim().length > 0
         ? ''
         : 'publicAnonymousTemplates.questionRequiredError';

@@ -140,7 +140,7 @@ export class BranchResponseDetailsModalComponent {
       return `${answer.smileValue ?? '-'} / 5`;
     }
 
-    if (answer.questionType === 'Complain') {
+    if (answer.questionType === 'Complain' || answer.questionType === 'FreeText') {
       return answer.textAnswer || answer.displayValue || '-';
     }
 

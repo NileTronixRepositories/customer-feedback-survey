@@ -1,1 +1,9 @@
-/* Styles are composed with Tailwind utility classes in the component template. */
+:host {
+  display: inline-block;
+}
+
+:host(.w-full),
+:host(.block) {
+  display: block;
+  width: 100%;
+}

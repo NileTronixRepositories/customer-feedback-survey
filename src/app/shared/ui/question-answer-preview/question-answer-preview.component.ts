@@ -46,6 +46,7 @@ export class QuestionAnswerPreviewComponent {
   readonly isVoice = computed(() => this.answerType() === QUESTION_ANSWER_TYPE.Voice);
   readonly isStarRating = computed(() => this.answerType() === QUESTION_ANSWER_TYPE.StarRating);
   readonly isComplain = computed(() => this.answerType() === QUESTION_ANSWER_TYPE.Complain);
+  readonly isFreeText = computed(() => this.answerType() === QUESTION_ANSWER_TYPE.FreeText);
   readonly isSmiles = computed(() => this.answerType() === QUESTION_ANSWER_TYPE.Smiles);
   readonly isImage = computed(() => this.answerType() === QUESTION_ANSWER_TYPE.Image);
   readonly localizedOptions = computed<readonly LocalizedAnswerOption[]>(() => {

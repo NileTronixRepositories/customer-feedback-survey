@@ -107,7 +107,7 @@ export class BranchDashboardService {
     if (query.satisfactionCategory) params = params.set('satisfactionCategory', query.satisfactionCategory);
     if (query.isScored !== undefined) params = params.set('isScored', String(query.isScored));
     if (query.questionId) params = params.set('questionId', query.questionId);
-    if (query.customInputName) params = params.set('customInputName', query.customInputName);
+    if (query.customInputId) params = params.set('customInputId', query.customInputId);
     if (query.customInputType) params = params.set('customInputType', query.customInputType);
     if (query.customInputValue) params = params.set('customInputValue', query.customInputValue);
     if (query.orderSort) params = params.set('orderSort', query.orderSort);
@@ -214,7 +214,9 @@ export class BranchDashboardService {
 
   private toCustomInputSegment(item: ApiRecord): BranchDashboardCustomInputSegment {
     return {
-      customInputName: this.readString(item, 'customInputName'),
+      customInputId: this.readString(item, 'customInputId'),
+      labelEn: this.readNullableString(item, 'labelEn'),
+      labelAr: this.readNullableString(item, 'labelAr'),
       type: this.readString(item, 'type'),
       typeName: this.readString(item, 'typeName'),
       segments: this.readArray(item['segments']).map((segment) =>
@@ -279,7 +281,9 @@ export class BranchDashboardService {
 
   private toCriticalCustomInput(item: ApiRecord): BranchDashboardCriticalResponseCustomInput {
     return {
-      name: this.readString(item, 'name'),
+      customInputId: this.readString(item, 'customInputId'),
+      labelEnSnapshot: this.readNullableString(item, 'labelEnSnapshot'),
+      labelArSnapshot: this.readNullableString(item, 'labelArSnapshot'),
       value: this.readString(item, 'value'),
     };
   }
@@ -316,7 +320,8 @@ export class BranchDashboardService {
   private toResponseCustomInput(item: ApiRecord): BranchSurveyResponseCustomInput {
     return {
       customInputId: this.readString(item, 'customInputId'),
-      name: this.readString(item, 'name'),
+      labelEnSnapshot: this.readNullableString(item, 'labelEnSnapshot'),
+      labelArSnapshot: this.readNullableString(item, 'labelArSnapshot'),
       type: this.readString(item, 'type'),
       typeName: this.readString(item, 'typeName'),
       stringValue: this.readNullableString(item, 'stringValue'),
@@ -394,7 +399,9 @@ export class BranchDashboardService {
 
   private toResponseCustomInputPreview(item: ApiRecord): BranchSurveyResponseCustomInputPreview {
     return {
-      name: this.readString(item, 'name'),
+      customInputId: this.readString(item, 'customInputId'),
+      labelEnSnapshot: this.readNullableString(item, 'labelEnSnapshot'),
+      labelArSnapshot: this.readNullableString(item, 'labelArSnapshot'),
       value: this.readString(item, 'value'),
     };
   }
@@ -416,6 +423,7 @@ export class BranchDashboardService {
       value === 'StarRating' ||
       value === 'Smiles' ||
       value === 'Complain' ||
+      value === 'FreeText' ||
       value === 'Voice' ||
       value === 'Image'
     ) {

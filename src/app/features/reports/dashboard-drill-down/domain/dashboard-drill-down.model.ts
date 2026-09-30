@@ -23,17 +23,27 @@ export interface DashboardSummaryActions {
   voiceAnswers: DashboardDetailsNavigation | null;
 }
 
+export interface DashboardResponseMetadataFallback {
+  templateNameEn?: string | null;
+  templateNameAr?: string | null;
+  branchNameEn?: string | null;
+  branchNameAr?: string | null;
+  operatorNameEn?: string | null;
+  operatorNameAr?: string | null;
+}
+
 export interface DashboardDrillDownContext {
   title: string;
   navigation: DashboardDetailsNavigation;
+  fallbackMetadata?: DashboardResponseMetadataFallback;
 }
 
 export type DashboardResponseSource = 'Internal' | 'Anonymous' | null;
 
 export interface DashboardResponseCustomInputPreview {
-  name: string;
-  labelEn: string | null;
-  labelAr: string | null;
+  customInputId: string;
+  labelEnSnapshot: string | null;
+  labelArSnapshot: string | null;
   value: string;
 }
 

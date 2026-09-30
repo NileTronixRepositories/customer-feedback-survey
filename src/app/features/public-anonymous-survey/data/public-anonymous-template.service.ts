@@ -112,7 +112,6 @@ export class PublicAnonymousTemplateService {
 
     return {
       customInputId: this.readRecordId(response.customInputId),
-      name: response.name ?? '',
       labelEn: response.labelEn ?? null,
       labelAr: response.labelAr ?? null,
       type,

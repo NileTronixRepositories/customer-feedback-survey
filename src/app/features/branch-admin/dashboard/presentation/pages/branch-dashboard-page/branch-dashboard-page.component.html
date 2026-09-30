@@ -902,26 +902,26 @@
                     <div class="flex gap-1.5 overflow-x-auto rounded-xl bg-slate-50 p-1">
                       @for (
                         segment of dashboard.customInputSegments;
-                        track segment.customInputName
+                        track segment.customInputId
                       ) {
                         <button
                           class="shrink-0 rounded-lg px-3 py-1.5 text-[11px] font-extrabold transition"
                           type="button"
                           [class.bg-white]="
-                            selectedSegment().customInputName === segment.customInputName
+                            selectedSegment().customInputId === segment.customInputId
                           "
                           [class.shadow-sm]="
-                            selectedSegment().customInputName === segment.customInputName
+                            selectedSegment().customInputId === segment.customInputId
                           "
                           [class.text-cyan-700]="
-                            selectedSegment().customInputName === segment.customInputName
+                            selectedSegment().customInputId === segment.customInputId
                           "
                           [class.text-slate-500]="
-                            selectedSegment().customInputName !== segment.customInputName
+                            selectedSegment().customInputId !== segment.customInputId
                           "
-                          (click)="selectedSegmentName.set(segment.customInputName)"
+                          (click)="selectedSegmentName.set(segment.customInputId)"
                         >
-                          {{ segment.customInputName }}
+                          {{ segmentLabel(segment) }}
                         </button>
                       }
                     </div>
@@ -933,7 +933,7 @@
                         <div class="flex flex-wrap items-center justify-between gap-2 px-1">
                           <div class="min-w-0">
                             <p class="truncate text-xs font-black text-slate-950">
-                              {{ segment.customInputName }}
+                              {{ segmentLabel(segment) }}
                             </p>
                             <p class="text-[10px] font-semibold text-slate-500">
                               {{ segment.typeName }} - {{ segmentResponsesTotal(segment) }}
@@ -1103,12 +1103,12 @@
                       @if (item.customInputs.length > 0) {
                         @for (
                           input of item.customInputs.slice(0, 4);
-                          track input.name + input.value
+                          track input.customInputId
                         ) {
                           <span
                             class="max-w-full truncate rounded-lg bg-slate-50 px-2 py-1 text-[10px] font-bold text-slate-500"
                             [title]="input.value"
-                            >{{ input.name }}: {{ input.value || '-' }}</span
+                            >{{ snapshotLabel(input) }}: {{ input.value || '-' }}</span
                           >
                         }
                       } @else {
@@ -1271,7 +1271,7 @@
                 </span>
               </div>
               <p class="mt-1 text-[10px] font-semibold text-slate-500">
-                {{ customInput.name }} -
+                {{ templateCustomInputLabel(customInput) }} -
                 {{
                   customInput.isRequired
                     ? ('branchTemplates.customInputIsRequired' | t)

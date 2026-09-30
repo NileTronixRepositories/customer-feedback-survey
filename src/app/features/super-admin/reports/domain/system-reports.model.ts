@@ -5,6 +5,7 @@ export type SystemResponseQuestionType =
   | 'StarRating'
   | 'Smiles'
   | 'Complain'
+  | 'FreeText'
   | 'Voice'
   | 'Image';
 
@@ -32,7 +33,7 @@ export interface SystemResponsesQuery {
   satisfactionCategory?: SatisfactionCategory;
   isScored?: boolean;
   questionId?: string;
-  customInputName?: string;
+  customInputId?: string;
   customInputType?: string;
   customInputValue?: string;
   orderSort?: 'Newest' | 'Oldest';
@@ -176,7 +177,9 @@ export interface SystemResponseListItem {
 }
 
 export interface SystemResponseCustomInputPreview {
-  name: string;
+  customInputId: string;
+  labelEnSnapshot: string | null;
+  labelArSnapshot: string | null;
   value: string;
 }
 
@@ -212,7 +215,8 @@ export interface SystemResponseScore {
 
 export interface SystemResponseCustomInput {
   customInputId: string;
-  name: string;
+  labelEnSnapshot: string | null;
+  labelArSnapshot: string | null;
   type: 'String' | 'Integer' | string;
   typeName: string;
   stringValue: string | null;

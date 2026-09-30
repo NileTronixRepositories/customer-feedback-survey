@@ -208,11 +208,11 @@
                     <div class="flex max-w-[18rem] flex-wrap gap-1">
                       @for (
                         input of row.customInputsPreview.slice(0, 3);
-                        track input.name + input.value
+                        track input.customInputId
                       ) {
                         <span
                           class="truncate rounded bg-slate-50 px-2 py-0.5 text-[10px] font-bold text-slate-500"
-                          >{{ input.name }}: {{ input.value || '-' }}</span
+                          >{{ localized(input.labelEnSnapshot ?? '', input.labelArSnapshot) }}: {{ input.value || '-' }}</span
                         >
                       } @empty {
                         <span class="text-slate-400">{{

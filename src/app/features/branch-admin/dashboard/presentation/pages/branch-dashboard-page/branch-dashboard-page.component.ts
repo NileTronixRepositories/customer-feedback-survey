@@ -177,7 +177,7 @@ export class BranchDashboardPageComponent implements OnInit, OnDestroy {
     if (!name) {
       return segments[0] ?? null;
     }
-    return segments.find((segment) => segment.customInputName === name) ?? segments[0] ?? null;
+    return segments.find((segment) => segment.customInputId === name) ?? segments[0] ?? null;
   });
 
   readonly filtersForm = this.formBuilder.nonNullable.group({
@@ -210,9 +210,9 @@ export class BranchDashboardPageComponent implements OnInit, OnDestroy {
       const selectedName = this.selectedSegmentName();
       if (
         segments.length > 0 &&
-        !segments.some((segment) => segment.customInputName === selectedName)
+        !segments.some((segment) => segment.customInputId === selectedName)
       ) {
-        this.selectedSegmentName.set(segments[0].customInputName);
+        this.selectedSegmentName.set(segments[0].customInputId);
       }
     });
   }
@@ -332,7 +332,7 @@ export class BranchDashboardPageComponent implements OnInit, OnDestroy {
   }
 
   templateCustomInputLabel(customInput: BranchTemplate['customInputs'][number]): string {
-    return this.localized(customInput.labelEn ?? customInput.name, customInput.labelAr);
+    return this.localized(customInput.labelEn ?? '', customInput.labelAr);
   }
 
   questionTemplateName(item: BranchDashboardQuestionInsight): string {
@@ -383,7 +383,17 @@ export class BranchDashboardPageComponent implements OnInit, OnDestroy {
       return this.i18n.translate('branchDashboard.noCustomFields');
     }
 
-    return response.customInputs.map((input) => `${input.name}: ${input.value}`).join(' | ');
+    return response.customInputs
+      .map((input) => `${this.snapshotLabel(input)}: ${input.value}`)
+      .join(' | ');
+  }
+
+  segmentLabel(segment: BranchDashboardCustomInputSegment): string {
+    return this.localized(segment.labelEn ?? '', segment.labelAr);
+  }
+
+  snapshotLabel(input: BranchDashboardCriticalResponse['customInputs'][number]): string {
+    return this.localized(input.labelEnSnapshot ?? '', input.labelArSnapshot);
   }
 
   openResponseDetails(response: BranchDashboardCriticalResponse): void {

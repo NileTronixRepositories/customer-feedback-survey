@@ -8,6 +8,7 @@ import { TranslatePipe } from '../../../../../../shared/pipes/translate.pipe';
 import { IconComponent } from '../../../../../../shared/ui/icon/icon.component';
 import {
   DepartmentResponseAnswer,
+  DepartmentResponseCustomInput,
   DepartmentResponseDetails,
 } from '../../../domain/department-reports.model';
 import { DepartmentResponseDetailsStore } from '../../state/department-response-details.store';
@@ -82,6 +83,10 @@ export class DepartmentResponseDetailsPageComponent implements OnInit {
     return this.localized(answer.selectedOptionTextEn ?? '', answer.selectedOptionTextAr);
   }
 
+  customInputLabel(input: DepartmentResponseCustomInput): string {
+    return this.localized(input.labelEnSnapshot ?? '', input.labelArSnapshot);
+  }
+
   displayAnswer(answer: DepartmentResponseAnswer): string {
     if (answer.questionType === 'SingleChoice') {
       return this.selectedOptionText(answer) || answer.displayValue || '-';
@@ -92,7 +97,7 @@ export class DepartmentResponseDetailsPageComponent implements OnInit {
     if (answer.questionType === 'Smiles') {
       return `${answer.smileValue ?? '-'} / 5`;
     }
-    if (answer.questionType === 'Complain') {
+    if (answer.questionType === 'Complain' || answer.questionType === 'FreeText') {
       return answer.textAnswer || answer.displayValue || '-';
     }
 
@@ -112,6 +117,7 @@ export class DepartmentResponseDetailsPageComponent implements OnInit {
     if (answer.questionType === 'StarRating') return this.i18n.translate('questions.typeStarRating');
     if (answer.questionType === 'Smiles') return this.i18n.translate('questions.typeSmiles');
     if (answer.questionType === 'Complain') return this.i18n.translate('questions.typeComplain');
+    if (answer.questionType === 'FreeText') return this.i18n.translate('questions.typeFreeText');
     if (answer.questionType === 'Voice') return this.i18n.translate('questions.typeVoice');
     if (answer.questionType === 'Image') return this.i18n.translate('questions.typeImage');
 

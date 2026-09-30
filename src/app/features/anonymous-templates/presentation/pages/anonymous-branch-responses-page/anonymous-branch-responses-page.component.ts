@@ -187,7 +187,7 @@ export class AnonymousBranchResponsesPageComponent implements OnInit {
   }
 
   customInputLabel(input: BranchAnonymousResponseCustomInputPreview): string {
-    const label = this.localized(input.labelEn ?? input.name, input.labelAr, input.name);
+    const label = this.localized(input.labelEnSnapshot, input.labelArSnapshot);
     return `${label}: ${input.value || '-'}`;
   }
 

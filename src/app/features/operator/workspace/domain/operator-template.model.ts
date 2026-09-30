@@ -46,7 +46,6 @@ export type OperatorTemplateCustomInputType = 1 | 2;
 
 export interface OperatorAssignedTemplateCustomInput {
   customInputId: string;
-  name: string;
   labelEn: string | null;
   labelAr: string | null;
   type: OperatorTemplateCustomInputType;
@@ -137,7 +136,8 @@ export interface OperatorTemplateResponseResult {
 
 export interface OperatorTemplateResponseCustomInput {
   customInputId: string;
-  name: string;
+  labelEnSnapshot: string | null;
+  labelArSnapshot: string | null;
   type: OperatorTemplateCustomInputType;
   typeName: string;
   stringValue: string | null;
@@ -177,7 +177,6 @@ export interface OperatorAssignedTemplateApiResponse {
 
 export interface OperatorAssignedTemplateCustomInputApiResponse {
   customInputId?: string | number;
-  name?: string | null;
   labelEn?: string | null;
   labelAr?: string | null;
   type?: number | string | null;
@@ -254,7 +253,8 @@ export interface OperatorTemplateResponseApiResponse {
 
 export interface OperatorTemplateResponseCustomInputApiResponse {
   customInputId?: string | number;
-  name?: string | null;
+  labelEnSnapshot?: string | null;
+  labelArSnapshot?: string | null;
   type?: number | string | null;
   typeName?: string | null;
   stringValue?: string | null;

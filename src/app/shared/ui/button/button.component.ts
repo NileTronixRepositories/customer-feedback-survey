@@ -9,6 +9,11 @@ export type ButtonSize = 'sm' | 'md';
   templateUrl: './button.component.html',
   styleUrl: './button.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '[class.inline-block]': '!fullWidth()',
+    '[class.block]': 'fullWidth()',
+    '[class.w-full]': 'fullWidth()',
+  },
 })
 export class ButtonComponent {
   readonly variant = input<ButtonVariant>('primary');

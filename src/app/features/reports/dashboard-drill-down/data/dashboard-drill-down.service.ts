@@ -25,12 +25,33 @@ export class DashboardDrillDownService {
       return;
     }
 
+    const queryParams: Record<string, string | undefined> = {
+      title: context.title,
+      path: context.navigation.path,
+      routeType: context.navigation.routeType,
+    };
+
+    if (context.fallbackMetadata?.templateNameEn) {
+      queryParams['fallbackTemplateEn'] = context.fallbackMetadata.templateNameEn;
+    }
+    if (context.fallbackMetadata?.templateNameAr) {
+      queryParams['fallbackTemplateAr'] = context.fallbackMetadata.templateNameAr;
+    }
+    if (context.fallbackMetadata?.branchNameEn) {
+      queryParams['fallbackBranchEn'] = context.fallbackMetadata.branchNameEn;
+    }
+    if (context.fallbackMetadata?.branchNameAr) {
+      queryParams['fallbackBranchAr'] = context.fallbackMetadata.branchNameAr;
+    }
+    if (context.fallbackMetadata?.operatorNameEn) {
+      queryParams['fallbackOperatorEn'] = context.fallbackMetadata.operatorNameEn;
+    }
+    if (context.fallbackMetadata?.operatorNameAr) {
+      queryParams['fallbackOperatorAr'] = context.fallbackMetadata.operatorNameAr;
+    }
+
     void this.router.navigate(['/dashboard-responses'], {
-      queryParams: {
-        title: context.title,
-        path: context.navigation.path,
-        routeType: context.navigation.routeType,
-      },
+      queryParams,
     });
   }
 
@@ -167,9 +188,9 @@ export class DashboardDrillDownService {
       hasComplaint: this.readBoolean(item, 'hasComplaint'),
       hasVoice: this.readBoolean(item, 'hasVoice'),
       customInputsPreview: this.readArray(item['customInputsPreview']).map((input) => ({
-        name: this.readString(input, 'name'),
-        labelEn: this.readNullableString(input, 'labelEn'),
-        labelAr: this.readNullableString(input, 'labelAr'),
+        customInputId: this.readString(input, 'customInputId'),
+        labelEnSnapshot: this.readNullableString(input, 'labelEnSnapshot'),
+        labelArSnapshot: this.readNullableString(input, 'labelArSnapshot'),
         value: this.readDisplayValue(input['value']),
       })),
       detailsNavigation: this.toNavigation(this.readRecord(item['detailsNavigation'])),
@@ -189,21 +210,39 @@ export class DashboardDrillDownService {
       templateNameEn:
         this.readString(response, 'templateNameEn') ||
         this.readString(response, 'anonymousTemplateNameEn') ||
-        this.readString(template, 'nameEn'),
+        this.readString(response, 'templateTitleEn') ||
+        this.readString(response, 'nameEn') ||
+        this.readString(template, 'nameEn') ||
+        this.readString(template, 'templateNameEn'),
       templateNameAr:
         this.readNullableString(response, 'templateNameAr') ??
         this.readNullableString(response, 'anonymousTemplateNameAr') ??
-        this.readNullableString(template, 'nameAr'),
-      branchNameEn: this.readString(response, 'branchNameEn') || this.readString(branch, 'nameEn'),
+        this.readNullableString(response, 'templateTitleAr') ??
+        this.readNullableString(response, 'nameAr') ??
+        this.readNullableString(template, 'nameAr') ??
+        this.readNullableString(template, 'templateNameAr'),
+      branchNameEn:
+        this.readString(response, 'branchNameEn') ||
+        this.readString(response, 'branchName') ||
+        this.readString(branch, 'nameEn') ||
+        this.readString(branch, 'name'),
       branchNameAr:
         this.readNullableString(response, 'branchNameAr') ??
-        this.readNullableString(branch, 'nameAr'),
+        this.readNullableString(response, 'branchName') ??
+        this.readNullableString(branch, 'nameAr') ??
+        this.readNullableString(branch, 'name'),
       operatorNameEn:
         this.readNullableString(response, 'operatorNameEn') ??
-        this.readNullableString(operator, 'nameEn'),
+        this.readNullableString(response, 'operatorName') ??
+        this.readNullableString(operator, 'nameEn') ??
+        this.readNullableString(operator, 'name') ??
+        this.readNullableString(operator, 'fullName'),
       operatorNameAr:
         this.readNullableString(response, 'operatorNameAr') ??
-        this.readNullableString(operator, 'nameAr'),
+        this.readNullableString(response, 'operatorName') ??
+        this.readNullableString(operator, 'nameAr') ??
+        this.readNullableString(operator, 'name') ??
+        this.readNullableString(operator, 'fullName'),
       submittedOnUtc: this.readString(response, 'submittedOnUtc'),
       scorePercentage:
         this.readNullableNumber(score, 'scorePercentage') ??
@@ -218,10 +257,10 @@ export class DashboardDrillDownService {
 
   private toDetailItem(item: ApiRecord, customInput: boolean): DashboardResponseDetailItem {
     const labelEn = customInput
-      ? this.readString(item, 'labelEn') || this.readString(item, 'name')
+      ? this.readString(item, 'labelEnSnapshot')
       : this.readString(item, 'questionTextEn');
     const labelAr = customInput
-      ? this.readNullableString(item, 'labelAr')
+      ? this.readNullableString(item, 'labelArSnapshot')
       : this.readNullableString(item, 'questionTextAr');
     const value =
       this.readString(item, 'displayValue') ||

@@ -522,6 +522,14 @@ export class BranchTemplatePreviewComponent {
     return question.answerType === QUESTION_ANSWER_TYPE.Complain;
   }
 
+  isFreeText(question: TemplatePreviewQuestion): boolean {
+    return question.answerType === QUESTION_ANSWER_TYPE.FreeText;
+  }
+
+  isTextAnswer(question: TemplatePreviewQuestion): boolean {
+    return this.isComplain(question) || this.isFreeText(question);
+  }
+
   isSmiles(question: TemplatePreviewQuestion): boolean {
     return question.answerType === QUESTION_ANSWER_TYPE.Smiles;
   }

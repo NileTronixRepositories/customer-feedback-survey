@@ -9,6 +9,15 @@ import { SurveyDashboardStore } from './presentation/state/survey-dashboard.stor
 
 export const SURVEY_DASHBOARD_ROUTES: Routes = [
   {
+    path: 'complaints',
+    canActivate: [surveyDashboardAccessGuard],
+    providers: [SurveyDashboardService],
+    loadComponent: () =>
+      import('./presentation/pages/survey-dashboard-complaints-page/survey-dashboard-complaints-page.component').then(
+        (m) => m.SurveyDashboardComplaintsPageComponent,
+      ),
+  },
+  {
     path: 'internal-responses',
     canActivate: [surveyDashboardAccessGuard],
     providers: [

@@ -6,6 +6,7 @@ export type DepartmentResponseQuestionType =
   | 'StarRating'
   | 'Smiles'
   | 'Complain'
+  | 'FreeText'
   | 'Voice'
   | 'Image';
 
@@ -108,7 +109,9 @@ export interface DepartmentQuestionInsight {
 }
 
 export interface DepartmentCustomInputSegment {
-  customInputName: string;
+  customInputId: string;
+  labelEn: string | null;
+  labelAr: string | null;
   type: 'String' | 'Integer' | string;
   typeName: string;
   segments: readonly DepartmentCustomInputSegmentValue[];
@@ -141,7 +144,9 @@ export interface DepartmentCriticalResponse {
 }
 
 export interface DepartmentCriticalResponseCustomInput {
-  name: string;
+  customInputId: string;
+  labelEnSnapshot: string | null;
+  labelArSnapshot: string | null;
   value: string;
 }
 
@@ -160,7 +165,7 @@ export interface DepartmentOperatorResponsesQuery {
   satisfactionCategory?: SatisfactionCategory;
   isScored?: boolean;
   questionId?: string;
-  customInputName?: string;
+  customInputId?: string;
   customInputType?: string;
   customInputValue?: string;
 }
@@ -198,7 +203,9 @@ export interface DepartmentOperatorResponseListItem {
 }
 
 export interface DepartmentResponseCustomInputPreview {
-  name: string;
+  customInputId: string;
+  labelEnSnapshot: string | null;
+  labelArSnapshot: string | null;
   value: string;
 }
 
@@ -243,7 +250,8 @@ export interface DepartmentResponseScore {
 
 export interface DepartmentResponseCustomInput {
   customInputId: string;
-  name: string;
+  labelEnSnapshot: string | null;
+  labelArSnapshot: string | null;
   type: 'String' | 'Integer' | string;
   typeName: string;
   stringValue: string | null;

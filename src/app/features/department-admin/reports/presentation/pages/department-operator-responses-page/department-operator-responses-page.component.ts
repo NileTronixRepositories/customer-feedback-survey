@@ -195,7 +195,7 @@ export class DepartmentOperatorResponsesPageComponent implements OnInit {
   }
 
   customInputLabel(input: DepartmentResponseCustomInputPreview): string {
-    return `${input.name}: ${input.value || '-'}`;
+    return `${this.localized(input.labelEnSnapshot ?? '', input.labelArSnapshot)}: ${input.value || '-'}`;
   }
 
   pageStart(): number {

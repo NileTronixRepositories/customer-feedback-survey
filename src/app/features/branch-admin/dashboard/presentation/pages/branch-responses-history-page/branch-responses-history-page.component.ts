@@ -171,7 +171,7 @@ export class BranchResponsesHistoryPageComponent implements OnInit {
   }
 
   customInputLabel(input: BranchSurveyResponseCustomInputPreview): string {
-    return `${input.name}: ${input.value || '-'}`;
+    return `${this.localized(input.labelEnSnapshot ?? '', input.labelArSnapshot)}: ${input.value || '-'}`;
   }
 
   pageStart(): number {

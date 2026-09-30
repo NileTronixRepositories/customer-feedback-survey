@@ -31,6 +31,7 @@ describe('AnonymousTemplatesService', () => {
     const request = httpTesting.expectOne((candidate) =>
       candidate.url.endsWith('/api/anonymous-templates/global-template-id/assign-to-branch'),
     );
+
     expect(request.request.method).toBe('POST');
     expect(request.request.body).toBeInstanceOf(FormData);
 

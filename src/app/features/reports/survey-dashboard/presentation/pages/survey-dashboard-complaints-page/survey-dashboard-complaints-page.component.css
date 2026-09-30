@@ -1,0 +1,21 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+article,
+button {
+  -webkit-font-smoothing: antialiased;
+}
+
+.filter-control {
+  transition:
+    border-color 150ms ease-in-out,
+    box-shadow 150ms ease-in-out,
+    background-color 150ms ease-in-out;
+}
+
+.filter-control:focus {
+  border-color: var(--theme-color-primary, #148496);
+  box-shadow: 0 0 0 3px rgb(var(--theme-primary-rgb, 20 132 150) / 0.15);
+}

@@ -195,6 +195,10 @@ export class AuthStore {
       });
   }
 
+  clearError(): void {
+    this.errorSignal.set(null);
+  }
+
   cancelBranchSelection(): void {
     this.branchSelectionSignal.set(null);
     this.branchSelectionStorage.clear();

@@ -71,6 +71,7 @@ import {
   SurveyDashboardGroupBy,
   SurveyDashboardNavigation,
   SurveyDashboardQuery,
+  SurveyDashboardQuestionGroup,
   SurveyDashboardSource,
   SurveyDashboardSourceMetrics,
   SurveyDashboardTemplateKind,
@@ -183,6 +184,20 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
   });
 
   readonly templateOptions = computed(() => this.filterTemplatesByBranch(this.store.templates()));
+  readonly questionGroupSections = computed(() => {
+    const sections = new Map<string, { templateId: string; templateName: string; groups: SurveyDashboardQuestionGroup[] }>();
+    for (const group of this.store.questionGroups()) {
+      const key = `${group.templateKind}:${group.templateId}`;
+      const section = sections.get(key) ?? {
+        templateId: key,
+        templateName: this.localized(group.templateNameEn, group.templateNameAr),
+        groups: [],
+      };
+      section.groups.push(group);
+      sections.set(key, section);
+    }
+    return [...sections.values()];
+  });
   readonly templatesSelectionDisabled = computed(
     () => this.isSuperAdmin() && this.selectedBranchId().length === 0,
   );
@@ -382,6 +397,24 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
     }
   }
 
+  openComplaints(): void {
+    const query = this.queryFromForm();
+    void this.router.navigate(['/reports/survey-dashboard/complaints'], {
+      queryParams: {
+        branchId: query.branchId,
+        source: query.source,
+        templateId: query.templateId,
+        anonymousTemplateId: query.anonymousTemplateId,
+        from: query.from,
+        to: query.to,
+      },
+    });
+  }
+
+  questionGroupName(group: SurveyDashboardQuestionGroup): string {
+    return this.localized(group.questionGroupNameEn, group.questionGroupNameAr);
+  }
+
   openDrillDown(event: { title: string; navigation: DashboardDetailsNavigation }): void {
     this.drillDown.open(event);
   }
@@ -479,6 +512,9 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
     if (normalizedType === 'complain') {
       return this.i18n.translate('questions.typeComplain');
     }
+    if (normalizedType === 'freetext') {
+      return this.i18n.translate('questions.typeFreeText');
+    }
     if (normalizedType === 'voice') {
       return this.i18n.translate('questions.typeVoice');
     }
@@ -559,14 +595,14 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
     return inputs
       .slice(0, 4)
       .map((input) => {
-        const label = this.localized(input.labelEn || input.name, input.labelAr);
+        const label = this.localized(input.labelEnSnapshot, input.labelArSnapshot);
         return `${label}: ${input.value || '-'}`;
       })
       .join(' | ');
   }
 
   segmentLabel(segment: SurveyDashboardCustomInputSegment): string {
-    return this.localized(segment.labelEn || segment.customInputName, segment.labelAr);
+    return this.localized(segment.labelEn, segment.labelAr);
   }
 
   barWidth(value: number | null): string {
@@ -597,7 +633,12 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
     };
 
     if (value.templateId) {
-      query.templateId = value.templateId || undefined;
+      const template = this.store.templates().find((item) => item.id === value.templateId);
+      if (template?.dashboardSource === 'Anonymous') {
+        query.anonymousTemplateId = value.templateId;
+      } else {
+        query.templateId = value.templateId;
+      }
     } else {
       query.source = value.source;
     }

@@ -30,8 +30,7 @@ export class UserPasswordResetService {
     fallbackApplicationUserId: string,
   ): ResetUserPasswordResponse {
     return {
-      applicationUserId:
-        this.readRecordId(response.applicationUserId) || fallbackApplicationUserId,
+      applicationUserId: this.readRecordId(response.applicationUserId) || fallbackApplicationUserId,
       passwordChanged: response.passwordChanged ?? true,
       mustChangePasswordOnNextLogin: response.mustChangePasswordOnNextLogin ?? true,
       passwordChangedOnUtc: response.passwordChangedOnUtc ?? '',

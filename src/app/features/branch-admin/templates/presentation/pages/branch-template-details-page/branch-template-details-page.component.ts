@@ -1,5 +1,13 @@
 import { DatePipe, DecimalPipe, Location } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnInit, computed, effect, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  computed,
+  effect,
+  inject,
+  signal,
+} from '@angular/core';
 import {
   AbstractControl,
   FormArray,
@@ -50,6 +58,7 @@ import { ButtonComponent } from '../../../../../../shared/ui/button/button.compo
 import { CardComponent } from '../../../../../../shared/ui/card/card.component';
 import { IconComponent } from '../../../../../../shared/ui/icon/icon.component';
 import { InputComponent } from '../../../../../../shared/ui/input/input.component';
+import { ModalComponent } from '../../../../../../shared/ui/modal/modal.component';
 import { QuestionAnswerPreviewComponent } from '../../../../../../shared/ui/question-answer-preview/question-answer-preview.component';
 import {
   BranchSurveyResponseCustomInputPreview,
@@ -72,7 +81,6 @@ import { BranchTemplatesStore } from '../../state/branch-templates.store';
 type CustomInputTypeFormValue = '1' | '2';
 type TemplateFieldName = 'nameEn' | 'nameAr' | 'description' | 'activeFrom' | 'expireTo';
 type CustomInputFieldName =
-  | 'name'
   | 'labelEn'
   | 'labelAr'
   | 'type'
@@ -87,7 +95,6 @@ type CustomInputFieldName =
 interface CustomInputFormControls {
   customInputId: FormControl<string | null>;
   originalType: FormControl<CustomInputTypeFormValue | null>;
-  name: FormControl<string>;
   labelEn: FormControl<string>;
   labelAr: FormControl<string>;
   type: FormControl<CustomInputTypeFormValue>;
@@ -136,6 +143,7 @@ interface TemplateDetailsQuestionView {
     DatePipe,
     IconComponent,
     InputComponent,
+    ModalComponent,
     QuestionAnswerPreviewComponent,
     ReactiveFormsModule,
     TranslatePipe,
@@ -262,14 +270,14 @@ export class BranchTemplateDetailsPageComponent implements OnInit {
 
   private patchTemplateForm(template: BranchTemplate): void {
     this.templateForm.patchValue({
-        nameEn: template.nameEn,
-        nameAr: template.nameAr,
-        description: template.description,
-        activeFrom: template.activeFrom
-          ? this.toDateTimeLocalValue(new Date(template.activeFrom))
-          : this.toDateTimeLocalValue(new Date()),
-        expireTo: template.expireTo ? this.toDateTimeLocalValue(new Date(template.expireTo)) : '',
-      });
+      nameEn: template.nameEn,
+      nameAr: template.nameAr,
+      description: template.description,
+      activeFrom: template.activeFrom
+        ? this.toDateTimeLocalValue(new Date(template.activeFrom))
+        : this.toDateTimeLocalValue(new Date()),
+      expireTo: template.expireTo ? this.toDateTimeLocalValue(new Date(template.expireTo)) : '',
+    });
     this.customInputsArray.clear();
     [...template.customInputs]
       .filter((customInput) => customInput.isActive)
@@ -333,16 +341,20 @@ export class BranchTemplateDetailsPageComponent implements OnInit {
     }
 
     const formValue = this.templateForm.getRawValue();
-    this.templatesStore.updateTemplate(template.templateId, {
-      nameEn: formValue.nameEn,
-      nameAr: formValue.nameAr,
-      description: formValue.description,
-      activeFrom: this.toUtcIsoDateTime(formValue.activeFrom),
-      expireTo: formValue.expireTo ? this.toUtcIsoDateTime(formValue.expireTo) : null,
-      customInputs: this.toUpdateCustomInputsPayload(),
-    }, () => {
-      this.editMode.set(false);
-    });
+    this.templatesStore.updateTemplate(
+      template.templateId,
+      {
+        nameEn: formValue.nameEn,
+        nameAr: formValue.nameAr,
+        description: formValue.description,
+        activeFrom: this.toUtcIsoDateTime(formValue.activeFrom),
+        expireTo: formValue.expireTo ? this.toUtcIsoDateTime(formValue.expireTo) : null,
+        customInputs: this.toUpdateCustomInputsPayload(),
+      },
+      () => {
+        this.editMode.set(false);
+      },
+    );
   }
 
   addCustomInput(): void {
@@ -404,10 +416,6 @@ export class BranchTemplateDetailsPageComponent implements OnInit {
 
     if (control.hasError('min') || control.hasError('invalidOrder')) {
       return 'branchTemplates.customInputOrderInvalid';
-    }
-
-    if (control.hasError('duplicatedName')) {
-      return 'branchTemplates.customInputNameDuplicated';
     }
 
     if (control.hasError('duplicatedOrder')) {
@@ -501,7 +509,9 @@ export class BranchTemplateDetailsPageComponent implements OnInit {
       .sort((first, second) => first.order - second.order);
   }
 
-  scoreStatus(row: BranchSurveyResponseListItem): 'Healthy' | 'Neutral' | 'Critical' | 'Not Scored' {
+  scoreStatus(
+    row: BranchSurveyResponseListItem,
+  ): 'Healthy' | 'Neutral' | 'Critical' | 'Not Scored' {
     if (!row.isScored) {
       return 'Not Scored';
     }
@@ -525,7 +535,7 @@ export class BranchTemplateDetailsPageComponent implements OnInit {
   }
 
   customInputLabel(input: BranchSurveyResponseCustomInputPreview): string {
-    return `${input.name}: ${input.value || '-'}`;
+    return `${this.localized(input.labelEnSnapshot ?? '', input.labelArSnapshot)}: ${input.value || '-'}`;
   }
 
   operatorName(row: BranchSurveyResponseListItem): string {
@@ -729,10 +739,6 @@ export class BranchTemplateDetailsPageComponent implements OnInit {
     return this.formBuilder.group<CustomInputFormControls>({
       customInputId: new FormControl<string | null>(customInput?.customInputId || null),
       originalType: new FormControl<CustomInputTypeFormValue | null>(customInput ? type : null),
-      name: this.formBuilder.nonNullable.control(customInput?.name ?? '', [
-        Validators.required,
-        Validators.maxLength(100),
-      ]),
       labelEn: this.formBuilder.nonNullable.control(customInput?.labelEn ?? '', [
         Validators.maxLength(200),
       ]),
@@ -762,7 +768,6 @@ export class BranchTemplateDetailsPageComponent implements OnInit {
   }
 
   private validateCustomInputs(): void {
-    const names = new Map<string, number[]>();
     const orders = new Map<number, number[]>();
 
     this.customInputsArray.controls.forEach((inputGroup, index) => {
@@ -773,11 +778,9 @@ export class BranchTemplateDetailsPageComponent implements OnInit {
         this.setControlError(inputGroup.controls.type, 'typeCannotBeChanged');
       }
 
-      const name = value.name.trim().toLowerCase();
-      if (name.length === 0) {
-        this.setControlError(inputGroup.controls.name, 'required');
-      } else {
-        names.set(name, [...(names.get(name) ?? []), index]);
+      if (!value.labelEn.trim() && !value.labelAr.trim()) {
+        this.setControlError(inputGroup.controls.labelEn, 'required');
+        this.setControlError(inputGroup.controls.labelAr, 'required');
       }
 
       if (!Number.isInteger(value.order) || value.order <= 0) {
@@ -796,15 +799,6 @@ export class BranchTemplateDetailsPageComponent implements OnInit {
         inputGroup.controls.startWith.setValue('', { emitEvent: false });
         this.validateIntegerCustomInput(inputGroup);
       }
-    });
-
-    names.forEach((indexes) => {
-      if (indexes.length <= 1) {
-        return;
-      }
-      indexes.forEach((index) =>
-        this.setControlError(this.customInputsArray.at(index).controls.name, 'duplicatedName'),
-      );
     });
 
     orders.forEach((indexes) => {
@@ -856,7 +850,6 @@ export class BranchTemplateDetailsPageComponent implements OnInit {
       }
 
       const {
-        duplicatedName: _duplicatedName,
         duplicatedOrder: _duplicatedOrder,
         invalidOrder: _invalidOrder,
         typeCannotBeChanged: _typeCannotBeChanged,
@@ -895,7 +888,6 @@ export class BranchTemplateDetailsPageComponent implements OnInit {
 
       return {
         customInputId: value.customInputId,
-        name: value.name.trim(),
         labelEn: this.toNullableTrimmedText(value.labelEn),
         labelAr: this.toNullableTrimmedText(value.labelAr),
         type,

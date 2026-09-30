@@ -16,7 +16,6 @@ export type AnonymousTemplateCustomInputType = 1 | 2;
 
 export interface AnonymousTemplateCustomInput {
   customInputId: string;
-  name: string;
   labelEn: string | null;
   labelAr: string | null;
   type: AnonymousTemplateCustomInputType;
@@ -238,7 +237,7 @@ export interface AnonymousTemplateResponsesListQuery {
   satisfactionCategory?: SatisfactionCategory;
   isScored?: boolean;
   questionId?: string;
-  customInputName?: string;
+  customInputId?: string;
   customInputType?: string;
   customInputValue?: string;
   searchText?: string;
@@ -262,7 +261,7 @@ export interface BranchAnonymousResponsesQuery {
   satisfactionCategory?: SatisfactionCategory;
   isScored?: boolean;
   questionId?: string;
-  customInputName?: string;
+  customInputId?: string;
   customInputType?: string;
   customInputValue?: string;
   hasComplaint?: boolean;
@@ -297,9 +296,9 @@ export interface BranchAnonymousResponseListItem {
 }
 
 export interface BranchAnonymousResponseCustomInputPreview {
-  name: string;
-  labelEn: string | null;
-  labelAr: string | null;
+  customInputId: string;
+  labelEnSnapshot: string | null;
+  labelArSnapshot: string | null;
   value: string;
 }
 
@@ -325,10 +324,8 @@ export interface AnonymousTemplateResponseDetails extends AnonymousTemplateRespo
 export interface AnonymousTemplateResponseCustomInputValue {
   customInputValueId: string;
   anonymousTemplateCustomInputId: string;
-  name: string;
-  labelEn: string | null;
-  labelAr: string | null;
-  nameSnapshot: string;
+  labelEnSnapshot: string | null;
+  labelArSnapshot: string | null;
   type: AnonymousTemplateCustomInputType;
   typeName: string;
   stringValue: string | null;
@@ -387,7 +384,6 @@ export interface CreateAnonymousTemplatePayload {
 }
 
 export interface CreateAnonymousTemplateCustomInputPayload {
-  name: string;
   labelEn: string | null;
   labelAr: string | null;
   type: AnonymousTemplateCustomInputType;
@@ -458,7 +454,6 @@ export interface AnonymousTemplateSummaryApiResponse {
 
 export interface AnonymousTemplateCustomInputApiResponse {
   customInputId?: string | number;
-  name?: string | null;
   labelEn?: string | null;
   labelAr?: string | null;
   type?: number | string | null;
@@ -598,9 +593,9 @@ export interface BranchAnonymousResponseApiResponse {
 }
 
 export interface BranchAnonymousResponseCustomInputPreviewApiResponse {
-  name?: string | null;
-  labelEn?: string | null;
-  labelAr?: string | null;
+  customInputId?: string | number;
+  labelEnSnapshot?: string | null;
+  labelArSnapshot?: string | null;
   value?: string | number | null;
 }
 
@@ -624,10 +619,8 @@ export interface AnonymousTemplateResponseApiResponse {
 export interface AnonymousTemplateResponseCustomInputValueApiResponse {
   customInputValueId?: string | number;
   anonymousTemplateCustomInputId?: string | number;
-  name?: string | null;
-  labelEn?: string | null;
-  labelAr?: string | null;
-  nameSnapshot?: string | null;
+  labelEnSnapshot?: string | null;
+  labelArSnapshot?: string | null;
   type?: number | string | null;
   typeName?: string | null;
   stringValue?: string | null;
@@ -753,7 +746,9 @@ export interface AnonymousTemplateDashboardQuestionInsight {
 }
 
 export interface AnonymousTemplateDashboardCustomInputSegment {
-  customInputName: string;
+  customInputId: string;
+  labelEn: string | null;
+  labelAr: string | null;
   type: number;
   typeName: string;
   segments: readonly AnonymousTemplateDashboardCustomInputSegmentItem[];
@@ -779,7 +774,9 @@ export interface AnonymousTemplateDashboardCriticalResponse {
 }
 
 export interface AnonymousTemplateDashboardCriticalCustomInput {
-  name: string;
+  customInputId: string;
+  labelEnSnapshot: string | null;
+  labelArSnapshot: string | null;
   value: string;
 }
 
@@ -797,7 +794,9 @@ export interface AnonymousTemplateDashboardApiResponse {
   anonymousTemplatePerformance?: readonly Partial<AnonymousTemplateDashboardTemplatePerformance>[];
   lowestRatedQuestions?: readonly Partial<AnonymousTemplateDashboardQuestionInsight>[];
   customInputSegments?: readonly {
-    customInputName?: string | null;
+    customInputId?: string | null;
+    labelEn?: string | null;
+    labelAr?: string | null;
     type?: number | null;
     typeName?: string | null;
     segments?: readonly Partial<AnonymousTemplateDashboardCustomInputSegmentItem>[];

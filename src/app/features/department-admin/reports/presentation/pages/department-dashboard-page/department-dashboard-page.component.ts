@@ -84,7 +84,7 @@ export class DepartmentDashboardPageComponent implements OnInit, OnDestroy {
   readonly selectedSegment = computed<DepartmentCustomInputSegment | null>(() => {
     const segments = this.store.dashboard()?.customInputSegments ?? [];
     const selected = this.selectedSegmentName();
-    return segments.find((segment) => segment.customInputName === selected) ?? segments[0] ?? null;
+    return segments.find((segment) => segment.customInputId === selected) ?? segments[0] ?? null;
   });
 
   readonly filtersForm = this.formBuilder.nonNullable.group({
@@ -176,8 +176,8 @@ export class DepartmentDashboardPageComponent implements OnInit, OnDestroy {
     effect(() => {
       const segments = this.store.dashboard()?.customInputSegments ?? [];
       const selectedName = this.selectedSegmentName();
-      if (segments.length > 0 && !segments.some((segment) => segment.customInputName === selectedName)) {
-        this.selectedSegmentName.set(segments[0].customInputName);
+      if (segments.length > 0 && !segments.some((segment) => segment.customInputId === selectedName)) {
+        this.selectedSegmentName.set(segments[0].customInputId);
       }
     });
   }
@@ -295,6 +295,14 @@ export class DepartmentDashboardPageComponent implements OnInit, OnDestroy {
     return segment.segments.reduce((total, item) => total + item.responsesCount, 0);
   }
 
+  customInputSegmentLabel(segment: DepartmentCustomInputSegment): string {
+    return this.localized(segment.labelEn ?? '', segment.labelAr);
+  }
+
+  criticalCustomInputLabel(input: DepartmentCriticalResponse['customInputs'][number]): string {
+    return this.localized(input.labelEnSnapshot ?? '', input.labelArSnapshot);
+  }
+
   private localized(englishText: string, arabicText: string | null | undefined): string {
     if (this.i18n.language() === 'ar') return arabicText || englishText || '-';
     return englishText || arabicText || '-';
@@ -305,6 +313,7 @@ export class DepartmentDashboardPageComponent implements OnInit, OnDestroy {
     if (type === 'StarRating') return this.i18n.translate('questions.typeStarRating');
     if (type === 'Smiles') return this.i18n.translate('questions.typeSmiles');
     if (type === 'Complain') return this.i18n.translate('questions.typeComplain');
+    if (type === 'FreeText') return this.i18n.translate('questions.typeFreeText');
     if (type === 'Voice') return this.i18n.translate('questions.typeVoice');
     if (type === 'Image') return this.i18n.translate('questions.typeImage');
 

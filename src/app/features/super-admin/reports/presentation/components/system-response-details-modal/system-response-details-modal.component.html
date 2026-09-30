@@ -301,7 +301,7 @@
               >
                 <div class="flex items-center justify-between gap-1.5">
                   <dt class="truncate text-[11px] font-bold text-slate-500">
-                    {{ input.name }}
+                    {{ localized(input.labelEnSnapshot ?? '', input.labelArSnapshot) }}
                   </dt>
                   <span
                     class="rounded border border-slate-200/80 bg-white px-1.5 py-0.5 text-[9px] font-bold text-[var(--theme-color-secondary)] shadow-2xs"
@@ -446,7 +446,7 @@
                     {{ node.answer.smileValue ?? '-' }} / 5
                   </span>
                 </div>
-              } @else if (node.answer.questionType === 'Complain') {
+              } @else if (node.answer.questionType === 'Complain' || node.answer.questionType === 'FreeText') {
                 <div class="rounded-lg border border-slate-200/80 bg-white p-2 shadow-2xs">
                   <p class="mb-0.5 flex items-center gap-1 text-[10px] font-bold text-slate-400">
                     <app-icon class="text-slate-500" [icon]="messageIcon" [size]="11" />

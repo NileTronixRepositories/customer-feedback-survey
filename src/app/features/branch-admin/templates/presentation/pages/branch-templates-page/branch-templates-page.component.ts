@@ -52,7 +52,6 @@ import { BranchTemplatesStore } from '../../state/branch-templates.store';
 type TemplateFieldName = 'nameEn' | 'nameAr' | 'description' | 'activeFrom' | 'expireTo';
 type CustomInputTypeFormValue = '1' | '2';
 type CustomInputFieldName =
-  | 'name'
   | 'labelEn'
   | 'labelAr'
   | 'type'
@@ -67,7 +66,6 @@ type CustomInputFieldName =
 interface CustomInputFormControls {
   customInputId: FormControl<string | null>;
   originalType: FormControl<CustomInputTypeFormValue | null>;
-  name: FormControl<string>;
   labelEn: FormControl<string>;
   labelAr: FormControl<string>;
   type: FormControl<CustomInputTypeFormValue>;
@@ -320,10 +318,6 @@ export class BranchTemplatesPageComponent implements OnInit {
       return 'branchTemplates.customInputOrderInvalid';
     }
 
-    if (control.hasError('duplicatedName')) {
-      return 'branchTemplates.customInputNameDuplicated';
-    }
-
     if (control.hasError('duplicatedOrder')) {
       return 'branchTemplates.customInputOrderDuplicated';
     }
@@ -389,13 +383,11 @@ export class BranchTemplatesPageComponent implements OnInit {
     const value = inputGroup.getRawValue();
     const labelEn = value.labelEn.trim();
     const labelAr = value.labelAr.trim();
-    const name = value.name.trim();
-
     if (this.i18n.language() === 'ar') {
-      return labelAr || labelEn || name || this.i18n.translate('branchTemplates.customInputItem');
+      return labelAr || labelEn || this.i18n.translate('branchTemplates.customInputItem');
     }
 
-    return labelEn || labelAr || name || this.i18n.translate('branchTemplates.customInputItem');
+    return labelEn || labelAr || this.i18n.translate('branchTemplates.customInputItem');
   }
 
   isCustomInputExpanded(inputGroup: CustomInputFormGroup): boolean {
@@ -676,10 +668,6 @@ export class BranchTemplatesPageComponent implements OnInit {
     return this.formBuilder.group<CustomInputFormControls>({
       customInputId: new FormControl<string | null>(customInput?.customInputId || null),
       originalType: new FormControl<CustomInputTypeFormValue | null>(customInput ? type : null),
-      name: this.formBuilder.nonNullable.control(customInput?.name ?? '', [
-        Validators.required,
-        Validators.maxLength(100),
-      ]),
       labelEn: this.formBuilder.nonNullable.control(customInput?.labelEn ?? '', [
         Validators.maxLength(200),
       ]),
@@ -756,7 +744,6 @@ export class BranchTemplatesPageComponent implements OnInit {
   }
 
   private validateCustomInputs(inputsArray: FormArray<CustomInputFormGroup>): void {
-    const names = new Map<string, number[]>();
     const orders = new Map<number, number[]>();
 
     inputsArray.controls.forEach((inputGroup, index) => {
@@ -767,11 +754,9 @@ export class BranchTemplatesPageComponent implements OnInit {
         this.setControlError(inputGroup.controls.type, 'typeCannotBeChanged');
       }
 
-      const name = value.name.trim().toLowerCase();
-      if (name.length === 0) {
-        this.setControlError(inputGroup.controls.name, 'required');
-      } else {
-        names.set(name, [...(names.get(name) ?? []), index]);
+      if (!value.labelEn.trim() && !value.labelAr.trim()) {
+        this.setControlError(inputGroup.controls.labelEn, 'required');
+        this.setControlError(inputGroup.controls.labelAr, 'required');
       }
 
       if (!Number.isInteger(value.order) || value.order <= 0) {
@@ -790,15 +775,6 @@ export class BranchTemplatesPageComponent implements OnInit {
         inputGroup.controls.startWith.setValue('', { emitEvent: false });
         this.validateIntegerCustomInput(inputGroup);
       }
-    });
-
-    names.forEach((indexes) => {
-      if (indexes.length <= 1) {
-        return;
-      }
-      indexes.forEach((index) =>
-        this.setControlError(inputsArray.at(index).controls.name, 'duplicatedName'),
-      );
     });
 
     orders.forEach((indexes) => {
@@ -850,7 +826,6 @@ export class BranchTemplatesPageComponent implements OnInit {
       }
 
       const {
-        duplicatedName: _duplicatedName,
         duplicatedOrder: _duplicatedOrder,
         invalidOrder: _invalidOrder,
         typeCannotBeChanged: _typeCannotBeChanged,
@@ -888,7 +863,6 @@ export class BranchTemplatesPageComponent implements OnInit {
       const type: 1 | 2 = Number(value.type) === 2 ? 2 : 1;
 
       return {
-        name: value.name.trim(),
         labelEn: this.toNullableTrimmedText(value.labelEn),
         labelAr: this.toNullableTrimmedText(value.labelAr),
         type,
@@ -910,7 +884,6 @@ export class BranchTemplatesPageComponent implements OnInit {
 
       return {
         customInputId: value.customInputId,
-        name: value.name.trim(),
         labelEn: this.toNullableTrimmedText(value.labelEn),
         labelAr: this.toNullableTrimmedText(value.labelAr),
         type,

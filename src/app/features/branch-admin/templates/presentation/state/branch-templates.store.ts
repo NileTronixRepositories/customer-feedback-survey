@@ -731,9 +731,6 @@ export class BranchTemplatesStore {
     if (code.includes('childquestiongroupinactive')) {
       return 'branchTemplates.conditionChildQuestionGroupInactive';
     }
-    if (code.includes('custominputnameduplicated')) {
-      return 'branchTemplates.customInputNameDuplicated';
-    }
     if (code.includes('custominputorderduplicated')) {
       return 'branchTemplates.customInputOrderDuplicated';
     }

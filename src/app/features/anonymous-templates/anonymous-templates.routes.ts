@@ -75,11 +75,7 @@ export const ANONYMOUS_TEMPLATES_ROUTES: Routes = [
   {
     path: '',
     canActivate: [anonymousTemplateAccessGuard],
-    providers: [
-      AnonymousTemplatesService,
-      AnonymousTemplatesStore,
-      BranchesService,
-    ],
+    providers: [AnonymousTemplatesService, AnonymousTemplatesStore, BranchesService],
     loadComponent: () =>
       import('./presentation/pages/anonymous-templates-page/anonymous-templates-page.component').then(
         (m) => m.AnonymousTemplatesPageComponent,

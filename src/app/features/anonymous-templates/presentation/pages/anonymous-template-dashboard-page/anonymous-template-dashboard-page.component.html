@@ -342,19 +342,19 @@
         </h3>
         @if (dashboard.customInputSegments.length > 0 && selectedSegment(); as segment) {
           <div class="mt-3 flex flex-wrap gap-1.5">
-            @for (item of dashboard.customInputSegments; track item.customInputName) {
+            @for (item of dashboard.customInputSegments; track item.customInputId) {
               <button
                 class="rounded-lg border px-2.5 py-1 text-[10px] font-extrabold transition"
                 type="button"
-                [class.border-[var(--theme-color-accent)]]="selectedSegmentName() === item.customInputName"
-                [class.bg-cyan-50]="selectedSegmentName() === item.customInputName"
-                [class.text-[var(--theme-color-secondary)]]="selectedSegmentName() === item.customInputName"
-                [class.border-slate-200]="selectedSegmentName() !== item.customInputName"
-                [class.bg-white]="selectedSegmentName() !== item.customInputName"
-                [class.text-slate-500]="selectedSegmentName() !== item.customInputName"
-                (click)="selectedSegmentName.set(item.customInputName)"
+                [class.border-[var(--theme-color-accent)]]="selectedSegmentName() === item.customInputId"
+                [class.bg-cyan-50]="selectedSegmentName() === item.customInputId"
+                [class.text-[var(--theme-color-secondary)]]="selectedSegmentName() === item.customInputId"
+                [class.border-slate-200]="selectedSegmentName() !== item.customInputId"
+                [class.bg-white]="selectedSegmentName() !== item.customInputId"
+                [class.text-slate-500]="selectedSegmentName() !== item.customInputId"
+                (click)="selectedSegmentName.set(item.customInputId)"
               >
-                {{ item.customInputName }}
+                {{ segmentLabel(item) }}
               </button>
             }
           </div>

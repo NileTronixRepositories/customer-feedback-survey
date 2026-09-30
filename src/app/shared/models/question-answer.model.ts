@@ -5,6 +5,7 @@ export const QUESTION_ANSWER_TYPE = {
   Complain: 4,
   Smiles: 5,
   Image: 6,
+  FreeText: 7,
 } as const;
 
 export type QuestionAnswerType = (typeof QUESTION_ANSWER_TYPE)[keyof typeof QUESTION_ANSWER_TYPE];
@@ -55,6 +56,7 @@ export const QUESTION_ANSWER_TYPE_LABEL_KEYS: Record<QuestionAnswerType, string>
   [QUESTION_ANSWER_TYPE.Complain]: 'questions.typeComplain',
   [QUESTION_ANSWER_TYPE.Smiles]: 'questions.typeSmiles',
   [QUESTION_ANSWER_TYPE.Image]: 'questions.typeImage',
+  [QUESTION_ANSWER_TYPE.FreeText]: 'questions.typeFreeText',
 };
 
 export const SMILE_LEVELS: readonly SmileLevel[] = [
@@ -86,13 +88,11 @@ export function toQuestionAnswerType(value: QuestionAnswerTypeInput): QuestionAn
     if (normalized === 'starrating' || normalized === 'rating') {
       return QUESTION_ANSWER_TYPE.StarRating;
     }
-    if (
-      normalized === 'complain' ||
-      normalized === 'complaint' ||
-      normalized === 'freetext' ||
-      normalized === 'textarea'
-    ) {
+    if (normalized === 'complain' || normalized === 'complaint') {
       return QUESTION_ANSWER_TYPE.Complain;
+    }
+    if (normalized === 'freetext' || normalized === 'textarea') {
+      return QUESTION_ANSWER_TYPE.FreeText;
     }
     if (normalized === 'smiles' || normalized === 'smile') {
       return QUESTION_ANSWER_TYPE.Smiles;
@@ -151,7 +151,8 @@ function isQuestionAnswerType(value: number): value is QuestionAnswerType {
     value === QUESTION_ANSWER_TYPE.StarRating ||
     value === QUESTION_ANSWER_TYPE.Complain ||
     value === QUESTION_ANSWER_TYPE.Smiles ||
-    value === QUESTION_ANSWER_TYPE.Image
+    value === QUESTION_ANSWER_TYPE.Image ||
+    value === QUESTION_ANSWER_TYPE.FreeText
   );
 }
 

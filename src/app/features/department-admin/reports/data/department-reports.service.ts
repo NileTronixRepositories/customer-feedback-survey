@@ -98,7 +98,7 @@ export class DepartmentReportsService {
     if (query.satisfactionCategory) params = params.set('satisfactionCategory', query.satisfactionCategory);
     if (query.isScored !== undefined) params = params.set('isScored', String(query.isScored));
     if (query.questionId) params = params.set('questionId', query.questionId);
-    if (query.customInputName) params = params.set('customInputName', query.customInputName);
+    if (query.customInputId) params = params.set('customInputId', query.customInputId);
     if (query.customInputType) params = params.set('customInputType', query.customInputType);
     if (query.customInputValue) params = params.set('customInputValue', query.customInputValue);
 
@@ -246,7 +246,9 @@ export class DepartmentReportsService {
 
   private toCustomInputSegment(item: ApiRecord): DepartmentCustomInputSegment {
     return {
-      customInputName: this.readString(item, 'customInputName'),
+      customInputId: this.readString(item, 'customInputId'),
+      labelEn: this.readNullableString(item, 'labelEn'),
+      labelAr: this.readNullableString(item, 'labelAr'),
       type: this.readString(item, 'type'),
       typeName: this.readString(item, 'typeName'),
       segments: this.readArray(item['segments']).map((segment) =>
@@ -318,7 +320,9 @@ export class DepartmentReportsService {
 
   private toCriticalCustomInput(item: ApiRecord): DepartmentCriticalResponseCustomInput {
     return {
-      name: this.readString(item, 'name'),
+      customInputId: this.readString(item, 'customInputId'),
+      labelEnSnapshot: this.readNullableString(item, 'labelEnSnapshot'),
+      labelArSnapshot: this.readNullableString(item, 'labelArSnapshot'),
       value: this.readString(item, 'value'),
     };
   }
@@ -368,7 +372,9 @@ export class DepartmentReportsService {
 
   private toCustomInputPreview(item: ApiRecord): DepartmentResponseCustomInputPreview {
     return {
-      name: this.readString(item, 'name'),
+      customInputId: this.readString(item, 'customInputId'),
+      labelEnSnapshot: this.readNullableString(item, 'labelEnSnapshot'),
+      labelArSnapshot: this.readNullableString(item, 'labelArSnapshot'),
       value: this.readString(item, 'value'),
     };
   }
@@ -427,7 +433,8 @@ export class DepartmentReportsService {
   private toResponseCustomInput(item: ApiRecord): DepartmentResponseCustomInput {
     return {
       customInputId: this.readString(item, 'customInputId'),
-      name: this.readString(item, 'name'),
+      labelEnSnapshot: this.readNullableString(item, 'labelEnSnapshot'),
+      labelArSnapshot: this.readNullableString(item, 'labelArSnapshot'),
       type: this.readString(item, 'type'),
       typeName: this.readString(item, 'typeName'),
       stringValue: this.readNullableString(item, 'stringValue'),
@@ -505,6 +512,7 @@ export class DepartmentReportsService {
       value === 'StarRating' ||
       value === 'Smiles' ||
       value === 'Complain' ||
+      value === 'FreeText' ||
       value === 'Voice' ||
       value === 'Image'
     ) {

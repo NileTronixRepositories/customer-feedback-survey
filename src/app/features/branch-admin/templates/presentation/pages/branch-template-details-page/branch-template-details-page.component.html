@@ -81,93 +81,77 @@
 
         <!-- Left: Action Buttons Toolbar -->
         <div class="flex flex-wrap items-center gap-2 lg:shrink-0">
-          @if (editMode()) {
-            <app-button type="button" variant="secondary" (pressed)="cancelEdit()">
-              <app-icon [icon]="cancelIcon" [size]="15" />
-              {{ 'common.cancel' | t }}
-            </app-button>
-            <app-button
-              type="button"
-              [disabled]="!canUpdate()"
-              [loading]="templatesStore.updating()"
-              (pressed)="updateTemplate()"
-            >
-              <app-icon [icon]="saveIcon" [size]="15" />
-              {{ 'common.save' | t }}
-            </app-button>
-          } @else {
-            @if (canAssignQuestions()) {
-              <app-button type="button" (pressed)="openQuestionsManager()">
-                <app-icon [icon]="listChecksIcon" [size]="15" />
-                {{ 'branchTemplates.manageQuestions' | t }}
-              </app-button>
-            }
-
-            @if (canUpdate()) {
-              <label
-                class="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200/80 bg-white px-3 py-2 text-xs font-bold text-slate-700 shadow-2xs transition hover:bg-slate-50 focus:outline-none"
-              >
-                <app-icon [icon]="logoIcon" [size]="15" />
-                {{ (template.logoPath ? 'branchTemplates.replaceLogo' : 'branchTemplates.uploadLogo') | t }}
-                <input class="sr-only" type="file" accept=".jpg,.jpeg,.png,.webp" (change)="onLogoSelected(template, $event)" />
-              </label>
-
-              @if (template.logoPath) {
-                <app-button type="button" variant="secondary" (pressed)="removeLogo(template)">
-                  <app-icon [icon]="deleteIcon" [size]="14" />
-                  {{ 'branchTemplates.removeLogo' | t }}
-                </app-button>
-              }
-
-              <app-button type="button" variant="secondary" (pressed)="enableEdit()">
-                <app-icon [icon]="editIcon" [size]="15" />
-                {{ 'common.edit' | t }}
-              </app-button>
-            }
-
-            @if (canCopyBetweenTypes() && template.isActive) {
-              <app-button
-                type="button"
-                variant="secondary"
-                [loading]="templatesStore.assetActionLoading()"
-                (pressed)="copyAsAnonymous(template)"
-              >
-                <app-icon [icon]="copyIcon" [size]="15" />
-                {{ 'branchTemplates.copyAsAnonymous' | t }}
-              </app-button>
-            }
-
-            @if (canDelete()) {
-              <app-button
-                type="button"
-                variant="danger"
-                [disabled]="!template.isActive || templatesStore.deleting()"
-                [loading]="templatesStore.deleting()"
-                (pressed)="deleteTemplate()"
-              >
-                <app-icon [icon]="deleteIcon" [size]="15" />
-                {{ 'common.delete' | t }}
-              </app-button>
-            }
-
-            <app-button type="button" variant="secondary" (pressed)="goBack()">
-              <app-icon [icon]="arrowLeftIcon" [size]="15" [flipRtl]="true" />
-              {{ 'common.back' | t }}
+          @if (canAssignQuestions()) {
+            <app-button type="button" (pressed)="openQuestionsManager()">
+              <app-icon [icon]="listChecksIcon" [size]="15" />
+              {{ 'branchTemplates.manageQuestions' | t }}
             </app-button>
           }
+
+          @if (canUpdate()) {
+            <label
+              class="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200/80 bg-white px-3 py-2 text-xs font-bold text-slate-700 shadow-2xs transition hover:bg-slate-50 focus:outline-none"
+            >
+              <app-icon [icon]="logoIcon" [size]="15" />
+              {{ (template.logoPath ? 'branchTemplates.replaceLogo' : 'branchTemplates.uploadLogo') | t }}
+              <input class="sr-only" type="file" accept=".jpg,.jpeg,.png,.webp" (change)="onLogoSelected(template, $event)" />
+            </label>
+
+            @if (template.logoPath) {
+              <app-button type="button" variant="secondary" (pressed)="removeLogo(template)">
+                <app-icon [icon]="deleteIcon" [size]="14" />
+                {{ 'branchTemplates.removeLogo' | t }}
+              </app-button>
+            }
+
+            <app-button type="button" variant="secondary" (pressed)="enableEdit()">
+              <app-icon [icon]="editIcon" [size]="15" />
+              {{ 'common.edit' | t }}
+            </app-button>
+          }
+
+          @if (canCopyBetweenTypes() && template.isActive) {
+            <app-button
+              type="button"
+              variant="secondary"
+              [loading]="templatesStore.assetActionLoading()"
+              (pressed)="copyAsAnonymous(template)"
+            >
+              <app-icon [icon]="copyIcon" [size]="15" />
+              {{ 'branchTemplates.copyAsAnonymous' | t }}
+            </app-button>
+          }
+
+          @if (canDelete()) {
+            <app-button
+              type="button"
+              variant="danger"
+              [disabled]="!template.isActive || templatesStore.deleting()"
+              [loading]="templatesStore.deleting()"
+              (pressed)="deleteTemplate()"
+            >
+              <app-icon [icon]="deleteIcon" [size]="15" />
+              {{ 'common.delete' | t }}
+            </app-button>
+          }
+
+          <app-button type="button" variant="secondary" (pressed)="goBack()">
+            <app-icon [icon]="arrowLeftIcon" [size]="15" [flipRtl]="true" />
+            {{ 'common.back' | t }}
+          </app-button>
         </div>
       </div>
     </div>
 
-    <!-- Edit Mode Form -->
-    @if (editMode()) {
-      <div class="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs">
-        <div class="mb-4 border-b border-slate-100 pb-3">
-          <h2 class="text-sm font-bold text-slate-900">{{ 'common.edit' | t }}: {{ template.nameEn }}</h2>
-          <p class="text-[11px] text-slate-500">{{ template.nameAr }}</p>
-        </div>
-
-        <form class="space-y-4" [formGroup]="templateForm" (ngSubmit)="updateTemplate()">
+    <!-- Edit Template Modal -->
+    <app-modal
+      [open]="editMode()"
+      [title]="('common.edit' | t) + ': ' + (template.nameAr || template.nameEn)"
+      [subtitle]="template.nameAr && template.nameEn ? template.nameEn : ''"
+      size="xl"
+      (closed)="cancelEdit()"
+    >
+      <form class="space-y-4" [formGroup]="templateForm" (ngSubmit)="updateTemplate()">
           <div class="grid gap-3 sm:grid-cols-2">
             <app-input
               [label]="'branchTemplates.nameEn' | t"
@@ -273,24 +257,6 @@
                     </div>
 
                     <div class="grid gap-3 sm:grid-cols-3">
-                      <label class="block">
-                        <span class="mb-1.5 block text-xs font-semibold text-slate-700">
-                          {{ 'branchTemplates.customInputName' | t }}
-                        </span>
-                        <input
-                          class="h-10 w-full rounded-xl border px-3 py-2 text-xs text-slate-900 shadow-2xs outline-none transition placeholder:text-slate-400 focus:border-[var(--theme-color-secondary)] focus:ring-2 focus:ring-[var(--theme-color-secondary)]/10"
-                          [class.border-[var(--theme-color-danger)]]="customInputFieldError(inputIndex, 'name').length > 0"
-                          [class.border-slate-200]="customInputFieldError(inputIndex, 'name').length === 0"
-                          formControlName="name"
-                          [placeholder]="'branchTemplates.customInputNamePlaceholder' | t"
-                        />
-                        @if (customInputFieldError(inputIndex, 'name')) {
-                          <span class="mt-2 block text-xs font-medium text-[var(--theme-color-danger)]">
-                            {{ customInputFieldError(inputIndex, 'name') | t }}
-                          </span>
-                        }
-                      </label>
-
                       <label class="block">
                         <span class="mb-1.5 block text-xs font-semibold text-slate-700">
                           {{ 'branchTemplates.customInputLabelEn' | t }}
@@ -464,8 +430,9 @@
             }
           </section>
 
-          <div class="flex flex-wrap justify-end gap-2.5 pt-2 border-t border-slate-100">
+          <div class="sticky bottom-0 -mx-4 -mb-4 mt-6 flex flex-wrap items-center justify-end gap-2.5 border-t border-slate-100 bg-white/95 px-4 py-3 backdrop-blur-xs sm:-mx-5 sm:-mb-5 sm:px-5">
             <app-button type="button" variant="secondary" (pressed)="cancelEdit()">
+              <app-icon [icon]="cancelIcon" [size]="15" />
               {{ 'common.cancel' | t }}
             </app-button>
             <app-button
@@ -478,8 +445,7 @@
             </app-button>
           </div>
         </form>
-      </div>
-    } @else {
+    </app-modal>
       <!-- 2. 4-Column Executive KPI Metrics Grid -->
       <div class="grid grid-cols-2 gap-3 sm:gap-3.5 lg:grid-cols-4">
         <!-- Total Questions -->
@@ -876,7 +842,7 @@
                           </td>
                           <td class="px-3.5 py-3">
                             <div class="flex flex-wrap gap-1.5">
-                              @for (input of row.customInputsPreview; track input.name) {
+                        @for (input of row.customInputsPreview; track input.customInputId) {
                                 <span class="max-w-[10rem] truncate rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-600" [title]="customInputLabel(input)">
                                   {{ customInputLabel(input) }}
                                 </span>
@@ -1084,7 +1050,7 @@
                   <div class="rounded-xl border border-slate-200/70 bg-slate-50/50 p-3">
                     <div class="flex flex-wrap items-center justify-between gap-1.5">
                       <p class="break-words text-xs font-bold text-slate-900 [overflow-wrap:anywhere]">
-                        {{ customInput.labelEn || customInput.name }}
+                            {{ customInput.labelEn || customInput.labelAr }}
                       </p>
                       <span
                         class="rounded-full px-2 py-0.5 text-[9px] font-bold"
@@ -1126,7 +1092,6 @@
           }
         </div>
       </div>
-    }
   }
 </div>
 

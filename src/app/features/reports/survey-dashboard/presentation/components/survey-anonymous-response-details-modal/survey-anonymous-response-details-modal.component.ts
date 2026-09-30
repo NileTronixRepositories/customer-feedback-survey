@@ -81,7 +81,7 @@ export class SurveyAnonymousResponseDetailsModalComponent {
   }
 
   customInputLabel(input: AnonymousTemplateResponseCustomInputValue): string {
-    return this.localized(input.labelEn || input.nameSnapshot || input.name, input.labelAr);
+    return this.localized(input.labelEnSnapshot, input.labelArSnapshot);
   }
 
   questionText(answer: AnonymousTemplateResponseAnswer): string {
@@ -146,7 +146,10 @@ export class SurveyAnonymousResponseDetailsModalComponent {
     if (answerType === QUESTION_ANSWER_TYPE.Smiles) {
       return answer.smileValue === null ? '-' : `${answer.smileValue} / 5`;
     }
-    if (answerType === QUESTION_ANSWER_TYPE.Complain) {
+    if (
+      answerType === QUESTION_ANSWER_TYPE.Complain ||
+      answerType === QUESTION_ANSWER_TYPE.FreeText
+    ) {
       return answer.textAnswer?.trim() || '-';
     }
     if (answerType === QUESTION_ANSWER_TYPE.Image) {

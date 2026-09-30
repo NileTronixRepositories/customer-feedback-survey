@@ -55,6 +55,7 @@ import {
   OperatorLatestTemplateScore,
   OperatorTemplateAnswerSubmission,
   OperatorTemplateCustomInputSubmission,
+  OperatorTemplateResponseCustomInput,
   OperatorTemplateResponseResult,
 } from '../../../domain/operator-template.model';
 import { OperatorTemplatesStore } from '../../state/operator-templates.store';
@@ -78,7 +79,6 @@ interface OperatorQuestionView {
 
 interface OperatorCustomInputView {
   customInputId: string;
-  name: string;
   label: string;
   secondaryLabel: string;
   type: 1 | 2;
@@ -133,7 +133,7 @@ interface OperatorLatestResponseView {
 
 interface OperatorLatestCustomInputValueView {
   customInputId: string;
-  name: string;
+  label: string;
   typeName: string;
   value: string;
 }
@@ -892,6 +892,14 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
     return question.answerType === QUESTION_ANSWER_TYPE.Complain;
   }
 
+  isFreeText(question: OperatorQuestionView): boolean {
+    return question.answerType === QUESTION_ANSWER_TYPE.FreeText;
+  }
+
+  isTextAnswer(question: OperatorQuestionView): boolean {
+    return this.isComplain(question) || this.isFreeText(question);
+  }
+
   isSmiles(question: OperatorQuestionView): boolean {
     return question.answerType === QUESTION_ANSWER_TYPE.Smiles;
   }
@@ -903,6 +911,14 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
     }
 
     return typeof type === 'string' || typeof type === 'number' ? String(type) : '';
+  }
+
+  responseCustomInputLabel(input: OperatorTemplateResponseCustomInput): string {
+    return this.localizedText(
+      input.labelEnSnapshot ?? '',
+      input.labelArSnapshot ?? '',
+      this.i18n.language() === 'ar',
+    );
   }
 
   private toTemplateView(template: OperatorAssignedTemplate): OperatorTemplateView {
@@ -968,10 +984,7 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
   ): OperatorCustomInputView {
     return {
       customInputId: customInput.customInputId,
-      name: customInput.name,
-      label:
-        this.localizedText(customInput.labelEn ?? '', customInput.labelAr ?? '', isArabic) ||
-        customInput.name,
+      label: this.localizedText(customInput.labelEn ?? '', customInput.labelAr ?? '', isArabic),
       secondaryLabel: '',
       type: customInput.type,
       typeName:
@@ -1035,7 +1048,7 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
       customInputsCount: response.customInputsCount,
       score: response.score,
       customInputs: response.customInputs.map((customInput) =>
-        this.toLatestCustomInputValueView(customInput),
+        this.toLatestCustomInputValueView(customInput, isArabic),
       ),
       answers: runtimeAnswers.map((answer, index) =>
         this.toLatestAnswerView(answer, index, isArabic, questionsByTemplateQuestionId),
@@ -1045,10 +1058,15 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
 
   private toLatestCustomInputValueView(
     customInput: OperatorLatestTemplateResponse['customInputs'][number],
+    isArabic: boolean,
   ): OperatorLatestCustomInputValueView {
     return {
       customInputId: customInput.customInputId,
-      name: customInput.name || customInput.typeName,
+      label: this.localizedText(
+        customInput.labelEnSnapshot ?? '',
+        customInput.labelArSnapshot ?? '',
+        isArabic,
+      ),
       typeName: customInput.typeName,
       value:
         customInput.type === 2
@@ -1085,7 +1103,10 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
     } else if (answerType === QUESTION_ANSWER_TYPE.StarRating) {
       displayAnswer =
         answer.starRatingValue !== null ? `${answer.starRatingValue} / 5` : fallbackAnswer;
-    } else if (answerType === QUESTION_ANSWER_TYPE.Complain) {
+    } else if (
+      answerType === QUESTION_ANSWER_TYPE.Complain ||
+      answerType === QUESTION_ANSWER_TYPE.FreeText
+    ) {
       displayAnswer = answer.textAnswer?.trim() || fallbackAnswer;
     } else if (answerType === QUESTION_ANSWER_TYPE.Smiles) {
       displayAnswer =
@@ -1493,7 +1514,7 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
       return this.isScaleValue(draft.starRatingValue) ? '' : 'operatorTemplates.starRatingRequired';
     }
 
-    if (this.isComplain(question)) {
+    if (this.isTextAnswer(question)) {
       const text = draft.textAnswer.trim();
       if (text.length === 0) {
         return 'operatorTemplates.complainTextRequired';
@@ -1555,7 +1576,7 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
         continue;
       }
 
-      if (this.isComplain(question)) {
+      if (this.isTextAnswer(question)) {
         submissions.push({
           questionId: question.questionId,
           textAnswer: draft.textAnswer.trim(),
@@ -1620,7 +1641,7 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
       return draft.starRatingValue ? `${draft.starRatingValue} / 5` : '';
     }
 
-    if (this.isComplain(question)) {
+    if (this.isTextAnswer(question)) {
       return draft.textAnswer.trim();
     }
 

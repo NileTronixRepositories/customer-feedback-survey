@@ -62,7 +62,6 @@ import { AnonymousTemplatesStore } from '../../state/anonymous-templates.store';
 type AnonymousTemplateFieldName = 'nameEn' | 'nameAr' | 'description' | 'activeFrom' | 'expireTo';
 type CustomInputTypeFormValue = '1' | '2';
 type CustomInputFieldName =
-  | 'name'
   | 'labelEn'
   | 'labelAr'
   | 'type'
@@ -77,7 +76,6 @@ type CustomInputFieldName =
 interface CustomInputFormControls {
   customInputId: FormControl<string | null>;
   originalType: FormControl<CustomInputTypeFormValue | null>;
-  name: FormControl<string>;
   labelEn: FormControl<string>;
   labelAr: FormControl<string>;
   type: FormControl<CustomInputTypeFormValue>;
@@ -282,7 +280,6 @@ export class AnonymousTemplateDetailsPageComponent implements OnInit {
     this.customInputsArray.push(
       this.createCustomInputGroup({
         customInputId: null,
-        name: '',
         labelEn: '',
         labelAr: '',
         type: 1,
@@ -455,10 +452,6 @@ export class AnonymousTemplateDetailsPageComponent implements OnInit {
       return 'branchTemplates.customInputOrderInvalid';
     }
 
-    if (control.hasError('duplicatedName')) {
-      return 'branchTemplates.customInputNameDuplicated';
-    }
-
     if (control.hasError('duplicatedOrder')) {
       return 'branchTemplates.customInputOrderDuplicated';
     }
@@ -522,9 +515,8 @@ export class AnonymousTemplateDetailsPageComponent implements OnInit {
   customInputDisplayLabel(input: {
     labelEn: string | null;
     labelAr: string | null;
-    name: string;
   }): string {
-    return this.localizedText(input.labelEn ?? input.name, input.labelAr, input.name);
+    return this.localizedText(input.labelEn, input.labelAr);
   }
 
   customInputValidationText(input: {
@@ -715,7 +707,6 @@ export class AnonymousTemplateDetailsPageComponent implements OnInit {
       this.customInputsArray.push(
         this.createCustomInputGroup({
           customInputId: customInput.customInputId,
-          name: customInput.name,
           labelEn: customInput.labelEn ?? '',
           labelAr: customInput.labelAr ?? '',
           type: customInput.type,
@@ -744,7 +735,6 @@ export class AnonymousTemplateDetailsPageComponent implements OnInit {
 
   private createCustomInputGroup(value: {
     customInputId: string | null;
-    name: string;
     labelEn: string;
     labelAr: string;
     type: AnonymousTemplateCustomInputType;
@@ -762,10 +752,6 @@ export class AnonymousTemplateDetailsPageComponent implements OnInit {
       originalType: new FormControl<CustomInputTypeFormValue | null>(
         value.customInputId ? type : null,
       ),
-      name: this.formBuilder.nonNullable.control(value.name, [
-        Validators.required,
-        Validators.maxLength(100),
-      ]),
       labelEn: this.formBuilder.nonNullable.control(value.labelEn, [Validators.maxLength(200)]),
       labelAr: this.formBuilder.nonNullable.control(value.labelAr, [Validators.maxLength(200)]),
       type: this.formBuilder.nonNullable.control<CustomInputTypeFormValue>(type, [
@@ -791,23 +777,15 @@ export class AnonymousTemplateDetailsPageComponent implements OnInit {
   }
 
   private validateCustomInputs(): void {
-    const names = new Map<string, number[]>();
     const orders = new Map<number, number[]>();
-    const ids = new Map<string, number[]>();
 
     this.customInputsArray.controls.forEach((inputGroup, index) => {
       this.clearCustomInputManualErrors(inputGroup);
 
       const value = inputGroup.getRawValue();
-      const name = value.name.trim().toLowerCase();
-      if (name.length === 0) {
-        this.setControlError(inputGroup.controls.name, 'required');
-      } else {
-        names.set(name, [...(names.get(name) ?? []), index]);
-      }
-
-      if (value.customInputId) {
-        ids.set(value.customInputId, [...(ids.get(value.customInputId) ?? []), index]);
+      if (!value.labelEn.trim() && !value.labelAr.trim()) {
+        this.setControlError(inputGroup.controls.labelEn, 'required');
+        this.setControlError(inputGroup.controls.labelAr, 'required');
       }
 
       if (!Number.isInteger(value.order) || value.order <= 0) {
@@ -832,14 +810,6 @@ export class AnonymousTemplateDetailsPageComponent implements OnInit {
       }
     });
 
-    names.forEach((indexes) => {
-      if (indexes.length > 1) {
-        indexes.forEach((index) =>
-          this.setControlError(this.customInputsArray.at(index).controls.name, 'duplicatedName'),
-        );
-      }
-    });
-
     orders.forEach((indexes) => {
       if (indexes.length > 1) {
         indexes.forEach((index) =>
@@ -848,13 +818,6 @@ export class AnonymousTemplateDetailsPageComponent implements OnInit {
       }
     });
 
-    ids.forEach((indexes) => {
-      if (indexes.length > 1) {
-        indexes.forEach((index) =>
-          this.setControlError(this.customInputsArray.at(index).controls.name, 'duplicatedName'),
-        );
-      }
-    });
   }
 
   private validateStringCustomInput(inputGroup: CustomInputFormGroup): void {
@@ -896,7 +859,6 @@ export class AnonymousTemplateDetailsPageComponent implements OnInit {
       }
 
       const {
-        duplicatedName: _duplicatedName,
         duplicatedOrder: _duplicatedOrder,
         invalidOrder: _invalidOrder,
         stringValidation: _stringValidation,
@@ -935,7 +897,6 @@ export class AnonymousTemplateDetailsPageComponent implements OnInit {
 
       return {
         customInputId: value.customInputId,
-        name: value.name.trim(),
         labelEn: this.toNullableTrimmedText(value.labelEn),
         labelAr: this.toNullableTrimmedText(value.labelAr),
         type,

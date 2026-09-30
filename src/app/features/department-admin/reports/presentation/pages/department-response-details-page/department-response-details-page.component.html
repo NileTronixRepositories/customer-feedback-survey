@@ -116,7 +116,7 @@
           @for (input of response.customInputs; track input.customInputId) {
             <div class="grid gap-1 p-4 sm:grid-cols-[14rem_minmax(0,1fr)] sm:items-center">
               <dt class="truncate text-[11px] font-black uppercase tracking-wide text-slate-400">
-                {{ input.name }} - {{ input.typeName }}
+                {{ customInputLabel(input) }} - {{ input.typeName }}
               </dt>
               <dd class="break-words text-xs font-bold text-slate-900 [overflow-wrap:anywhere]">
                 {{ input.displayValue || '-' }}
@@ -203,6 +203,9 @@
                   </div>
                 }
                 @case ('Complain') {
+                  <p class="break-words text-xs font-semibold text-slate-700 [overflow-wrap:anywhere]">{{ displayAnswer(node.answer) }}</p>
+                }
+                @case ('FreeText') {
                   <p class="break-words text-xs font-semibold text-slate-700 [overflow-wrap:anywhere]">{{ displayAnswer(node.answer) }}</p>
                 }
                 @case ('Voice') {

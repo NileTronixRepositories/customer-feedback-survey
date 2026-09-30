@@ -295,7 +295,7 @@
                     </td>
                     <td class="px-2.5 py-2">
                       <div class="flex max-w-md flex-wrap gap-1.5">
-                        @for (input of response.customInputsPreview; track input.name + input.value) {
+                        @for (input of response.customInputsPreview; track input.customInputId) {
                           <span
                             class="max-w-[12rem] truncate rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-600"
                             [title]="customInputLabel(input)"

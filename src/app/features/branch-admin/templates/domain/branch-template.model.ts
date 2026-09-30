@@ -46,7 +46,6 @@ export type BranchTemplateCustomInputType = 1 | 2;
 
 export interface BranchTemplateCustomInput {
   customInputId: string;
-  name: string;
   labelEn: string | null;
   labelAr: string | null;
   type: BranchTemplateCustomInputType;
@@ -179,7 +178,6 @@ export interface UpdateBranchTemplatePayload {
 }
 
 export interface CreateBranchTemplateCustomInputPayload {
-  name: string;
   labelEn: string | null;
   labelAr: string | null;
   type: BranchTemplateCustomInputType;
@@ -221,7 +219,6 @@ export interface BranchTemplateApiResponse {
 
 export interface BranchTemplateCustomInputApiResponse {
   customInputId?: string | number;
-  name?: string | null;
   labelEn?: string | null;
   labelAr?: string | null;
   type?: number | string | null;

@@ -553,12 +553,12 @@
               }
 
               <!-- COMPLAIN (TEXT) COMPONENT -->
-              @else if (isComplain(question)) {
+              @else if (isTextAnswer(question)) {
                 <div class="space-y-1.5">
                   <textarea
                     class="min-h-24 w-full resize-y rounded-xl border border-slate-200 p-3 text-xs text-slate-900 shadow-xs outline-none transition placeholder:text-slate-400 focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15"
                     maxlength="4000"
-                    [placeholder]="'operatorTemplates.complainPlaceholder' | t"
+                    [placeholder]="(isComplain(question) ? 'operatorTemplates.complainPlaceholder' : 'operatorTemplates.freeTextPlaceholder') | t"
                     [value]="textAnswer(question)"
                     (input)="updateTextAnswer(question, $event)"
                   ></textarea>

@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   AbstractControl,
   FormBuilder,
@@ -48,6 +49,14 @@ export class ChangePasswordPageComponent {
     },
     { validators: this.matchingPasswordsValidator },
   );
+
+  constructor() {
+    this.form.valueChanges.pipe(takeUntilDestroyed()).subscribe(() => {
+      if (this.authStore.error()) {
+        this.authStore.clearError();
+      }
+    });
+  }
 
   newPasswordError(): string {
     const control = this.form.controls.newPassword;

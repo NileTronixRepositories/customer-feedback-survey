@@ -262,6 +262,15 @@
                     ></textarea>
                   }
 
+                  @case ('freeText') {
+                    <textarea
+                      class="min-h-28 w-full rounded-lg border border-slate-200 bg-white px-3 py-3 text-sm font-semibold text-slate-950 outline-none transition duration-200 focus:border-[var(--theme-color-accent)] focus:ring-4 focus:ring-cyan-50"
+                      [value]="answerFor(question.anonymousTemplateQuestionId).textAnswer"
+                      [placeholder]="'publicAnonymousTemplates.textAnswerPlaceholder' | t"
+                      (input)="updateTextAnswer(question.anonymousTemplateQuestionId, $event)"
+                    ></textarea>
+                  }
+
                   @case ('voice') {
                     <label
                       class="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-slate-300 bg-slate-50 p-6 text-center transition duration-200 hover:-translate-y-0.5 hover:border-[var(--theme-color-accent)] hover:bg-[var(--theme-color-accent-softest)]"

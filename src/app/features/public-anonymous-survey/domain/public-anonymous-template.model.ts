@@ -6,6 +6,7 @@ export type PublicQuestionKind =
   | 'starRating'
   | 'smiles'
   | 'complain'
+  | 'freeText'
   | 'voice'
   | 'image';
 
@@ -33,7 +34,6 @@ export interface PublicAnonymousTemplateBranch {
 
 export interface PublicAnonymousTemplateCustomInput {
   customInputId: string;
-  name: string;
   labelEn: string | null;
   labelAr: string | null;
   type: PublicCustomInputType;
@@ -106,7 +106,6 @@ export interface PublicAnonymousTemplateBranchApiResponse {
 
 export interface PublicAnonymousTemplateCustomInputApiResponse {
   customInputId?: string | number;
-  name?: string | null;
   labelEn?: string | null;
   labelAr?: string | null;
   type?: number | string | null;

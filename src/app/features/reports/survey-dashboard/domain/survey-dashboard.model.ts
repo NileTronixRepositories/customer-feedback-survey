@@ -30,6 +30,69 @@ export interface SurveyDashboardQuery {
   criticalScoreThreshold?: number;
 }
 
+export interface SurveyDashboardQuestionGroup {
+  templateId: string;
+  templateKind: SurveyDashboardTemplateKind;
+  templateNameEn: string;
+  templateNameAr: string | null;
+  questionGroupId: string;
+  questionGroupNameEn: string;
+  questionGroupNameAr: string | null;
+  questionsCount: number;
+  scorableQuestionsCount: number;
+  totalResponses: number;
+  scoredResponsesCount: number;
+  scoredItemsCount: number;
+  averageScoreValue: number | null;
+  averageScorePercentage: number | null;
+}
+
+export interface SurveyDashboardComplaintsQuery extends SurveyDashboardQuery {
+  pageNumber: number;
+  pageSize: number;
+}
+
+export interface SurveyDashboardComplaint {
+  responseId: string;
+  templateId: string;
+  templateKind: SurveyDashboardTemplateKind;
+  templateNameEn: string;
+  templateNameAr: string | null;
+  questionId: string;
+  questionTextEn: string;
+  questionTextAr: string | null;
+  complaintText: string;
+  submittedOnUtc: string;
+  branchId: string | null;
+  branchNameEn: string | null;
+  branchNameAr: string | null;
+  source: SurveyDashboardSource;
+  operatorId: string | null;
+  operatorNameEn: string | null;
+  operatorNameAr: string | null;
+  detailsNavigation: SurveyDashboardNavigation | null;
+}
+
+export interface SurveyDashboardComplaintGroup {
+  templateId: string;
+  templateKind: SurveyDashboardTemplateKind;
+  templateNameEn: string;
+  templateNameAr: string | null;
+  complaintsCount: number;
+  complaints: readonly SurveyDashboardComplaint[];
+}
+
+export interface SurveyDashboardComplaintsPage {
+  totalComplaints: number;
+  responsesWithComplaints: number;
+  complaintRate: number;
+  currentPage: number;
+  pageSize: number;
+  totalItems: number;
+  totalPages: number;
+  templateGroups: readonly SurveyDashboardComplaintGroup[];
+}
+
 export interface SurveyDashboardTemplatesSelectionQuery {
   branchId?: string;
   searchText?: string;
@@ -185,7 +248,7 @@ export interface SurveyDashboardLowestRatedQuestion {
 
 export interface SurveyDashboardCustomInputSegment {
   source: SurveyDashboardSource;
-  customInputName: string;
+  customInputId: string;
   labelEn: string | null;
   labelAr: string | null;
   type: string;
@@ -224,9 +287,9 @@ export interface SurveyDashboardCriticalResponse {
 }
 
 export interface SurveyDashboardCustomInputPreview {
-  name: string;
-  labelEn: string | null;
-  labelAr: string | null;
+  customInputId: string;
+  labelEnSnapshot: string | null;
+  labelArSnapshot: string | null;
   value: string;
 }
 
@@ -278,7 +341,6 @@ export interface SurveyDashboardTemplateDetails {
 
 export interface SurveyDashboardTemplateCustomInput {
   customInputId: string;
-  name: string;
   labelEn: string | null;
   labelAr: string | null;
   type: string;

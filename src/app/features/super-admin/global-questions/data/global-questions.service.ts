@@ -187,13 +187,11 @@ export class GlobalQuestionsService {
     if (normalized === 'smiles' || normalized === 'smile') {
       return GLOBAL_QUESTION_TYPE.Smiles;
     }
-    if (
-      normalized === 'complain' ||
-      normalized === 'complaint' ||
-      normalized === 'freetext' ||
-      normalized === 'textarea'
-    ) {
+    if (normalized === 'complain' || normalized === 'complaint') {
       return GLOBAL_QUESTION_TYPE.Complain;
+    }
+    if (normalized === 'freetext' || normalized === 'textarea') {
+      return GLOBAL_QUESTION_TYPE.FreeText;
     }
     if (normalized === 'voice') {
       return GLOBAL_QUESTION_TYPE.Voice;

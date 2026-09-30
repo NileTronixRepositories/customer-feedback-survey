@@ -90,6 +90,10 @@ const QUESTION_TYPE_OPTIONS: readonly QuestionTypeOption[] = [
     value: QUESTION_ANSWER_TYPE.Image,
     labelKey: QUESTION_ANSWER_TYPE_LABEL_KEYS[QUESTION_ANSWER_TYPE.Image],
   },
+  {
+    value: QUESTION_ANSWER_TYPE.FreeText,
+    labelKey: QUESTION_ANSWER_TYPE_LABEL_KEYS[QUESTION_ANSWER_TYPE.FreeText],
+  },
 ];
 
 type QuestionMainField = 'groupId' | 'textEn' | 'textAr' | 'type';

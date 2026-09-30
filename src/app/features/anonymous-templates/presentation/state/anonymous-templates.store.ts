@@ -1130,9 +1130,6 @@ export class AnonymousTemplatesStore {
     if (code.includes('expireto') && code.includes('mustbeafteractivefrom')) {
       return 'branchTemplates.expireToAfterActiveFrom';
     }
-    if (code.includes('custominputnameduplicated')) {
-      return 'branchTemplates.customInputNameDuplicated';
-    }
     if (code.includes('custominputorderduplicated')) {
       return 'branchTemplates.customInputOrderDuplicated';
     }
@@ -1185,9 +1182,6 @@ export class AnonymousTemplatesStore {
     }
     if (code.includes('custominputidduplicated')) {
       return 'anonymousTemplates.customInputIdDuplicated';
-    }
-    if (code.includes('custominputnameduplicated')) {
-      return 'branchTemplates.customInputNameDuplicated';
     }
     if (code.includes('custominputorderduplicated')) {
       return 'branchTemplates.customInputOrderDuplicated';

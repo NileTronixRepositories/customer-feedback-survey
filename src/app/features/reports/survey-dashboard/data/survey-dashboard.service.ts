@@ -33,6 +33,10 @@ import {
   SurveyDashboardAppliedFilters,
   SurveyDashboardBranchOption,
   SurveyDashboardBranchSummary,
+  SurveyDashboardComplaint,
+  SurveyDashboardComplaintGroup,
+  SurveyDashboardComplaintsPage,
+  SurveyDashboardComplaintsQuery,
   SurveyDashboardCriticalResponse,
   SurveyDashboardCustomInputPreview,
   SurveyDashboardCustomInputSegment,
@@ -42,6 +46,7 @@ import {
   SurveyDashboardNavigation,
   SurveyDashboardPeriod,
   SurveyDashboardQuery,
+  SurveyDashboardQuestionGroup,
   SurveyDashboardResponse,
   SurveyDashboardScope,
   SurveyDashboardSource,
@@ -74,6 +79,28 @@ export class SurveyDashboardService {
     return this.http
       .get<ApiRecord>(this.dashboardUrl, { params: this.toDashboardParams(query) })
       .pipe(map((response) => this.toDashboard(response)));
+  }
+
+  getQuestionGroups(query: SurveyDashboardQuery): Observable<readonly SurveyDashboardQuestionGroup[]> {
+    return this.http
+      .get<unknown>(`${this.dashboardUrl}/question-groups`, {
+        params: this.toAnalyticsParams(query, true),
+      })
+      .pipe(
+        map((response) =>
+          this.readPageArray(response).map((item) => this.toQuestionGroup(item)),
+        ),
+      );
+  }
+
+  getComplaints(query: SurveyDashboardComplaintsQuery): Observable<SurveyDashboardComplaintsPage> {
+    let params = this.toAnalyticsParams(query, false)
+      .set('pageNumber', String(query.pageNumber))
+      .set('pageSize', String(query.pageSize));
+
+    return this.http
+      .get<ApiRecord>(`${this.dashboardUrl}/complaints`, { params })
+      .pipe(map((response) => this.toComplaintsPage(response, query)));
   }
 
   getDashboardByPath(path: string): Observable<SurveyDashboardResponse> {
@@ -187,12 +214,129 @@ export class SurveyDashboardService {
     return params;
   }
 
+  private toAnalyticsParams(query: SurveyDashboardQuery, includeScoreMode: boolean): HttpParams {
+    let params = new HttpParams();
+    if (query.branchId) params = params.set('branchId', query.branchId);
+    if (query.source) params = params.set('source', query.source);
+    if (query.templateId) params = params.set('templateId', query.templateId);
+    if (query.anonymousTemplateId && !query.templateId) {
+      params = params.set('anonymousTemplateId', query.anonymousTemplateId);
+    }
+    if (query.from) params = params.set('from', query.from);
+    if (query.to) params = params.set('to', query.to);
+    if (includeScoreMode && query.scoreCalculationMode) {
+      params = params.set('scoreCalculationMode', query.scoreCalculationMode);
+    }
+    return params;
+  }
+
   private toTemplatesSelectionParams(query: SurveyDashboardTemplatesSelectionQuery): HttpParams {
     let params = new HttpParams();
     if (query.branchId) params = params.set('branchId', query.branchId);
     if (query.searchText) params = params.set('searchText', query.searchText);
     if (query.templateKind) params = params.set('templateKind', query.templateKind);
     return params;
+  }
+
+  private toQuestionGroup(item: ApiRecord): SurveyDashboardQuestionGroup {
+    return {
+      templateId: this.readRecordId(item['templateId']),
+      templateKind: this.toTemplateKind(this.readString(item, 'templateKind')),
+      templateNameEn: this.readString(item, 'templateNameEn'),
+      templateNameAr: this.readNullableString(item, 'templateNameAr'),
+      questionGroupId: this.readRecordId(item['questionGroupId']),
+      questionGroupNameEn: this.readString(item, 'questionGroupNameEn'),
+      questionGroupNameAr: this.readNullableString(item, 'questionGroupNameAr'),
+      questionsCount: this.readNumber(item, 'questionsCount'),
+      scorableQuestionsCount: this.readNumber(item, 'scorableQuestionsCount'),
+      totalResponses: this.readNumber(item, 'totalResponses'),
+      scoredResponsesCount: this.readNumber(item, 'scoredResponsesCount'),
+      scoredItemsCount: this.readNumber(item, 'scoredItemsCount'),
+      averageScoreValue: this.readNullableNumber(item, 'averageScoreValue'),
+      averageScorePercentage: this.readNullableNumber(item, 'averageScorePercentage'),
+    };
+  }
+
+  private toComplaintsPage(
+    response: ApiRecord,
+    query: SurveyDashboardComplaintsQuery,
+  ): SurveyDashboardComplaintsPage {
+    const suppliedGroups = this.readArray(response['templateGroups']);
+    const templateGroups = suppliedGroups.length > 0
+      ? suppliedGroups.map((group) => this.toComplaintGroup(group))
+      : this.groupComplaints(
+          this.readPageArray(response).map((item) => this.toComplaint(item)),
+        );
+    const totalItems = this.readNumber(response, 'totalItems') ||
+      templateGroups.reduce((total, group) => total + group.complaints.length, 0);
+    const pageSize = this.readNumber(response, 'pageSize') || query.pageSize;
+
+    return {
+      totalComplaints: this.readNumber(response, 'totalComplaints') || totalItems,
+      responsesWithComplaints: this.readNumber(response, 'responsesWithComplaints'),
+      complaintRate: this.readNumber(response, 'complaintRate'),
+      currentPage: this.readNumber(response, 'currentPage') || query.pageNumber,
+      pageSize,
+      totalItems,
+      totalPages: this.readNumber(response, 'totalPages') || Math.ceil(totalItems / pageSize),
+      templateGroups,
+    };
+  }
+
+  private toComplaintGroup(item: ApiRecord): SurveyDashboardComplaintGroup {
+    const complaints = this.readArray(item['complaints'] ?? item['items']).map((complaint) =>
+      this.toComplaint(complaint),
+    );
+    return {
+      templateId: this.readRecordId(item['templateId']),
+      templateKind: this.toTemplateKind(this.readString(item, 'templateKind')),
+      templateNameEn: this.readString(item, 'templateNameEn'),
+      templateNameAr: this.readNullableString(item, 'templateNameAr'),
+      complaintsCount: this.readNumber(item, 'complaintsCount') || complaints.length,
+      complaints,
+    };
+  }
+
+  private toComplaint(item: ApiRecord): SurveyDashboardComplaint {
+    return {
+      responseId: this.readRecordId(item['responseId']),
+      templateId: this.readRecordId(item['templateId']),
+      templateKind: this.toTemplateKind(this.readString(item, 'templateKind')),
+      templateNameEn: this.readString(item, 'templateNameEn'),
+      templateNameAr: this.readNullableString(item, 'templateNameAr'),
+      questionId: this.readRecordId(item['questionId']),
+      questionTextEn: this.readString(item, 'questionTextEn'),
+      questionTextAr: this.readNullableString(item, 'questionTextAr'),
+      complaintText: this.readString(item, 'complaintText'),
+      submittedOnUtc: this.readString(item, 'submittedOnUtc'),
+      branchId: this.readNullableString(item, 'branchId'),
+      branchNameEn: this.readNullableString(item, 'branchNameEn'),
+      branchNameAr: this.readNullableString(item, 'branchNameAr'),
+      source: this.toSource(this.readString(item, 'source')),
+      operatorId: this.readNullableString(item, 'operatorId'),
+      operatorNameEn: this.readNullableString(item, 'operatorNameEn'),
+      operatorNameAr: this.readNullableString(item, 'operatorNameAr'),
+      detailsNavigation: this.toNavigation(this.readRecord(item['detailsNavigation'])),
+    };
+  }
+
+  private groupComplaints(
+    complaints: readonly SurveyDashboardComplaint[],
+  ): readonly SurveyDashboardComplaintGroup[] {
+    const groups = new Map<string, SurveyDashboardComplaint[]>();
+    for (const complaint of complaints) {
+      const key = `${complaint.templateKind}:${complaint.templateId}`;
+      groups.set(key, [...(groups.get(key) ?? []), complaint]);
+    }
+
+    return [...groups.values()].map((items) => ({
+      templateId: items[0].templateId,
+      templateKind: items[0].templateKind,
+      templateNameEn: items[0].templateNameEn,
+      templateNameAr: items[0].templateNameAr,
+      complaintsCount: items.length,
+      complaints: items,
+    }));
   }
 
   private toDashboard(response: ApiRecord): SurveyDashboardResponse {
@@ -414,7 +558,7 @@ export class SurveyDashboardService {
   private toCustomInputSegment(item: ApiRecord): SurveyDashboardCustomInputSegment {
     return {
       source: this.toSource(this.readString(item, 'source')),
-      customInputName: this.readString(item, 'customInputName'),
+      customInputId: this.readRecordId(item['customInputId']),
       labelEn: this.readNullableString(item, 'labelEn'),
       labelAr: this.readNullableString(item, 'labelAr'),
       type: this.readString(item, 'type'),
@@ -480,9 +624,9 @@ export class SurveyDashboardService {
 
   private toCustomInputPreview(item: ApiRecord): SurveyDashboardCustomInputPreview {
     return {
-      name: this.readString(item, 'name'),
-      labelEn: this.readNullableString(item, 'labelEn'),
-      labelAr: this.readNullableString(item, 'labelAr'),
+      customInputId: this.readRecordId(item['customInputId']),
+      labelEnSnapshot: this.readNullableString(item, 'labelEnSnapshot'),
+      labelArSnapshot: this.readNullableString(item, 'labelArSnapshot'),
       value: this.readDisplayString(item['value']),
     };
   }
@@ -592,7 +736,8 @@ export class SurveyDashboardService {
   private toInternalResponseCustomInput(item: ApiRecord): BranchSurveyResponseCustomInput {
     return {
       customInputId: this.readRecordId(item['customInputId']),
-      name: this.readString(item, 'name'),
+      labelEnSnapshot: this.readNullableString(item, 'labelEnSnapshot'),
+      labelArSnapshot: this.readNullableString(item, 'labelArSnapshot'),
       type: this.readString(item, 'type'),
       typeName: this.readString(item, 'typeName'),
       stringValue: this.readNullableString(item, 'stringValue'),
@@ -668,7 +813,6 @@ export class SurveyDashboardService {
       (typeof value === 'string' || typeof value === 'number' ? String(value) : null);
     const integerValue =
       this.readNullableNumber(item, 'integerValue') ?? (typeof value === 'number' ? value : null);
-    const name = this.readString(item, 'nameSnapshot') || this.readString(item, 'name');
     const displayValue =
       this.readString(item, 'displayValue') ??
       stringValue ??
@@ -677,10 +821,8 @@ export class SurveyDashboardService {
     return {
       customInputValueId: this.readRecordId(item['customInputValueId']),
       anonymousTemplateCustomInputId: this.readRecordId(item['anonymousTemplateCustomInputId']),
-      name,
-      labelEn: this.readNullableString(item, 'labelEn'),
-      labelAr: this.readNullableString(item, 'labelAr'),
-      nameSnapshot: name,
+      labelEnSnapshot: this.readNullableString(item, 'labelEnSnapshot'),
+      labelArSnapshot: this.readNullableString(item, 'labelArSnapshot'),
       type,
       typeName: this.readString(item, 'typeName') || (type === 2 ? 'Integer' : 'String'),
       stringValue,
@@ -838,7 +980,6 @@ export class SurveyDashboardService {
   private toTemplateCustomInput(item: ApiRecord): SurveyDashboardTemplateCustomInput {
     return {
       customInputId: this.readRecordId(item['customInputId']),
-      name: this.readString(item, 'name'),
       labelEn: this.readNullableString(item, 'labelEn'),
       labelAr: this.readNullableString(item, 'labelAr'),
       type: this.readDisplayString(item['type']) || this.readString(item, 'typeName'),

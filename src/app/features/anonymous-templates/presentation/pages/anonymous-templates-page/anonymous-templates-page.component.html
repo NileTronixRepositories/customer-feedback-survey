@@ -937,28 +937,6 @@
                 <div class="grid gap-2 md:grid-cols-3">
                   <label class="block">
                     <span class="mb-1 block text-[10px] font-semibold text-slate-700">
-                      {{ 'branchTemplates.customInputName' | t }}
-                    </span>
-                    <input
-                      class="h-8 w-full rounded-md border px-2.5 py-1.5 text-[11px] text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/10"
-                      [class.border-[var(--theme-color-danger)]]="
-                        customInputFieldError(inputIndex, 'name').length > 0
-                      "
-                      [class.border-slate-200]="
-                        customInputFieldError(inputIndex, 'name').length === 0
-                      "
-                      formControlName="name"
-                      [placeholder]="'branchTemplates.customInputNamePlaceholder' | t"
-                    />
-                    @if (customInputFieldError(inputIndex, 'name')) {
-                      <span class="mt-2 block text-xs font-medium text-[var(--theme-color-danger)]">
-                        {{ customInputFieldError(inputIndex, 'name') | t }}
-                      </span>
-                    }
-                  </label>
-
-                  <label class="block">
-                    <span class="mb-1 block text-[10px] font-semibold text-slate-700">
                       {{ 'branchTemplates.customInputLabelEn' | t }}
                     </span>
                     <input
@@ -1351,30 +1329,6 @@
                   </div>
 
                   <div class="grid gap-2 md:grid-cols-3">
-                    <label class="block">
-                      <span class="mb-1 block text-[10px] font-semibold text-slate-700">
-                        {{ 'branchTemplates.customInputName' | t }}
-                      </span>
-                      <input
-                        class="h-8 w-full rounded-md border px-2.5 py-1.5 text-[11px] text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/10"
-                        [class.border-[var(--theme-color-danger)]]="
-                          editCustomInputFieldError(inputIndex, 'name').length > 0
-                        "
-                        [class.border-slate-200]="
-                          editCustomInputFieldError(inputIndex, 'name').length === 0
-                        "
-                        formControlName="name"
-                        [placeholder]="'branchTemplates.customInputNamePlaceholder' | t"
-                      />
-                      @if (editCustomInputFieldError(inputIndex, 'name')) {
-                        <span
-                          class="mt-1 block text-[10px] font-medium text-[var(--theme-color-danger)]"
-                        >
-                          {{ editCustomInputFieldError(inputIndex, 'name') | t }}
-                        </span>
-                      }
-                    </label>
-
                     <label class="block">
                       <span class="mb-1 block text-[10px] font-semibold text-slate-700">
                         {{ 'branchTemplates.customInputLabelEn' | t }}

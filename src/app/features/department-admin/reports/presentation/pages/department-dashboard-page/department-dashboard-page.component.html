@@ -625,11 +625,11 @@
               {{ response.complaintText || ('departmentDashboard.noComplaintText' | t) }}
             </p>
             <div class="mt-2 flex flex-wrap gap-1.5">
-              @for (input of response.customInputs; track input.name + input.value) {
+              @for (input of response.customInputs; track input.customInputId) {
                 <span
                   class="max-w-full truncate rounded-full bg-slate-100 px-2 py-1 text-[10px] font-bold text-slate-600"
                 >
-                  {{ input.name }}: {{ input.value || '-' }}
+                  {{ criticalCustomInputLabel(input) }}: {{ input.value || '-' }}
                 </span>
               } @empty {
                 <span class="text-[11px] font-semibold text-slate-400">

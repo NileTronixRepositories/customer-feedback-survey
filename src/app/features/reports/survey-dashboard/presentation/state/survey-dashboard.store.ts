@@ -10,6 +10,7 @@ import {
   SurveyDashboardBranchOption,
   SurveyDashboardNavigation,
   SurveyDashboardQuery,
+  SurveyDashboardQuestionGroup,
   SurveyDashboardResponse,
   SurveyDashboardTemplateDetails,
   SurveyDashboardTemplateOption,
@@ -26,6 +27,8 @@ export class SurveyDashboardStore {
   private readonly dashboardSignal = signal<SurveyDashboardResponse | null>(null);
   private readonly loadingSignal = signal(false);
   private readonly errorSignal = signal<string | null>(null);
+  private readonly questionGroupsSignal = signal<readonly SurveyDashboardQuestionGroup[]>([]);
+  private readonly questionGroupsLoadingSignal = signal(false);
   private readonly querySignal = signal<SurveyDashboardQuery>({
     source: 'All',
     groupBy: 'Day',
@@ -56,6 +59,8 @@ export class SurveyDashboardStore {
   readonly dashboard = this.dashboardSignal.asReadonly();
   readonly loading = this.loadingSignal.asReadonly();
   readonly error = this.errorSignal.asReadonly();
+  readonly questionGroups = this.questionGroupsSignal.asReadonly();
+  readonly questionGroupsLoading = this.questionGroupsLoadingSignal.asReadonly();
   readonly query = this.querySignal.asReadonly();
   readonly branches = this.branchesSignal.asReadonly();
   readonly templates = this.templatesSignal.asReadonly();
@@ -129,6 +134,7 @@ export class SurveyDashboardStore {
     this.loadingSignal.set(true);
     this.errorSignal.set(null);
     this.querySignal.set(normalizedQuery);
+    this.loadQuestionGroups(normalizedQuery);
 
     this.dashboardService
       .getDashboard(normalizedQuery)
@@ -147,6 +153,18 @@ export class SurveyDashboardStore {
           this.errorSignal.set(this.errorMessage(error, 'Survey dashboard is temporarily unavailable.'));
         },
       });
+  }
+
+  private loadQuestionGroups(query: SurveyDashboardQuery): void {
+    this.questionGroupsLoadingSignal.set(true);
+    this.dashboardService
+      .getQuestionGroups(query)
+      .pipe(
+        catchError(() => of([] as readonly SurveyDashboardQuestionGroup[])),
+        take(1),
+        finalize(() => this.questionGroupsLoadingSignal.set(false)),
+      )
+      .subscribe((groups) => this.questionGroupsSignal.set(groups));
   }
 
   loadDashboardFromNavigation(navigation: SurveyDashboardNavigation): void {

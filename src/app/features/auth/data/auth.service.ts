@@ -41,11 +41,11 @@ const AUTH_ERROR_KEYS: Record<string, string> = {
   'ChangePassword.UserIdMismatch': 'auth.changePasswordUserIdMismatch',
   'ChangePassword.UserNotFound': 'auth.changePasswordUserNotFound',
   'ChangePassword.UserInactive': 'auth.changePasswordUserInactive',
-  'ChangePassword_NewPassword_Required': 'auth.changePasswordNewPasswordRequired',
-  'ChangePassword_ConfirmNewPassword_Required': 'auth.changePasswordConfirmPasswordRequired',
-  'ChangePassword_ConfirmNewPassword_NotMatched': 'auth.changePasswordConfirmPasswordNotMatched',
-  'ChangePassword_NewPassword_MinLength': 'auth.changePasswordNewPasswordMinLength',
-  'ChangePassword_NewPassword_MaxLength': 'auth.changePasswordNewPasswordMaxLength',
+  ChangePassword_NewPassword_Required: 'auth.changePasswordNewPasswordRequired',
+  ChangePassword_ConfirmNewPassword_Required: 'auth.changePasswordConfirmPasswordRequired',
+  ChangePassword_ConfirmNewPassword_NotMatched: 'auth.changePasswordConfirmPasswordNotMatched',
+  ChangePassword_NewPassword_MinLength: 'auth.changePasswordNewPasswordMinLength',
+  ChangePassword_NewPassword_MaxLength: 'auth.changePasswordNewPasswordMaxLength',
 };
 
 @Injectable({ providedIn: 'root' })
@@ -57,38 +57,40 @@ export class AuthService {
   private readonly usersUrl = `${environment.apiBaseUrl}/api/auth/users`;
 
   login(credentials: LoginCredentials): Observable<AuthLoginResult> {
-    return this.http.post<LoginResponse>(this.loginUrl, credentials, {
-      context: new HttpContext().set(SKIP_AUTH, true),
-    }).pipe(
-      switchMap((response) => {
-        const branchSelection =
-          response.requiresBranchSelection === true
-            ? this.toBranchSelectionResult(response, credentials.userNameOrEmail)
-            : null;
+    return this.http
+      .post<LoginResponse>(this.loginUrl, credentials, {
+        context: new HttpContext().set(SKIP_AUTH, true),
+      })
+      .pipe(
+        switchMap((response) => {
+          const branchSelection =
+            response.requiresBranchSelection === true
+              ? this.toBranchSelectionResult(response, credentials.userNameOrEmail)
+              : null;
 
-        if (this.requiresPasswordChange(response)) {
-          return of({
-            kind: 'password-change-required' as const,
-            session: this.toSession(response, credentials.userNameOrEmail, null),
-            branchSelection,
-          });
-        }
+          if (this.requiresPasswordChange(response)) {
+            return of({
+              kind: 'password-change-required' as const,
+              session: this.toSession(response, credentials.userNameOrEmail, null),
+              branchSelection,
+            });
+          }
 
-        if (branchSelection) {
-          return of(branchSelection);
-        }
+          if (branchSelection) {
+            return of(branchSelection);
+          }
 
-        return this.resolveBranchUserRoles(response).pipe(
-          map(({ response: loginResponse, branchUserRoles }) => ({
-            kind: 'authenticated' as const,
-            session: this.toSession(loginResponse, credentials.userNameOrEmail, branchUserRoles),
-          })),
-        );
-      }),
-      catchError((error: unknown) =>
-        throwError(() => new Error(this.resolveAuthErrorKey(error, 'auth.invalidCredentials'))),
-      ),
-    );
+          return this.resolveBranchUserRoles(response).pipe(
+            map(({ response: loginResponse, branchUserRoles }) => ({
+              kind: 'authenticated' as const,
+              session: this.toSession(loginResponse, credentials.userNameOrEmail, branchUserRoles),
+            })),
+          );
+        }),
+        catchError((error: unknown) =>
+          throwError(() => new Error(this.resolveAuthErrorKey(error, 'auth.invalidCredentials'))),
+        ),
+      );
   }
 
   changePassword(
@@ -104,9 +106,7 @@ export class AuthService {
       )
       .pipe(
         catchError((error: unknown) =>
-          throwError(() =>
-            new Error(this.resolveAuthErrorKey(error, 'auth.changePasswordError')),
-          ),
+          throwError(() => new Error(this.resolveAuthErrorKey(error, 'auth.changePasswordError'))),
         ),
       );
   }
@@ -251,7 +251,12 @@ export class AuthService {
   private requiresPasswordChange(response: LoginResponse): boolean {
     const tokenPayload = this.decodeJwtPayload(response.token);
     return (
-      this.resolveBoolean(response.firstLoginFlag, tokenPayload, 'firstLoginFlag', 'FirstLoginFlag') ||
+      this.resolveBoolean(
+        response.firstLoginFlag,
+        tokenPayload,
+        'firstLoginFlag',
+        'FirstLoginFlag',
+      ) ||
       this.resolveBoolean(
         response.passwordExpiredFlag,
         tokenPayload,
@@ -485,8 +490,8 @@ export class AuthService {
     );
   }
 
-  private toNonEmptyString(value: string | null | undefined): string | null {
-    return typeof value === 'string' && value.length > 0 ? value : null;
+  private toNonEmptyString(value: unknown): string | null {
+    return typeof value === 'string' && value.trim().length > 0 ? value.trim() : null;
   }
 
   private toBranchSelectionResult(
@@ -504,17 +509,17 @@ export class AuthService {
     };
   }
 
-  private toLoginBranchSelection(
-    response: LoginBranchSelectionApiResponse,
-  ): LoginBranchSelection {
+  private toLoginBranchSelection(response: LoginBranchSelectionApiResponse): LoginBranchSelection {
     return {
       id: this.readRecordId(response.id ?? response.branchId),
       nameEn:
         this.toNonEmptyString(response.nameEn) ??
         this.toNonEmptyString(response.branchNameEn) ??
         '',
-      nameAr: this.toNonEmptyString(response.nameAr) ?? this.toNonEmptyString(response.branchNameAr),
-      code: this.toNonEmptyString(response.code) ?? this.toNonEmptyString(response.branchCode) ?? '',
+      nameAr:
+        this.toNonEmptyString(response.nameAr) ?? this.toNonEmptyString(response.branchNameAr),
+      code:
+        this.toNonEmptyString(response.code) ?? this.toNonEmptyString(response.branchCode) ?? '',
     };
   }
 
@@ -539,8 +544,105 @@ export class AuthService {
       return fallbackKey;
     }
 
+    if (error.status === 0) {
+      return 'toast.networkErrorDescription';
+    }
+
+    if (error.status >= 500) {
+      return 'toast.requestFailedDescription';
+    }
+
     const code = this.firstApiErrorCode(error.error);
-    return code ? AUTH_ERROR_KEYS[code] ?? fallbackKey : fallbackKey;
+    if (code && AUTH_ERROR_KEYS[code]) {
+      return AUTH_ERROR_KEYS[code];
+    }
+
+    const apiMessage = this.extractApiMessage(error.error);
+    if (apiMessage) {
+      return apiMessage;
+    }
+
+    if (error.status === 403) {
+      return 'toast.forbiddenDescription';
+    }
+
+    if (error.status === 404) {
+      return 'toast.notFoundDescription';
+    }
+
+    if (error.status === 400 || error.status === 422) {
+      return fallbackKey === 'auth.invalidCredentials'
+        ? 'toast.validationErrorDescription'
+        : fallbackKey;
+    }
+
+    return fallbackKey;
+  }
+
+  private extractApiMessage(errorBody: unknown): string | null {
+    if (typeof errorBody === 'string') {
+      const trimmed = errorBody.trim();
+      return trimmed.length > 0 && !this.isHtmlOrJson(trimmed) ? trimmed : null;
+    }
+
+    if (!this.isRecord(errorBody)) {
+      return null;
+    }
+
+    const message = this.toNonEmptyString(errorBody['message']);
+    if (message && !this.isGenericStatusText(message)) {
+      return message;
+    }
+
+    const detail = this.toNonEmptyString(errorBody['detail']);
+    if (detail && !this.isGenericStatusText(detail)) {
+      return detail;
+    }
+
+    const errors = errorBody['errors'];
+    if (Array.isArray(errors)) {
+      const firstString = errors.find(
+        (e): e is string => typeof e === 'string' && e.trim().length > 0 && !AUTH_ERROR_KEYS[e],
+      );
+      if (firstString) {
+        return firstString.trim();
+      }
+
+      const firstObj = errors.find(
+        (e): e is Record<string, unknown> =>
+          this.isRecord(e) && typeof e['message'] === 'string' && e['message'].trim().length > 0,
+      );
+      if (firstObj && typeof firstObj['message'] === 'string') {
+        return firstObj['message'].trim();
+      }
+    }
+
+    if (this.isRecord(errors)) {
+      const firstVal = Object.values(errors)
+        .flatMap((v) => (Array.isArray(v) ? v : [v]))
+        .find(
+          (v): v is string => typeof v === 'string' && v.trim().length > 0 && !AUTH_ERROR_KEYS[v],
+        );
+      if (firstVal) {
+        return firstVal.trim();
+      }
+    }
+
+    return null;
+  }
+
+  private isGenericStatusText(text: string): boolean {
+    const lower = text.trim().toLowerCase();
+    return (
+      lower === 'bad request' ||
+      lower === 'unauthorized' ||
+      lower === 'forbidden' ||
+      lower === 'internal server error'
+    );
+  }
+
+  private isHtmlOrJson(text: string): boolean {
+    return text.startsWith('<') || text.startsWith('{') || text.startsWith('[');
   }
 
   private firstApiErrorCode(errorBody: unknown): string | null {
@@ -555,8 +657,9 @@ export class AuthService {
 
     const errors = errorBody['errors'];
     if (Array.isArray(errors)) {
-      const firstError = errors.find((error): error is Record<string, unknown> =>
-        this.isRecord(error) && typeof error['code'] === 'string',
+      const firstError = errors.find(
+        (error): error is Record<string, unknown> =>
+          this.isRecord(error) && typeof error['code'] === 'string',
       );
 
       if (typeof firstError?.['code'] === 'string') {

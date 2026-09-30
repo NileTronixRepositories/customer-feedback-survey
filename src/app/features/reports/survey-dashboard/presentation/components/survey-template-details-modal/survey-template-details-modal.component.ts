@@ -79,7 +79,7 @@ export class SurveyTemplateDetailsModalComponent {
   }
 
   customInputLabel(input: SurveyDashboardTemplateCustomInput): string {
-    return this.localized(input.labelEn || input.name, input.labelAr);
+    return this.localized(input.labelEn, input.labelAr);
   }
 
   customInputTypeLabel(input: SurveyDashboardTemplateCustomInput): string {

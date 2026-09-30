@@ -69,6 +69,13 @@
     <app-icon [icon]="messageIcon" [size]="compact() ? 13 : 15" />
     {{ 'questions.complainPlaceholder' | t }}
   </div>
+} @else if (isFreeText()) {
+  <div
+    class="inline-flex items-center gap-1.5 rounded-lg bg-slate-50 px-2 py-1 text-xs font-semibold text-slate-500"
+  >
+    <app-icon [icon]="messageIcon" [size]="compact() ? 13 : 15" />
+    {{ 'operatorTemplates.freeTextPlaceholder' | t }}
+  </div>
 } @else if (isImage()) {
   <div
     class="inline-flex items-center gap-1.5 rounded-lg bg-slate-50 px-2 py-1 text-xs font-semibold text-slate-500"

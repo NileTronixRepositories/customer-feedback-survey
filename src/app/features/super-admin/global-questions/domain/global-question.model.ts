@@ -10,11 +10,12 @@ import {
 
 export const GLOBAL_QUESTION_TYPE = {
   SingleChoice: 1,
-  StarRating: 2,
-  Smiles: 3,
+  Voice: 2,
+  StarRating: 3,
   Complain: 4,
-  Voice: 5,
+  Smiles: 5,
   Image: 6,
+  FreeText: 7,
 } as const;
 
 export type GlobalQuestionType = (typeof GLOBAL_QUESTION_TYPE)[keyof typeof GLOBAL_QUESTION_TYPE];
@@ -48,6 +49,10 @@ export const GLOBAL_QUESTION_TYPE_OPTIONS: readonly GlobalQuestionTypeOption[] =
   {
     value: GLOBAL_QUESTION_TYPE.Image,
     labelKey: 'questions.typeImage',
+  },
+  {
+    value: GLOBAL_QUESTION_TYPE.FreeText,
+    labelKey: 'questions.typeFreeText',
   },
 ];
 
@@ -149,13 +154,11 @@ export function toGlobalQuestionType(
     if (normalized === 'smiles' || normalized === 'smile') {
       return GLOBAL_QUESTION_TYPE.Smiles;
     }
-    if (
-      normalized === 'complain' ||
-      normalized === 'complaint' ||
-      normalized === 'freetext' ||
-      normalized === 'textarea'
-    ) {
+    if (normalized === 'complain' || normalized === 'complaint') {
       return GLOBAL_QUESTION_TYPE.Complain;
+    }
+    if (normalized === 'freetext' || normalized === 'textarea') {
+      return GLOBAL_QUESTION_TYPE.FreeText;
     }
     if (normalized === 'voice') {
       return GLOBAL_QUESTION_TYPE.Voice;
@@ -175,7 +178,8 @@ export function toGlobalQuestionType(
     numericValue === GLOBAL_QUESTION_TYPE.Smiles ||
     numericValue === GLOBAL_QUESTION_TYPE.Complain ||
     numericValue === GLOBAL_QUESTION_TYPE.Voice ||
-    numericValue === GLOBAL_QUESTION_TYPE.Image
+    numericValue === GLOBAL_QUESTION_TYPE.Image ||
+    numericValue === GLOBAL_QUESTION_TYPE.FreeText
   ) {
     return numericValue;
   }

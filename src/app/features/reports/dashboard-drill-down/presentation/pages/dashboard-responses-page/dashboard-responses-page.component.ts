@@ -163,7 +163,18 @@ export class DashboardResponsesPageComponent {
         finalize(() => this.detailsLoading.set(false)),
       )
       .subscribe({
-        next: (details) => this.selectedDetails.set(details),
+        next: (details) => {
+          const merged: DashboardResponseDetails = {
+            ...details,
+            templateNameEn: details.templateNameEn || item.templateNameEn || '',
+            templateNameAr: details.templateNameAr || item.templateNameAr || null,
+            branchNameEn: details.branchNameEn || item.branchNameEn || '',
+            branchNameAr: details.branchNameAr || item.branchNameAr || null,
+            operatorNameEn: details.operatorNameEn || item.operatorNameEn || null,
+            operatorNameAr: details.operatorNameAr || item.operatorNameAr || null,
+          };
+          this.selectedDetails.set(merged);
+        },
         error: (error: { status?: number }) =>
           this.detailsErrorKey.set(
             error.status === 403
@@ -188,6 +199,50 @@ export class DashboardResponsesPageComponent {
     return this.i18n.language() === 'ar' ? ar || en || '—' : en || ar || '—';
   }
 
+  templateDisplayName(details: DashboardResponseDetails): string {
+    const val = this.localized(details.templateNameEn, details.templateNameAr);
+    if (val !== '—') return val;
+
+    const matching = this.page()?.data.find((item) => item.responseId === details.responseId);
+    if (matching) {
+      const fromItem = this.localized(matching.templateNameEn, matching.templateNameAr);
+      if (fromItem !== '—') return fromItem;
+    }
+    return '—';
+  }
+
+  branchDisplayName(details: DashboardResponseDetails): string {
+    const val = this.localized(details.branchNameEn, details.branchNameAr);
+    if (val !== '—') return val;
+
+    const matching = this.page()?.data.find((item) => item.responseId === details.responseId);
+    if (matching) {
+      const fromItem = this.localized(matching.branchNameEn, matching.branchNameAr);
+      if (fromItem !== '—') return fromItem;
+    }
+    return '—';
+  }
+
+  operatorDisplayName(details: DashboardResponseDetails): string {
+    const val = this.localized(details.operatorNameEn, details.operatorNameAr);
+    if (val !== '—') return val;
+
+    const matching = this.page()?.data.find((item) => item.responseId === details.responseId);
+    if (matching) {
+      const fromItem = this.localized(matching.operatorNameEn, matching.operatorNameAr);
+      if (fromItem !== '—') return fromItem;
+      if (matching.source === 'Anonymous') {
+        return this.i18n.language() === 'ar' ? 'استبيان عام (بدون مشغل)' : 'Public Survey (No Operator)';
+      }
+    }
+
+    if (this.currentPath().includes('anonymous')) {
+      return this.i18n.language() === 'ar' ? 'استبيان عام (بدون مشغل)' : 'Public Survey (No Operator)';
+    }
+
+    return '—';
+  }
+
   score(item: DashboardResponseListItem): string {
     return item.isScored && item.scorePercentage !== null
       ? `${item.scorePercentage.toFixed(1)}%`
@@ -207,7 +262,7 @@ export class DashboardResponsesPageComponent {
       .slice(0, 3)
       .map(
         (input) =>
-          `${this.localized(input.labelEn || input.name, input.labelAr)}: ${input.value || '—'}`,
+          `${this.localized(input.labelEnSnapshot, input.labelArSnapshot)}: ${input.value || '—'}`,
       )
       .join(' · ');
   }
@@ -304,7 +359,26 @@ export class DashboardResponsesPageComponent {
         finalize(() => this.detailsLoading.set(false)),
       )
       .subscribe({
-        next: (details) => this.selectedDetails.set(details),
+        next: (details) => {
+          const params = this.route.snapshot.queryParamMap;
+          const fallbackTemplateEn = params.get('fallbackTemplateEn');
+          const fallbackTemplateAr = params.get('fallbackTemplateAr');
+          const fallbackBranchEn = params.get('fallbackBranchEn');
+          const fallbackBranchAr = params.get('fallbackBranchAr');
+          const fallbackOperatorEn = params.get('fallbackOperatorEn');
+          const fallbackOperatorAr = params.get('fallbackOperatorAr');
+
+          const merged: DashboardResponseDetails = {
+            ...details,
+            templateNameEn: details.templateNameEn || fallbackTemplateEn || '',
+            templateNameAr: details.templateNameAr || fallbackTemplateAr || null,
+            branchNameEn: details.branchNameEn || fallbackBranchEn || '',
+            branchNameAr: details.branchNameAr || fallbackBranchAr || null,
+            operatorNameEn: details.operatorNameEn || fallbackOperatorEn || null,
+            operatorNameAr: details.operatorNameAr || fallbackOperatorAr || null,
+          };
+          this.selectedDetails.set(merged);
+        },
         error: (error: { status?: number }) =>
           this.detailsErrorKey.set(
             error.status === 403

@@ -88,7 +88,9 @@ export class SystemResponseDetailsModalComponent {
     }
     if (answer.questionType === 'StarRating') return `${answer.starRatingValue ?? '-'} / 5`;
     if (answer.questionType === 'Smiles') return `${answer.smileValue ?? '-'} / 5`;
-    if (answer.questionType === 'Complain') return answer.textAnswer || answer.displayValue || '-';
+    if (answer.questionType === 'Complain' || answer.questionType === 'FreeText') {
+      return answer.textAnswer || answer.displayValue || '-';
+    }
     if (answer.questionType === 'Image') {
       return (
         answer.imageFileName ||
@@ -113,7 +115,7 @@ export class SystemResponseDetailsModalComponent {
     if (answer.questionType === 'Smiles') {
       return this.i18n.translate('systemResponseDetails.smileValue');
     }
-    if (answer.questionType === 'Complain') {
+    if (answer.questionType === 'Complain' || answer.questionType === 'FreeText') {
       return this.i18n.translate('systemResponseDetails.textAnswer');
     }
     if (answer.questionType === 'Image') {
@@ -129,6 +131,7 @@ export class SystemResponseDetailsModalComponent {
       return this.i18n.translate('questions.typeStarRating');
     if (answer.questionType === 'Smiles') return this.i18n.translate('questions.typeSmiles');
     if (answer.questionType === 'Complain') return this.i18n.translate('questions.typeComplain');
+    if (answer.questionType === 'FreeText') return this.i18n.translate('questions.typeFreeText');
     if (answer.questionType === 'Voice') return this.i18n.translate('questions.typeVoice');
     if (answer.questionType === 'Image') return this.i18n.translate('questions.typeImage');
     return answer.questionTypeName || answer.questionType;

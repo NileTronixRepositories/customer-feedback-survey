@@ -309,9 +309,9 @@
                 }}</span>
                 <h4
                   class="text-sm font-black text-slate-900 truncate"
-                  [title]="localized(details.templateNameEn, details.templateNameAr)"
+                  [title]="templateDisplayName(details)"
                 >
-                  {{ localized(details.templateNameEn, details.templateNameAr) }}
+                  {{ templateDisplayName(details) }}
                 </h4>
               </div>
             </div>
@@ -358,7 +358,7 @@
                   'dashboardDrillDown.branch' | t
                 }}</span>
                 <span class="font-bold text-slate-800 text-xs block truncate">{{
-                  localized(details.branchNameEn, details.branchNameAr)
+                  branchDisplayName(details)
                 }}</span>
               </div>
             </div>
@@ -372,7 +372,7 @@
                   'dashboardDrillDown.operator' | t
                 }}</span>
                 <span class="font-bold text-slate-800 text-xs block truncate">{{
-                  localized(details.operatorNameEn, details.operatorNameAr)
+                  operatorDisplayName(details)
                 }}</span>
               </div>
             </div>

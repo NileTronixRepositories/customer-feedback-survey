@@ -270,10 +270,11 @@ export class AnonymousTemplatesService {
     if (query.maxScorePercentage !== null) {
       params = params.set('maxScorePercentage', query.maxScorePercentage);
     }
-    if (query.satisfactionCategory) params = params.set('satisfactionCategory', query.satisfactionCategory);
+    if (query.satisfactionCategory)
+      params = params.set('satisfactionCategory', query.satisfactionCategory);
     if (query.isScored !== undefined) params = params.set('isScored', query.isScored);
     if (query.questionId) params = params.set('questionId', query.questionId);
-    if (query.customInputName) params = params.set('customInputName', query.customInputName);
+    if (query.customInputId) params = params.set('customInputId', query.customInputId);
     if (query.customInputType) params = params.set('customInputType', query.customInputType);
     if (query.customInputValue) params = params.set('customInputValue', query.customInputValue);
     if (query.searchText) params = params.set('searchText', query.searchText);
@@ -315,10 +316,11 @@ export class AnonymousTemplatesService {
     if (query.hasVoice !== undefined) {
       params = params.set('hasVoice', query.hasVoice);
     }
-    if (query.satisfactionCategory) params = params.set('satisfactionCategory', query.satisfactionCategory);
+    if (query.satisfactionCategory)
+      params = params.set('satisfactionCategory', query.satisfactionCategory);
     if (query.isScored !== undefined) params = params.set('isScored', query.isScored);
     if (query.questionId) params = params.set('questionId', query.questionId);
-    if (query.customInputName) params = params.set('customInputName', query.customInputName);
+    if (query.customInputId) params = params.set('customInputId', query.customInputId);
     if (query.customInputType) params = params.set('customInputType', query.customInputType);
     if (query.customInputValue) params = params.set('customInputValue', query.customInputValue);
 
@@ -348,7 +350,9 @@ export class AnonymousTemplatesService {
       .pipe(map((response) => this.toResponseDetails(response, anonymousTemplateId)));
   }
 
-  dashboard(query: AnonymousTemplateDashboardQuery): Observable<AnonymousTemplateDashboardResponse> {
+  dashboard(
+    query: AnonymousTemplateDashboardQuery,
+  ): Observable<AnonymousTemplateDashboardResponse> {
     let params = new HttpParams();
 
     if (query.from) {
@@ -406,7 +410,9 @@ export class AnonymousTemplatesService {
     };
   }
 
-  private toDashboard(response: AnonymousTemplateDashboardApiResponse): AnonymousTemplateDashboardResponse {
+  private toDashboard(
+    response: AnonymousTemplateDashboardApiResponse,
+  ): AnonymousTemplateDashboardResponse {
     const summary = response.summary ?? {};
 
     return {
@@ -471,7 +477,9 @@ export class AnonymousTemplatesService {
         detailsNavigation: this.toDashboardNavigation(item.detailsNavigation),
       })),
       customInputSegments: (response.customInputSegments ?? []).map((segment) => ({
-        customInputName: segment.customInputName ?? '',
+        customInputId: this.readRecordId(segment.customInputId),
+        labelEn: segment.labelEn ?? null,
+        labelAr: segment.labelAr ?? null,
         type: segment.type ?? 0,
         typeName: segment.typeName ?? '',
         segments: (segment.segments ?? []).map((item) => ({
@@ -521,7 +529,9 @@ export class AnonymousTemplatesService {
       scorePercentage: item.scorePercentage ?? 0,
       complaintText: item.complaintText ?? null,
       customInputs: (item.customInputs ?? []).map((input) => ({
-        name: input.name ?? '',
+        customInputId: input.customInputId ?? '',
+        labelEnSnapshot: input.labelEnSnapshot ?? null,
+        labelArSnapshot: input.labelArSnapshot ?? null,
         value: input.value ?? '',
       })),
       detailsNavigation: this.toDashboardNavigation(item.detailsNavigation),
@@ -531,9 +541,7 @@ export class AnonymousTemplatesService {
   private toDashboardNavigation(
     navigation: DashboardDetailsNavigation | null | undefined,
   ): DashboardDetailsNavigation | null {
-    return navigation?.method === 'GET' && navigation.path?.startsWith('/api/')
-      ? navigation
-      : null;
+    return navigation?.method === 'GET' && navigation.path?.startsWith('/api/') ? navigation : null;
   }
 
   private toSatisfactionCategory(value: string): SatisfactionCategory {
@@ -626,9 +634,9 @@ export class AnonymousTemplatesService {
     response: BranchAnonymousResponseCustomInputPreviewApiResponse,
   ): BranchAnonymousResponseCustomInputPreview {
     return {
-      name: response.name ?? '',
-      labelEn: response.labelEn ?? null,
-      labelAr: response.labelAr ?? null,
+      customInputId: this.readRecordId(response.customInputId),
+      labelEnSnapshot: response.labelEnSnapshot ?? null,
+      labelArSnapshot: response.labelArSnapshot ?? null,
       value: response.value === null || response.value === undefined ? '' : String(response.value),
     };
   }
@@ -677,19 +685,16 @@ export class AnonymousTemplatesService {
     const stringValue =
       response.stringValue ??
       (typeof rawValue === 'string' || typeof rawValue === 'number' ? String(rawValue) : null);
-    const integerValue =
-      response.integerValue ?? (typeof rawValue === 'number' ? rawValue : null);
-    const name = response.nameSnapshot ?? response.name ?? '';
+    const integerValue = response.integerValue ?? (typeof rawValue === 'number' ? rawValue : null);
     const displayValue =
-      stringValue ?? (integerValue === null || integerValue === undefined ? '' : String(integerValue));
+      stringValue ??
+      (integerValue === null || integerValue === undefined ? '' : String(integerValue));
 
     return {
       customInputValueId: this.readRecordId(response.customInputValueId),
       anonymousTemplateCustomInputId: this.readRecordId(response.anonymousTemplateCustomInputId),
-      name,
-      labelEn: response.labelEn ?? null,
-      labelAr: response.labelAr ?? null,
-      nameSnapshot: name,
+      labelEnSnapshot: response.labelEnSnapshot ?? null,
+      labelArSnapshot: response.labelArSnapshot ?? null,
       type,
       typeName: response.typeName ?? (type === 2 ? 'Integer' : 'String'),
       stringValue,
@@ -846,7 +851,6 @@ export class AnonymousTemplatesService {
 
     return {
       customInputId: this.readRecordId(response.customInputId),
-      name: response.name ?? '',
       labelEn: response.labelEn ?? null,
       labelAr: response.labelAr ?? null,
       type,

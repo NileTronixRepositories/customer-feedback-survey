@@ -5,6 +5,7 @@ export type BranchSurveyResponseQuestionType =
   | 'StarRating'
   | 'Smiles'
   | 'Complain'
+  | 'FreeText'
   | 'Voice'
   | 'Image';
 
@@ -29,7 +30,7 @@ export interface BranchSurveyResponsesQuery {
   satisfactionCategory?: SatisfactionCategory;
   isScored?: boolean;
   questionId?: string;
-  customInputName?: string;
+  customInputId?: string;
   customInputType?: string;
   customInputValue?: string;
   orderSort?: 'Newest' | 'Oldest';
@@ -65,7 +66,9 @@ export interface BranchSurveyResponseListItem {
 }
 
 export interface BranchSurveyResponseCustomInputPreview {
-  name: string;
+  customInputId: string;
+  labelEnSnapshot: string | null;
+  labelArSnapshot: string | null;
   value: string;
 }
 
@@ -140,7 +143,9 @@ export interface BranchDashboardQuestionInsight {
 }
 
 export interface BranchDashboardCustomInputSegment {
-  customInputName: string;
+  customInputId: string;
+  labelEn: string | null;
+  labelAr: string | null;
   type: 'String' | 'Integer' | string;
   typeName: string;
   segments: readonly BranchDashboardCustomInputSegmentValue[];
@@ -166,7 +171,9 @@ export interface BranchDashboardCriticalResponse {
 }
 
 export interface BranchDashboardCriticalResponseCustomInput {
-  name: string;
+  customInputId: string;
+  labelEnSnapshot: string | null;
+  labelArSnapshot: string | null;
   value: string;
 }
 
@@ -195,7 +202,8 @@ export interface BranchSurveyResponseScore {
 
 export interface BranchSurveyResponseCustomInput {
   customInputId: string;
-  name: string;
+  labelEnSnapshot: string | null;
+  labelArSnapshot: string | null;
   type: 'String' | 'Integer' | string;
   typeName: string;
   stringValue: string | null;

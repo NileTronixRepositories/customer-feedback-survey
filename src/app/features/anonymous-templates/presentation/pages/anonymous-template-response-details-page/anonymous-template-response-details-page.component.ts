@@ -99,10 +99,10 @@ export class AnonymousTemplateResponseDetailsPageComponent implements OnInit {
 
   customInputLabel(value: AnonymousTemplateResponseCustomInputValue): string {
     if (this.i18n.language() === 'ar') {
-      return value.labelAr || value.labelEn || value.nameSnapshot || value.name || '-';
+      return value.labelArSnapshot || value.labelEnSnapshot || '-';
     }
 
-    return value.labelEn || value.labelAr || value.nameSnapshot || value.name || '-';
+    return value.labelEnSnapshot || value.labelArSnapshot || '-';
   }
 
   responseTitle(response: AnonymousTemplateResponseDetails): string {
@@ -141,7 +141,10 @@ export class AnonymousTemplateResponseDetailsPageComponent implements OnInit {
     if (answerType === QUESTION_ANSWER_TYPE.Smiles) {
       return answer.smileValue === null ? '-' : String(answer.smileValue);
     }
-    if (answerType === QUESTION_ANSWER_TYPE.Complain) {
+    if (
+      answerType === QUESTION_ANSWER_TYPE.Complain ||
+      answerType === QUESTION_ANSWER_TYPE.FreeText
+    ) {
       return answer.textAnswer?.trim() || '-';
     }
     if (answerType === QUESTION_ANSWER_TYPE.Image) {

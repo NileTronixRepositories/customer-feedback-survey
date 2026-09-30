@@ -140,7 +140,6 @@ export class OperatorTemplatesService {
 
     return {
       customInputId: this.readRecordId(response.customInputId),
-      name: response.name ?? '',
       labelEn: response.labelEn ?? null,
       labelAr: response.labelAr ?? null,
       type,
@@ -277,7 +276,8 @@ export class OperatorTemplatesService {
 
     return {
       customInputId: this.readRecordId(response.customInputId),
-      name: response.name ?? '',
+      labelEnSnapshot: response.labelEnSnapshot ?? null,
+      labelArSnapshot: response.labelArSnapshot ?? null,
       type,
       typeName: response.typeName ?? (type === 2 ? 'Integer' : 'String'),
       stringValue: response.stringValue ?? null,

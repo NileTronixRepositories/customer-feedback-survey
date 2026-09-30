@@ -38,7 +38,7 @@ export const errorToastInterceptor: HttpInterceptorFn = (request, next) => {
     }),
     catchError((error: unknown) => {
       if (error instanceof HttpErrorResponse && !request.context.get(SKIP_ERROR_TOAST)) {
-        return resolveProblemDetails(error, i18n).pipe(
+        return resolveProblemDetails(error, i18n, request.url).pipe(
           mergeMap((problem) => {
             toastService.error(problem.title, problem.detail || problem.errors.join('\n'));
             return throwError(() => error);
@@ -59,32 +59,34 @@ function isAuthRequest(url: string): boolean {
   return url.includes('/api/auth/');
 }
 
-function resolveProblemDetails(error: HttpErrorResponse, i18n: I18nService) {
+function resolveProblemDetails(error: HttpErrorResponse, i18n: I18nService, url?: string) {
   const body = error.error;
   if (body instanceof Blob) {
-    return from(readBlobProblemDetails(error, body, i18n));
+    return from(readBlobProblemDetails(error, body, i18n, url));
   }
 
-  return of(readProblemDetails(error, body, i18n));
+  return of(readProblemDetails(error, body, i18n, url));
 }
 
 async function readBlobProblemDetails(
   error: HttpErrorResponse,
   blob: Blob,
   i18n: I18nService,
+  url?: string,
 ): Promise<ApiProblemDetails> {
   const text = (await blob.text()).trim();
   if (!text) {
-    return readProblemDetails(error, {}, i18n);
+    return readProblemDetails(error, {}, i18n, url);
   }
 
-  return readProblemDetails(error, parseProblemText(text), i18n);
+  return readProblemDetails(error, parseProblemText(text), i18n, url);
 }
 
 function readProblemDetails(
   error: HttpErrorResponse,
   body: unknown,
   i18n: I18nService,
+  url?: string,
 ): ApiProblemDetails {
   const problem = isRecord(body) ? body : {};
   const errors = readErrorMessages(problem['errors']);
@@ -100,7 +102,7 @@ function readProblemDetails(
     detail:
       errors.length > 0
         ? errors.slice(0, 3).join('\n')
-        : safeDetail || statusDescription(error.status, i18n),
+        : safeDetail || statusDescription(error.status, i18n, url),
     errors,
   };
 }
@@ -149,11 +151,14 @@ function statusTitle(status: number, i18n: I18nService): string {
   return i18n.translate('toast.requestFailedTitle');
 }
 
-function statusDescription(status: number, i18n: I18nService): string {
+function statusDescription(status: number, i18n: I18nService, url?: string): string {
   if (status === 0) {
     return i18n.translate('toast.networkErrorDescription');
   }
   if (status === 401) {
+    if (url && isAuthRequest(url)) {
+      return i18n.translate('auth.invalidCredentials');
+    }
     return i18n.translate('toast.unauthorizedDescription');
   }
   if (status === 403) {

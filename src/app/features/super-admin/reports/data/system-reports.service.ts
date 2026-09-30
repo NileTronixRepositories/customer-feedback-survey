@@ -83,7 +83,7 @@ export class SystemReportsService {
     if (query.satisfactionCategory) params = params.set('satisfactionCategory', query.satisfactionCategory);
     if (query.isScored !== undefined) params = params.set('isScored', String(query.isScored));
     if (query.questionId) params = params.set('questionId', query.questionId);
-    if (query.customInputName) params = params.set('customInputName', query.customInputName);
+    if (query.customInputId) params = params.set('customInputId', query.customInputId);
     if (query.customInputType) params = params.set('customInputType', query.customInputType);
     if (query.customInputValue) params = params.set('customInputValue', query.customInputValue);
     if (query.orderSort) params = params.set('orderSort', query.orderSort);
@@ -317,7 +317,8 @@ export class SystemReportsService {
   private toResponseCustomInput(item: ApiRecord): SystemResponseCustomInput {
     return {
       customInputId: this.readString(item, 'customInputId'),
-      name: this.readString(item, 'name'),
+      labelEnSnapshot: this.readNullableString(item, 'labelEnSnapshot'),
+      labelArSnapshot: this.readNullableString(item, 'labelArSnapshot'),
       type: this.readString(item, 'type'),
       typeName: this.readString(item, 'typeName'),
       stringValue: this.readNullableString(item, 'stringValue'),
@@ -363,7 +364,9 @@ export class SystemReportsService {
 
   private toCustomInputPreview(item: ApiRecord): SystemResponseCustomInputPreview {
     return {
-      name: this.readString(item, 'name'),
+      customInputId: this.readString(item, 'customInputId'),
+      labelEnSnapshot: this.readNullableString(item, 'labelEnSnapshot'),
+      labelArSnapshot: this.readNullableString(item, 'labelArSnapshot'),
       value: this.readString(item, 'value'),
     };
   }
@@ -394,7 +397,7 @@ export class SystemReportsService {
   }
 
   private toQuestionType(value: string): SystemResponseQuestionType {
-    return value === 'SingleChoice' || value === 'StarRating' || value === 'Smiles' || value === 'Complain' || value === 'Voice' || value === 'Image'
+    return value === 'SingleChoice' || value === 'StarRating' || value === 'Smiles' || value === 'Complain' || value === 'FreeText' || value === 'Voice' || value === 'Image'
       ? value
       : 'SingleChoice';
   }

@@ -85,7 +85,7 @@ export class AnonymousTemplateDashboardPageComponent implements OnInit, OnDestro
     }
 
     return (
-      segments.find((segment) => segment.customInputName === this.selectedSegmentName()) ??
+      segments.find((segment) => segment.customInputId === this.selectedSegmentName()) ??
       segments[0]
     );
   });
@@ -116,8 +116,8 @@ export class AnonymousTemplateDashboardPageComponent implements OnInit, OnDestro
     effect(() => {
       const segments = this.store.dashboard()?.customInputSegments ?? [];
       const selectedName = this.selectedSegmentName();
-      if (segments.length > 0 && !segments.some((segment) => segment.customInputName === selectedName)) {
-        this.selectedSegmentName.set(segments[0].customInputName);
+      if (segments.length > 0 && !segments.some((segment) => segment.customInputId === selectedName)) {
+        this.selectedSegmentName.set(segments[0].customInputId);
       }
     });
   }
@@ -220,7 +220,13 @@ export class AnonymousTemplateDashboardPageComponent implements OnInit, OnDestro
       return this.i18n.translate('anonymousDashboard.noCustomInputs');
     }
 
-    return response.customInputs.map((input) => `${input.name}: ${input.value || '-'}`).join(' | ');
+    return response.customInputs
+      .map((input) => `${this.localized(input.labelEnSnapshot, input.labelArSnapshot)}: ${input.value || '-'}`)
+      .join(' | ');
+  }
+
+  segmentLabel(segment: AnonymousTemplateDashboardCustomInputSegment): string {
+    return this.localized(segment.labelEn, segment.labelAr);
   }
 
   private localized(
