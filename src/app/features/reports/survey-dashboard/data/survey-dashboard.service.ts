@@ -18,6 +18,11 @@ import {
   triggerTypeName,
 } from '../../../../shared/models/question-condition.model';
 import {
+  BestRatedQuestion,
+  HistoricalAvailability,
+} from '../../../../shared/models/historical-survey.model';
+import { parseScoreCalculationMode } from '../../../../shared/models/score-calculation-mode.model';
+import {
   AnonymousTemplateResponseAnswer,
   AnonymousTemplateResponseCustomInputValue,
   AnonymousTemplateResponseDetails,
@@ -81,7 +86,9 @@ export class SurveyDashboardService {
       .pipe(map((response) => this.toDashboard(response)));
   }
 
-  getQuestionGroups(query: SurveyDashboardQuery): Observable<readonly SurveyDashboardQuestionGroup[]> {
+  getQuestionGroups(
+    query: SurveyDashboardQuery,
+  ): Observable<readonly SurveyDashboardQuestionGroup[]> {
     return this.http
       .get<unknown>(`${this.dashboardUrl}/question-groups`, {
         params: this.toAnalyticsParams(query, true),
@@ -97,6 +104,10 @@ export class SurveyDashboardService {
     let params = this.toAnalyticsParams(query, false)
       .set('pageNumber', String(query.pageNumber))
       .set('pageSize', String(query.pageSize));
+
+    if (query.searchText) {
+      params = params.set('searchText', query.searchText);
+    }
 
     return this.http
       .get<ApiRecord>(`${this.dashboardUrl}/complaints`, { params })
@@ -130,31 +141,33 @@ export class SurveyDashboardService {
       ? `${this.anonymousTemplatesUrl}/${templateId}`
       : `${this.templatesUrl}/${templateId}`;
 
-    return this.http.get<ApiRecord>(detailsUrl).pipe(
-      map((response) =>
-        isAnonymous
-          ? this.toAnonymousTemplateDetails(response, templateId)
-          : this.toInternalTemplateDetails(response, templateId),
-      ),
-    );
+    return this.http
+      .get<ApiRecord>(detailsUrl)
+      .pipe(
+        map((response) =>
+          isAnonymous
+            ? this.toAnonymousTemplateDetails(response, templateId)
+            : this.toInternalTemplateDetails(response, templateId),
+        ),
+      );
   }
 
   getBranchOptions(): Observable<readonly SurveyDashboardBranchOption[]> {
     return this.http
       .get<unknown>(`${environment.apiBaseUrl}/api/branches/selection`)
-      .pipe(map((response) => this.readPageArray(response).map((item) => this.toBranchOption(item))));
+      .pipe(
+        map((response) => this.readPageArray(response).map((item) => this.toBranchOption(item))),
+      );
   }
 
   getInternalTemplateOptions(): Observable<readonly SurveyDashboardTemplateOption[]> {
-    return this.http
-      .get<unknown>(`${this.templatesUrl}/selection`)
-      .pipe(
-        map((response) =>
-          this.readPageArray(response)
-            .map((item) => this.toTemplateOption(item))
-            .filter((item) => item.id.length > 0),
-        ),
-      );
+    return this.http.get<unknown>(`${this.templatesUrl}/selection`).pipe(
+      map((response) =>
+        this.readPageArray(response)
+          .map((item) => this.toTemplateOption(item))
+          .filter((item) => item.id.length > 0),
+      ),
+    );
   }
 
   getDashboardTemplateOptions(
@@ -176,15 +189,13 @@ export class SurveyDashboardService {
   getAnonymousTemplateOptions(): Observable<readonly SurveyDashboardTemplateOption[]> {
     const params = new HttpParams().set('pageNumber', '1').set('pageSize', '100');
 
-    return this.http
-      .get<unknown>(this.anonymousTemplatesUrl, { params })
-      .pipe(
-        map((response) =>
-          this.readPageArray(response)
-            .map((item) => this.toAnonymousTemplateOption(item))
-            .filter((item) => item.id.length > 0),
-        ),
-      );
+    return this.http.get<unknown>(this.anonymousTemplatesUrl, { params }).pipe(
+      map((response) =>
+        this.readPageArray(response)
+          .map((item) => this.toAnonymousTemplateOption(item))
+          .filter((item) => item.id.length > 0),
+      ),
+    );
   }
 
   private toDashboardParams(query: SurveyDashboardQuery): HttpParams {
@@ -199,7 +210,7 @@ export class SurveyDashboardService {
     if (query.to) params = params.set('to', query.to);
     if (query.groupBy) params = params.set('groupBy', query.groupBy);
     if (query.scoreCalculationMode) {
-      params = params.set('scoreCalculationMode', query.scoreCalculationMode);
+      params = params.set('scoreCalculationMode', String(query.scoreCalculationMode));
     }
     if (query.topQuestionsCount !== undefined) {
       params = params.set('topQuestionsCount', String(query.topQuestionsCount));
@@ -225,7 +236,7 @@ export class SurveyDashboardService {
     if (query.from) params = params.set('from', query.from);
     if (query.to) params = params.set('to', query.to);
     if (includeScoreMode && query.scoreCalculationMode) {
-      params = params.set('scoreCalculationMode', query.scoreCalculationMode);
+      params = params.set('scoreCalculationMode', String(query.scoreCalculationMode));
     }
     return params;
   }
@@ -254,6 +265,12 @@ export class SurveyDashboardService {
       scoredItemsCount: this.readNumber(item, 'scoredItemsCount'),
       averageScoreValue: this.readNullableNumber(item, 'averageScoreValue'),
       averageScorePercentage: this.readNullableNumber(item, 'averageScorePercentage'),
+      requestedModeAvailable:
+        item['requestedModeAvailable'] !== undefined
+          ? this.readBoolean(item, 'requestedModeAvailable')
+          : true,
+      storedBaselineResponsesCount: this.readNumber(item, 'storedBaselineResponsesCount'),
+      hasCompleteQuestionScoreData: this.readBoolean(item, 'hasCompleteQuestionScoreData'),
     };
   }
 
@@ -261,24 +278,35 @@ export class SurveyDashboardService {
     response: ApiRecord,
     query: SurveyDashboardComplaintsQuery,
   ): SurveyDashboardComplaintsPage {
+    const rawPage = this.readArray(response['page']);
+    const pageItems = rawPage.map((item) => this.toComplaint(item));
+
     const suppliedGroups = this.readArray(response['templateGroups']);
-    const templateGroups = suppliedGroups.length > 0
-      ? suppliedGroups.map((group) => this.toComplaintGroup(group))
-      : this.groupComplaints(
-          this.readPageArray(response).map((item) => this.toComplaint(item)),
-        );
-    const totalItems = this.readNumber(response, 'totalItems') ||
+    const templateGroups =
+      suppliedGroups.length > 0
+        ? suppliedGroups.map((group) => this.toComplaintGroup(group))
+        : this.groupComplaints(
+            pageItems.length > 0
+              ? pageItems
+              : this.readPageArray(response).map((item) => this.toComplaint(item)),
+          );
+
+    const totalItems =
+      this.readNumber(response, 'totalItems') ||
+      pageItems.length ||
       templateGroups.reduce((total, group) => total + group.complaints.length, 0);
     const pageSize = this.readNumber(response, 'pageSize') || query.pageSize;
 
     return {
       totalComplaints: this.readNumber(response, 'totalComplaints') || totalItems,
       responsesWithComplaints: this.readNumber(response, 'responsesWithComplaints'),
+      totalResponses: this.readNullableNumber(response, 'totalResponses') ?? undefined,
       complaintRate: this.readNumber(response, 'complaintRate'),
       currentPage: this.readNumber(response, 'currentPage') || query.pageNumber,
       pageSize,
       totalItems,
       totalPages: this.readNumber(response, 'totalPages') || Math.ceil(totalItems / pageSize),
+      page: pageItems.length > 0 ? pageItems : undefined,
       templateGroups,
     };
   }
@@ -363,6 +391,9 @@ export class SurveyDashboardService {
       templatePerformance: this.readArray(response['templatePerformance']).map((item) =>
         this.toTemplatePerformance(item),
       ),
+      bestRatedQuestions: this.readArray(response['bestRatedQuestions']).map((item) =>
+        this.toBestRatedQuestion(item),
+      ),
       lowestRatedQuestions: this.readArray(response['lowestRatedQuestions']).map((item) =>
         this.toLowestRatedQuestion(item),
       ),
@@ -372,6 +403,26 @@ export class SurveyDashboardService {
       criticalResponses: this.readArray(response['criticalResponses']).map((item) =>
         this.toCriticalResponse(item),
       ),
+      classificationPolicy: this.readNullableString(response, 'classificationPolicy'),
+      hasMixedClassificationCriteria: this.readBoolean(response, 'hasMixedClassificationCriteria'),
+      storedBaselineResponsesCount: this.readNumber(response, 'storedBaselineResponsesCount'),
+      hasCompleteQuestionScoreData: this.readBoolean(response, 'hasCompleteQuestionScoreData'),
+      requestedModeAvailable:
+        response['requestedModeAvailable'] !== undefined
+          ? this.readBoolean(response, 'requestedModeAvailable')
+          : true,
+      availability: this.toAvailability(this.readRecord(response['availability'])),
+    };
+  }
+
+  private toAvailability(item: ApiRecord | null): HistoricalAvailability | undefined {
+    if (!item) return undefined;
+    return {
+      availableTemplatesDuringPeriod: this.readNumber(item, 'availableTemplatesDuringPeriod'),
+      templatesWithResponsesCount: this.readNumber(item, 'templatesWithResponsesCount'),
+      currentlyAvailableTemplatesCount: this.readNumber(item, 'currentlyAvailableTemplatesCount'),
+      isHistoryComplete: this.readBoolean(item, 'isHistoryComplete'),
+      coverageStartsOnUtc: this.readNullableString(item, 'coverageStartsOnUtc'),
     };
   }
 
@@ -404,10 +455,7 @@ export class SurveyDashboardService {
       from: this.readNullableString(filters, 'from'),
       to: this.readNullableString(filters, 'to'),
       groupBy: this.toGroupBy(this.readString(filters, 'groupBy')),
-      scoreCalculationMode:
-        this.readString(filters, 'scoreCalculationMode') === 'LowestConditionLevel'
-          ? 'LowestConditionLevel'
-          : 'RootQuestions',
+      scoreCalculationMode: parseScoreCalculationMode(filters?.['scoreCalculationMode']),
       topQuestionsCount: this.readNumber(filters, 'topQuestionsCount') || 5,
       criticalResponsesCount: this.readNumber(filters, 'criticalResponsesCount') || 10,
       criticalScoreThreshold: this.readNumber(filters, 'criticalScoreThreshold') || 40,
@@ -415,15 +463,25 @@ export class SurveyDashboardService {
   }
 
   private toSummary(summary: ApiRecord | null): SurveyDashboardSummary {
+    const scoredResponses = this.readNumber(summary, 'scoredResponses');
+    const hasScoreData =
+      summary?.['hasScoreData'] !== undefined
+        ? this.readBoolean(summary, 'hasScoreData')
+        : scoredResponses > 0;
+
     return {
       totalResponses: this.readNumber(summary, 'totalResponses'),
-      scoredResponses: this.readNumber(summary, 'scoredResponses'),
+      scoredResponses,
       unscoredResponses: this.readNumber(summary, 'unscoredResponses'),
       internalResponses: this.readNumber(summary, 'internalResponses'),
       anonymousResponses: this.readNumber(summary, 'anonymousResponses'),
       internalScoredResponses: this.readNumber(summary, 'internalScoredResponses'),
       anonymousScoredResponses: this.readNumber(summary, 'anonymousScoredResponses'),
       averageScorePercentage: this.readNullableNumber(summary, 'averageScorePercentage'),
+      hasScoreData,
+      satisfactionPercentage:
+        this.readNullableNumber(summary, 'satisfactionPercentage') ??
+        (hasScoreData ? this.readNullableNumber(summary, 'averageScorePercentage') : null),
       satisfiedResponses: this.readNumber(summary, 'satisfiedResponses'),
       neutralResponses: this.readNumber(summary, 'neutralResponses'),
       unhappyResponses: this.readNumber(summary, 'unhappyResponses'),
@@ -437,6 +495,29 @@ export class SurveyDashboardService {
     };
   }
 
+  private toBestRatedQuestion(item: ApiRecord): BestRatedQuestion {
+    return {
+      templateId: this.readRecordId(item['templateId']),
+      templateNameEn: this.readNullableString(item, 'templateNameEn') ?? undefined,
+      templateNameAr: this.readNullableString(item, 'templateNameAr'),
+      branchId: this.readNullableString(item, 'branchId') ?? undefined,
+      branchNameEn: this.readNullableString(item, 'branchNameEn') ?? undefined,
+      branchNameAr: this.readNullableString(item, 'branchNameAr'),
+      questionId: this.readRecordId(item['questionId']),
+      anonymousTemplateQuestionId:
+        this.readNullableRecordId(item['anonymousTemplateQuestionId']) ?? undefined,
+      questionTextEn: this.readString(item, 'questionTextEn'),
+      questionTextAr: this.readNullableString(item, 'questionTextAr'),
+      questionType: item['questionType'] as string | number,
+      questionTypeName: this.readString(item, 'questionTypeName'),
+      answersCount: this.readNumber(item, 'answersCount'),
+      averageValue: this.readNullableNumber(item, 'averageValue'),
+      averageScorePercentage: this.readNullableNumber(item, 'averageScorePercentage'),
+      detailsNavigation: this.toNavigation(this.readRecord(item['detailsNavigation'])),
+    };
+  }
+
+
   private toSourceBreakdown(breakdown: ApiRecord | null): SurveyDashboardSourceBreakdown {
     return {
       internal: this.toSourceMetrics(this.readRecord(breakdown?.['internal'])),
@@ -445,10 +526,20 @@ export class SurveyDashboardService {
   }
 
   private toSourceMetrics(metrics: ApiRecord | null): SurveyDashboardSourceMetrics {
+    const scoredCount = this.readNumber(metrics, 'scoredResponsesCount');
+    const hasScoreData =
+      metrics?.['hasScoreData'] !== undefined
+        ? this.readBoolean(metrics, 'hasScoreData')
+        : scoredCount > 0;
+
     return {
       responsesCount: this.readNumber(metrics, 'responsesCount'),
-      scoredResponsesCount: this.readNumber(metrics, 'scoredResponsesCount'),
+      scoredResponsesCount: scoredCount,
       averageScorePercentage: this.readNullableNumber(metrics, 'averageScorePercentage'),
+      hasScoreData,
+      satisfactionPercentage:
+        this.readNullableNumber(metrics, 'satisfactionPercentage') ??
+        (hasScoreData ? this.readNullableNumber(metrics, 'averageScorePercentage') : null),
       satisfiedResponses: this.readNumber(metrics, 'satisfiedResponses'),
       neutralResponses: this.readNumber(metrics, 'neutralResponses'),
       unhappyResponses: this.readNumber(metrics, 'unhappyResponses'),
@@ -459,14 +550,24 @@ export class SurveyDashboardService {
   }
 
   private toBranchSummary(item: ApiRecord): SurveyDashboardBranchSummary {
+    const totalResponses = this.readNumber(item, 'totalResponses');
+    const hasScoreData =
+      item['hasScoreData'] !== undefined
+        ? this.readBoolean(item, 'hasScoreData')
+        : totalResponses > 0;
+
     return {
       branchId: this.readRecordId(item['branchId']),
       branchNameEn: this.readString(item, 'branchNameEn'),
       branchNameAr: this.readNullableString(item, 'branchNameAr'),
-      totalResponses: this.readNumber(item, 'totalResponses'),
+      totalResponses,
       internalResponses: this.readNumber(item, 'internalResponses'),
       anonymousResponses: this.readNumber(item, 'anonymousResponses'),
       averageScorePercentage: this.readNullableNumber(item, 'averageScorePercentage'),
+      hasScoreData,
+      satisfactionPercentage:
+        this.readNullableNumber(item, 'satisfactionPercentage') ??
+        (hasScoreData ? this.readNullableNumber(item, 'averageScorePercentage') : null),
       complaintsCount: this.readNumber(item, 'complaintsCount'),
       voiceAnswersCount: this.readNumber(item, 'voiceAnswersCount'),
       detailsNavigation: this.toNavigation(this.readRecord(item['detailsNavigation'])),
@@ -474,9 +575,15 @@ export class SurveyDashboardService {
   }
 
   private toTrendPoint(item: ApiRecord): SurveyDashboardTrendPoint {
+    const responsesCount = this.readNumber(item, 'responsesCount');
+    const hasScoreData =
+      item['hasScoreData'] !== undefined
+        ? this.readBoolean(item, 'hasScoreData')
+        : responsesCount > 0;
+
     return {
       period: this.readString(item, 'period'),
-      responsesCount: this.readNumber(item, 'responsesCount'),
+      responsesCount,
       internalResponses: this.readNumber(item, 'internalResponses'),
       anonymousResponses: this.readNumber(item, 'anonymousResponses'),
       averageScorePercentage: this.readNullableNumber(item, 'averageScorePercentage'),
@@ -488,18 +595,24 @@ export class SurveyDashboardService {
         item,
         'anonymousAverageScorePercentage',
       ),
+      hasScoreData,
+      satisfactionPercentage:
+        this.readNullableNumber(item, 'satisfactionPercentage') ??
+        (hasScoreData ? this.readNullableNumber(item, 'averageScorePercentage') : null),
       detailsNavigation: this.toNavigation(this.readRecord(item['detailsNavigation'])),
     };
   }
 
   private toCharts(charts: ApiRecord | null): DashboardCharts {
     return {
-      satisfactionDistribution: this.readArray(charts?.['satisfactionDistribution']).map((item) => ({
-        category: this.toSatisfactionCategory(this.readString(item, 'category')),
-        responsesCount: this.readNumber(item, 'responsesCount'),
-        percentage: this.readNumber(item, 'percentage'),
-        detailsNavigation: this.toNavigation(this.readRecord(item['detailsNavigation'])),
-      })),
+      satisfactionDistribution: this.readArray(charts?.['satisfactionDistribution']).map(
+        (item) => ({
+          category: this.toSatisfactionCategory(this.readString(item, 'category')),
+          responsesCount: this.readNumber(item, 'responsesCount'),
+          percentage: this.readNumber(item, 'percentage'),
+          detailsNavigation: this.toNavigation(this.readRecord(item['detailsNavigation'])),
+        }),
+      ),
     };
   }
 
@@ -516,6 +629,10 @@ export class SurveyDashboardService {
   }
 
   private toTemplatePerformance(item: ApiRecord): SurveyDashboardTemplatePerformance {
+    const scoredCount = this.readNumber(item, 'scoredResponsesCount');
+    const hasScoreData =
+      item['hasScoreData'] !== undefined ? this.readBoolean(item, 'hasScoreData') : scoredCount > 0;
+
     return {
       source: this.toSource(this.readString(item, 'source')),
       templateId: this.readRecordId(item['templateId']),
@@ -525,14 +642,19 @@ export class SurveyDashboardService {
       branchNameEn: this.readString(item, 'branchNameEn'),
       branchNameAr: this.readNullableString(item, 'branchNameAr'),
       responsesCount: this.readNumber(item, 'responsesCount'),
-      scoredResponsesCount: this.readNumber(item, 'scoredResponsesCount'),
+      scoredResponsesCount: scoredCount,
       averageScorePercentage: this.readNullableNumber(item, 'averageScorePercentage'),
+      hasScoreData,
+      satisfactionPercentage:
+        this.readNullableNumber(item, 'satisfactionPercentage') ??
+        (hasScoreData ? this.readNullableNumber(item, 'averageScorePercentage') : null),
       complaintsCount: this.readNumber(item, 'complaintsCount'),
       voiceAnswersCount: this.readNumber(item, 'voiceAnswersCount'),
       riskLevel: this.readString(item, 'riskLevel') || 'Healthy',
       detailsNavigation: this.toNavigation(this.readRecord(item['detailsNavigation'])),
     };
   }
+
 
   private toLowestRatedQuestion(item: ApiRecord): SurveyDashboardLowestRatedQuestion {
     return {
@@ -576,6 +698,8 @@ export class SurveyDashboardService {
       internalResponses: this.readNumber(item, 'internalResponses'),
       anonymousResponses: this.readNumber(item, 'anonymousResponses'),
       averageScorePercentage: this.readNullableNumber(item, 'averageScorePercentage'),
+      hasScoreData: this.readNumber(item, 'responsesCount') > 0,
+      satisfactionPercentage: this.readNullableNumber(item, 'averageScorePercentage'),
       detailsNavigation: this.toNavigation(this.readRecord(item['detailsNavigation'])),
     };
   }
@@ -771,7 +895,9 @@ export class SurveyDashboardService {
       imageFileUrl:
         this.readNullableString(item, 'imageFileUrl') ?? this.readNullableString(item, 'imageUrl'),
       displayValue: this.readString(item, 'displayValue'),
-      children: this.readAnswerChildren(item).map((answer) => this.toInternalResponseAnswer(answer)),
+      children: this.readAnswerChildren(item).map((answer) =>
+        this.toInternalResponseAnswer(answer),
+      ),
     };
   }
 
@@ -794,7 +920,9 @@ export class SurveyDashboardService {
       actualScore: this.readNullableNumber(response, 'actualScore'),
       maxScore: this.readNullableNumber(response, 'maxScore'),
       scorePercentage: this.readNullableNumber(response, 'scorePercentage'),
-      isScored: this.readBoolean(response, 'isScored') || this.readNullableNumber(response, 'scorePercentage') !== null,
+      isScored:
+        this.readBoolean(response, 'isScored') ||
+        this.readNullableNumber(response, 'scorePercentage') !== null,
       answersCount: this.readNumber(response, 'answersCount') || answers.length,
       customInputValuesCount:
         this.readNumber(response, 'customInputValuesCount') || customInputValues.length,
@@ -805,7 +933,9 @@ export class SurveyDashboardService {
     };
   }
 
-  private toAnonymousResponseCustomInput(item: ApiRecord): AnonymousTemplateResponseCustomInputValue {
+  private toAnonymousResponseCustomInput(
+    item: ApiRecord,
+  ): AnonymousTemplateResponseCustomInputValue {
     const type = this.toAnonymousCustomInputType(item['type'] ?? item['typeName']);
     const value = item['value'];
     const stringValue =
@@ -984,8 +1114,7 @@ export class SurveyDashboardService {
       labelAr: this.readNullableString(item, 'labelAr'),
       type: this.readDisplayString(item['type']) || this.readString(item, 'typeName'),
       typeName:
-        this.readString(item, 'typeName') ||
-        (String(item['type']) === '2' ? 'Integer' : 'String'),
+        this.readString(item, 'typeName') || (String(item['type']) === '2' ? 'Integer' : 'String'),
       isRequired: this.readBoolean(item, 'isRequired'),
       minLength: this.readNullableNumber(item, 'minLength'),
       maxLength: this.readNullableNumber(item, 'maxLength'),
@@ -1035,10 +1164,7 @@ export class SurveyDashboardService {
     };
   }
 
-  private toTemplateQuestionCondition(
-    item: ApiRecord,
-    isAnonymous: boolean,
-  ): QuestionCondition {
+  private toTemplateQuestionCondition(item: ApiRecord, isAnonymous: boolean): QuestionCondition {
     const triggerType = this.toQuestionConditionTriggerType(item['triggerType']);
 
     return {
@@ -1248,7 +1374,11 @@ export class SurveyDashboardService {
     return record?.[key] === true;
   }
 
-  private readBooleanWithDefault(record: ApiRecord | null, key: string, fallback: boolean): boolean {
+  private readBooleanWithDefault(
+    record: ApiRecord | null,
+    key: string,
+    fallback: boolean,
+  ): boolean {
     const value = record?.[key];
     return typeof value === 'boolean' ? value : fallback;
   }

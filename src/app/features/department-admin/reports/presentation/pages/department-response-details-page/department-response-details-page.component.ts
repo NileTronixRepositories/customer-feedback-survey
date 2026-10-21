@@ -1,7 +1,7 @@
 import { DatePipe, DecimalPipe, NgTemplateOutlet } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ArrowLeft, FileText, Image as ImageIcon, Mic } from 'lucide-angular';
+import { AlertTriangle, ArrowLeft, FileText, History, Image as ImageIcon, Mic } from 'lucide-angular';
 import { environment } from '../../../../../../../environments/environment';
 import { I18nService } from '../../../../../../core/services/i18n.service';
 import { TranslatePipe } from '../../../../../../shared/pipes/translate.pipe';
@@ -36,8 +36,10 @@ export class DepartmentResponseDetailsPageComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly i18n = inject(I18nService);
 
+  readonly alertIcon = AlertTriangle;
   readonly backIcon = ArrowLeft;
   readonly fileIcon = FileText;
+  readonly historyIcon = History;
   readonly imageIcon = ImageIcon;
   readonly micIcon = Mic;
   readonly scaleSlots: readonly ScaleSlot[] = [
@@ -73,6 +75,20 @@ export class DepartmentResponseDetailsPageComponent implements OnInit {
 
   operatorName(details: DepartmentResponseDetails): string {
     return this.localized(details.operator.nameEn, details.operator.nameAr);
+  }
+
+  scoreDerivation(details: DepartmentResponseDetails | null | undefined): string | null | undefined {
+    return details?.scoreDerivation;
+  }
+
+  derivationLabel(derivation: string | undefined): string {
+    if (derivation === 'SubmissionSnapshot') {
+      return this.i18n.language() === 'ar' ? 'لقطة الإرسال' : 'Snapshot';
+    }
+    if (derivation === 'StoredRootBaseline') {
+      return this.i18n.language() === 'ar' ? 'الأساس المخزن' : 'Baseline';
+    }
+    return derivation || '';
   }
 
   questionText(answer: DepartmentResponseAnswer): string {

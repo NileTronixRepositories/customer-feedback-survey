@@ -24,7 +24,11 @@ export class SystemReportsStore {
   private readonly responsesSignal = signal<SystemResponsesPagination | null>(null);
   private readonly responsesLoadingSignal = signal(false);
   private readonly responsesErrorSignal = signal<string | null>(null);
-  private readonly responsesQuerySignal = signal<SystemResponsesQuery>({ pageNumber: 1, pageSize: 10 });
+  private readonly responsesQuerySignal = signal<SystemResponsesQuery>({
+    pageNumber: 1,
+    pageSize: 10,
+    scoreCalculationMode: 'RootQuestions',
+  });
   private readonly branchesSignal = signal<readonly ReportBranchOption[]>([]);
   private readonly departmentsSignal = signal<readonly ReportDepartmentOption[]>([]);
   private readonly detailsOpenSignal = signal(false);
@@ -35,7 +39,9 @@ export class SystemReportsStore {
   readonly dashboard = this.dashboardSignal.asReadonly();
   readonly dashboardLoading = this.dashboardLoadingSignal.asReadonly();
   readonly dashboardError = this.dashboardErrorSignal.asReadonly();
-  readonly dashboardEmpty = computed(() => (this.dashboardSignal()?.summary.totalResponses ?? 0) === 0);
+  readonly dashboardEmpty = computed(
+    () => (this.dashboardSignal()?.summary.totalResponses ?? 0) === 0,
+  );
   readonly responses = this.responsesSignal.asReadonly();
   readonly responsesLoading = this.responsesLoadingSignal.asReadonly();
   readonly responsesError = this.responsesErrorSignal.asReadonly();
@@ -67,12 +73,13 @@ export class SystemReportsStore {
   }
 
   loadDashboard(query: SystemDashboardQuery = {}): void {
-    const normalizedQuery = {
+    const normalizedQuery: SystemDashboardQuery = {
       from: query.from || undefined,
       to: query.to || undefined,
       branchId: query.branchId || undefined,
       departmentId: query.departmentId || undefined,
       groupBy: query.groupBy ?? 'Day',
+      scoreCalculationMode: query.scoreCalculationMode ?? 'RootQuestions',
       criticalScoreThreshold: query.criticalScoreThreshold ?? 40,
       criticalResponsesCount: query.criticalResponsesCount ?? 10,
       topTemplatesCount: query.topTemplatesCount ?? 10,
@@ -110,7 +117,9 @@ export class SystemReportsStore {
         next: (responses) => this.responsesSignal.set(responses),
         error: (error: unknown) => {
           this.responsesSignal.set(null);
-          this.responsesErrorSignal.set(this.errorKey(error, 'System responses are temporarily unavailable.'));
+          this.responsesErrorSignal.set(
+            this.errorKey(error, 'System responses are temporarily unavailable.'),
+          );
         },
       });
   }
@@ -138,7 +147,9 @@ export class SystemReportsStore {
         next: (details) => this.detailsSignal.set(details),
         error: (error: unknown) => {
           this.detailsSignal.set(null);
-          this.detailsErrorSignal.set(this.errorKey(error, 'Response details are temporarily unavailable.'));
+          this.detailsErrorSignal.set(
+            this.errorKey(error, 'Response details are temporarily unavailable.'),
+          );
         },
       });
   }
@@ -157,10 +168,20 @@ export class SystemReportsStore {
       branchId: query.branchId || undefined,
       departmentId: query.departmentId || undefined,
       templateId: query.templateId || undefined,
+      scoreCalculationMode: query.scoreCalculationMode ?? 'RootQuestions',
+      scoreIncludedOnly: query.scoreIncludedOnly,
+      complaintItemsOnly: query.complaintItemsOnly,
       minScorePercentage: this.normalizeNumber(query.minScorePercentage),
       maxScorePercentage: this.normalizeNumber(query.maxScorePercentage),
       hasComplaint: query.hasComplaint,
       hasVoice: query.hasVoice,
+      satisfactionCategory: query.satisfactionCategory,
+      isScored: query.isScored,
+      questionId: query.questionId || undefined,
+      customInputId: query.customInputId || undefined,
+      customInputType: query.customInputType || undefined,
+      customInputValue: query.customInputValue || undefined,
+      orderSort: query.orderSort,
       searchText: query.searchText?.trim() || undefined,
       pageNumber: Math.max(query.pageNumber || 1, 1),
       pageSize: Math.min(Math.max(query.pageSize || 10, 5), 100),
@@ -179,7 +200,8 @@ export class SystemReportsStore {
     }
     if (error.status === 403) return 'You do not have permission to view system reports.';
     if (error.status === 404) return 'Survey response was not found.';
-    if (error.status === 400 || error.status === 422) return 'Invalid filters. Please check date range or score range.';
+    if (error.status === 400 || error.status === 422)
+      return 'Invalid filters. Please check date range or score range.';
     return fallback;
   }
 

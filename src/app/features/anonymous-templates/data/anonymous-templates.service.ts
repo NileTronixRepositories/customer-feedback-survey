@@ -11,6 +11,17 @@ import {
   toSelectableEditableScopeState,
 } from '../../../shared/models/resource-scope.model';
 import {
+  ScoreCalculationMode,
+  toScoreCalculationModeCode,
+} from '../../../shared/models/score-calculation-mode.model';
+import {
+  BestRatedQuestion,
+  ClassificationPolicy,
+  HistoricalAvailability,
+  HistoricalDataProvenance,
+  HistoricalSurvey,
+} from '../../../shared/models/historical-survey.model';
+import {
   AnonymousTemplate,
   AnonymousTemplateApiResponse,
   AnonymousTemplateAssignedQuestion,
@@ -255,19 +266,34 @@ export class AnonymousTemplatesService {
       params = params.set('orderSort', orderSort);
     }
 
-    if (query.fromDate !== null) {
+    if (query.fromDate !== null && query.fromDate !== undefined) {
       params = params.set('fromDate', query.fromDate);
     }
 
-    if (query.toDate !== null) {
+    if (query.toDate !== null && query.toDate !== undefined) {
       params = params.set('toDate', query.toDate);
     }
 
-    if (query.minScorePercentage !== null) {
+    if (query.scoreCalculationMode !== undefined && query.scoreCalculationMode !== null) {
+      params = params.set(
+        'scoreCalculationMode',
+        toScoreCalculationModeCode(query.scoreCalculationMode),
+      );
+    }
+
+    if (query.scoreIncludedOnly !== undefined) {
+      params = params.set('scoreIncludedOnly', query.scoreIncludedOnly);
+    }
+
+    if (query.complaintItemsOnly !== undefined) {
+      params = params.set('complaintItemsOnly', query.complaintItemsOnly);
+    }
+
+    if (query.minScorePercentage !== null && query.minScorePercentage !== undefined) {
       params = params.set('minScorePercentage', query.minScorePercentage);
     }
 
-    if (query.maxScorePercentage !== null) {
+    if (query.maxScorePercentage !== null && query.maxScorePercentage !== undefined) {
       params = params.set('maxScorePercentage', query.maxScorePercentage);
     }
     if (query.satisfactionCategory)
@@ -303,6 +329,18 @@ export class AnonymousTemplatesService {
     }
     if (query.to) {
       params = params.set('to', query.to);
+    }
+    if (query.scoreCalculationMode !== undefined && query.scoreCalculationMode !== null) {
+      params = params.set(
+        'scoreCalculationMode',
+        toScoreCalculationModeCode(query.scoreCalculationMode),
+      );
+    }
+    if (query.scoreIncludedOnly !== undefined) {
+      params = params.set('scoreIncludedOnly', query.scoreIncludedOnly);
+    }
+    if (query.complaintItemsOnly !== undefined) {
+      params = params.set('complaintItemsOnly', query.complaintItemsOnly);
     }
     if (query.minScorePercentage !== undefined) {
       params = params.set('minScorePercentage', query.minScorePercentage);
@@ -366,6 +404,12 @@ export class AnonymousTemplatesService {
     }
     if (query.groupBy) {
       params = params.set('groupBy', query.groupBy);
+    }
+    if (query.scoreCalculationMode !== undefined && query.scoreCalculationMode !== null) {
+      params = params.set(
+        'scoreCalculationMode',
+        toScoreCalculationModeCode(query.scoreCalculationMode),
+      );
     }
     if (query.topQuestionsCount !== undefined) {
       params = params.set('topQuestionsCount', query.topQuestionsCount);
@@ -433,6 +477,13 @@ export class AnonymousTemplatesService {
         scoredResponses: summary.scoredResponses ?? 0,
         unscoredResponses: summary.unscoredResponses ?? 0,
         averageScorePercentage: summary.averageScorePercentage ?? 0,
+        hasScoreData: summary.hasScoreData ?? (summary.totalResponses ?? 0) > 0,
+        satisfactionPercentage:
+          summary.satisfactionPercentage !== undefined
+            ? summary.satisfactionPercentage
+            : summary.hasScoreData !== false
+              ? summary.averageScorePercentage
+              : null,
         satisfiedResponses: summary.satisfiedResponses ?? 0,
         neutralResponses: summary.neutralResponses ?? 0,
         unhappyResponses: summary.unhappyResponses ?? 0,
@@ -461,6 +512,26 @@ export class AnonymousTemplatesService {
       anonymousTemplatePerformance: (response.anonymousTemplatePerformance ?? []).map((item) =>
         this.toDashboardTemplatePerformance(item),
       ),
+      bestRatedQuestions: (response.bestRatedQuestions ?? []).map((q) => ({
+        templateId: this.readRecordId(q.templateId),
+        templateNameEn: q.templateNameEn ?? '',
+        templateNameAr: q.templateNameAr ?? null,
+        branchId: q.branchId ? this.readRecordId(q.branchId) : undefined,
+        branchNameEn: q.branchNameEn ?? undefined,
+        branchNameAr: q.branchNameAr ?? null,
+        questionId: this.readRecordId(q.questionId),
+        anonymousTemplateQuestionId: q.anonymousTemplateQuestionId
+          ? this.readRecordId(q.anonymousTemplateQuestionId)
+          : undefined,
+        questionTextEn: q.questionTextEn ?? '',
+        questionTextAr: q.questionTextAr ?? null,
+        questionType: q.questionType ?? 0,
+        questionTypeName: q.questionTypeName ?? '',
+        answersCount: q.answersCount ?? 0,
+        averageValue: q.averageValue ?? 0,
+        averageScorePercentage: q.averageScorePercentage ?? 0,
+        detailsNavigation: this.toDashboardNavigation(q.detailsNavigation),
+      })),
       lowestRatedQuestions: (response.lowestRatedQuestions ?? []).map((item) => ({
         anonymousTemplateId: this.readRecordId(item.anonymousTemplateId),
         templateNameEn: item.templateNameEn ?? '',
@@ -492,6 +563,13 @@ export class AnonymousTemplatesService {
       criticalResponses: (response.criticalResponses ?? []).map((item) =>
         this.toDashboardCriticalResponse(item),
       ),
+      scoreCalculationMode: response.scoreCalculationMode,
+      classificationPolicy: response.classificationPolicy ?? null,
+      hasMixedClassificationCriteria: response.hasMixedClassificationCriteria ?? false,
+      storedBaselineResponsesCount: response.storedBaselineResponsesCount ?? 0,
+      hasCompleteQuestionScoreData: response.hasCompleteQuestionScoreData ?? true,
+      requestedModeAvailable: response.requestedModeAvailable ?? true,
+      availability: response.availability,
     };
   }
 
@@ -624,6 +702,10 @@ export class AnonymousTemplatesService {
       isScored: response.isScored ?? scorePercentage !== null,
       hasComplaint: response.hasComplaint ?? false,
       hasVoice: response.hasVoice ?? false,
+      requestedModeAvailable: response.requestedModeAvailable ?? true,
+      scoreDerivation: response.scoreDerivation ?? 'SubmissionSnapshot',
+      complaintQuestionId: this.readNullableRecordId(response.complaintQuestionId),
+      complaintText: response.complaintText ?? null,
       customInputsPreview: (response.customInputsPreview ?? []).map((input) =>
         this.toBranchAnonymousResponseCustomInputPreview(input),
       ),
@@ -657,6 +739,10 @@ export class AnonymousTemplatesService {
       isScored: response.isScored ?? (response.scorePercentage ?? null) !== null,
       answersCount: response.answersCount ?? answers.length,
       customInputValuesCount: response.customInputValuesCount ?? customInputs.length,
+      requestedModeAvailable: response.requestedModeAvailable ?? true,
+      scoreDerivation: response.scoreDerivation ?? 'SubmissionSnapshot',
+      complaintQuestionId: this.readNullableRecordId(response.complaintQuestionId),
+      complaintText: response.complaintText ?? null,
     };
   }
 
@@ -672,6 +758,10 @@ export class AnonymousTemplatesService {
       anonymousTemplateId: listItem.anonymousTemplateId || fallbackAnonymousTemplateId,
       templateNameEn: response.templateNameEn ?? '',
       templateNameAr: response.templateNameAr ?? null,
+      historicalSurvey: (response.historicalSurvey as HistoricalSurvey) ?? null,
+      historicalDataProvenance:
+        (response.historicalDataProvenance as HistoricalDataProvenance) ?? null,
+      isHistoricalDataVerified: response.isHistoricalDataVerified ?? true,
       customInputValues: customInputs.map((value) => this.toResponseCustomInputValue(value)),
       answers: (response.answers ?? []).map((answer) => this.toResponseAnswer(answer)),
     };

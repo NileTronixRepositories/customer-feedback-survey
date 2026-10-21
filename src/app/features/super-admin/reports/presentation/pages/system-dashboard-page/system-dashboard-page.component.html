@@ -108,6 +108,11 @@
     </div>
   </div>
 
+  <app-score-mode-selector
+    [selectedMode]="filtersForm.controls.scoreCalculationMode.value"
+    (modeChange)="onScoreModeChange($event)"
+  />
+
   @if (store.dashboardLoading()) {
     <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
       @for (item of [1,2,3,4]; track item) {
@@ -122,6 +127,14 @@
       </div>
     </section>
   } @else if (store.dashboard(); as dashboard) {
+    @if (dashboard.requestedModeAvailable === false) {
+      <app-historical-warning-banner />
+    }
+
+    @if (dashboard.availability) {
+      <app-historical-availability-card [availability]="dashboard.availability" />
+    }
+
     @if (store.dashboardEmpty()) {
       <section class="dashboard-card rounded-xl border border-dashed border-slate-200 bg-white p-8 text-center">
         <div class="flex flex-col items-center gap-2">
@@ -207,7 +220,7 @@
                 </p>
                 <p class="mt-1 flex items-center gap-1 text-xl font-black text-slate-950">
                   {{ m.total }}
-                  <span class="text-sm font-bold text-emerald-600">{{ m.averageScore.toFixed(1) }}%</span>
+                  <span class="text-sm font-bold text-emerald-600">{{ scoreLabel(m.averageScore, m.hasScoreData) }}</span>
                 </p>
                 <p class="mt-0.5 flex items-center gap-2 text-[11px] font-semibold text-slate-500">
                   <span class="flex items-center gap-1"><app-icon [icon]="alertTriangleIcon" [size]="12" class="text-amber-500" />{{ m.complaints }}</span>

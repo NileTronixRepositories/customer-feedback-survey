@@ -69,10 +69,13 @@ export class BranchTemplatesPdfReportService {
     }
 
     if (query.scoreCalculationMode) {
-      params = params.set(
-        'ScoreCalculationMode',
-        query.scoreCalculationMode === 'RootQuestions' ? '1' : '2',
-      );
+      const modeCode =
+        query.scoreCalculationMode === 'RootQuestions'
+          ? '1'
+          : query.scoreCalculationMode === 'LowestConditionLevel'
+            ? '2'
+            : '3';
+      params = params.set('ScoreCalculationMode', modeCode);
     }
 
     if (query.topWorstQuestionsCount !== undefined) {

@@ -31,6 +31,9 @@ export class BranchSatisfactionReportService {
     if (query.to) {
       params = params.set('to', query.to);
     }
+    if (query.scoreCalculationMode) {
+      params = params.set('scoreCalculationMode', query.scoreCalculationMode);
+    }
 
     return this.http
       .get<BranchSatisfactionReportApiResponse>(this.reportUrl, { params })
@@ -45,10 +48,15 @@ export class BranchSatisfactionReportService {
       byTemplate: (response.byTemplate ?? []).map((item) => this.toByTemplateItem(item)),
       trend: (response.trend ?? []).map((item) => this.toTrendItem(item)),
       complaints: this.toComplaints(response.complaints),
+      scoreCalculationMode: response.scoreCalculationMode ?? 'RootQuestions',
+      requestedModeAvailable: response.requestedModeAvailable ?? true,
+      storedBaselineResponsesCount: response.storedBaselineResponsesCount ?? 0,
     };
   }
 
-  private toPeriod(period: Partial<SatisfactionReportPeriod> | undefined): SatisfactionReportPeriod {
+  private toPeriod(
+    period: Partial<SatisfactionReportPeriod> | undefined,
+  ): SatisfactionReportPeriod {
     return {
       from: period?.from ?? '',
       to: period?.to ?? '',
@@ -69,6 +77,8 @@ export class BranchSatisfactionReportService {
       unsatisfiedResponses: overall?.unsatisfiedResponses ?? 0,
       complaintsCount: overall?.complaintsCount ?? 0,
       voiceAnswersCount: overall?.voiceAnswersCount ?? 0,
+      hasScoreData: overall?.hasScoreData ?? true,
+      satisfactionPercentage: overall?.satisfactionPercentage ?? null,
     };
   }
 

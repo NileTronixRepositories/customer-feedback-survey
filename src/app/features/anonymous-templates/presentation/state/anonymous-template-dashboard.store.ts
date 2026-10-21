@@ -18,6 +18,7 @@ export class AnonymousTemplateDashboardStore {
   private readonly errorSignal = signal<string | null>(null);
   private readonly querySignal = signal<AnonymousTemplateDashboardQuery>({
     groupBy: 'Day',
+    scoreCalculationMode: 'RootQuestions',
     topQuestionsCount: 5,
     criticalResponsesCount: 10,
     criticalScoreThreshold: 40,
@@ -41,7 +42,13 @@ export class AnonymousTemplateDashboardStore {
     const nextQuery: AnonymousTemplateDashboardQuery = {
       ...this.querySignal(),
       ...query,
-      topQuestionsCount: this.clamp(query.topQuestionsCount ?? this.querySignal().topQuestionsCount ?? 5, 1, 20),
+      scoreCalculationMode:
+        query.scoreCalculationMode ?? this.querySignal().scoreCalculationMode ?? 'RootQuestions',
+      topQuestionsCount: this.clamp(
+        query.topQuestionsCount ?? this.querySignal().topQuestionsCount ?? 5,
+        1,
+        20,
+      ),
       criticalResponsesCount: this.clamp(
         query.criticalResponsesCount ?? this.querySignal().criticalResponsesCount ?? 10,
         1,

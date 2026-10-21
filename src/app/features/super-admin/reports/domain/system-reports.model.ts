@@ -1,3 +1,17 @@
+import {
+  DashboardCharts,
+  DashboardDetailsNavigation,
+  DashboardSummaryActions,
+  SatisfactionCategory,
+} from '../../../reports/dashboard-drill-down/domain/dashboard-drill-down.model';
+import { ScoreCalculationMode } from '../../../../shared/models/score-calculation-mode.model';
+import {
+  ClassificationPolicy,
+  HistoricalAvailability,
+  HistoricalDataProvenance,
+  HistoricalSurvey,
+} from '../../../../shared/models/historical-survey.model';
+
 export type SystemReportsGroupBy = 'Day' | 'Month';
 export type SystemReportsRiskLevel = 'Healthy' | 'MediumRisk' | 'HighRisk';
 export type SystemResponseQuestionType =
@@ -15,6 +29,7 @@ export interface SystemDashboardQuery {
   branchId?: string;
   departmentId?: string;
   groupBy?: SystemReportsGroupBy;
+  scoreCalculationMode?: ScoreCalculationMode | string;
   criticalScoreThreshold?: number;
   criticalResponsesCount?: number;
   topTemplatesCount?: number;
@@ -26,6 +41,9 @@ export interface SystemResponsesQuery {
   branchId?: string;
   departmentId?: string;
   templateId?: string;
+  scoreCalculationMode?: ScoreCalculationMode | string;
+  scoreIncludedOnly?: boolean;
+  complaintItemsOnly?: boolean;
   minScorePercentage?: number;
   maxScorePercentage?: number;
   hasComplaint?: boolean;
@@ -52,6 +70,13 @@ export interface SystemDashboardResponse {
   departmentActivity: readonly SystemDepartmentActivity[];
   topTemplates: readonly SystemTemplatePerformance[];
   criticalResponses: readonly SystemCriticalResponse[];
+  scoreCalculationMode?: ScoreCalculationMode | string;
+  classificationPolicy?: ClassificationPolicy | null;
+  hasMixedClassificationCriteria?: boolean;
+  storedBaselineResponsesCount?: number;
+  hasCompleteQuestionScoreData?: boolean;
+  requestedModeAvailable?: boolean;
+  availability?: HistoricalAvailability;
 }
 
 export interface SystemDashboardPeriod {
@@ -72,6 +97,8 @@ export interface SystemDashboardSummary {
   activeTemplates: number;
   totalResponses: number;
   averageScorePercentage: number;
+  hasScoreData?: boolean;
+  satisfactionPercentage?: number | null;
   complaintsCount: number;
   voiceAnswersCount: number;
 }
@@ -173,6 +200,10 @@ export interface SystemResponseListItem {
   isScored: boolean;
   hasComplaint: boolean;
   hasVoice: boolean;
+  requestedModeAvailable?: boolean;
+  scoreDerivation?: 'SubmissionSnapshot' | 'StoredRootBaseline' | string;
+  complaintQuestionId?: string | null;
+  complaintText?: string | null;
   customInputsPreview: readonly SystemResponseCustomInputPreview[];
 }
 
@@ -202,6 +233,11 @@ export interface SystemResponseDetails {
   score: SystemResponseScore;
   customInputsCount: number;
   answersCount: number;
+  requestedModeAvailable?: boolean;
+  scoreDerivation?: 'SubmissionSnapshot' | 'StoredRootBaseline' | string;
+  historicalSurvey?: HistoricalSurvey | null;
+  historicalDataProvenance?: HistoricalDataProvenance | null;
+  isHistoricalDataVerified?: boolean;
   customInputs: readonly SystemResponseCustomInput[];
   answers: readonly SystemResponseAnswer[];
 }
@@ -259,9 +295,3 @@ export interface ReportDepartmentOption {
   nameEn: string;
   nameAr: string;
 }
-import {
-  DashboardCharts,
-  DashboardDetailsNavigation,
-  DashboardSummaryActions,
-  SatisfactionCategory,
-} from '../../../reports/dashboard-drill-down/domain/dashboard-drill-down.model';

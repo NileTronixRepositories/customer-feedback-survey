@@ -9,6 +9,16 @@ import {
   SatisfactionCategory,
 } from '../../../reports/dashboard-drill-down/domain/dashboard-drill-down.model';
 import {
+  ScoreCalculationMode,
+  toScoreCalculationModeCode,
+} from '../../../../shared/models/score-calculation-mode.model';
+import {
+  ClassificationPolicy,
+  HistoricalAvailability,
+  HistoricalDataProvenance,
+  HistoricalSurvey,
+} from '../../../../shared/models/historical-survey.model';
+import {
   ReportBranchOption,
   ReportDepartmentOption,
   SystemBranchPerformance,
@@ -47,6 +57,12 @@ export class SystemReportsService {
     if (query.branchId) params = params.set('branchId', query.branchId);
     if (query.departmentId) params = params.set('departmentId', query.departmentId);
     if (query.groupBy) params = params.set('groupBy', query.groupBy);
+    if (query.scoreCalculationMode !== undefined && query.scoreCalculationMode !== null) {
+      params = params.set(
+        'scoreCalculationMode',
+        toScoreCalculationModeCode(query.scoreCalculationMode),
+      );
+    }
     if (query.criticalScoreThreshold !== undefined) {
       params = params.set('criticalScoreThreshold', String(query.criticalScoreThreshold));
     }
@@ -71,16 +87,30 @@ export class SystemReportsService {
     if (query.branchId) params = params.set('branchId', query.branchId);
     if (query.departmentId) params = params.set('departmentId', query.departmentId);
     if (query.templateId) params = params.set('templateId', query.templateId);
+    if (query.scoreCalculationMode !== undefined && query.scoreCalculationMode !== null) {
+      params = params.set(
+        'scoreCalculationMode',
+        toScoreCalculationModeCode(query.scoreCalculationMode),
+      );
+    }
+    if (query.scoreIncludedOnly !== undefined) {
+      params = params.set('scoreIncludedOnly', String(query.scoreIncludedOnly));
+    }
+    if (query.complaintItemsOnly !== undefined) {
+      params = params.set('complaintItemsOnly', String(query.complaintItemsOnly));
+    }
     if (query.minScorePercentage !== undefined) {
       params = params.set('minScorePercentage', String(query.minScorePercentage));
     }
     if (query.maxScorePercentage !== undefined) {
       params = params.set('maxScorePercentage', String(query.maxScorePercentage));
     }
-    if (query.hasComplaint !== undefined) params = params.set('hasComplaint', String(query.hasComplaint));
+    if (query.hasComplaint !== undefined)
+      params = params.set('hasComplaint', String(query.hasComplaint));
     if (query.hasVoice !== undefined) params = params.set('hasVoice', String(query.hasVoice));
     if (query.searchText) params = params.set('searchText', query.searchText);
-    if (query.satisfactionCategory) params = params.set('satisfactionCategory', query.satisfactionCategory);
+    if (query.satisfactionCategory)
+      params = params.set('satisfactionCategory', query.satisfactionCategory);
     if (query.isScored !== undefined) params = params.set('isScored', String(query.isScored));
     if (query.questionId) params = params.set('questionId', query.questionId);
     if (query.customInputId) params = params.set('customInputId', query.customInputId);
@@ -117,11 +147,34 @@ export class SystemReportsService {
       summary: this.toSummary(this.readRecord(response['summary'])),
       charts: this.toCharts(this.readRecord(response['charts'])),
       summaryActions: this.toSummaryActions(this.readRecord(response['summaryActions'])),
-      satisfactionTrend: this.readArray(response['satisfactionTrend']).map((item) => this.toTrendPoint(item)),
-      branchPerformance: this.readArray(response['branchPerformance']).map((item) => this.toBranchPerformance(item)),
-      departmentActivity: this.readArray(response['departmentActivity']).map((item) => this.toDepartmentActivity(item)),
-      topTemplates: this.readArray(response['topTemplates']).map((item) => this.toTemplatePerformance(item)),
-      criticalResponses: this.readArray(response['criticalResponses']).map((item) => this.toCriticalResponse(item)),
+      satisfactionTrend: this.readArray(response['satisfactionTrend']).map((item) =>
+        this.toTrendPoint(item),
+      ),
+      branchPerformance: this.readArray(response['branchPerformance']).map((item) =>
+        this.toBranchPerformance(item),
+      ),
+      departmentActivity: this.readArray(response['departmentActivity']).map((item) =>
+        this.toDepartmentActivity(item),
+      ),
+      topTemplates: this.readArray(response['topTemplates']).map((item) =>
+        this.toTemplatePerformance(item),
+      ),
+      criticalResponses: this.readArray(response['criticalResponses']).map((item) =>
+        this.toCriticalResponse(item),
+      ),
+      scoreCalculationMode: response['scoreCalculationMode'] as ScoreCalculationMode,
+      classificationPolicy: (response['classificationPolicy'] as ClassificationPolicy) ?? null,
+      hasMixedClassificationCriteria: this.readBoolean(response, 'hasMixedClassificationCriteria'),
+      storedBaselineResponsesCount: this.readNumber(response, 'storedBaselineResponsesCount'),
+      hasCompleteQuestionScoreData:
+        response['hasCompleteQuestionScoreData'] !== undefined
+          ? this.readBoolean(response, 'hasCompleteQuestionScoreData')
+          : true,
+      requestedModeAvailable:
+        response['requestedModeAvailable'] !== undefined
+          ? this.readBoolean(response, 'requestedModeAvailable')
+          : true,
+      availability: response['availability'] as HistoricalAvailability,
     };
   }
 
@@ -135,6 +188,13 @@ export class SystemReportsService {
   }
 
   private toSummary(summary: ApiRecord | null): SystemDashboardSummary {
+    const totalResponses = this.readNumber(summary, 'totalResponses');
+    const hasScoreData =
+      summary?.['hasScoreData'] !== undefined
+        ? this.readBoolean(summary, 'hasScoreData')
+        : totalResponses > 0;
+    const averageScorePercentage = this.readNumber(summary, 'averageScorePercentage');
+
     return {
       totalBranches: this.readNumber(summary, 'totalBranches'),
       activeBranches: this.readNumber(summary, 'activeBranches'),
@@ -144,8 +204,16 @@ export class SystemReportsService {
       totalOperators: this.readNumber(summary, 'totalOperators'),
       totalTemplates: this.readNumber(summary, 'totalTemplates'),
       activeTemplates: this.readNumber(summary, 'activeTemplates'),
-      totalResponses: this.readNumber(summary, 'totalResponses'),
-      averageScorePercentage: this.readNumber(summary, 'averageScorePercentage'),
+      totalResponses,
+      averageScorePercentage,
+      hasScoreData,
+      satisfactionPercentage:
+        summary?.['satisfactionPercentage'] !== undefined &&
+        summary?.['satisfactionPercentage'] !== null
+          ? this.readNumber(summary, 'satisfactionPercentage')
+          : hasScoreData !== false
+            ? averageScorePercentage
+            : null,
       complaintsCount: this.readNumber(summary, 'complaintsCount'),
       voiceAnswersCount: this.readNumber(summary, 'voiceAnswersCount'),
     };
@@ -210,19 +278,23 @@ export class SystemReportsService {
       submittedOnUtc: this.readString(item, 'submittedOnUtc'),
       scorePercentage: this.readNumber(item, 'scorePercentage'),
       complaintText: this.readNullableString(item, 'complaintText'),
-      customInputs: this.readArray(item['customInputs']).map((input) => this.toCustomInputPreview(input)),
+      customInputs: this.readArray(item['customInputs']).map((input) =>
+        this.toCustomInputPreview(input),
+      ),
       detailsNavigation: this.toNavigation(this.readRecord(item['detailsNavigation'])),
     };
   }
 
   private toCharts(charts: ApiRecord | null): DashboardCharts {
     return {
-      satisfactionDistribution: this.readArray(charts?.['satisfactionDistribution']).map((item) => ({
-        category: this.toSatisfactionCategory(this.readString(item, 'category')),
-        responsesCount: this.readNumber(item, 'responsesCount'),
-        percentage: this.readNumber(item, 'percentage'),
-        detailsNavigation: this.toNavigation(this.readRecord(item['detailsNavigation'])),
-      })),
+      satisfactionDistribution: this.readArray(charts?.['satisfactionDistribution']).map(
+        (item) => ({
+          category: this.toSatisfactionCategory(this.readString(item, 'category')),
+          responsesCount: this.readNumber(item, 'responsesCount'),
+          percentage: this.readNumber(item, 'percentage'),
+          detailsNavigation: this.toNavigation(this.readRecord(item['detailsNavigation'])),
+        }),
+      ),
     };
   }
 
@@ -264,7 +336,16 @@ export class SystemReportsService {
       isScored: this.readBoolean(item, 'isScored'),
       hasComplaint: this.readBoolean(item, 'hasComplaint'),
       hasVoice: this.readBoolean(item, 'hasVoice'),
-      customInputsPreview: this.readArray(item['customInputsPreview']).map((input) => this.toCustomInputPreview(input)),
+      requestedModeAvailable:
+        item['requestedModeAvailable'] !== undefined
+          ? this.readBoolean(item, 'requestedModeAvailable')
+          : true,
+      scoreDerivation: this.readString(item, 'scoreDerivation') || 'SubmissionSnapshot',
+      complaintQuestionId: this.readNullableString(item, 'complaintQuestionId'),
+      complaintText: this.readNullableString(item, 'complaintText'),
+      customInputsPreview: this.readArray(item['customInputsPreview']).map((input) =>
+        this.toCustomInputPreview(input),
+      ),
     };
   }
 
@@ -275,7 +356,21 @@ export class SystemReportsService {
       score: this.toResponseScore(this.readRecord(response['score'])),
       customInputsCount: this.readNumber(response, 'customInputsCount'),
       answersCount: this.readNumber(response, 'answersCount'),
-      customInputs: this.readArray(response['customInputs']).map((input) => this.toResponseCustomInput(input)),
+      requestedModeAvailable:
+        response['requestedModeAvailable'] !== undefined
+          ? this.readBoolean(response, 'requestedModeAvailable')
+          : undefined,
+      scoreDerivation: this.readNullableString(response, 'scoreDerivation') ?? undefined,
+      historicalSurvey: (response['historicalSurvey'] as HistoricalSurvey) ?? null,
+      historicalDataProvenance:
+        (response['historicalDataProvenance'] as HistoricalDataProvenance) ?? null,
+      isHistoricalDataVerified:
+        response['isHistoricalDataVerified'] !== undefined
+          ? this.readBoolean(response, 'isHistoricalDataVerified')
+          : true,
+      customInputs: this.readArray(response['customInputs']).map((input) =>
+        this.toResponseCustomInput(input),
+      ),
       answers: this.readArray(response['answers']).map((answer) => this.toResponseAnswer(answer)),
     };
   }
@@ -290,18 +385,28 @@ export class SystemReportsService {
       surveyResponseId: this.readString(item, 'surveyResponseId'),
       branchId: this.readString(item, 'branchId') || this.readString(branch, 'branchId'),
       branchNameEn: this.readString(item, 'branchNameEn') || this.readString(branch, 'nameEn'),
-      branchNameAr: this.readNullableString(item, 'branchNameAr') ?? this.readNullableString(branch, 'nameAr'),
+      branchNameAr:
+        this.readNullableString(item, 'branchNameAr') ?? this.readNullableString(branch, 'nameAr'),
       branchCode: this.readString(item, 'branchCode') || this.readString(branch, 'code'),
-      departmentId: this.readString(item, 'departmentId') || this.readString(department, 'departmentId'),
-      departmentNameEn: this.readString(item, 'departmentNameEn') || this.readString(department, 'nameEn'),
+      departmentId:
+        this.readString(item, 'departmentId') || this.readString(department, 'departmentId'),
+      departmentNameEn:
+        this.readString(item, 'departmentNameEn') || this.readString(department, 'nameEn'),
       departmentNameAr:
-        this.readNullableString(item, 'departmentNameAr') ?? this.readNullableString(department, 'nameAr'),
+        this.readNullableString(item, 'departmentNameAr') ??
+        this.readNullableString(department, 'nameAr'),
       templateId: this.readString(item, 'templateId') || this.readString(template, 'templateId'),
-      templateNameEn: this.readString(item, 'templateNameEn') || this.readString(template, 'nameEn'),
-      templateNameAr: this.readNullableString(item, 'templateNameAr') ?? this.readNullableString(template, 'nameAr'),
+      templateNameEn:
+        this.readString(item, 'templateNameEn') || this.readString(template, 'nameEn'),
+      templateNameAr:
+        this.readNullableString(item, 'templateNameAr') ??
+        this.readNullableString(template, 'nameAr'),
       operatorId: this.readString(item, 'operatorId') || this.readString(operator, 'operatorId'),
-      operatorNameEn: this.readString(item, 'operatorNameEn') || this.readString(operator, 'nameEn'),
-      operatorNameAr: this.readNullableString(item, 'operatorNameAr') ?? this.readNullableString(operator, 'nameAr'),
+      operatorNameEn:
+        this.readString(item, 'operatorNameEn') || this.readString(operator, 'nameEn'),
+      operatorNameAr:
+        this.readNullableString(item, 'operatorNameAr') ??
+        this.readNullableString(operator, 'nameAr'),
     };
   }
 
@@ -393,11 +498,19 @@ export class SystemReportsService {
   }
 
   private toRiskLevel(value: string): SystemReportsRiskLevel {
-    return value === 'HighRisk' || value === 'MediumRisk' || value === 'Healthy' ? value : 'Healthy';
+    return value === 'HighRisk' || value === 'MediumRisk' || value === 'Healthy'
+      ? value
+      : 'Healthy';
   }
 
   private toQuestionType(value: string): SystemResponseQuestionType {
-    return value === 'SingleChoice' || value === 'StarRating' || value === 'Smiles' || value === 'Complain' || value === 'FreeText' || value === 'Voice' || value === 'Image'
+    return value === 'SingleChoice' ||
+      value === 'StarRating' ||
+      value === 'Smiles' ||
+      value === 'Complain' ||
+      value === 'FreeText' ||
+      value === 'Voice' ||
+      value === 'Image'
       ? value
       : 'SingleChoice';
   }

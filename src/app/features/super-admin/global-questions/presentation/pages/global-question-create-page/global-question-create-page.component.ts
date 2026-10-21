@@ -37,7 +37,6 @@ import { ButtonComponent } from '../../../../../../shared/ui/button/button.compo
 import { PageHeaderComponent } from '../../../../../../shared/ui/page-header/page-header.component';
 import { CardComponent } from '../../../../../../shared/ui/card/card.component';
 import { IconComponent } from '../../../../../../shared/ui/icon/icon.component';
-import { InputComponent } from '../../../../../../shared/ui/input/input.component';
 import { ModalComponent } from '../../../../../../shared/ui/modal/modal.component';
 import { I18nService } from '../../../../../../core/services/i18n.service';
 import { AuthStore } from '../../../../../auth/presentation/state/auth.store';
@@ -86,7 +85,6 @@ type GlobalQuestionOptionFormValue = GlobalQuestionFormValue['options'][number];
     CardComponent,
     DatePipe,
     IconComponent,
-    InputComponent,
     ModalComponent,
     PageHeaderComponent,
     ReactiveFormsModule,

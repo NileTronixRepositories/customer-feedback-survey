@@ -5,6 +5,10 @@ import { Observable, map } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
 import { resolveMediaUrl } from '../../../../shared/utils/media-url.util';
 import {
+  HistoricalDataProvenance,
+  HistoricalSurvey,
+} from '../../../../shared/models/historical-survey.model';
+import {
   DashboardDetailsNavigation,
   DashboardDrillDownContext,
   DashboardResponseDetailItem,
@@ -158,6 +162,11 @@ export class DashboardDrillDownService {
       hasPreviousPage: this.readBoolean(response, 'hasPreviousPage') || currentPage > 1,
       hasNextPage:
         this.readBoolean(response, 'hasNextPage') || (totalPages > 0 && currentPage < totalPages),
+      requestedModeAvailable:
+        response['requestedModeAvailable'] !== undefined
+          ? this.readBoolean(response, 'requestedModeAvailable')
+          : undefined,
+      scoreDerivation: this.readNullableString(response, 'scoreDerivation') ?? undefined,
       data,
     };
   }
@@ -187,6 +196,13 @@ export class DashboardDrillDownService {
       isScored: this.readBoolean(item, 'isScored'),
       hasComplaint: this.readBoolean(item, 'hasComplaint'),
       hasVoice: this.readBoolean(item, 'hasVoice'),
+      requestedModeAvailable:
+        item['requestedModeAvailable'] !== undefined
+          ? this.readBoolean(item, 'requestedModeAvailable')
+          : undefined,
+      scoreDerivation: this.readNullableString(item, 'scoreDerivation') ?? undefined,
+      complaintQuestionId: this.readNullableString(item, 'complaintQuestionId'),
+      complaintText: this.readNullableString(item, 'complaintText'),
       customInputsPreview: this.readArray(item['customInputsPreview']).map((input) => ({
         customInputId: this.readString(input, 'customInputId'),
         labelEnSnapshot: this.readNullableString(input, 'labelEnSnapshot'),
@@ -248,6 +264,18 @@ export class DashboardDrillDownService {
         this.readNullableNumber(score, 'scorePercentage') ??
         this.readNullableNumber(response, 'scorePercentage'),
       isScored: this.readBoolean(score, 'isScored') || this.readBoolean(response, 'isScored'),
+      requestedModeAvailable:
+        response['requestedModeAvailable'] !== undefined
+          ? this.readBoolean(response, 'requestedModeAvailable')
+          : undefined,
+      scoreDerivation: this.readNullableString(response, 'scoreDerivation') ?? undefined,
+      historicalSurvey: (response['historicalSurvey'] as HistoricalSurvey) ?? null,
+      historicalDataProvenance:
+        (response['historicalDataProvenance'] as HistoricalDataProvenance) ?? null,
+      isHistoricalDataVerified:
+        response['isHistoricalDataVerified'] !== undefined
+          ? this.readBoolean(response, 'isHistoricalDataVerified')
+          : true,
       customInputs: this.readArray(response['customInputs'] ?? response['customInputValues']).map(
         (item) => this.toDetailItem(item, true),
       ),

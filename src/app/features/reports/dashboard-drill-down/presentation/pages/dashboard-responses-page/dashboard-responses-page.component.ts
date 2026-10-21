@@ -19,6 +19,7 @@ import {
   ChevronRight,
   Eye,
   FileText,
+  History,
   MessageSquareWarning,
   Mic,
   Search,
@@ -66,6 +67,7 @@ export class DashboardResponsesPageComponent {
   readonly closeIcon = X;
   readonly complaintIcon = MessageSquareWarning;
   readonly detailsIcon = Eye;
+  readonly historyIcon = History;
   readonly micIcon = Mic;
   readonly responsesIcon = UsersRound;
   readonly searchIcon = Search;
@@ -246,7 +248,17 @@ export class DashboardResponsesPageComponent {
   score(item: DashboardResponseListItem): string {
     return item.isScored && item.scorePercentage !== null
       ? `${item.scorePercentage.toFixed(1)}%`
-      : this.i18n.translate('dashboardDrillDown.notScored');
+      : 'N/A';
+  }
+
+  derivationLabel(derivation: string | undefined): string {
+    if (derivation === 'SubmissionSnapshot') {
+      return this.i18n.language() === 'ar' ? 'لقطة الإرسال' : 'Snapshot';
+    }
+    if (derivation === 'StoredRootBaseline') {
+      return this.i18n.language() === 'ar' ? 'الأساس المخزن' : 'Baseline';
+    }
+    return derivation || '';
   }
 
   scoreClass(value: number | null): string {

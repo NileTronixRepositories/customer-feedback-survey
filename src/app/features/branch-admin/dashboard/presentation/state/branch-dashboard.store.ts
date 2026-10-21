@@ -112,6 +112,7 @@ export class BranchDashboardStore {
       to: query.to || undefined,
       templateId: query.templateId || undefined,
       groupBy: query.groupBy ?? 'Day',
+      scoreCalculationMode: query.scoreCalculationMode ?? 'RootQuestions',
       topQuestionsCount: query.topQuestionsCount ?? 5,
       criticalResponsesCount: query.criticalResponsesCount ?? 10,
       criticalScoreThreshold: query.criticalScoreThreshold ?? 40,

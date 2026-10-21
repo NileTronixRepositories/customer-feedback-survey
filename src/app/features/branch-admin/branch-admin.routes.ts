@@ -23,6 +23,8 @@ import { branchTemplateAccessGuard } from './templates/presentation/guards/branc
 import { BranchTemplatesService } from './templates/data/branch-templates.service';
 import { BranchTemplatesStore } from './templates/presentation/state/branch-templates.store';
 import { AnonymousTemplatesService } from '../anonymous-templates/data/anonymous-templates.service';
+import { branchEvaluationSettingsAccessGuard } from './branch/presentation/guards/branch-evaluation-settings-access.guard';
+import { BranchEvaluationSettingsService } from './branch/data/branch-evaluation-settings.service';
 
 export const BRANCH_ADMIN_ROUTES: Routes = [
   {
@@ -36,6 +38,7 @@ export const BRANCH_ADMIN_ROUTES: Routes = [
       BranchUsersStore,
       BranchSatisfactionReportService,
       BranchSatisfactionReportStore,
+      BranchEvaluationSettingsService,
     ],
     children: [
       {
@@ -44,6 +47,14 @@ export const BRANCH_ADMIN_ROUTES: Routes = [
         loadComponent: () =>
           import('./dashboard/presentation/pages/branch-dashboard-page/branch-dashboard-page.component').then(
             (m) => m.BranchDashboardPageComponent,
+          ),
+      },
+      {
+        path: 'evaluation-settings',
+        canActivate: [branchEvaluationSettingsAccessGuard],
+        loadComponent: () =>
+          import('./branch/presentation/pages/branch-evaluation-settings-page/branch-evaluation-settings-page.component').then(
+            (m) => m.BranchEvaluationSettingsPageComponent,
           ),
       },
       {

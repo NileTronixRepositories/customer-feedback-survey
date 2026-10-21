@@ -209,21 +209,52 @@
                   <td>{{ localized(row.templateNameEn, row.templateNameAr) }}</td>
                   <td>{{ localized(row.operatorNameEn, row.operatorNameAr) }}</td>
                   <td>
-                    <span
-                      class="rounded-full px-2 py-1 text-[10px] font-black"
-                      [class.bg-emerald-50]="scoreStatus(row) === 'Healthy'"
-                      [class.text-emerald-700]="scoreStatus(row) === 'Healthy'"
-                      [class.bg-amber-50]="scoreStatus(row) === 'Neutral'"
-                      [class.text-amber-700]="scoreStatus(row) === 'Neutral'"
-                      [class.bg-rose-50]="scoreStatus(row) === 'Critical'"
-                      [class.text-rose-700]="scoreStatus(row) === 'Critical'"
-                      [class.bg-slate-100]="scoreStatus(row) === 'Not Scored'"
-                      [class.text-slate-600]="scoreStatus(row) === 'Not Scored'"
-                    >
-                      {{ scoreLabel(row) }}
-                    </span>
+                    <div class="flex flex-col gap-1 items-start">
+                      <span
+                        class="rounded-full px-2 py-1 text-[10px] font-black"
+                        [class.bg-emerald-50]="scoreStatus(row) === 'Healthy'"
+                        [class.text-emerald-700]="scoreStatus(row) === 'Healthy'"
+                        [class.bg-amber-50]="scoreStatus(row) === 'Neutral'"
+                        [class.text-amber-700]="scoreStatus(row) === 'Neutral'"
+                        [class.bg-rose-50]="scoreStatus(row) === 'Critical'"
+                        [class.text-rose-700]="scoreStatus(row) === 'Critical'"
+                        [class.bg-slate-100]="scoreStatus(row) === 'Not Scored'"
+                        [class.text-slate-600]="scoreStatus(row) === 'Not Scored'"
+                      >
+                        {{ scoreLabel(row) }}
+                      </span>
+                      @if (row.scoreDerivation) {
+                        <span
+                          class="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[9px] font-bold border"
+                          [class.bg-indigo-50]="row.scoreDerivation === 'SubmissionSnapshot'"
+                          [class.text-indigo-700]="row.scoreDerivation === 'SubmissionSnapshot'"
+                          [class.border-indigo-200]="row.scoreDerivation === 'SubmissionSnapshot'"
+                          [class.bg-amber-50]="row.scoreDerivation === 'StoredRootBaseline'"
+                          [class.text-amber-800]="row.scoreDerivation === 'StoredRootBaseline'"
+                          [class.border-amber-200]="row.scoreDerivation === 'StoredRootBaseline'"
+                        >
+                          <app-icon [icon]="historyIcon" [size]="9" />
+                          {{ derivationLabel(row.scoreDerivation) }}
+                        </span>
+                      }
+                      @if (row.requestedModeAvailable === false) {
+                        <span class="inline-flex items-center gap-0.5 text-[9px] font-semibold text-amber-700" title="Requested scoring mode unavailable for this record">
+                          <app-icon [icon]="alertIcon" [size]="9" class="text-amber-600" />
+                          <span>Fallback</span>
+                        </span>
+                      }
+                    </div>
                   </td>
-                  <td>{{ booleanLabel(row.hasComplaint) }}</td>
+                  <td>
+                    <div class="flex flex-col gap-1">
+                      <span>{{ booleanLabel(row.hasComplaint) }}</span>
+                      @if (row.complaintText) {
+                        <span class="line-clamp-2 max-w-[12rem] text-[10px] text-rose-700 font-medium bg-rose-50/80 rounded px-1 py-0.5 border border-rose-200/50" [title]="row.complaintText">
+                          {{ row.complaintText }}
+                        </span>
+                      }
+                    </div>
+                  </td>
                   <td>{{ booleanLabel(row.hasVoice) }}</td>
                   <td>
                     <div class="flex max-w-[18rem] flex-wrap gap-1">

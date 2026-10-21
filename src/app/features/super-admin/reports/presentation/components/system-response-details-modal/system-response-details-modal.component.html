@@ -100,6 +100,21 @@
             }
             {{ scoreBadgeLabel(response.score) }}
           </span>
+
+          @if (response.scoreDerivation) {
+            <span
+              class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold border shadow-2xs"
+              [class.bg-indigo-50]="response.scoreDerivation === 'SubmissionSnapshot'"
+              [class.text-indigo-700]="response.scoreDerivation === 'SubmissionSnapshot'"
+              [class.border-indigo-200]="response.scoreDerivation === 'SubmissionSnapshot'"
+              [class.bg-amber-50]="response.scoreDerivation === 'StoredRootBaseline'"
+              [class.text-amber-800]="response.scoreDerivation === 'StoredRootBaseline'"
+              [class.border-amber-200]="response.scoreDerivation === 'StoredRootBaseline'"
+            >
+              <app-icon [icon]="historyIcon" [size]="10" />
+              {{ derivationLabel(response.scoreDerivation) }}
+            </span>
+          }
         </div>
 
         <!-- Meta Details Chips -->
@@ -170,6 +185,38 @@
           </div>
         </div>
       </header>
+
+      @if (response.isHistoricalDataVerified === false) {
+        <div
+          class="flex items-start gap-2 rounded-xl border border-amber-300 bg-amber-50/90 p-2.5 text-xs text-amber-900 shadow-2xs"
+          role="alert"
+        >
+          <app-icon [icon]="alertIcon" [size]="15" class="text-amber-600 shrink-0 mt-0.5" />
+          <div class="flex-1">
+            <p class="font-bold">Historical data unverified</p>
+            <p class="text-[11px] text-amber-800 leading-tight">
+              This response was recorded prior to schema versioning or contains reconstructed historical dependencies.
+            </p>
+          </div>
+        </div>
+      }
+
+      @if (response.historicalSurvey; as hs) {
+        <div class="rounded-xl border border-indigo-100 bg-indigo-50/50 p-2.5 text-xs">
+          <div class="flex items-center justify-between text-indigo-950 font-bold">
+            <span class="flex items-center gap-1.5">
+              <app-icon [icon]="historyIcon" [size]="13" class="text-indigo-600" />
+              Historical Schema Snapshot
+            </span>
+            <span class="rounded bg-indigo-100 px-2 py-0.5 text-[10px] text-indigo-700">
+              v{{ hs.schemaVersion || '1' }} · {{ hs.provenance }}
+            </span>
+          </div>
+          <p class="text-[11px] text-indigo-800 mt-1">
+            Historical survey contains {{ hs.questions.length }} questions and {{ hs.conditions.length }} branching conditions.
+          </p>
+        </div>
+      }
 
       <!-- KPI Stat Cards (Compact Horizontal Row) -->
       <section class="grid grid-cols-3 gap-2">

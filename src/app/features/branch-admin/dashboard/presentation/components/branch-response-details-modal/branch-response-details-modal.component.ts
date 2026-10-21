@@ -1,12 +1,14 @@
 import { DatePipe, DecimalPipe, NgTemplateOutlet } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, input, output } from '@angular/core';
 import {
+  AlertTriangle,
   Calendar,
   ChartColumnIncreasing,
   CheckCircle2,
   CircleGauge,
   FileText,
   Hash,
+  History,
   Image as ImageIcon,
   ListChecks,
   MessageSquareText,
@@ -59,12 +61,14 @@ export class BranchResponseDetailsModalComponent {
     this.toAnswerTree(this.details()?.answers ?? []),
   );
 
+  readonly alertIcon = AlertTriangle;
   readonly calendarIcon = Calendar;
   readonly chartIcon = ChartColumnIncreasing;
   readonly checkCircleIcon = CheckCircle2;
   readonly fileIcon = FileText;
   readonly gaugeIcon = CircleGauge;
   readonly hashIcon = Hash;
+  readonly historyIcon = History;
   readonly imageIcon = ImageIcon;
   readonly listChecksIcon = ListChecks;
   readonly messageIcon = MessageSquareText;
@@ -96,6 +100,16 @@ export class BranchResponseDetailsModalComponent {
     }
     const percent = score.scorePercentage ?? 0;
     return `${this.i18n.translate('branchResponseDetails.scored')} - ${percent.toFixed(1)}%`;
+  }
+
+  derivationLabel(derivation: string | undefined): string {
+    if (derivation === 'SubmissionSnapshot') {
+      return this.i18n.language() === 'ar' ? 'لقطة الإرسال' : 'Snapshot';
+    }
+    if (derivation === 'StoredRootBaseline') {
+      return this.i18n.language() === 'ar' ? 'الأساس المخزن' : 'Baseline';
+    }
+    return derivation || '';
   }
 
   questionTypeLabel(answer: BranchSurveyResponseAnswer): string {

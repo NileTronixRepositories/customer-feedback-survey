@@ -522,6 +522,20 @@ export class AuthStore {
     );
   }
 
+  canViewEvaluationSettings(): boolean {
+    return (
+      this.hasPermission('Branches.ViewEvaluationSettings') ||
+      this.isBranchAdminUserType()
+    );
+  }
+
+  canManageEvaluationSettings(): boolean {
+    return (
+      this.hasPermission('Branches.ManageEvaluationSettings') &&
+      this.isBranchAdminUserType()
+    );
+  }
+
   isBranchAdminUserType(): boolean {
     return this.userType() === 'BranchAdmin';
   }

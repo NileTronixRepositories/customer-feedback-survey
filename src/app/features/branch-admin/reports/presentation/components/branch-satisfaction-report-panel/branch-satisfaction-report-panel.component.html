@@ -1,9 +1,13 @@
 <section class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/60">
-  <div class="mb-4 flex flex-col gap-1.5 sm:flex-row sm:items-end sm:justify-between">
+  <div class="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
     <div>
       <h3 class="text-sm font-extrabold text-slate-950">{{ 'branchReports.title' | t }}</h3>
       <p class="text-[11px] font-medium text-slate-500">{{ 'branchReports.subtitle' | t }}</p>
     </div>
+    <app-score-mode-selector
+      [selectedMode]="filtersForm.controls.scoreCalculationMode.value"
+      (modeChange)="onScoreModeChange($event)"
+    />
   </div>
 
   <form
@@ -13,10 +17,7 @@
   >
     <label class="filter-label flex-[1.4] min-w-[180px]">
       <span class="filter-label-text">{{ 'branchReports.templateFilter' | t }}</span>
-      <select
-        class="filter-control filter-select"
-        formControlName="templateId"
-      >
+      <select class="filter-control filter-select" formControlName="templateId">
         <option value="">{{ 'branchReports.allTemplates' | t }}</option>
         @for (template of templates(); track template.templateId) {
           <option [value]="template.templateId">{{ templateName(template) }}</option>
@@ -26,20 +27,12 @@
 
     <label class="filter-label flex-1 min-w-[130px]">
       <span class="filter-label-text">{{ 'branchReports.from' | t }}</span>
-      <input
-        class="filter-control"
-        type="date"
-        formControlName="from"
-      />
+      <input class="filter-control" type="date" formControlName="from" />
     </label>
 
     <label class="filter-label flex-1 min-w-[130px]">
       <span class="filter-label-text">{{ 'branchReports.to' | t }}</span>
-      <input
-        class="filter-control"
-        type="date"
-        formControlName="to"
-      />
+      <input class="filter-control" type="date" formControlName="to" />
     </label>
 
     <div class="flex items-center gap-2 pt-1 sm:pt-0 shrink-0 self-end">
@@ -68,6 +61,15 @@
       {{ reportStore.error() ?? '' | t }}
     </div>
   } @else if (reportStore.report(); as report) {
+    <!-- Historical Mode Availability Warning Banner -->
+    @if (report.requestedModeAvailable === false) {
+      <div class="mt-4">
+        <app-historical-warning-banner
+          [storedBaselineCount]="report.storedBaselineResponsesCount"
+        />
+      </div>
+    }
+
     <div class="mt-4 space-y-4">
       <div class="border-b border-slate-100 pb-4">
         <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
@@ -88,14 +90,31 @@
           <div>
             <p
               class="text-3xl font-black leading-none"
-              [class.text-emerald-700]="report.overall.score >= 80"
-              [class.text-amber-700]="report.overall.score >= 60 && report.overall.score < 80"
-              [class.text-rose-700]="report.overall.score < 60"
+              [class.text-emerald-700]="report.overall.hasScoreData && report.overall.score >= 80"
+              [class.text-amber-700]="
+                report.overall.hasScoreData &&
+                report.overall.score >= 60 &&
+                report.overall.score < 80
+              "
+              [class.text-rose-700]="report.overall.hasScoreData && report.overall.score < 60"
+              [class.text-slate-400]="!report.overall.hasScoreData"
             >
-              {{ report.overall.score | number: '1.0-1' }}%
+              {{
+                scoreLabel(
+                  report.overall.satisfactionPercentage ?? report.overall.score,
+                  report.overall.hasScoreData
+                )
+              }}
             </p>
             <p class="mt-1 text-[11px] font-bold text-slate-500">
-              {{ scoreState(report.overall.score) | t }}
+              @if (
+                report.overall.hasScoreData === false ||
+                report.overall.satisfactionPercentage === null
+              ) {
+                {{ 'surveyDashboard.noData' | t }}
+              } @else {
+                {{ scoreState(report.overall.satisfactionPercentage ?? report.overall.score) | t }}
+              }
             </p>
           </div>
 
@@ -188,7 +207,10 @@
         </div>
 
         <div class="h-56 rounded-xl border border-slate-200 bg-white p-3">
-          <canvas #chartCanvas [attr.aria-label]="'branchDashboard.satisfactionTrendChart' | t"></canvas>
+          <canvas
+            #chartCanvas
+            [attr.aria-label]="'branchDashboard.satisfactionTrendChart' | t"
+          ></canvas>
         </div>
 
         @if (report.byTemplate.length > 0) {

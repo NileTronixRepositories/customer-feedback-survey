@@ -9,6 +9,13 @@ import {
   SatisfactionCategory,
 } from '../../../reports/dashboard-drill-down/domain/dashboard-drill-down.model';
 import {
+  BestRatedQuestion,
+  HistoricalAvailability,
+  HistoricalDataProvenance,
+  HistoricalSurvey,
+} from '../../../../shared/models/historical-survey.model';
+import { parseScoreCalculationMode } from '../../../../shared/models/score-calculation-mode.model';
+import {
   BranchDashboardCriticalResponse,
   BranchDashboardCriticalResponseCustomInput,
   BranchDashboardCustomInputSegment,
@@ -56,6 +63,9 @@ export class BranchDashboardService {
     if (query.groupBy) {
       params = params.set('groupBy', query.groupBy);
     }
+    if (query.scoreCalculationMode) {
+      params = params.set('scoreCalculationMode', String(query.scoreCalculationMode));
+    }
     if (query.topQuestionsCount !== undefined) {
       params = params.set('topQuestionsCount', String(query.topQuestionsCount));
     }
@@ -91,6 +101,12 @@ export class BranchDashboardService {
     }
     if (query.templateId) {
       params = params.set('templateId', query.templateId);
+    }
+    if (query.scoreCalculationMode) {
+      params = params.set('scoreCalculationMode', String(query.scoreCalculationMode));
+    }
+    if (query.scoreIncludedOnly !== undefined) {
+      params = params.set('scoreIncludedOnly', String(query.scoreIncludedOnly));
     }
     if (query.minScorePercentage !== undefined) {
       params = params.set('minScorePercentage', String(query.minScorePercentage));
@@ -132,6 +148,9 @@ export class BranchDashboardService {
       templatePerformance: this.readArray(response['templatePerformance']).map((item) =>
         this.toTemplatePerformance(item),
       ),
+      bestRatedQuestions: this.readArray(response['bestRatedQuestions']).map((item) =>
+        this.toBestRatedQuestion(item),
+      ),
       lowestRatedQuestions: this.readArray(response['lowestRatedQuestions']).map((item) =>
         this.toQuestionInsight(item),
       ),
@@ -141,6 +160,16 @@ export class BranchDashboardService {
       criticalResponses: this.readArray(response['criticalResponses']).map((item) =>
         this.toCriticalResponse(item),
       ),
+      scoreCalculationMode: parseScoreCalculationMode(response['scoreCalculationMode']),
+      classificationPolicy: this.readNullableString(response, 'classificationPolicy'),
+      hasMixedClassificationCriteria: this.readBoolean(response, 'hasMixedClassificationCriteria'),
+      storedBaselineResponsesCount: this.readNumber(response, 'storedBaselineResponsesCount'),
+      hasCompleteQuestionScoreData: this.readBoolean(response, 'hasCompleteQuestionScoreData'),
+      requestedModeAvailable:
+        response['requestedModeAvailable'] !== undefined
+          ? this.readBoolean(response, 'requestedModeAvailable')
+          : true,
+      availability: this.toAvailability(this.readRecord(response['availability'])),
     };
   }
 
@@ -154,14 +183,24 @@ export class BranchDashboardService {
   }
 
   private toSummary(summary: ApiRecord | null): BranchDashboardSummary {
+    const totalResponses = this.readNumber(summary, 'totalResponses');
+    const hasScoreData =
+      summary?.['hasScoreData'] !== undefined
+        ? this.readBoolean(summary, 'hasScoreData')
+        : totalResponses > 0;
+
     return {
       branchId: this.readString(summary, 'branchId'),
       branchNameEn: this.readString(summary, 'branchNameEn'),
       branchNameAr: this.readNullableString(summary, 'branchNameAr'),
-      totalResponses: this.readNumber(summary, 'totalResponses'),
+      totalResponses,
       scoredResponses: this.readNumber(summary, 'scoredResponses'),
       unscoredResponses: this.readNumber(summary, 'unscoredResponses'),
       averageScorePercentage: this.readNumber(summary, 'averageScorePercentage'),
+      hasScoreData,
+      satisfactionPercentage:
+        this.readNullableNumber(summary, 'satisfactionPercentage') ??
+        (hasScoreData ? this.readNullableNumber(summary, 'averageScorePercentage') : null),
       satisfiedResponses: this.readNumber(summary, 'satisfiedResponses'),
       neutralResponses: this.readNumber(summary, 'neutralResponses'),
       unhappyResponses: this.readNumber(summary, 'unhappyResponses'),
@@ -173,24 +212,51 @@ export class BranchDashboardService {
   }
 
   private toTrendPoint(point: ApiRecord): BranchDashboardTrendPoint {
+    const responsesCount = this.readNumber(point, 'responsesCount');
+    const hasScoreData =
+      point['hasScoreData'] !== undefined
+        ? this.readBoolean(point, 'hasScoreData')
+        : responsesCount > 0;
+
     return {
       period: this.readString(point, 'period'),
-      responsesCount: this.readNumber(point, 'responsesCount'),
+      responsesCount,
       averageScorePercentage: this.readNumber(point, 'averageScorePercentage'),
+      hasScoreData,
       detailsNavigation: this.toNavigation(this.readRecord(point['detailsNavigation'])),
     };
   }
 
   private toTemplatePerformance(item: ApiRecord): BranchDashboardTemplatePerformance {
+    const scoredCount = this.readNumber(item, 'scoredResponsesCount');
+    const hasScoreData =
+      item['hasScoreData'] !== undefined ? this.readBoolean(item, 'hasScoreData') : scoredCount > 0;
+
     return {
       templateId: this.readString(item, 'templateId'),
       templateNameEn: this.readString(item, 'templateNameEn'),
       templateNameAr: this.readNullableString(item, 'templateNameAr'),
       responsesCount: this.readNumber(item, 'responsesCount'),
-      scoredResponsesCount: this.readNumber(item, 'scoredResponsesCount'),
+      scoredResponsesCount: scoredCount,
       averageScorePercentage: this.readNumber(item, 'averageScorePercentage'),
+      hasScoreData,
       complaintsCount: this.readNumber(item, 'complaintsCount'),
       riskLevel: this.toRiskLevel(this.readString(item, 'riskLevel')),
+      detailsNavigation: this.toNavigation(this.readRecord(item['detailsNavigation'])),
+    };
+  }
+
+  private toBestRatedQuestion(item: ApiRecord): BestRatedQuestion {
+    return {
+      templateId: this.readString(item, 'templateId'),
+      questionId: this.readString(item, 'questionId'),
+      questionTextEn: this.readString(item, 'questionTextEn'),
+      questionTextAr: this.readNullableString(item, 'questionTextAr'),
+      questionType: this.readString(item, 'questionType'),
+      questionTypeName: this.readString(item, 'questionTypeName'),
+      answersCount: this.readNumber(item, 'answersCount'),
+      averageValue: this.readNullableNumber(item, 'averageValue'),
+      averageScorePercentage: this.readNullableNumber(item, 'averageScorePercentage'),
       detailsNavigation: this.toNavigation(this.readRecord(item['detailsNavigation'])),
     };
   }
@@ -208,6 +274,7 @@ export class BranchDashboardService {
       answersCount: this.readNumber(item, 'answersCount'),
       averageValue: this.readNumber(item, 'averageValue'),
       averageScorePercentage: this.readNumber(item, 'averageScorePercentage'),
+      hasScoreData: this.readNumber(item, 'answersCount') > 0,
       detailsNavigation: this.toNavigation(this.readRecord(item['detailsNavigation'])),
     };
   }
@@ -247,6 +314,17 @@ export class BranchDashboardService {
         this.toCriticalCustomInput(input),
       ),
       detailsNavigation: this.toNavigation(this.readRecord(item['detailsNavigation'])),
+    };
+  }
+
+  private toAvailability(item: ApiRecord | null): HistoricalAvailability | undefined {
+    if (!item) return undefined;
+    return {
+      availableTemplatesDuringPeriod: this.readNumber(item, 'availableTemplatesDuringPeriod'),
+      templatesWithResponsesCount: this.readNumber(item, 'templatesWithResponsesCount'),
+      currentlyAvailableTemplatesCount: this.readNumber(item, 'currentlyAvailableTemplatesCount'),
+      isHistoryComplete: this.readBoolean(item, 'isHistoryComplete'),
+      coverageStartsOnUtc: this.readNullableString(item, 'coverageStartsOnUtc'),
     };
   }
 
@@ -301,6 +379,18 @@ export class BranchDashboardService {
       score: this.toResponseScore(this.readRecord(response['score'])),
       customInputsCount: this.readNumber(response, 'customInputsCount'),
       answersCount: this.readNumber(response, 'answersCount'),
+      requestedModeAvailable:
+        response['requestedModeAvailable'] !== undefined
+          ? this.readBoolean(response, 'requestedModeAvailable')
+          : undefined,
+      scoreDerivation: this.readNullableString(response, 'scoreDerivation') ?? undefined,
+      historicalSurvey: (response['historicalSurvey'] as HistoricalSurvey) ?? null,
+      historicalDataProvenance:
+        (response['historicalDataProvenance'] as HistoricalDataProvenance) ?? null,
+      isHistoricalDataVerified:
+        response['isHistoricalDataVerified'] !== undefined
+          ? this.readBoolean(response, 'isHistoricalDataVerified')
+          : true,
       customInputs: this.readArray(response['customInputs']).map((input) =>
         this.toResponseCustomInput(input),
       ),
@@ -371,6 +461,11 @@ export class BranchDashboardService {
       pageSize: this.readNumber(response, 'pageSize') || 10,
       totalItems: this.readNumber(response, 'totalItems'),
       totalPages: this.readNumber(response, 'totalPages'),
+      requestedModeAvailable:
+        response['requestedModeAvailable'] !== undefined
+          ? this.readBoolean(response, 'requestedModeAvailable')
+          : undefined,
+      scoreDerivation: this.readNullableString(response, 'scoreDerivation') ?? undefined,
       data: this.readArray(response['data']).map((item) => this.toResponseListItem(item)),
     };
   }
@@ -391,6 +486,13 @@ export class BranchDashboardService {
       isScored: this.readBoolean(item, 'isScored'),
       hasComplaint: this.readBoolean(item, 'hasComplaint'),
       hasVoice: this.readBoolean(item, 'hasVoice'),
+      requestedModeAvailable:
+        item['requestedModeAvailable'] !== undefined
+          ? this.readBoolean(item, 'requestedModeAvailable')
+          : undefined,
+      scoreDerivation: this.readNullableString(item, 'scoreDerivation') ?? undefined,
+      complaintQuestionId: this.readNullableString(item, 'complaintQuestionId'),
+      complaintText: this.readNullableString(item, 'complaintText'),
       customInputsPreview: this.readArray(item['customInputsPreview']).map((input) =>
         this.toResponseCustomInputPreview(input),
       ),

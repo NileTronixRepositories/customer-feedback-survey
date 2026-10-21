@@ -25,6 +25,10 @@ import { TranslatePipe } from '../../../../../../shared/pipes/translate.pipe';
 import { ButtonComponent } from '../../../../../../shared/ui/button/button.component';
 import { PageHeaderComponent } from '../../../../../../shared/ui/page-header/page-header.component';
 import { IconComponent } from '../../../../../../shared/ui/icon/icon.component';
+import { ScoreModeSelectorComponent } from '../../../../../../shared/ui/score-mode-selector/score-mode-selector.component';
+import { HistoricalAvailabilityCardComponent } from '../../../../../../shared/ui/historical-availability-card/historical-availability-card.component';
+import { HistoricalWarningBannerComponent } from '../../../../../../shared/ui/historical-warning-banner/historical-warning-banner.component';
+import { ScoreCalculationMode } from '../../../../../../shared/models/score-calculation-mode.model';
 import {
   ReportBranchOption,
   ReportDepartmentOption,
@@ -55,6 +59,9 @@ import { DashboardSummaryActionsComponent } from '../../../../../reports/dashboa
     SatisfactionDistributionComponent,
     DashboardSummaryActionsComponent,
     TranslatePipe,
+    ScoreModeSelectorComponent,
+    HistoricalAvailabilityCardComponent,
+    HistoricalWarningBannerComponent,
   ],
   templateUrl: './system-dashboard-page.component.html',
   styleUrl: './system-dashboard-page.component.css',
@@ -84,6 +91,7 @@ export class SystemDashboardPageComponent implements OnInit {
     branchId: [''],
     departmentId: [''],
     groupBy: ['Day' as SystemReportsGroupBy],
+    scoreCalculationMode: ['RootQuestions' as ScoreCalculationMode],
   });
 
   readonly branchMetrics = computed(() => {
@@ -126,9 +134,16 @@ export class SystemDashboardPageComponent implements OnInit {
   readonly responseMetrics = computed(() => {
     const summary = this.store.dashboard()?.summary;
     if (!summary) return null;
+    const hasScoreData = summary.hasScoreData ?? summary.totalResponses > 0;
     return {
       total: summary.totalResponses,
-      averageScore: summary.averageScorePercentage,
+      averageScore:
+        summary.satisfactionPercentage !== undefined
+          ? summary.satisfactionPercentage
+          : hasScoreData !== false
+            ? summary.averageScorePercentage
+            : null,
+      hasScoreData,
       complaints: summary.complaintsCount,
       voice: summary.voiceAnswersCount,
     };
@@ -137,6 +152,18 @@ export class SystemDashboardPageComponent implements OnInit {
   ngOnInit(): void {
     this.store.loadOptions();
     this.store.loadDashboard();
+  }
+
+  onScoreModeChange(mode: ScoreCalculationMode): void {
+    this.filtersForm.controls.scoreCalculationMode.setValue(mode);
+    this.applyFilters();
+  }
+
+  scoreLabel(value: number | null | undefined, hasScoreData: boolean = true): string {
+    if (!hasScoreData || value === null || value === undefined) {
+      return 'N/A';
+    }
+    return `${value.toFixed(1)}%`;
   }
 
   toggleAdvancedFilters(): void {
@@ -151,6 +178,7 @@ export class SystemDashboardPageComponent implements OnInit {
       branchId: value.branchId || undefined,
       departmentId: value.departmentId || undefined,
       groupBy: value.groupBy,
+      scoreCalculationMode: value.scoreCalculationMode,
       criticalScoreThreshold: 40,
       criticalResponsesCount: 10,
       topTemplatesCount: 10,
@@ -164,12 +192,16 @@ export class SystemDashboardPageComponent implements OnInit {
       branchId: '',
       departmentId: '',
       groupBy: 'Day',
+      scoreCalculationMode: 'RootQuestions',
     });
     this.store.loadDashboard();
   }
 
   openDetails(response: SystemCriticalResponse): void {
-    this.openNavigation(response.detailsNavigation, this.i18n.translate('dashboardDrillDown.responseDetails'));
+    this.openNavigation(
+      response.detailsNavigation,
+      this.i18n.translate('dashboardDrillDown.responseDetails'),
+    );
   }
 
   openDrillDown(event: { title: string; navigation: DashboardDetailsNavigation }): void {
@@ -205,5 +237,4 @@ export class SystemDashboardPageComponent implements OnInit {
     if (riskLevel === 'MediumRisk') return this.i18n.translate('systemDashboard.mediumRisk');
     return this.i18n.translate('systemDashboard.healthy');
   }
-
 }

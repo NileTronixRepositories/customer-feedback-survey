@@ -10,6 +10,14 @@ import {
   DashboardSummaryActions,
   SatisfactionCategory,
 } from '../../reports/dashboard-drill-down/domain/dashboard-drill-down.model';
+import { ScoreCalculationMode } from '../../../shared/models/score-calculation-mode.model';
+import {
+  BestRatedQuestion,
+  ClassificationPolicy,
+  HistoricalAvailability,
+  HistoricalDataProvenance,
+  HistoricalSurvey,
+} from '../../../shared/models/historical-survey.model';
 
 export type AnonymousTemplateScope = 1 | 2;
 export type AnonymousTemplateCustomInputType = 1 | 2;
@@ -232,6 +240,9 @@ export interface AnonymousTemplateResponsesListQuery {
   orderSort: string;
   fromDate: string | null;
   toDate: string | null;
+  scoreCalculationMode?: ScoreCalculationMode | string;
+  scoreIncludedOnly?: boolean;
+  complaintItemsOnly?: boolean;
   minScorePercentage: number | null;
   maxScorePercentage: number | null;
   satisfactionCategory?: SatisfactionCategory;
@@ -256,6 +267,9 @@ export interface BranchAnonymousResponsesQuery {
   anonymousTemplateId?: string;
   from?: string;
   to?: string;
+  scoreCalculationMode?: ScoreCalculationMode | string;
+  scoreIncludedOnly?: boolean;
+  complaintItemsOnly?: boolean;
   minScorePercentage?: number;
   maxScorePercentage?: number;
   satisfactionCategory?: SatisfactionCategory;
@@ -292,6 +306,10 @@ export interface BranchAnonymousResponseListItem {
   isScored: boolean;
   hasComplaint: boolean;
   hasVoice: boolean;
+  requestedModeAvailable?: boolean;
+  scoreDerivation?: 'SubmissionSnapshot' | 'StoredRootBaseline' | string;
+  complaintQuestionId?: string | null;
+  complaintText?: string | null;
   customInputsPreview: readonly BranchAnonymousResponseCustomInputPreview[];
 }
 
@@ -312,11 +330,18 @@ export interface AnonymousTemplateResponseListItem {
   isScored: boolean;
   answersCount: number;
   customInputValuesCount: number;
+  requestedModeAvailable?: boolean;
+  scoreDerivation?: 'SubmissionSnapshot' | 'StoredRootBaseline' | string;
+  complaintQuestionId?: string | null;
+  complaintText?: string | null;
 }
 
 export interface AnonymousTemplateResponseDetails extends AnonymousTemplateResponseListItem {
   templateNameEn: string;
   templateNameAr: string | null;
+  historicalSurvey?: HistoricalSurvey | null;
+  historicalDataProvenance?: HistoricalDataProvenance | null;
+  isHistoricalDataVerified?: boolean;
   customInputValues: readonly AnonymousTemplateResponseCustomInputValue[];
   answers: readonly AnonymousTemplateResponseAnswer[];
 }
@@ -405,8 +430,7 @@ export interface UpdateAnonymousTemplatePayload {
   customInputs: readonly UpdateAnonymousTemplateCustomInputPayload[];
 }
 
-export interface UpdateAnonymousTemplateCustomInputPayload
-  extends CreateAnonymousTemplateCustomInputPayload {
+export interface UpdateAnonymousTemplateCustomInputPayload extends CreateAnonymousTemplateCustomInputPayload {
   customInputId: string | null;
 }
 
@@ -494,8 +518,7 @@ export interface AnonymousTemplateQuestionsSelectionApiResponse extends ScopeApi
   questions?: readonly AnonymousTemplateQuestionSelectionItemApiResponse[];
 }
 
-export interface AnonymousTemplateQuestionSelectionItemApiResponse
-  extends SelectableEditableScopeApiFields {
+export interface AnonymousTemplateQuestionSelectionItemApiResponse extends SelectableEditableScopeApiFields {
   questionId?: string | number;
   anonymousTemplateQuestionId?: string | number | null;
   branchId?: string | number | null;
@@ -589,6 +612,10 @@ export interface BranchAnonymousResponseApiResponse {
   isScored?: boolean | null;
   hasComplaint?: boolean | null;
   hasVoice?: boolean | null;
+  requestedModeAvailable?: boolean;
+  scoreDerivation?: string | null;
+  complaintQuestionId?: string | number | null;
+  complaintText?: string | null;
   customInputsPreview?: readonly BranchAnonymousResponseCustomInputPreviewApiResponse[];
 }
 
@@ -611,6 +638,13 @@ export interface AnonymousTemplateResponseApiResponse {
   isScored?: boolean;
   answersCount?: number | null;
   customInputValuesCount?: number | null;
+  requestedModeAvailable?: boolean;
+  scoreDerivation?: string | null;
+  complaintQuestionId?: string | number | null;
+  complaintText?: string | null;
+  historicalSurvey?: HistoricalSurvey | null;
+  historicalDataProvenance?: HistoricalDataProvenance | null;
+  isHistoricalDataVerified?: boolean;
   customInputs?: readonly AnonymousTemplateResponseCustomInputValueApiResponse[];
   customInputValues?: readonly AnonymousTemplateResponseCustomInputValueApiResponse[];
   answers?: readonly AnonymousTemplateResponseAnswerApiResponse[];
@@ -662,6 +696,7 @@ export interface AnonymousTemplateDashboardQuery {
   to?: string;
   anonymousTemplateId?: string;
   groupBy?: AnonymousTemplateDashboardGroupBy;
+  scoreCalculationMode?: ScoreCalculationMode | string;
   topQuestionsCount?: number;
   criticalResponsesCount?: number;
   criticalScoreThreshold?: number;
@@ -674,9 +709,17 @@ export interface AnonymousTemplateDashboardResponse {
   summaryActions: DashboardSummaryActions;
   satisfactionTrend: readonly AnonymousTemplateDashboardTrendPoint[];
   anonymousTemplatePerformance: readonly AnonymousTemplateDashboardTemplatePerformance[];
+  bestRatedQuestions: readonly BestRatedQuestion[];
   lowestRatedQuestions: readonly AnonymousTemplateDashboardQuestionInsight[];
   customInputSegments: readonly AnonymousTemplateDashboardCustomInputSegment[];
   criticalResponses: readonly AnonymousTemplateDashboardCriticalResponse[];
+  scoreCalculationMode?: ScoreCalculationMode | string;
+  classificationPolicy?: ClassificationPolicy | null;
+  hasMixedClassificationCriteria?: boolean;
+  storedBaselineResponsesCount?: number;
+  hasCompleteQuestionScoreData?: boolean;
+  requestedModeAvailable?: boolean;
+  availability?: HistoricalAvailability;
 }
 
 export interface AnonymousTemplateDashboardPeriod {
@@ -697,6 +740,8 @@ export interface AnonymousTemplateDashboardSummary {
   scoredResponses: number;
   unscoredResponses: number;
   averageScorePercentage: number;
+  hasScoreData?: boolean;
+  satisfactionPercentage?: number | null;
   satisfiedResponses: number;
   neutralResponses: number;
   unhappyResponses: number;
@@ -787,11 +832,17 @@ export interface AnonymousTemplateDashboardApiResponse {
     isDefaultPeriod?: boolean | null;
     groupBy?: AnonymousTemplateDashboardGroupBy | string | null;
   } | null;
-  summary?: Partial<AnonymousTemplateDashboardSummary> | null;
+  summary?:
+    | (Partial<AnonymousTemplateDashboardSummary> & {
+        hasScoreData?: boolean;
+        satisfactionPercentage?: number | null;
+      })
+    | null;
   charts?: DashboardCharts | null;
   summaryActions?: DashboardSummaryActions | null;
   satisfactionTrend?: readonly Partial<AnonymousTemplateDashboardTrendPoint>[];
   anonymousTemplatePerformance?: readonly Partial<AnonymousTemplateDashboardTemplatePerformance>[];
+  bestRatedQuestions?: readonly Partial<BestRatedQuestion>[];
   lowestRatedQuestions?: readonly Partial<AnonymousTemplateDashboardQuestionInsight>[];
   customInputSegments?: readonly {
     customInputId?: string | null;
@@ -812,4 +863,11 @@ export interface AnonymousTemplateDashboardApiResponse {
     customInputs?: readonly Partial<AnonymousTemplateDashboardCriticalCustomInput>[];
     detailsNavigation?: DashboardDetailsNavigation | null;
   }[];
+  scoreCalculationMode?: ScoreCalculationMode | string;
+  classificationPolicy?: ClassificationPolicy | null;
+  hasMixedClassificationCriteria?: boolean;
+  storedBaselineResponsesCount?: number;
+  hasCompleteQuestionScoreData?: boolean;
+  requestedModeAvailable?: boolean;
+  availability?: HistoricalAvailability;
 }

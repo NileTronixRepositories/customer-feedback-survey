@@ -47,6 +47,42 @@ describe('BranchTemplatesPdfReportService', () => {
     request.flush(new Blob(), { headers: { 'X-Excel-File-Name': 'report%20file.xlsx' } });
   });
 
+  it('maps scoreCalculationMode to proper backend codes 1, 2, 3', () => {
+    service
+      .downloadPdf({
+        query: {
+          fromDate: '2026-09-01',
+          toDate: '2026-09-24',
+          scoreCalculationMode: 'AllAnsweredQuestions',
+        },
+        language: 'English',
+      })
+      .subscribe();
+
+    const req1 = httpTesting.expectOne((candidate) =>
+      candidate.url.endsWith('/api/reports/templates/pdf'),
+    );
+    expect(req1.request.params.get('ScoreCalculationMode')).toBe('3');
+    req1.flush(new Blob());
+
+    service
+      .downloadPdf({
+        query: {
+          fromDate: '2026-09-01',
+          toDate: '2026-09-24',
+          scoreCalculationMode: 'LowestConditionLevel',
+        },
+        language: 'English',
+      })
+      .subscribe();
+
+    const req2 = httpTesting.expectOne((candidate) =>
+      candidate.url.endsWith('/api/reports/templates/pdf'),
+    );
+    expect(req2.request.params.get('ScoreCalculationMode')).toBe('2');
+    req2.flush(new Blob());
+  });
+
   it('decodes the PDF file name returned by the API', () => {
     let fileName: string | null = null;
     service

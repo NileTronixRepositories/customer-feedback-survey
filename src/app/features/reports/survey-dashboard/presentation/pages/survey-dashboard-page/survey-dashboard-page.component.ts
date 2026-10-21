@@ -92,6 +92,10 @@ export interface QuestionGroupSectionData {
   totalQuestionsCount: number;
 }
 
+import { BestRatedQuestionsComponent } from '../../../../../../shared/ui/best-rated-questions/best-rated-questions.component';
+import { HistoricalAvailabilityCardComponent } from '../../../../../../shared/ui/historical-availability-card/historical-availability-card.component';
+import { HistoricalWarningBannerComponent } from '../../../../../../shared/ui/historical-warning-banner/historical-warning-banner.component';
+
 Chart.register(...registerables);
 
 @Component({
@@ -108,6 +112,9 @@ Chart.register(...registerables);
     SatisfactionDistributionComponent,
     DashboardSummaryActionsComponent,
     TranslatePipe,
+    BestRatedQuestionsComponent,
+    HistoricalAvailabilityCardComponent,
+    HistoricalWarningBannerComponent,
   ],
   templateUrl: './survey-dashboard-page.component.html',
   styleUrl: './survey-dashboard-page.component.css',
@@ -156,10 +163,11 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
   readonly mapPinIcon = MapPin;
   readonly shieldCheckIcon = ShieldCheck;
   readonly userIcon = User;
-  readonly activeTableTab = signal<'templates' | 'questions' | 'critical' | 'branches' | 'all'>(
-    'templates',
-  );
-  private lastSingleTab: 'templates' | 'questions' | 'critical' | 'branches' = 'templates';
+  readonly activeTableTab = signal<
+    'templates' | 'bestQuestions' | 'questions' | 'critical' | 'branches' | 'all'
+  >('templates');
+  private lastSingleTab: 'templates' | 'bestQuestions' | 'questions' | 'critical' | 'branches' =
+    'templates';
   readonly collapsedSections = signal<ReadonlySet<string>>(new Set());
   readonly calculationOptionsOpen = signal(false);
 
@@ -191,7 +199,9 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
     from: [''],
     to: [''],
     groupBy: ['Day' as SurveyDashboardGroupBy],
-    scoreCalculationMode: ['RootQuestions' as const],
+    scoreCalculationMode: [
+      'RootQuestions' as 'RootQuestions' | 'LowestConditionLevel' | 'AllAnsweredQuestions',
+    ],
     topQuestionsCount: ['5'],
     criticalResponsesCount: ['10'],
     criticalScoreThreshold: ['40'],
@@ -498,7 +508,9 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
     void this.router.navigate(['/anonymous-templates/dashboard']);
   }
 
-  setTableTab(tab: 'templates' | 'questions' | 'critical' | 'branches' | 'all'): void {
+  setTableTab(
+    tab: 'templates' | 'bestQuestions' | 'questions' | 'critical' | 'branches' | 'all',
+  ): void {
     if (tab === 'all') {
       this.toggleAllTables();
       return;
@@ -522,7 +534,9 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
     }
   }
 
-  isSectionActive(section: 'templates' | 'questions' | 'critical' | 'branches'): boolean {
+  isSectionActive(
+    section: 'templates' | 'bestQuestions' | 'questions' | 'critical' | 'branches',
+  ): boolean {
     if (this.activeTableTab() === 'all') {
       return true;
     }
@@ -765,12 +779,15 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
     return this.i18n.translate('surveyDashboard.sourceAll');
   }
 
-  scoreLabel(value: number | null): string {
-    return value === null ? this.i18n.translate('surveyDashboard.noData') : `${value.toFixed(1)}%`;
+  scoreLabel(value: number | null, hasScoreData: boolean = true): string {
+    if (!hasScoreData || value === null) {
+      return this.i18n.translate('surveyDashboard.noData');
+    }
+    return `${value.toFixed(1)}%`;
   }
 
-  scoreClass(value: number | null): string {
-    if (value === null) return 'bg-slate-100 text-slate-600';
+  scoreClass(value: number | null, hasScoreData: boolean = true): string {
+    if (!hasScoreData || value === null) return 'bg-slate-100 text-slate-600';
     if (value >= 80) return 'bg-emerald-50 text-emerald-700';
     if (value >= 60) return 'bg-amber-50 text-amber-700';
     return 'bg-rose-50 text-rose-700';

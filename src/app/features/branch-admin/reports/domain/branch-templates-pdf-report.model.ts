@@ -2,6 +2,7 @@ export const BRANCH_TEMPLATES_PDF_REPORT_TEMPLATE_KINDS = ['Normal', 'Anonymous'
 export const BRANCH_TEMPLATES_PDF_REPORT_SCORE_CALCULATION_MODES = [
   'RootQuestions',
   'LowestConditionLevel',
+  'AllAnsweredQuestions',
 ] as const;
 export const BRANCH_TEMPLATES_PDF_REPORT_LANGUAGES = ['Arabic', 'English'] as const;
 export const BRANCH_TEMPLATES_REPORT_QUESTION_COUNTS = [5, 10, 20] as const;

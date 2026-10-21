@@ -1,0 +1,77 @@
+@if (availability(); as data) {
+  <div class="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs">
+    <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-3">
+      <div class="flex items-center gap-2">
+        <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-sky-50 text-sky-600">
+          <app-icon [icon]="calendarCheckIcon" [size]="16" />
+        </div>
+        <div>
+          <h4 class="text-xs font-bold text-slate-900">{{ 'historicalAvailability.title' | t }}</h4>
+          <p class="text-[11px] text-slate-500">{{ 'historicalAvailability.subtitle' | t }}</p>
+        </div>
+      </div>
+
+      @if (data.isHistoryComplete) {
+        <span
+          class="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700"
+        >
+          <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+          {{ 'historicalAvailability.verifiedComplete' | t }}
+        </span>
+      } @else {
+        <span
+          class="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-700"
+        >
+          <app-icon [icon]="alertIcon" [size]="10" />
+          {{ 'historicalAvailability.coveragePartial' | t }}
+        </span>
+      }
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+      <div class="p-2.5 rounded-xl bg-slate-50/70 border border-slate-100">
+        <span class="text-[10px] font-semibold text-slate-500 block">{{
+          'historicalAvailability.availableDuringPeriod' | t
+        }}</span>
+        <span class="text-base font-extrabold text-slate-800">{{
+          data.availableTemplatesDuringPeriod
+        }}</span>
+      </div>
+
+      <div class="p-2.5 rounded-xl bg-slate-50/70 border border-slate-100">
+        <span class="text-[10px] font-semibold text-slate-500 block">{{
+          'historicalAvailability.templatesWithResponses' | t
+        }}</span>
+        <span class="text-base font-extrabold text-sky-700">{{
+          data.templatesWithResponsesCount
+        }}</span>
+      </div>
+
+      <div class="p-2.5 rounded-xl bg-slate-50/70 border border-slate-100">
+        <span class="text-[10px] font-semibold text-slate-500 block">{{
+          'historicalAvailability.currentlyAvailable' | t
+        }}</span>
+        <span class="text-base font-extrabold text-slate-800">{{
+          data.currentlyAvailableTemplatesCount
+        }}</span>
+      </div>
+    </div>
+
+    @if (!data.isHistoryComplete) {
+      <div
+        class="mt-3 flex items-start gap-2 rounded-xl bg-amber-50/70 p-2.5 text-[11px] text-amber-900 border border-amber-200/50"
+      >
+        <app-icon [icon]="infoIcon" [size]="14" class="text-amber-600 shrink-0 mt-0.5" />
+        <div>
+          <span>{{ 'historicalAvailability.incompleteWarning' | t }}</span>
+          @if (data.coverageStartsOnUtc) {
+            <span class="font-semibold block mt-0.5">
+              {{ 'historicalAvailability.coverageStarts' | t }}:
+              {{ data.coverageStartsOnUtc | date: 'mediumDate' }}
+            </span>
+          }
+        </div>
+      </div>
+    }
+  </div>
+}

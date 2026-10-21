@@ -1,7 +1,10 @@
+import { ScoreCalculationMode } from '../../../../shared/models/score-calculation-mode.model';
+
 export interface BranchSatisfactionReportQuery {
   from?: string;
   to?: string;
   templateId?: string;
+  scoreCalculationMode?: ScoreCalculationMode;
 }
 
 export interface BranchSatisfactionReport {
@@ -11,6 +14,9 @@ export interface BranchSatisfactionReport {
   byTemplate: readonly SatisfactionByTemplateItem[];
   trend: readonly SatisfactionTrendItem[];
   complaints: SatisfactionComplaints;
+  scoreCalculationMode?: ScoreCalculationMode;
+  requestedModeAvailable?: boolean;
+  storedBaselineResponsesCount?: number;
 }
 
 export interface SatisfactionReportPeriod {
@@ -31,6 +37,8 @@ export interface SatisfactionOverall {
   unsatisfiedResponses: number;
   complaintsCount: number;
   voiceAnswersCount: number;
+  hasScoreData?: boolean;
+  satisfactionPercentage?: number | null;
 }
 
 export interface SatisfactionDistributionItem {
@@ -68,4 +76,7 @@ export interface BranchSatisfactionReportApiResponse {
   byTemplate?: readonly Partial<SatisfactionByTemplateItem>[];
   trend?: readonly Partial<SatisfactionTrendItem>[];
   complaints?: Partial<SatisfactionComplaints>;
+  scoreCalculationMode?: ScoreCalculationMode;
+  requestedModeAvailable?: boolean;
+  storedBaselineResponsesCount?: number;
 }

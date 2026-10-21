@@ -31,6 +31,11 @@ import { ThemeColorService } from '../../../../../core/theme/theme-color.service
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 import { ButtonComponent } from '../../../../../shared/ui/button/button.component';
 import { IconComponent } from '../../../../../shared/ui/icon/icon.component';
+import { BestRatedQuestionsComponent } from '../../../../../shared/ui/best-rated-questions/best-rated-questions.component';
+import { HistoricalAvailabilityCardComponent } from '../../../../../shared/ui/historical-availability-card/historical-availability-card.component';
+import { HistoricalWarningBannerComponent } from '../../../../../shared/ui/historical-warning-banner/historical-warning-banner.component';
+import { ScoreModeSelectorComponent } from '../../../../../shared/ui/score-mode-selector/score-mode-selector.component';
+import { ScoreCalculationMode } from '../../../../../shared/models/score-calculation-mode.model';
 import {
   AnonymousTemplateDashboardCriticalResponse,
   AnonymousTemplateDashboardCustomInputSegment,
@@ -50,7 +55,20 @@ Chart.register(...registerables);
 @Component({
   selector: 'app-anonymous-template-dashboard-page',
   standalone: true,
-  imports: [ButtonComponent, DashboardSummaryActionsComponent, DatePipe, DecimalPipe, IconComponent, ReactiveFormsModule, SatisfactionDistributionComponent, TranslatePipe],
+  imports: [
+    ButtonComponent,
+    DashboardSummaryActionsComponent,
+    DatePipe,
+    DecimalPipe,
+    IconComponent,
+    ReactiveFormsModule,
+    SatisfactionDistributionComponent,
+    TranslatePipe,
+    BestRatedQuestionsComponent,
+    HistoricalAvailabilityCardComponent,
+    HistoricalWarningBannerComponent,
+    ScoreModeSelectorComponent,
+  ],
   templateUrl: './anonymous-template-dashboard-page.component.html',
   styleUrl: './anonymous-template-dashboard-page.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -95,6 +113,7 @@ export class AnonymousTemplateDashboardPageComponent implements OnInit, OnDestro
     to: [''],
     anonymousTemplateId: [''],
     groupBy: ['Day' as 'Day' | 'Month'],
+    scoreCalculationMode: ['RootQuestions' as ScoreCalculationMode],
     criticalScoreThreshold: ['40'],
   });
 
@@ -116,7 +135,10 @@ export class AnonymousTemplateDashboardPageComponent implements OnInit, OnDestro
     effect(() => {
       const segments = this.store.dashboard()?.customInputSegments ?? [];
       const selectedName = this.selectedSegmentName();
-      if (segments.length > 0 && !segments.some((segment) => segment.customInputId === selectedName)) {
+      if (
+        segments.length > 0 &&
+        !segments.some((segment) => segment.customInputId === selectedName)
+      ) {
         this.selectedSegmentName.set(segments[0].customInputId);
       }
     });
@@ -131,6 +153,18 @@ export class AnonymousTemplateDashboardPageComponent implements OnInit, OnDestro
     this.trendChart?.destroy();
   }
 
+  onScoreModeChange(mode: ScoreCalculationMode): void {
+    this.filtersForm.controls.scoreCalculationMode.setValue(mode);
+    this.applyFilters();
+  }
+
+  scoreLabel(value: number | null | undefined, hasScoreData: boolean = true): string {
+    if (!hasScoreData || value === null || value === undefined) {
+      return 'N/A';
+    }
+    return `${value.toFixed(1)}%`;
+  }
+
   toggleAdvancedFilters(): void {
     this.advancedFiltersOpen.update((open) => !open);
   }
@@ -142,6 +176,7 @@ export class AnonymousTemplateDashboardPageComponent implements OnInit, OnDestro
       to: value.to || undefined,
       anonymousTemplateId: value.anonymousTemplateId || undefined,
       groupBy: value.groupBy,
+      scoreCalculationMode: value.scoreCalculationMode,
       criticalScoreThreshold: this.toScoreThreshold(value.criticalScoreThreshold),
       topQuestionsCount: 5,
       criticalResponsesCount: 10,
@@ -154,13 +189,17 @@ export class AnonymousTemplateDashboardPageComponent implements OnInit, OnDestro
       to: '',
       anonymousTemplateId: '',
       groupBy: 'Day',
+      scoreCalculationMode: 'RootQuestions',
       criticalScoreThreshold: '40',
     });
     this.store.load();
   }
 
   openCriticalResponse(response: AnonymousTemplateDashboardCriticalResponse): void {
-    this.openNavigation(response.detailsNavigation, this.i18n.translate('dashboardDrillDown.responseDetails'));
+    this.openNavigation(
+      response.detailsNavigation,
+      this.i18n.translate('dashboardDrillDown.responseDetails'),
+    );
   }
 
   openDrillDown(event: { title: string; navigation: DashboardDetailsNavigation }): void {
@@ -221,7 +260,10 @@ export class AnonymousTemplateDashboardPageComponent implements OnInit, OnDestro
     }
 
     return response.customInputs
-      .map((input) => `${this.localized(input.labelEnSnapshot, input.labelArSnapshot)}: ${input.value || '-'}`)
+      .map(
+        (input) =>
+          `${this.localized(input.labelEnSnapshot, input.labelArSnapshot)}: ${input.value || '-'}`,
+      )
       .join(' | ');
   }
 

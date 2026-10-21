@@ -1,3 +1,8 @@
+import {
+  HistoricalDataProvenance,
+  HistoricalSurvey,
+} from '../../../../shared/models/historical-survey.model';
+
 export type SatisfactionCategory = 'Satisfied' | 'Neutral' | 'Unhappy';
 
 export interface DashboardDetailsNavigation {
@@ -64,6 +69,10 @@ export interface DashboardResponseListItem {
   isScored: boolean;
   hasComplaint: boolean;
   hasVoice: boolean;
+  requestedModeAvailable?: boolean;
+  scoreDerivation?: 'SubmissionSnapshot' | 'StoredRootBaseline' | string;
+  complaintQuestionId?: string | null;
+  complaintText?: string | null;
   customInputsPreview: readonly DashboardResponseCustomInputPreview[];
   detailsNavigation: DashboardDetailsNavigation | null;
 }
@@ -75,6 +84,8 @@ export interface DashboardResponsesPage {
   totalPages: number;
   hasPreviousPage: boolean;
   hasNextPage: boolean;
+  requestedModeAvailable?: boolean;
+  scoreDerivation?: string;
   data: readonly DashboardResponseListItem[];
 }
 
@@ -101,6 +112,11 @@ export interface DashboardResponseDetails {
   submittedOnUtc: string;
   scorePercentage: number | null;
   isScored: boolean;
+  requestedModeAvailable?: boolean;
+  scoreDerivation?: 'SubmissionSnapshot' | 'StoredRootBaseline' | string;
+  historicalSurvey?: HistoricalSurvey | null;
+  historicalDataProvenance?: HistoricalDataProvenance | null;
+  isHistoricalDataVerified?: boolean;
   customInputs: readonly DashboardResponseDetailItem[];
   answers: readonly DashboardResponseDetailItem[];
 }

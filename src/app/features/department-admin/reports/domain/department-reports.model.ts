@@ -1,5 +1,19 @@
+import {
+  DashboardCharts,
+  DashboardDetailsNavigation,
+  DashboardSummaryActions,
+  SatisfactionCategory,
+} from '../../../reports/dashboard-drill-down/domain/dashboard-drill-down.model';
+import { ScoreCalculationMode } from '../../../../shared/models/score-calculation-mode.model';
+import {
+  BestRatedQuestion,
+  ClassificationPolicy,
+  HistoricalAvailability,
+  HistoricalSurvey,
+} from '../../../../shared/models/historical-survey.model';
+
 export type DepartmentReportsGroupBy = 'Day' | 'Month';
-export type DepartmentReportsRiskLevel = 'Healthy' | 'MediumRisk' | 'HighRisk';
+export type DepartmentReportsRiskLevel = 'Healthy' | 'MediumRisk' | 'HighRisk' | 'NoData';
 export type DepartmentReportsOrderSort = 'Newest' | 'Oldest';
 export type DepartmentResponseQuestionType =
   | 'SingleChoice'
@@ -15,6 +29,7 @@ export interface DepartmentDashboardQuery {
   to?: string;
   templateId?: string;
   groupBy?: DepartmentReportsGroupBy;
+  scoreCalculationMode?: ScoreCalculationMode;
   topQuestionsCount?: number;
   criticalResponsesCount?: number;
   criticalScoreThreshold?: number;
@@ -31,6 +46,14 @@ export interface DepartmentDashboardResponse {
   lowestRatedQuestions: readonly DepartmentQuestionInsight[];
   customInputSegments: readonly DepartmentCustomInputSegment[];
   criticalResponses: readonly DepartmentCriticalResponse[];
+  scoreCalculationMode?: ScoreCalculationMode;
+  classificationPolicy?: ClassificationPolicy | null;
+  hasMixedClassificationCriteria?: boolean;
+  storedBaselineResponsesCount?: number;
+  hasCompleteQuestionScoreData?: boolean;
+  requestedModeAvailable?: boolean;
+  availability?: HistoricalAvailability | null;
+  bestRatedQuestions?: readonly BestRatedQuestion[];
 }
 
 export interface DepartmentDashboardPeriod {
@@ -55,6 +78,8 @@ export interface DepartmentDashboardSummary {
   unhappyResponses: number;
   scoredResponses: number;
   unscoredResponses: number;
+  hasScoreData?: boolean;
+  satisfactionPercentage?: number | null;
 }
 
 export interface DepartmentDashboardTrendPoint {
@@ -165,6 +190,8 @@ export interface DepartmentOperatorResponsesQuery {
   satisfactionCategory?: SatisfactionCategory;
   isScored?: boolean;
   questionId?: string;
+  scoreCalculationMode?: ScoreCalculationMode;
+  scoreIncludedOnly?: boolean;
   customInputId?: string;
   customInputType?: string;
   customInputValue?: string;
@@ -200,6 +227,8 @@ export interface DepartmentOperatorResponseListItem {
   hasComplaint: boolean;
   hasVoice: boolean;
   customInputsPreview: readonly DepartmentResponseCustomInputPreview[];
+  requestedModeAvailable?: boolean;
+  scoreDerivation?: 'SubmissionSnapshot' | 'StoredRootBaseline' | string;
 }
 
 export interface DepartmentResponseCustomInputPreview {
@@ -220,6 +249,10 @@ export interface DepartmentResponseDetails {
   answersCount: number;
   customInputs: readonly DepartmentResponseCustomInput[];
   answers: readonly DepartmentResponseAnswer[];
+  historicalSurvey?: HistoricalSurvey | null;
+  historicalDataProvenance?: 'CapturedAtSubmission' | 'LegacyReconstructed' | 'LegacyIncomplete' | string;
+  isHistoricalDataVerified?: boolean;
+  scoreDerivation?: 'SubmissionSnapshot' | 'StoredRootBaseline' | string | null;
 }
 
 export interface DepartmentResponseBranch {
@@ -291,9 +324,3 @@ export interface DepartmentReportTemplateOption {
   branchNameAr: string | null;
   branchCode: string;
 }
-import {
-  DashboardCharts,
-  DashboardDetailsNavigation,
-  DashboardSummaryActions,
-  SatisfactionCategory,
-} from '../../../reports/dashboard-drill-down/domain/dashboard-drill-down.model';

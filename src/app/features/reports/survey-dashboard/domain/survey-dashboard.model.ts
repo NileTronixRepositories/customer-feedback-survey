@@ -4,6 +4,13 @@ import {
 } from '../../../../shared/models/question-answer.model';
 import { QuestionCondition } from '../../../../shared/models/question-condition.model';
 import {
+  BestRatedQuestion,
+  HistoricalAvailability,
+} from '../../../../shared/models/historical-survey.model';
+import {
+  ScoreCalculationMode,
+} from '../../../../shared/models/score-calculation-mode.model';
+import {
   DashboardCharts,
   DashboardDetailsNavigation,
   DashboardSummaryActions,
@@ -14,7 +21,7 @@ export type SurveyDashboardGroupBy = 'Day' | 'Month';
 export type SurveyDashboardRiskLevel = 'Healthy' | 'MediumRisk' | 'HighRisk' | string;
 export type SurveyDashboardTemplateKind = 'Authorized' | 'Anonymous';
 export type SurveyDashboardTemplateDashboardSource = 'Internal' | 'Anonymous';
-export type SurveyDashboardScoreCalculationMode = 'RootQuestions' | 'LowestConditionLevel';
+export type SurveyDashboardScoreCalculationMode = ScoreCalculationMode;
 
 export interface SurveyDashboardQuery {
   branchId?: string;
@@ -45,11 +52,15 @@ export interface SurveyDashboardQuestionGroup {
   scoredItemsCount: number;
   averageScoreValue: number | null;
   averageScorePercentage: number | null;
+  requestedModeAvailable?: boolean;
+  storedBaselineResponsesCount?: number;
+  hasCompleteQuestionScoreData?: boolean;
 }
 
 export interface SurveyDashboardComplaintsQuery extends SurveyDashboardQuery {
   pageNumber: number;
   pageSize: number;
+  searchText?: string;
 }
 
 export interface SurveyDashboardComplaint {
@@ -85,12 +96,15 @@ export interface SurveyDashboardComplaintGroup {
 export interface SurveyDashboardComplaintsPage {
   totalComplaints: number;
   responsesWithComplaints: number;
+  totalResponses?: number;
   complaintRate: number;
   currentPage: number;
   pageSize: number;
   totalItems: number;
   totalPages: number;
+  page?: readonly SurveyDashboardComplaint[];
   templateGroups: readonly SurveyDashboardComplaintGroup[];
+  appliedFilters?: SurveyDashboardAppliedFilters;
 }
 
 export interface SurveyDashboardTemplatesSelectionQuery {
@@ -113,9 +127,16 @@ export interface SurveyDashboardResponse {
   branchesSummary: readonly SurveyDashboardBranchSummary[];
   satisfactionTrend: readonly SurveyDashboardTrendPoint[];
   templatePerformance: readonly SurveyDashboardTemplatePerformance[];
+  bestRatedQuestions?: readonly BestRatedQuestion[];
   lowestRatedQuestions: readonly SurveyDashboardLowestRatedQuestion[];
   customInputSegments: readonly SurveyDashboardCustomInputSegment[];
   criticalResponses: readonly SurveyDashboardCriticalResponse[];
+  classificationPolicy?: string | null;
+  hasMixedClassificationCriteria?: boolean;
+  storedBaselineResponsesCount?: number;
+  hasCompleteQuestionScoreData?: boolean;
+  requestedModeAvailable?: boolean;
+  availability?: HistoricalAvailability | null;
 }
 
 export interface SurveyDashboardPeriod {
@@ -157,6 +178,8 @@ export interface SurveyDashboardSummary {
   internalScoredResponses: number;
   anonymousScoredResponses: number;
   averageScorePercentage: number | null;
+  hasScoreData?: boolean;
+  satisfactionPercentage?: number | null;
   satisfiedResponses: number;
   neutralResponses: number;
   unhappyResponses: number;
@@ -178,6 +201,8 @@ export interface SurveyDashboardSourceMetrics {
   responsesCount: number;
   scoredResponsesCount: number;
   averageScorePercentage: number | null;
+  hasScoreData?: boolean;
+  satisfactionPercentage?: number | null;
   satisfiedResponses: number;
   neutralResponses: number;
   unhappyResponses: number;
@@ -194,6 +219,8 @@ export interface SurveyDashboardBranchSummary {
   internalResponses: number;
   anonymousResponses: number;
   averageScorePercentage: number | null;
+  hasScoreData?: boolean;
+  satisfactionPercentage?: number | null;
   complaintsCount: number;
   voiceAnswersCount: number;
   detailsNavigation: SurveyDashboardNavigation | null;
@@ -207,6 +234,8 @@ export interface SurveyDashboardTrendPoint {
   averageScorePercentage: number | null;
   internalAverageScorePercentage: number | null;
   anonymousAverageScorePercentage: number | null;
+  hasScoreData?: boolean;
+  satisfactionPercentage?: number | null;
   detailsNavigation: SurveyDashboardNavigation | null;
 }
 
@@ -221,6 +250,8 @@ export interface SurveyDashboardTemplatePerformance {
   responsesCount: number;
   scoredResponsesCount: number;
   averageScorePercentage: number | null;
+  hasScoreData?: boolean;
+  satisfactionPercentage?: number | null;
   complaintsCount: number;
   voiceAnswersCount: number;
   riskLevel: SurveyDashboardRiskLevel;
@@ -262,6 +293,8 @@ export interface SurveyDashboardCustomInputSegmentValue {
   internalResponses: number;
   anonymousResponses: number;
   averageScorePercentage: number | null;
+  hasScoreData?: boolean;
+  satisfactionPercentage?: number | null;
   detailsNavigation: SurveyDashboardNavigation | null;
 }
 

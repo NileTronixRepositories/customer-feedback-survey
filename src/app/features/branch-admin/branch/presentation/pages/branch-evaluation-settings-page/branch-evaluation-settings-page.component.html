@@ -1,0 +1,248 @@
+<div class="space-y-6 max-w-4xl">
+  <app-page-header
+    [title]="'branchEvaluationSettings.title' | t"
+    [description]="'branchEvaluationSettings.subtitle' | t"
+  >
+    <div class="flex items-center gap-2">
+      @if (store.settings(); as settings) {
+        @if (settings.usesDefaults) {
+          <span class="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-700 border border-slate-200">
+            <app-icon [icon]="sparklesIcon" [size]="12" class="text-sky-600" />
+            {{ 'branchEvaluationSettings.usesDefaults' | t }}
+          </span>
+        } @else {
+          <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-800 border border-emerald-200">
+            <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
+            {{ 'branchEvaluationSettings.customOverride' | t }}
+          </span>
+        }
+
+        @if (settings.updatedOnUtc) {
+          <span class="text-xs text-slate-400">
+            {{ 'branchEvaluationSettings.lastUpdated' | t }}: {{ settings.updatedOnUtc | date: 'medium' }}
+          </span>
+        }
+      }
+    </div>
+  </app-page-header>
+
+  @if (store.loading()) {
+    <div class="space-y-4">
+      <div class="h-44 animate-pulse rounded-2xl bg-slate-100"></div>
+      <div class="h-44 animate-pulse rounded-2xl bg-slate-100"></div>
+    </div>
+  } @else {
+    @if (store.error(); as error) {
+      <div class="rounded-xl border border-rose-200 bg-rose-50/80 p-4 text-xs font-bold text-rose-800 shadow-2xs flex items-center gap-2">
+        <app-icon [icon]="alertCircleIcon" [size]="16" class="text-rose-500 shrink-0" />
+        <span>{{ error | t }}</span>
+      </div>
+    }
+
+    @if (store.success()) {
+      <div class="rounded-xl border border-emerald-200 bg-emerald-50/90 p-4 text-xs font-bold text-emerald-800 shadow-2xs flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <app-icon [icon]="checkCircleIcon" [size]="16" class="text-emerald-600 shrink-0" />
+          <span>{{ 'branchEvaluationSettings.saveSuccess' | t }}</span>
+        </div>
+        <button
+          type="button"
+          (click)="store.dismissSuccess()"
+          class="text-xs text-emerald-700 hover:text-emerald-900 underline"
+        >
+          {{ 'common.dismissNotification' | t }}
+        </button>
+      </div>
+    }
+
+    @if (!canManage()) {
+      <div class="rounded-xl border border-amber-200/80 bg-amber-50/70 p-4 text-xs text-amber-900 flex items-start gap-2.5">
+        <app-icon [icon]="shieldIcon" [size]="16" class="text-amber-600 shrink-0 mt-0.5" />
+        <div>
+          <p class="font-bold">{{ 'branchEvaluationSettings.viewOnlyMode' | t }}</p>
+          <p class="text-amber-800 mt-0.5">{{ 'branchEvaluationSettings.viewOnlyNotice' | t }}</p>
+        </div>
+      </div>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-6">
+      <!-- Section 1: Customer Satisfaction Thresholds -->
+      <div class="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-xs space-y-5">
+        <div class="flex items-start justify-between border-b border-slate-100 pb-4">
+          <div>
+            <h3 class="text-sm font-bold text-slate-900">{{ 'branchEvaluationSettings.satisfactionThresholds' | t }}</h3>
+            <p class="text-xs text-slate-500 mt-0.5">{{ 'branchEvaluationSettings.satisfactionThresholdsSubtitle' | t }}</p>
+          </div>
+          <span class="text-[11px] font-mono font-bold text-slate-400">0% - 100%</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <!-- Neutral Minimum -->
+          <div class="space-y-1.5">
+            <label class="block text-xs font-bold text-slate-700" for="neutralMinimum">
+              {{ 'branchEvaluationSettings.neutralMinimum' | t }}
+            </label>
+            <div class="relative">
+              <input
+                id="neutralMinimum"
+                type="number"
+                formControlName="neutralMinimum"
+                min="0"
+                max="100"
+                step="0.1"
+                [readonly]="!canManage()"
+                class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-sm font-semibold text-slate-900 transition focus:border-sky-500 focus:bg-white focus:outline-hidden"
+              />
+              <span class="absolute end-3 top-2.5 text-xs font-bold text-slate-400">%</span>
+            </div>
+            <p class="text-[11px] text-slate-400">{{ 'branchEvaluationSettings.neutralMinimumHint' | t }}</p>
+          </div>
+
+          <!-- Satisfied Minimum -->
+          <div class="space-y-1.5">
+            <label class="block text-xs font-bold text-slate-700" for="satisfiedMinimum">
+              {{ 'branchEvaluationSettings.satisfiedMinimum' | t }}
+            </label>
+            <div class="relative">
+              <input
+                id="satisfiedMinimum"
+                type="number"
+                formControlName="satisfiedMinimum"
+                min="0"
+                max="100"
+                step="0.1"
+                [readonly]="!canManage()"
+                class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-sm font-semibold text-slate-900 transition focus:border-sky-500 focus:bg-white focus:outline-hidden"
+              />
+              <span class="absolute end-3 top-2.5 text-xs font-bold text-slate-400">%</span>
+            </div>
+            <p class="text-[11px] text-slate-400">{{ 'branchEvaluationSettings.satisfiedMinimumHint' | t }}</p>
+          </div>
+        </div>
+
+        <!-- Satisfaction Range Preview Bar -->
+        <div class="rounded-xl bg-slate-50 p-3.5 border border-slate-100">
+          <span class="text-[11px] font-bold text-slate-600 block mb-2">{{ 'branchEvaluationSettings.previewClassification' | t }}</span>
+          <div class="flex h-3 w-full rounded-full overflow-hidden bg-slate-200 text-center text-[9px] font-extrabold text-white">
+            <div class="bg-rose-500 transition-all" [style.width.%]="form.get('neutralMinimum')?.value ?? 60" title="Unhappy"></div>
+            <div class="bg-amber-400 transition-all" [style.width.%]="(form.get('satisfiedMinimum')?.value ?? 80) - (form.get('neutralMinimum')?.value ?? 60)" title="Neutral"></div>
+            <div class="bg-emerald-500 transition-all" [style.width.%]="100 - (form.get('satisfiedMinimum')?.value ?? 80)" title="Satisfied"></div>
+          </div>
+          <div class="flex justify-between text-[11px] text-slate-500 mt-2 font-semibold">
+            <span class="text-rose-600 font-bold">0% {{ 'satisfaction.unhappy' | t }}</span>
+            <span class="text-amber-600 font-bold">{{ form.get('neutralMinimum')?.value }}% {{ 'satisfaction.neutral' | t }}</span>
+            <span class="text-emerald-600 font-bold">{{ form.get('satisfiedMinimum')?.value }}% {{ 'satisfaction.satisfied' | t }}</span>
+            <span>100%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 2: Branch Risk Level Thresholds -->
+      <div class="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-xs space-y-5">
+        <div class="flex items-start justify-between border-b border-slate-100 pb-4">
+          <div>
+            <h3 class="text-sm font-bold text-slate-900">{{ 'branchEvaluationSettings.riskThresholds' | t }}</h3>
+            <p class="text-xs text-slate-500 mt-0.5">{{ 'branchEvaluationSettings.riskThresholdsSubtitle' | t }}</p>
+          </div>
+          <span class="text-[11px] font-mono font-bold text-slate-400">0% - 100%</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <!-- Medium Risk Minimum -->
+          <div class="space-y-1.5">
+            <label class="block text-xs font-bold text-slate-700" for="mediumRiskMinimum">
+              {{ 'branchEvaluationSettings.mediumRiskMinimum' | t }}
+            </label>
+            <div class="relative">
+              <input
+                id="mediumRiskMinimum"
+                type="number"
+                formControlName="mediumRiskMinimum"
+                min="0"
+                max="100"
+                step="0.1"
+                [readonly]="!canManage()"
+                class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-sm font-semibold text-slate-900 transition focus:border-sky-500 focus:bg-white focus:outline-hidden"
+              />
+              <span class="absolute end-3 top-2.5 text-xs font-bold text-slate-400">%</span>
+            </div>
+            <p class="text-[11px] text-slate-400">{{ 'branchEvaluationSettings.mediumRiskMinimumHint' | t }}</p>
+          </div>
+
+          <!-- Healthy Minimum -->
+          <div class="space-y-1.5">
+            <label class="block text-xs font-bold text-slate-700" for="healthyMinimum">
+              {{ 'branchEvaluationSettings.healthyMinimum' | t }}
+            </label>
+            <div class="relative">
+              <input
+                id="healthyMinimum"
+                type="number"
+                formControlName="healthyMinimum"
+                min="0"
+                max="100"
+                step="0.1"
+                [readonly]="!canManage()"
+                class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-sm font-semibold text-slate-900 transition focus:border-sky-500 focus:bg-white focus:outline-hidden"
+              />
+              <span class="absolute end-3 top-2.5 text-xs font-bold text-slate-400">%</span>
+            </div>
+            <p class="text-[11px] text-slate-400">{{ 'branchEvaluationSettings.healthyMinimumHint' | t }}</p>
+          </div>
+        </div>
+
+        <!-- Risk Range Preview Bar -->
+        <div class="rounded-xl bg-slate-50 p-3.5 border border-slate-100">
+          <span class="text-[11px] font-bold text-slate-600 block mb-2">{{ 'branchEvaluationSettings.previewRiskClassification' | t }}</span>
+          <div class="flex h-3 w-full rounded-full overflow-hidden bg-slate-200 text-center text-[9px] font-extrabold text-white">
+            <div class="bg-rose-500 transition-all" [style.width.%]="form.get('mediumRiskMinimum')?.value ?? 50" title="High Risk"></div>
+            <div class="bg-amber-400 transition-all" [style.width.%]="(form.get('healthyMinimum')?.value ?? 75) - (form.get('mediumRiskMinimum')?.value ?? 50)" title="Medium Risk"></div>
+            <div class="bg-emerald-500 transition-all" [style.width.%]="100 - (form.get('healthyMinimum')?.value ?? 75)" title="Healthy"></div>
+          </div>
+          <div class="flex justify-between text-[11px] text-slate-500 mt-2 font-semibold">
+            <span class="text-rose-600 font-bold">0% {{ 'branchDashboard.highRisk' | t }}</span>
+            <span class="text-amber-600 font-bold">{{ form.get('mediumRiskMinimum')?.value }}% {{ 'branchDashboard.mediumRisk' | t }}</span>
+            <span class="text-emerald-600 font-bold">{{ form.get('healthyMinimum')?.value }}% {{ 'branchDashboard.healthy' | t }}</span>
+            <span>100%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Validation Errors Display -->
+      @if (validationErrors().length > 0) {
+        <div class="rounded-xl border border-rose-200 bg-rose-50 p-4 text-xs font-bold text-rose-800 space-y-1">
+          @for (err of validationErrors(); track err) {
+            <div class="flex items-center gap-2">
+              <app-icon [icon]="alertCircleIcon" [size]="14" class="text-rose-500 shrink-0" />
+              <span>{{ err | t }}</span>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- Actions -->
+      @if (canManage()) {
+        <div class="flex items-center justify-end gap-3 pt-2">
+          <app-button
+            type="button"
+            variant="secondary"
+            (pressed)="resetToEffective()"
+            [disabled]="store.saving()"
+          >
+            <app-icon [icon]="resetIcon" [size]="14" />
+            <span>{{ 'common.cancel' | t }}</span>
+          </app-button>
+
+          <app-button
+            type="submit"
+            variant="primary"
+            [disabled]="!isValid() || store.saving()"
+          >
+            <app-icon [icon]="saveIcon" [size]="14" />
+            <span>{{ store.saving() ? ('common.saving' | t) : ('common.save' | t) }}</span>
+          </app-button>
+        </div>
+      }
+    </form>
+  }
+</div>

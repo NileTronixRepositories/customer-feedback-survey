@@ -44,24 +44,72 @@
             {{ 'departmentResponseDetails.responseId' | t }}: {{ response.surveyResponseId }}
           </p>
         </div>
-        <span
-          class="w-fit shrink-0 rounded-full px-3 py-1 text-[11px] font-black"
-          [class.bg-slate-100]="!response.score.isScored"
-          [class.text-slate-600]="!response.score.isScored"
-          [class.bg-emerald-50]="response.score.isScored && response.score.scorePercentage >= 80"
-          [class.text-emerald-700]="response.score.isScored && response.score.scorePercentage >= 80"
-          [class.bg-amber-50]="response.score.isScored && response.score.scorePercentage >= 60 && response.score.scorePercentage < 80"
-          [class.text-amber-700]="response.score.isScored && response.score.scorePercentage >= 60 && response.score.scorePercentage < 80"
-          [class.bg-rose-50]="response.score.isScored && response.score.scorePercentage < 60"
-          [class.text-rose-700]="response.score.isScored && response.score.scorePercentage < 60"
-        >
-          {{
-            response.score.isScored
-              ? (response.score.scorePercentage | number: '1.0-1') + '%'
-              : ('departmentResponseDetails.unscored' | t)
-          }}
-        </span>
+        <div class="flex items-center gap-2">
+          <span
+            class="w-fit shrink-0 rounded-full px-3 py-1 text-[11px] font-black"
+            [class.bg-slate-100]="!response.score.isScored"
+            [class.text-slate-600]="!response.score.isScored"
+            [class.bg-emerald-50]="response.score.isScored && response.score.scorePercentage >= 80"
+            [class.text-emerald-700]="response.score.isScored && response.score.scorePercentage >= 80"
+            [class.bg-amber-50]="response.score.isScored && response.score.scorePercentage >= 60 && response.score.scorePercentage < 80"
+            [class.text-amber-700]="response.score.isScored && response.score.scorePercentage >= 60 && response.score.scorePercentage < 80"
+            [class.bg-rose-50]="response.score.isScored && response.score.scorePercentage < 60"
+            [class.text-rose-700]="response.score.isScored && response.score.scorePercentage < 60"
+          >
+            {{
+              response.score.isScored
+                ? (response.score.scorePercentage | number: '1.0-1') + '%'
+                : ('departmentResponseDetails.unscored' | t)
+            }}
+          </span>
+          @if (scoreDerivation(response); as derivation) {
+            <span
+              class="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-bold border shadow-2xs"
+              [class.bg-indigo-50]="derivation === 'SubmissionSnapshot'"
+              [class.text-indigo-700]="derivation === 'SubmissionSnapshot'"
+              [class.border-indigo-200]="derivation === 'SubmissionSnapshot'"
+              [class.bg-amber-50]="derivation === 'StoredRootBaseline'"
+              [class.text-amber-800]="derivation === 'StoredRootBaseline'"
+              [class.border-amber-200]="derivation === 'StoredRootBaseline'"
+            >
+              <app-icon [icon]="historyIcon" [size]="10" />
+              {{ derivationLabel(derivation) }}
+            </span>
+          }
+        </div>
       </div>
+
+      @if (response.isHistoricalDataVerified === false) {
+        <div
+          class="flex items-start gap-2 rounded-xl border border-amber-300 bg-amber-50/90 p-2.5 text-xs text-amber-900 shadow-2xs mt-3"
+          role="alert"
+        >
+          <app-icon [icon]="alertIcon" [size]="15" class="text-amber-600 shrink-0 mt-0.5" />
+          <div class="flex-1">
+            <p class="font-bold">Historical data unverified</p>
+            <p class="text-[11px] text-amber-800 leading-tight">
+              This response was recorded prior to schema versioning or contains reconstructed historical dependencies.
+            </p>
+          </div>
+        </div>
+      }
+
+      @if (response.historicalSurvey; as hs) {
+        <div class="rounded-xl border border-indigo-100 bg-indigo-50/50 p-2.5 text-xs mt-3">
+          <div class="flex items-center justify-between text-indigo-950 font-bold">
+            <span class="flex items-center gap-1.5">
+              <app-icon [icon]="historyIcon" [size]="13" class="text-indigo-600" />
+              Historical Schema Snapshot
+            </span>
+            <span class="rounded bg-indigo-100 px-2 py-0.5 text-[10px] text-indigo-700">
+              v{{ hs.schemaVersion || '1' }} · {{ hs.provenance }}
+            </span>
+          </div>
+          <p class="text-[11px] text-indigo-800 mt-1">
+            Historical survey contains {{ hs.questions.length }} questions and {{ hs.conditions.length }} branching conditions.
+          </p>
+        </div>
+      }
     </section>
 
     <section class="grid overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm shadow-slate-200/60 sm:grid-cols-4">

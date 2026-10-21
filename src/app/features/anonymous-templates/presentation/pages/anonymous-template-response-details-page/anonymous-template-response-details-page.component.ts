@@ -1,7 +1,7 @@
 import { DatePipe, DecimalPipe, Location, NgTemplateOutlet } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { ArrowLeft, ClipboardCheck, FileText, MessageSquareText } from 'lucide-angular';
+import { AlertTriangle, ArrowLeft, ClipboardCheck, FileText, History, MessageSquareText } from 'lucide-angular';
 import { environment } from '../../../../../../environments/environment';
 import {
   QUESTION_ANSWER_TYPE,
@@ -48,9 +48,11 @@ export class AnonymousTemplateResponseDetailsPageComponent implements OnInit {
   private readonly location = inject(Location);
   private readonly route = inject(ActivatedRoute);
 
+  readonly alertIcon = AlertTriangle;
   readonly arrowLeftIcon = ArrowLeft;
   readonly answerIcon = MessageSquareText;
   readonly fileTextIcon = FileText;
+  readonly historyIcon = History;
   readonly responseIcon = ClipboardCheck;
   readonly anonymousTemplateId = this.route.snapshot.paramMap.get('anonymousTemplateId') ?? '';
   readonly responseId = this.route.snapshot.paramMap.get('responseId') ?? '';
@@ -85,16 +87,26 @@ export class AnonymousTemplateResponseDetailsPageComponent implements OnInit {
     this.location.back();
   }
 
-  customInputDisplayValue(value: AnonymousTemplateResponseCustomInputValue): string {
-    if (value.displayValue.trim().length > 0) {
-      return value.displayValue;
+  derivationLabel(derivation: string | undefined): string {
+    if (derivation === 'SubmissionSnapshot') {
+      return this.i18n.language() === 'ar' ? 'لقطة الإرسال' : 'Snapshot';
+    }
+    if (derivation === 'StoredRootBaseline') {
+      return this.i18n.language() === 'ar' ? 'الأساس المخزن' : 'Baseline';
+    }
+    return derivation || '';
+  }
+
+  responseTitle(response: AnonymousTemplateResponseDetails): string {
+    const template = this.anonymousTemplatesStore.selectedTemplate();
+    const englishTitle = response.templateNameEn || template?.nameEn;
+    const arabicTitle = response.templateNameAr || template?.nameAr;
+
+    if (this.i18n.language() === 'ar') {
+      return arabicTitle || englishTitle || this.i18n.translate('anonymousTemplates.responseDetailsTitle');
     }
 
-    if (value.type === 2) {
-      return value.integerValue === null ? '-' : String(value.integerValue);
-    }
-
-    return value.stringValue?.trim() || '-';
+    return englishTitle || arabicTitle || this.i18n.translate('anonymousTemplates.responseDetailsTitle');
   }
 
   customInputLabel(value: AnonymousTemplateResponseCustomInputValue): string {
@@ -105,15 +117,15 @@ export class AnonymousTemplateResponseDetailsPageComponent implements OnInit {
     return value.labelEnSnapshot || value.labelArSnapshot || '-';
   }
 
-  responseTitle(response: AnonymousTemplateResponseDetails): string {
-    if (this.i18n.language() === 'ar') {
-      return response.templateNameAr || response.templateNameEn || this.i18n.translate('anonymousTemplates.responseDetailsTitle');
-    }
-
-    return response.templateNameEn || response.templateNameAr || this.i18n.translate('anonymousTemplates.responseDetailsTitle');
+  customInputDisplayValue(value: AnonymousTemplateResponseCustomInputValue): string {
+    return value.stringValue?.trim() || '-';
   }
 
   answerQuestionText(answer: AnonymousTemplateResponseAnswer): string {
+    return this.answerPrimaryText(answer);
+  }
+
+  answerPrimaryText(answer: AnonymousTemplateResponseAnswer): string {
     if (this.i18n.language() === 'ar') {
       return answer.questionTextAr || answer.questionTextEn || '-';
     }

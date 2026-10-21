@@ -8,6 +8,13 @@ import {
   DashboardSummaryActions,
   SatisfactionCategory,
 } from '../../../reports/dashboard-drill-down/domain/dashboard-drill-down.model';
+import { ScoreCalculationMode } from '../../../../shared/models/score-calculation-mode.model';
+import {
+  BestRatedQuestion,
+  ClassificationPolicy,
+  HistoricalAvailability,
+  HistoricalSurvey,
+} from '../../../../shared/models/historical-survey.model';
 import {
   DepartmentCriticalResponse,
   DepartmentCriticalResponseCustomInput,
@@ -55,6 +62,9 @@ export class DepartmentReportsService {
     if (query.to) params = params.set('to', query.to);
     if (query.templateId) params = params.set('templateId', query.templateId);
     if (query.groupBy) params = params.set('groupBy', query.groupBy);
+    if (query.scoreCalculationMode) {
+      params = params.set('scoreCalculationMode', query.scoreCalculationMode);
+    }
     if (query.topQuestionsCount !== undefined) {
       params = params.set('topQuestionsCount', String(query.topQuestionsCount));
     }
@@ -98,6 +108,12 @@ export class DepartmentReportsService {
     if (query.satisfactionCategory) params = params.set('satisfactionCategory', query.satisfactionCategory);
     if (query.isScored !== undefined) params = params.set('isScored', String(query.isScored));
     if (query.questionId) params = params.set('questionId', query.questionId);
+    if (query.scoreCalculationMode) {
+      params = params.set('scoreCalculationMode', query.scoreCalculationMode);
+    }
+    if (query.scoreIncludedOnly !== undefined) {
+      params = params.set('scoreIncludedOnly', String(query.scoreIncludedOnly));
+    }
     if (query.customInputId) params = params.set('customInputId', query.customInputId);
     if (query.customInputType) params = params.set('customInputType', query.customInputType);
     if (query.customInputValue) params = params.set('customInputValue', query.customInputValue);
@@ -154,6 +170,17 @@ export class DepartmentReportsService {
       criticalResponses: this.readArray(response['criticalResponses']).map((item) =>
         this.toCriticalResponse(item),
       ),
+      scoreCalculationMode: (response['scoreCalculationMode'] as ScoreCalculationMode) ?? 'RootQuestions',
+      classificationPolicy: (response['classificationPolicy'] as ClassificationPolicy) ?? null,
+      hasMixedClassificationCriteria: Boolean(response['hasMixedClassificationCriteria']),
+      storedBaselineResponsesCount: Number(response['storedBaselineResponsesCount'] ?? 0),
+      hasCompleteQuestionScoreData: Boolean(response['hasCompleteQuestionScoreData']),
+      requestedModeAvailable:
+        response['requestedModeAvailable'] === undefined ? true : Boolean(response['requestedModeAvailable']),
+      availability: response['availability'] ? this.toAvailability(this.readRecord(response['availability'])) : null,
+      bestRatedQuestions: this.readArray(response['bestRatedQuestions']).map((item) =>
+        this.toBestRatedQuestion(item),
+      ),
     };
   }
 
@@ -182,6 +209,11 @@ export class DepartmentReportsService {
       unhappyResponses: this.readNumber(summary, 'unhappyResponses'),
       scoredResponses: this.readNumber(summary, 'scoredResponses'),
       unscoredResponses: this.readNumber(summary, 'unscoredResponses'),
+      hasScoreData: summary?.['hasScoreData'] === undefined ? true : Boolean(summary['hasScoreData']),
+      satisfactionPercentage:
+        summary?.['satisfactionPercentage'] !== undefined && summary['satisfactionPercentage'] !== null
+          ? Number(summary['satisfactionPercentage'])
+          : null,
     };
   }
 
@@ -367,6 +399,9 @@ export class DepartmentReportsService {
       customInputsPreview: this.readArray(item['customInputsPreview']).map((input) =>
         this.toCustomInputPreview(input),
       ),
+      requestedModeAvailable:
+        item['requestedModeAvailable'] === undefined ? true : Boolean(item['requestedModeAvailable']),
+      scoreDerivation: (item['scoreDerivation'] as string) ?? undefined,
     };
   }
 
@@ -393,6 +428,11 @@ export class DepartmentReportsService {
         this.toResponseCustomInput(input),
       ),
       answers: this.readArray(response['answers']).map((answer) => this.toResponseAnswer(answer)),
+      historicalSurvey: (response['historicalSurvey'] as HistoricalSurvey) ?? null,
+      historicalDataProvenance: (response['historicalDataProvenance'] as string) ?? undefined,
+      isHistoricalDataVerified:
+        response['isHistoricalDataVerified'] === undefined ? true : Boolean(response['isHistoricalDataVerified']),
+      scoreDerivation: (response['scoreDerivation'] as string) ?? null,
     };
   }
 
@@ -469,6 +509,32 @@ export class DepartmentReportsService {
     };
   }
 
+  private toAvailability(record: ApiRecord | null): HistoricalAvailability | null {
+    if (!record) return null;
+    return {
+      availableTemplatesDuringPeriod: Number(record['availableTemplatesDuringPeriod'] ?? 0),
+      templatesWithResponsesCount: Number(record['templatesWithResponsesCount'] ?? 0),
+      currentlyAvailableTemplatesCount: Number(record['currentlyAvailableTemplatesCount'] ?? 0),
+      isHistoryComplete: Boolean(record['isHistoryComplete']),
+      coverageStartsOnUtc: (record['coverageStartsOnUtc'] as string) ?? null,
+    };
+  }
+
+  private toBestRatedQuestion(item: ApiRecord): BestRatedQuestion {
+    return {
+      templateId: this.readString(item, 'templateId'),
+      questionId: this.readString(item, 'questionId'),
+      questionTextEn: this.readString(item, 'questionTextEn'),
+      questionTextAr: this.readNullableString(item, 'questionTextAr'),
+      questionType: this.readString(item, 'questionType'),
+      questionTypeName: this.readString(item, 'questionTypeName'),
+      answersCount: this.readNumber(item, 'answersCount'),
+      averageValue: this.readNumber(item, 'averageValue'),
+      averageScorePercentage: this.readNumber(item, 'averageScorePercentage'),
+      detailsNavigation: this.toNavigation(this.readRecord(item['detailsNavigation'])),
+    };
+  }
+
   private readAnswerChildren(item: ApiRecord): ApiRecord[] {
     const children = this.readArray(item['children']);
     if (children.length > 0) {
@@ -495,7 +561,7 @@ export class DepartmentReportsService {
   }
 
   private toRiskLevel(value: string): DepartmentReportsRiskLevel {
-    if (value === 'HighRisk' || value === 'MediumRisk' || value === 'Healthy') {
+    if (value === 'HighRisk' || value === 'MediumRisk' || value === 'Healthy' || value === 'NoData') {
       return value;
     }
 

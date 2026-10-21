@@ -1,6 +1,7 @@
 import { DatePipe, DecimalPipe, NgTemplateOutlet } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, input, output } from '@angular/core';
 import {
+  AlertTriangle,
   Building2,
   Calendar,
   ChartColumnIncreasing,
@@ -8,6 +9,7 @@ import {
   CircleGauge,
   FileText,
   Hash,
+  History,
   Image as ImageIcon,
   ListChecks,
   MessageSquareText,
@@ -43,6 +45,7 @@ interface SystemAnswerTreeNode {
 export class SystemResponseDetailsModalComponent {
   private readonly i18n = inject(I18nService);
 
+  readonly alertIcon = AlertTriangle;
   readonly buildingIcon = Building2;
   readonly calendarIcon = Calendar;
   readonly chartIcon = ChartColumnIncreasing;
@@ -50,6 +53,7 @@ export class SystemResponseDetailsModalComponent {
   readonly gaugeIcon = CircleGauge;
   readonly fileIcon = FileText;
   readonly hashIcon = Hash;
+  readonly historyIcon = History;
   readonly imageIcon = ImageIcon;
   readonly listChecksIcon = ListChecks;
   readonly messageIcon = MessageSquareText;
@@ -159,6 +163,16 @@ export class SystemResponseDetailsModalComponent {
     if (score.scorePercentage >= 80) return this.i18n.translate('systemResponseDetails.healthy');
     if (score.scorePercentage >= 60) return this.i18n.translate('systemResponseDetails.neutral');
     return this.i18n.translate('systemResponseDetails.critical');
+  }
+
+  derivationLabel(derivation: string | undefined): string {
+    if (derivation === 'SubmissionSnapshot') {
+      return this.i18n.language() === 'ar' ? 'لقطة الإرسال' : 'Snapshot';
+    }
+    if (derivation === 'StoredRootBaseline') {
+      return this.i18n.language() === 'ar' ? 'الأساس المخزن' : 'Baseline';
+    }
+    return derivation || '';
   }
 
   voiceUrl(answer: SystemResponseAnswer): string {

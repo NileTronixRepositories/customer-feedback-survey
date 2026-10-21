@@ -85,6 +85,7 @@ export class DepartmentDashboardStore {
       to: query.to || undefined,
       templateId: query.templateId || undefined,
       groupBy: query.groupBy ?? 'Day',
+      scoreCalculationMode: query.scoreCalculationMode ?? 'RootQuestions',
       topQuestionsCount: this.normalizePositiveInteger(query.topQuestionsCount, 5),
       criticalResponsesCount: this.normalizePositiveInteger(query.criticalResponsesCount, 10),
       criticalScoreThreshold: this.normalizeScore(query.criticalScoreThreshold, 40),

@@ -18,6 +18,9 @@ import { ThemeColorService } from '../../../../../../core/theme/theme-color.serv
 import { TranslatePipe } from '../../../../../../shared/pipes/translate.pipe';
 import { ButtonComponent } from '../../../../../../shared/ui/button/button.component';
 import { IconComponent } from '../../../../../../shared/ui/icon/icon.component';
+import { ScoreModeSelectorComponent } from '../../../../../../shared/ui/score-mode-selector/score-mode-selector.component';
+import { HistoricalWarningBannerComponent } from '../../../../../../shared/ui/historical-warning-banner/historical-warning-banner.component';
+import { ScoreCalculationMode } from '../../../../../../shared/models/score-calculation-mode.model';
 import { BranchAdminTemplate } from '../../../../branch/domain/branch-admin-branch.model';
 import {
   SatisfactionByTemplateItem,
@@ -30,7 +33,15 @@ Chart.register(...registerables);
 @Component({
   selector: 'app-branch-satisfaction-report-panel',
   standalone: true,
-  imports: [ButtonComponent, DecimalPipe, IconComponent, ReactiveFormsModule, TranslatePipe],
+  imports: [
+    ButtonComponent,
+    DecimalPipe,
+    IconComponent,
+    ReactiveFormsModule,
+    TranslatePipe,
+    ScoreModeSelectorComponent,
+    HistoricalWarningBannerComponent,
+  ],
   templateUrl: './branch-satisfaction-report-panel.component.html',
   styleUrl: './branch-satisfaction-report-panel.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -55,6 +66,7 @@ export class BranchSatisfactionReportPanelComponent implements OnInit, OnDestroy
     templateId: [''],
     from: [''],
     to: [''],
+    scoreCalculationMode: ['RootQuestions' as ScoreCalculationMode],
   });
 
   constructor() {
@@ -81,12 +93,18 @@ export class BranchSatisfactionReportPanelComponent implements OnInit, OnDestroy
     this.chart?.destroy();
   }
 
+  onScoreModeChange(mode: ScoreCalculationMode): void {
+    this.filtersForm.controls.scoreCalculationMode.setValue(mode);
+    this.applyFilters();
+  }
+
   applyFilters(): void {
     const value = this.filtersForm.getRawValue();
     this.reportStore.load({
       templateId: value.templateId || undefined,
       from: value.from || undefined,
       to: value.to || undefined,
+      scoreCalculationMode: value.scoreCalculationMode,
     });
   }
 
@@ -95,8 +113,16 @@ export class BranchSatisfactionReportPanelComponent implements OnInit, OnDestroy
       templateId: '',
       from: '',
       to: '',
+      scoreCalculationMode: 'RootQuestions',
     });
     this.reportStore.load({});
+  }
+
+  scoreLabel(value: number | null, hasScoreData: boolean = true): string {
+    if (!hasScoreData || value === null) {
+      return 'N/A';
+    }
+    return `${value.toFixed(1)}%`;
   }
 
   templateName(template: BranchAdminTemplate): string {

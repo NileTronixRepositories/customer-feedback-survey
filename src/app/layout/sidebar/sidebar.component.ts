@@ -15,6 +15,7 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   ScanQrCode,
+  Sliders,
   UserCog,
   UsersRound,
 } from 'lucide-angular';
@@ -43,7 +44,8 @@ interface MenuItem {
     | 'surveyDashboard'
     | 'systemReports'
     | 'departmentReports'
-    | 'branchDashboard';
+    | 'branchDashboard'
+    | 'evaluationSettings';
   exact?: boolean;
 }
 
@@ -87,6 +89,14 @@ const MENU_ITEMS: readonly MenuItem[] = [
     icon: FileText,
     roles: [],
     feature: 'branchDashboard',
+    exact: true,
+  },
+  {
+    labelKey: 'branchEvaluationSettings.navTitle',
+    path: '/branch-admin/evaluation-settings',
+    icon: Sliders,
+    roles: [],
+    feature: 'evaluationSettings',
     exact: true,
   },
   {
@@ -160,33 +170,38 @@ const MENU_ITEMS: readonly MenuItem[] = [
     labelKey: 'nav.globalQuestionGroups',
     path: '/global-question-groups',
     icon: ListTree,
-    roles: [],
+    roles: ['SUPER_ADMIN'],
     feature: 'globalQuestionGroups',
+    exact: true,
   },
   {
     labelKey: 'nav.globalQuestions',
     path: '/global-questions',
     icon: BadgeQuestionMark,
-    roles: [],
+    roles: ['SUPER_ADMIN'],
     feature: 'globalQuestions',
+    exact: true,
   },
   {
-    labelKey: 'nav.surveys',
-    path: '/survey',
-    icon: ClipboardList,
-    roles: [],
-  },
-  {
-    labelKey: 'operators.title',
-    path: '/operators',
+    labelKey: 'nav.users',
+    path: '/users',
     icon: UserCog,
-    roles: ['SUPER_ADMIN', 'DEPARTMENT_ADMIN'],
+    roles: ['SUPER_ADMIN'],
+    exact: true,
   },
   {
-    labelKey: 'operatorTemplates.title',
+    labelKey: 'nav.operators',
+    path: '/operators',
+    icon: UsersRound,
+    roles: ['DEPARTMENT_ADMIN'],
+    exact: true,
+  },
+  {
+    labelKey: 'nav.operatorWorkspace',
     path: '/operator/templates',
-    icon: FileText,
+    icon: ClipboardList,
     roles: ['OPERATOR'],
+    exact: true,
   },
 ];
 
@@ -257,6 +272,9 @@ export class SidebarComponent {
     }
     if (feature === 'branchDashboard') {
       return this.authStore.canAccessBranchDashboard();
+    }
+    if (feature === 'evaluationSettings') {
+      return this.authStore.canViewEvaluationSettings();
     }
     return false;
   }

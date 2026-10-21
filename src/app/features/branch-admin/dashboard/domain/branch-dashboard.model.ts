@@ -1,3 +1,18 @@
+import { ScoreCalculationMode } from '../../../../shared/models/score-calculation-mode.model';
+import {
+  BestRatedQuestion,
+  ClassificationPolicy,
+  HistoricalAvailability,
+  HistoricalDataProvenance,
+  HistoricalSurvey,
+} from '../../../../shared/models/historical-survey.model';
+import {
+  DashboardCharts,
+  DashboardDetailsNavigation,
+  DashboardSummaryActions,
+  SatisfactionCategory,
+} from '../../../reports/dashboard-drill-down/domain/dashboard-drill-down.model';
+
 export type BranchDashboardGroupBy = 'Day' | 'Month';
 export type BranchDashboardRiskLevel = 'Healthy' | 'MediumRisk' | 'HighRisk';
 export type BranchSurveyResponseQuestionType =
@@ -14,6 +29,7 @@ export interface BranchDashboardQuery {
   to?: string;
   templateId?: string;
   groupBy?: BranchDashboardGroupBy;
+  scoreCalculationMode?: ScoreCalculationMode | string;
   topQuestionsCount?: number;
   criticalResponsesCount?: number;
   criticalScoreThreshold?: number;
@@ -23,6 +39,8 @@ export interface BranchSurveyResponsesQuery {
   from?: string;
   to?: string;
   templateId?: string;
+  scoreCalculationMode?: ScoreCalculationMode | string;
+  scoreIncludedOnly?: boolean;
   minScorePercentage?: number;
   maxScorePercentage?: number;
   hasComplaint?: boolean;
@@ -44,6 +62,8 @@ export interface BranchSurveyResponsesPagination {
   pageSize: number;
   totalItems: number;
   totalPages: number;
+  requestedModeAvailable?: boolean;
+  scoreDerivation?: 'SubmissionSnapshot' | 'StoredRootBaseline' | string;
   data: readonly BranchSurveyResponseListItem[];
 }
 
@@ -62,6 +82,10 @@ export interface BranchSurveyResponseListItem {
   isScored: boolean;
   hasComplaint: boolean;
   hasVoice: boolean;
+  requestedModeAvailable?: boolean;
+  scoreDerivation?: 'SubmissionSnapshot' | 'StoredRootBaseline' | string;
+  complaintQuestionId?: string | null;
+  complaintText?: string | null;
   customInputsPreview: readonly BranchSurveyResponseCustomInputPreview[];
 }
 
@@ -79,9 +103,17 @@ export interface BranchDashboardResponse {
   summaryActions: DashboardSummaryActions;
   satisfactionTrend: readonly BranchDashboardTrendPoint[];
   templatePerformance: readonly BranchDashboardTemplatePerformance[];
+  bestRatedQuestions: readonly BestRatedQuestion[];
   lowestRatedQuestions: readonly BranchDashboardQuestionInsight[];
   customInputSegments: readonly BranchDashboardCustomInputSegment[];
   criticalResponses: readonly BranchDashboardCriticalResponse[];
+  scoreCalculationMode?: ScoreCalculationMode | string;
+  classificationPolicy?: ClassificationPolicy | null;
+  hasMixedClassificationCriteria?: boolean;
+  storedBaselineResponsesCount?: number;
+  hasCompleteQuestionScoreData?: boolean;
+  requestedModeAvailable?: boolean;
+  availability?: HistoricalAvailability;
 }
 
 export interface BranchDashboardPeriod {
@@ -99,6 +131,8 @@ export interface BranchDashboardSummary {
   scoredResponses: number;
   unscoredResponses: number;
   averageScorePercentage: number;
+  hasScoreData?: boolean;
+  satisfactionPercentage?: number | null;
   satisfiedResponses: number;
   neutralResponses: number;
   unhappyResponses: number;
@@ -112,6 +146,7 @@ export interface BranchDashboardTrendPoint {
   period: string;
   responsesCount: number;
   averageScorePercentage: number;
+  hasScoreData?: boolean;
   detailsNavigation: DashboardDetailsNavigation | null;
 }
 
@@ -122,6 +157,7 @@ export interface BranchDashboardTemplatePerformance {
   responsesCount: number;
   scoredResponsesCount: number;
   averageScorePercentage: number;
+  hasScoreData?: boolean;
   complaintsCount: number;
   riskLevel: BranchDashboardRiskLevel;
   detailsNavigation: DashboardDetailsNavigation | null;
@@ -139,6 +175,7 @@ export interface BranchDashboardQuestionInsight {
   answersCount: number;
   averageValue: number;
   averageScorePercentage: number;
+  hasScoreData?: boolean;
   detailsNavigation: DashboardDetailsNavigation | null;
 }
 
@@ -189,6 +226,11 @@ export interface BranchSurveyResponseDetails {
   score: BranchSurveyResponseScore;
   customInputsCount: number;
   answersCount: number;
+  requestedModeAvailable?: boolean;
+  scoreDerivation?: 'SubmissionSnapshot' | 'StoredRootBaseline' | string;
+  historicalSurvey?: HistoricalSurvey | null;
+  historicalDataProvenance?: HistoricalDataProvenance | null;
+  isHistoricalDataVerified?: boolean;
   customInputs: readonly BranchSurveyResponseCustomInput[];
   answers: readonly BranchSurveyResponseAnswer[];
 }
@@ -233,9 +275,3 @@ export interface BranchSurveyResponseAnswer {
   displayValue: string;
   children: readonly BranchSurveyResponseAnswer[];
 }
-import {
-  DashboardCharts,
-  DashboardDetailsNavigation,
-  DashboardSummaryActions,
-  SatisfactionCategory,
-} from '../../../reports/dashboard-drill-down/domain/dashboard-drill-down.model';

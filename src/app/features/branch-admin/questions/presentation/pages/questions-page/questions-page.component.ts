@@ -50,7 +50,6 @@ import {
 import { TranslatePipe } from '../../../../../../shared/pipes/translate.pipe';
 import { ButtonComponent } from '../../../../../../shared/ui/button/button.component';
 import { IconComponent } from '../../../../../../shared/ui/icon/icon.component';
-import { InputComponent } from '../../../../../../shared/ui/input/input.component';
 import { ModalComponent } from '../../../../../../shared/ui/modal/modal.component';
 import { PageHeaderComponent } from '../../../../../../shared/ui/page-header/page-header.component';
 import {
@@ -127,7 +126,6 @@ type QuestionOptionFormValue = QuestionFormValue['options'][number];
     ButtonComponent,
     DatePipe,
     IconComponent,
-    InputComponent,
     ModalComponent,
     PageHeaderComponent,
     QuestionAnswersAccordionComponent,
@@ -279,9 +277,12 @@ export class QuestionsPageComponent implements OnInit {
       return;
     }
 
-    this.questionsStore.createQuestion(this.toCreatePayload(this.questionForm.getRawValue()), () => {
-      this.closeCreateQuestion();
-    });
+    this.questionsStore.createQuestion(
+      this.toCreatePayload(this.questionForm.getRawValue()),
+      () => {
+        this.closeCreateQuestion();
+      },
+    );
   }
 
   openEditQuestion(event: MouseEvent, question: QuestionListItem): void {
@@ -947,7 +948,9 @@ export class QuestionsPageComponent implements OnInit {
     return Math.min(Math.max(pageSize, 1), 100);
   }
 
-  private singleChoiceAnswerItems(question: QuestionListItem): readonly QuestionAnswerAccordionItem[] {
+  private singleChoiceAnswerItems(
+    question: QuestionListItem,
+  ): readonly QuestionAnswerAccordionItem[] {
     const isArabic = this.i18n.language() === 'ar';
 
     return [...question.options]
@@ -962,7 +965,11 @@ export class QuestionsPageComponent implements OnInit {
     isArabic: boolean,
   ): QuestionAnswerAccordionItem {
     const label = this.localizedText(option.textEn, option.textAr ?? '', isArabic);
-    const secondaryLabel = this.secondaryLocalizedText(option.textEn, option.textAr ?? '', isArabic);
+    const secondaryLabel = this.secondaryLocalizedText(
+      option.textEn,
+      option.textAr ?? '',
+      isArabic,
+    );
 
     return {
       id: option.optionId || `${option.order}-${index}`,
@@ -980,7 +987,11 @@ export class QuestionsPageComponent implements OnInit {
     return englishText || arabicText || '-';
   }
 
-  private secondaryLocalizedText(englishText: string, arabicText: string, isArabic: boolean): string {
+  private secondaryLocalizedText(
+    englishText: string,
+    arabicText: string,
+    isArabic: boolean,
+  ): string {
     if (isArabic) {
       return englishText;
     }

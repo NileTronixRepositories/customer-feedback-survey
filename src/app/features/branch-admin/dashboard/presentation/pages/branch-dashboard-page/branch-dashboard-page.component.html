@@ -10,7 +10,11 @@
         {{ 'branchDashboard.eyebrow' | t }}
       </p>
     </div>
-    <div class="flex items-center gap-2">
+    <div class="flex flex-wrap items-center gap-2">
+      <app-score-mode-selector
+        [selectedMode]="filtersForm.controls.scoreCalculationMode.value"
+        (modeChange)="onScoreModeChange($event)"
+      />
       <button class="filter-toggle-btn" type="button" (click)="openAllResponses()">
         <app-icon [icon]="chartIcon" [size]="14" />
         {{ 'branchDashboard.viewAllResponses' | t }}
@@ -72,6 +76,17 @@
               @for (template of branchStore.branch()?.templates ?? []; track template.templateId) {
                 <option [value]="template.templateId">{{ templateName(template) }}</option>
               }
+            </select>
+          </label>
+
+          <label class="filter-label flex-1 min-w-[160px]">
+            <span class="filter-label-text">{{ 'branchDashboard.scoreCalculationMode' | t }}</span>
+            <select class="filter-control filter-select" formControlName="scoreCalculationMode">
+              <option value="RootQuestions">Root Questions / الأسئلة الرئيسية</option>
+              <option value="LowestConditionLevel">Lowest Condition Level / أعمق مستوى شرطي</option>
+              <option value="AllAnsweredQuestions">
+                All Answered Questions / جميع الأسئلة المجاب عنها
+              </option>
             </select>
           </label>
 
@@ -156,6 +171,18 @@
         </p>
       </section>
     } @else {
+      <!-- Historical Mode Availability Warning Banner -->
+      @if (dashboard.requestedModeAvailable === false) {
+        <app-historical-warning-banner
+          [storedBaselineCount]="dashboard.storedBaselineResponsesCount"
+        />
+      }
+
+      <!-- Historical Availability Metrics Card -->
+      @if (dashboard.availability) {
+        <app-historical-availability-card [availability]="dashboard.availability" />
+      }
+
       <!-- Premium Creative Dashboard Widget Panel -->
       <section
         class="grid overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm shadow-slate-200/60 motion-safe:[animation:branch-dashboard-rise_.5s_ease-out_both] lg:grid-cols-[minmax(22rem,0.8fr)_minmax(0,1.2fr)]"
@@ -208,18 +235,31 @@
                     cx="50"
                     cy="50"
                     r="38"
-                    [attr.stroke]="scoreColor()"
+                    [attr.stroke]="dashboard.summary.hasScoreData ? scoreColor() : '#cbd5e1'"
                     stroke-width="5.5"
                     fill="transparent"
                     [attr.stroke-dasharray]="strokeDashArray"
-                    [attr.stroke-dashoffset]="strokeDashOffset()"
+                    [attr.stroke-dashoffset]="
+                      dashboard.summary.hasScoreData ? strokeDashOffset() : strokeDashArray
+                    "
                     stroke-linecap="round"
                     class="transition-all duration-1000 ease-out"
                   />
                 </svg>
                 <div class="absolute flex flex-col items-center justify-center">
-                  <span class="text-2xl font-black tracking-tight text-slate-900 leading-none">
-                    {{ averageScore() | number: '1.0-1' }}%
+                  <span
+                    class="text-2xl font-black tracking-tight text-slate-900 leading-none"
+                    [class.text-slate-400]="
+                      dashboard.summary.hasScoreData === false ||
+                      dashboard.summary.satisfactionPercentage === null
+                    "
+                  >
+                    {{
+                      scoreLabel(
+                        dashboard.summary.satisfactionPercentage ?? averageScore(),
+                        dashboard.summary.hasScoreData
+                      )
+                    }}
                   </span>
                   <span class="text-[8px] font-black uppercase tracking-widest text-slate-400 mt-1">
                     {{ 'branchDashboard.score' | t }}
@@ -541,7 +581,9 @@
         </div>
       </section>
 
-      <section class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/60">
+      <section
+        class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/60"
+      >
         <h2 class="mb-4 text-sm font-extrabold text-slate-950">
           {{ 'dashboardDrillDown.satisfactionDistribution' | t }}
         </h2>
@@ -630,7 +672,9 @@
                   @for (item of dashboard.templatePerformance; track item.templateId) {
                     <tr
                       class="cursor-pointer transition hover:bg-slate-50"
-                      (click)="openNavigation(item.detailsNavigation, performanceTemplateName(item))"
+                      (click)="
+                        openNavigation(item.detailsNavigation, performanceTemplateName(item))
+                      "
                     >
                       <td class="px-3 py-3">
                         <p
@@ -751,8 +795,14 @@
         </article>
       </section>
 
-      <!-- Lowest Rated Questions, Custom Input Segments, and Critical Feed -->
-      <section class="grid items-start gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+      <!-- Question Rankings: Best Rated and Lowest Rated (Friction) -->
+      <section class="grid items-start gap-4 xl:grid-cols-2">
+        <!-- Best Rated Questions -->
+        <app-best-rated-questions
+          [questions]="dashboard.bestRatedQuestions"
+          (navigationSelected)="openDrillDown($event)"
+        />
+
         <!-- Friction Point Inspector -->
         <article
           class="min-w-0 rounded-xl border border-slate-200 bg-white p-3 shadow-sm shadow-slate-200/50 sm:p-4"
@@ -900,10 +950,7 @@
                 } @else {
                   <div class="mt-4 space-y-3">
                     <div class="flex gap-1.5 overflow-x-auto rounded-xl bg-slate-50 p-1">
-                      @for (
-                        segment of dashboard.customInputSegments;
-                        track segment.customInputId
-                      ) {
+                      @for (segment of dashboard.customInputSegments; track segment.customInputId) {
                         <button
                           class="shrink-0 rounded-lg px-3 py-1.5 text-[11px] font-extrabold transition"
                           type="button"
@@ -1101,10 +1148,7 @@
                     </p>
                     <div class="mt-3 flex flex-wrap gap-1.5">
                       @if (item.customInputs.length > 0) {
-                        @for (
-                          input of item.customInputs.slice(0, 4);
-                          track input.customInputId
-                        ) {
+                        @for (input of item.customInputs.slice(0, 4); track input.customInputId) {
                           <span
                             class="max-w-full truncate rounded-lg bg-slate-50 px-2 py-1 text-[10px] font-bold text-slate-500"
                             [title]="input.value"
@@ -1227,7 +1271,9 @@
           >
             {{ template.questionsCount }} {{ 'branches.questionsCount' | t }}
           </span>
-          <span class="inline-flex items-center rounded-md border border-slate-200 bg-white px-2.5 py-1 text-[10px] font-bold text-slate-600 shadow-2xs">
+          <span
+            class="inline-flex items-center rounded-md border border-slate-200 bg-white px-2.5 py-1 text-[10px] font-bold text-slate-600 shadow-2xs"
+          >
             {{ 'branchTemplates.customInputsCount' | t }}: {{ template.customInputsCount }}
           </span>
         </div>

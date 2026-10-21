@@ -40,6 +40,11 @@ import { TranslatePipe } from '../../../../../../shared/pipes/translate.pipe';
 import { ButtonComponent } from '../../../../../../shared/ui/button/button.component';
 import { IconComponent } from '../../../../../../shared/ui/icon/icon.component';
 import { ModalComponent } from '../../../../../../shared/ui/modal/modal.component';
+import { BestRatedQuestionsComponent } from '../../../../../../shared/ui/best-rated-questions/best-rated-questions.component';
+import { HistoricalAvailabilityCardComponent } from '../../../../../../shared/ui/historical-availability-card/historical-availability-card.component';
+import { HistoricalWarningBannerComponent } from '../../../../../../shared/ui/historical-warning-banner/historical-warning-banner.component';
+import { ScoreModeSelectorComponent } from '../../../../../../shared/ui/score-mode-selector/score-mode-selector.component';
+import { ScoreCalculationMode } from '../../../../../../shared/models/score-calculation-mode.model';
 import { AuthStore } from '../../../../../auth/presentation/state/auth.store';
 import { BranchAdminBranchStore } from '../../../../branch/presentation/state/branch-admin-branch.store';
 import { BranchAdminTemplate } from '../../../../branch/domain/branch-admin-branch.model';
@@ -76,6 +81,10 @@ Chart.register(...registerables);
     TranslatePipe,
     SatisfactionDistributionComponent,
     DashboardSummaryActionsComponent,
+    BestRatedQuestionsComponent,
+    HistoricalAvailabilityCardComponent,
+    HistoricalWarningBannerComponent,
+    ScoreModeSelectorComponent,
   ],
   templateUrl: './branch-dashboard-page.component.html',
   styleUrl: './branch-dashboard-page.component.css',
@@ -185,6 +194,7 @@ export class BranchDashboardPageComponent implements OnInit, OnDestroy {
     to: [''],
     templateId: [''],
     groupBy: ['Day' as BranchDashboardGroupBy],
+    scoreCalculationMode: ['RootQuestions' as ScoreCalculationMode],
     topQuestionsCount: ['5'],
     criticalResponsesCount: ['10'],
     criticalScoreThreshold: ['40'],
@@ -228,6 +238,11 @@ export class BranchDashboardPageComponent implements OnInit, OnDestroy {
     this.trendChart?.destroy();
   }
 
+  onScoreModeChange(mode: ScoreCalculationMode): void {
+    this.filtersForm.controls.scoreCalculationMode.setValue(mode);
+    this.applyFilters();
+  }
+
   applyFilters(): void {
     const value = this.filtersForm.getRawValue();
     this.dashboardStore.load({
@@ -235,6 +250,7 @@ export class BranchDashboardPageComponent implements OnInit, OnDestroy {
       to: value.to || undefined,
       templateId: value.templateId || undefined,
       groupBy: value.groupBy,
+      scoreCalculationMode: value.scoreCalculationMode,
       topQuestionsCount: this.toOptionalPositiveInteger(value.topQuestionsCount),
       criticalResponsesCount: this.toOptionalPositiveInteger(value.criticalResponsesCount),
       criticalScoreThreshold: this.toOptionalPercentage(value.criticalScoreThreshold),
@@ -247,11 +263,19 @@ export class BranchDashboardPageComponent implements OnInit, OnDestroy {
       to: '',
       templateId: '',
       groupBy: 'Day',
+      scoreCalculationMode: 'RootQuestions',
       topQuestionsCount: '5',
       criticalResponsesCount: '10',
       criticalScoreThreshold: '40',
     });
     this.dashboardStore.load();
+  }
+
+  scoreLabel(value: number | null, hasScoreData: boolean = true): string {
+    if (!hasScoreData || value === null) {
+      return 'N/A';
+    }
+    return `${value.toFixed(1)}%`;
   }
 
   toggleAdvancedFilters(): void {

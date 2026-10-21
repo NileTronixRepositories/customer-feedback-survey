@@ -1,7 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
-import { ChevronLeft, ChevronRight, Filter, Search } from 'lucide-angular';
+import { AlertTriangle, ChevronLeft, ChevronRight, Filter, History, Search } from 'lucide-angular';
 import { I18nService } from '../../../../../../core/services/i18n.service';
 import { TranslatePipe } from '../../../../../../shared/pipes/translate.pipe';
 import { ButtonComponent } from '../../../../../../shared/ui/button/button.component';
@@ -37,9 +37,11 @@ export class SystemResponsesHistoryPageComponent implements OnInit {
   private readonly formBuilder = inject(FormBuilder);
   private readonly i18n = inject(I18nService);
 
+  readonly alertIcon = AlertTriangle;
   readonly chevronLeftIcon = ChevronLeft;
   readonly chevronRightIcon = ChevronRight;
   readonly filterIcon = Filter;
+  readonly historyIcon = History;
   readonly searchIcon = Search;
   readonly advancedFiltersOpen = signal(false);
 
@@ -151,6 +153,16 @@ export class SystemResponsesHistoryPageComponent implements OnInit {
 
   booleanLabel(value: boolean): string {
     return this.i18n.translate(value ? 'systemResponsesHistory.yes' : 'systemResponsesHistory.no');
+  }
+
+  derivationLabel(derivation: string | undefined): string {
+    if (derivation === 'SubmissionSnapshot') {
+      return this.i18n.language() === 'ar' ? 'لقطة الإرسال' : 'Snapshot';
+    }
+    if (derivation === 'StoredRootBaseline') {
+      return this.i18n.language() === 'ar' ? 'الأساس المخزن' : 'Baseline';
+    }
+    return derivation || '';
   }
 
   private toOptionalNumber(value: string): number | undefined {

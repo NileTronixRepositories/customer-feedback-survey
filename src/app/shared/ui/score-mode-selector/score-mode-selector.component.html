@@ -1,0 +1,42 @@
+<div
+  class="score-mode-selector inline-flex items-center gap-1 p-1 rounded-xl bg-slate-100/90 text-slate-600 transition-all"
+  [class.opacity-60]="disabled()"
+  [class.pointer-events-none]="disabled()"
+  role="radiogroup"
+  [attr.aria-label]="'scoreMode.title' | t"
+>
+  @if (showIcon()) {
+    <div class="px-1.5 text-slate-400 flex items-center" title="{{ 'scoreMode.title' | t }}">
+      <app-icon [icon]="calculatorIcon" [size]="size() === 'sm' ? 13 : 15" />
+    </div>
+  }
+
+  @for (mode of modes; track mode.value) {
+    <button
+      type="button"
+      role="radio"
+      [attr.aria-checked]="selectedMode() === mode.value"
+      [disabled]="disabled()"
+      (click)="selectMode(mode.value)"
+      class="mode-btn relative rounded-lg font-semibold transition-all duration-150 flex items-center gap-1.5 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-sky-500"
+      [class.px-2.5]="size() === 'sm'"
+      [class.py-1]="size() === 'sm'"
+      [class.text-xs]="size() === 'sm'"
+      [class.px-3.5]="size() === 'md'"
+      [class.py-1.5]="size() === 'md'"
+      [class.text-sm]="size() === 'md'"
+      [class.bg-white]="selectedMode() === mode.value"
+      [class.text-slate-900]="selectedMode() === mode.value"
+      [class.shadow-2xs]="selectedMode() === mode.value"
+      [class.font-bold]="selectedMode() === mode.value"
+      [class.text-slate-600]="selectedMode() !== mode.value"
+      [class.hover:text-slate-900]="selectedMode() !== mode.value"
+      [class.hover:bg-slate-200/60]="selectedMode() !== mode.value"
+    >
+      @if (selectedMode() === mode.value) {
+        <span class="h-1.5 w-1.5 rounded-full bg-sky-500 animate-pulse"></span>
+      }
+      <span>{{ getLabel(mode) }}</span>
+    </button>
+  }
+</div>

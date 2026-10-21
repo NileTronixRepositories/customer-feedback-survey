@@ -1,0 +1,99 @@
+<div class="rounded-2xl border border-emerald-100 bg-white p-5 shadow-xs">
+  <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+    <div class="flex items-center gap-2.5">
+      <div
+        class="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600"
+      >
+        <app-icon [icon]="trophyIcon" [size]="18" />
+      </div>
+      <div>
+        <h3 class="text-sm font-bold text-slate-900">{{ 'bestRatedQuestions.title' | t }}</h3>
+        <p class="text-xs text-slate-500">{{ 'bestRatedQuestions.subtitle' | t }}</p>
+      </div>
+    </div>
+    @if (safeQuestions().length > 0) {
+      <span
+        class="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700"
+      >
+        {{ safeQuestions().length }} {{ 'bestRatedQuestions.count' | t }}
+      </span>
+    }
+  </div>
+
+  @if (loading()) {
+    <div class="space-y-3 pt-4">
+      @for (i of [1, 2, 3]; track i) {
+        <div class="h-16 animate-pulse rounded-xl bg-slate-50"></div>
+      }
+    </div>
+  } @else if (safeQuestions().length === 0) {
+    <div class="flex flex-col items-center justify-center py-8 text-center text-slate-400">
+      <app-icon [icon]="starIcon" [size]="28" class="mb-2 text-slate-300" />
+      <p class="text-xs font-medium">{{ 'bestRatedQuestions.empty' | t }}</p>
+    </div>
+  } @else {
+    <div class="divide-y divide-slate-100 pt-2">
+      @for (item of safeQuestions(); track item.questionId; let idx = $index) {
+        <div
+          class="flex items-center justify-between gap-4 py-3 group hover:bg-slate-50/60 rounded-xl px-2 -mx-2 transition-colors"
+        >
+          <div class="flex items-center gap-3 min-w-0">
+            <span
+              class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-xs font-bold"
+              [class.bg-amber-100]="idx === 0"
+              [class.text-amber-800]="idx === 0"
+              [class.bg-slate-100]="idx > 0"
+              [class.text-slate-700]="idx > 0"
+            >
+              #{{ idx + 1 }}
+            </span>
+            <div class="min-w-0">
+              <p
+                class="truncate text-xs font-bold text-slate-800 group-hover:text-emerald-700 transition-colors"
+              >
+                {{ questionText(item) }}
+              </p>
+              <div class="flex items-center gap-2 mt-0.5 text-[11px] text-slate-400">
+                @if (templateName(item)) {
+                  <span class="truncate max-w-[140px]">{{ templateName(item) }}</span>
+                  <span>•</span>
+                }
+                <span>{{ item.answersCount }} {{ 'bestRatedQuestions.answers' | t }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-3 shrink-0">
+            <div class="text-end">
+              <span class="text-xs font-extrabold text-emerald-600">
+                @if (
+                  item.averageScorePercentage !== null && item.averageScorePercentage !== undefined
+                ) {
+                  {{ item.averageScorePercentage | number: '1.0-1' }}%
+                } @else {
+                  N/A
+                }
+              </span>
+              @if (item.averageValue !== null && item.averageValue !== undefined) {
+                <p class="text-[10px] text-slate-400">
+                  ({{ item.averageValue | number: '1.1-2' }} / 5)
+                </p>
+              }
+            </div>
+
+            @if (item.detailsNavigation) {
+              <button
+                type="button"
+                (click)="onDrillDown(item)"
+                class="flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 hover:bg-emerald-50 hover:text-emerald-700 transition-colors"
+                title="{{ 'dashboardDrillDown.viewResponses' | t }}"
+              >
+                <app-icon [icon]="eyeIcon" [size]="14" />
+              </button>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

@@ -142,6 +142,9 @@
                   <option value="LowestConditionLevel">
                     {{ 'surveyDashboard.lowestConditionLevel' | t }}
                   </option>
+                  <option value="AllAnsweredQuestions">
+                    {{ 'surveyDashboard.allAnsweredQuestions' | t }}
+                  </option>
                 </select>
               </label>
 
@@ -629,7 +632,7 @@
     >
       <div class="flex items-center gap-2">
         <app-icon [icon]="alertIcon" [size]="18" />
-        <span>{{ (store.error() ?? '') | t }}</span>
+        <span>{{ store.error() ?? '' | t }}</span>
       </div>
     </section>
   } @else if (store.dashboard(); as dashboard) {
@@ -715,6 +718,18 @@
         </p>
       </section>
     } @else {
+      <!-- Historical Mode Availability Warning Banner -->
+      @if (dashboard.requestedModeAvailable === false) {
+        <app-historical-warning-banner
+          [storedBaselineCount]="dashboard.storedBaselineResponsesCount"
+        />
+      }
+
+      <!-- Historical Availability Metrics Card -->
+      @if (dashboard.availability) {
+        <app-historical-availability-card [availability]="dashboard.availability" />
+      }
+
       <!-- ==================== TIER 1: PRIMARY HERO KPI METRICS ==================== -->
       <section class="grid gap-2.5 sm:grid-cols-2 xl:grid-cols-4">
         <!-- 1. Overall Satisfaction Score -->
@@ -727,23 +742,44 @@
                 {{ 'surveyDashboard.averageScore' | t }}
               </p>
               <p class="mt-0.5 text-2xl font-black tracking-tight text-slate-900">
-                {{ scoreLabel(dashboard.summary.averageScorePercentage) }}
+                {{
+                  scoreLabel(
+                    dashboard.summary.averageScorePercentage,
+                    dashboard.summary.hasScoreData
+                  )
+                }}
               </p>
             </div>
             <span
               class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
-              [class.bg-emerald-50]="(dashboard.summary.averageScorePercentage ?? 0) >= 80"
-              [class.text-emerald-600]="(dashboard.summary.averageScorePercentage ?? 0) >= 80"
+              [class.bg-emerald-50]="
+                dashboard.summary.hasScoreData &&
+                (dashboard.summary.averageScorePercentage ?? 0) >= 80
+              "
+              [class.text-emerald-600]="
+                dashboard.summary.hasScoreData &&
+                (dashboard.summary.averageScorePercentage ?? 0) >= 80
+              "
               [class.bg-amber-50]="
+                dashboard.summary.hasScoreData &&
                 (dashboard.summary.averageScorePercentage ?? 0) >= 60 &&
                 (dashboard.summary.averageScorePercentage ?? 0) < 80
               "
               [class.text-amber-600]="
+                dashboard.summary.hasScoreData &&
                 (dashboard.summary.averageScorePercentage ?? 0) >= 60 &&
                 (dashboard.summary.averageScorePercentage ?? 0) < 80
               "
-              [class.bg-rose-50]="(dashboard.summary.averageScorePercentage ?? 0) < 60"
-              [class.text-rose-600]="(dashboard.summary.averageScorePercentage ?? 0) < 60"
+              [class.bg-rose-50]="
+                dashboard.summary.hasScoreData &&
+                (dashboard.summary.averageScorePercentage ?? 0) < 60
+              "
+              [class.text-rose-600]="
+                dashboard.summary.hasScoreData &&
+                (dashboard.summary.averageScorePercentage ?? 0) < 60
+              "
+              [class.bg-slate-100]="!dashboard.summary.hasScoreData"
+              [class.text-slate-400]="!dashboard.summary.hasScoreData"
             >
               <app-icon [icon]="trendIcon" [size]="16" />
             </span>
@@ -1501,6 +1537,31 @@
               </span>
             </button>
 
+            <!-- Tab: Best Rated Questions -->
+            <button
+              type="button"
+              class="inline-flex items-center gap-2 rounded-xl px-3.5 py-2 text-xs font-black transition"
+              [class.bg-emerald-600]="activeTableTab() === 'bestQuestions'"
+              [class.text-white]="activeTableTab() === 'bestQuestions'"
+              [class.shadow-xs]="activeTableTab() === 'bestQuestions'"
+              [class.bg-white]="activeTableTab() !== 'bestQuestions'"
+              [class.text-slate-600]="activeTableTab() !== 'bestQuestions'"
+              [class.hover:bg-slate-50]="activeTableTab() !== 'bestQuestions'"
+              (click)="setTableTab('bestQuestions')"
+            >
+              <app-icon [icon]="questionsIcon" [size]="14" />
+              <span>{{ 'surveyDashboard.bestRatedQuestions' | t }}</span>
+              <span
+                class="rounded-full px-2 py-0.5 text-[10px] font-black"
+                [class.bg-white/20]="activeTableTab() === 'bestQuestions'"
+                [class.text-white]="activeTableTab() === 'bestQuestions'"
+                [class.bg-emerald-100]="activeTableTab() !== 'bestQuestions'"
+                [class.text-emerald-800]="activeTableTab() !== 'bestQuestions'"
+              >
+                {{ dashboard.bestRatedQuestions?.length ?? 0 }}
+              </span>
+            </button>
+
             <!-- Tab 2: Lowest Rated Questions -->
             <button
               type="button"
@@ -1895,6 +1956,57 @@
                       </tbody>
                     </table>
                   </div>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <!-- ==================== TAB CONTENT: BEST RATED QUESTIONS ==================== -->
+        <div class="table-accordion-item" [class.is-expanded]="isSectionActive('bestQuestions')">
+          <div class="table-accordion-content">
+            <article class="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs">
+              <div
+                class="flex cursor-pointer select-none items-center justify-between rounded-xl p-1 -m-1 transition hover:bg-slate-50/70"
+                [class.mb-3]="!isSectionCollapsed('bestQuestions')"
+                (click)="toggleTableSection('bestQuestions')"
+                tabindex="0"
+                (keydown.enter)="toggleTableSection('bestQuestions')"
+                (keydown.space)="$event.preventDefault(); toggleTableSection('bestQuestions')"
+              >
+                <div class="flex items-center gap-2">
+                  <span
+                    class="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600"
+                  >
+                    <app-icon [icon]="questionsIcon" [size]="15" />
+                  </span>
+                  <h2 class="text-sm font-black text-slate-950">
+                    {{ 'surveyDashboard.bestRatedQuestions' | t }}
+                  </h2>
+                </div>
+                <div class="flex items-center gap-2.5">
+                  <span class="text-xs font-bold text-slate-400">
+                    {{ dashboard.bestRatedQuestions?.length ?? 0 }} {{ 'surveyDashboard.answers' | t }}
+                  </span>
+                  <span
+                    class="flex h-6 w-6 items-center justify-center rounded-lg border border-slate-200/80 bg-white text-slate-400 shadow-2xs transition-transform duration-300 hover:text-slate-600"
+                    [class.rotate-180]="!isSectionCollapsed('bestQuestions')"
+                  >
+                    <app-icon [icon]="chevronDownIcon" [size]="13" />
+                  </span>
+                </div>
+              </div>
+
+              <!-- Collapsible Body -->
+              <div
+                class="table-body-collapse"
+                [class.is-collapsed]="isSectionCollapsed('bestQuestions')"
+              >
+                <div class="min-h-0 overflow-hidden">
+                  <app-best-rated-questions
+                    [questions]="dashboard.bestRatedQuestions"
+                    (drillDown)="openNavigation($event)"
+                  />
                 </div>
               </div>
             </article>
