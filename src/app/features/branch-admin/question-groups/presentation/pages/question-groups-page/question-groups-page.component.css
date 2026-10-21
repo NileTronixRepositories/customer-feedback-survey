@@ -1,1 +1,29 @@
-/* Styles are composed with Tailwind utility classes in the component template. */
+:host {
+  display: block;
+  min-width: 0;
+}
+
+:host ::ng-deep app-card,
+:host ::ng-deep app-input,
+:host ::ng-deep app-modal {
+  min-width: 0;
+}
+
+@media (max-width: 640px) {
+  :host ::ng-deep app-page-header app-button,
+  :host ::ng-deep app-page-header app-button button,
+  :host ::ng-deep app-page-header .filter-toggle-btn {
+    display: block;
+    width: 100%;
+  }
+
+  :host ::ng-deep .flex > app-button.flex-1,
+  :host ::ng-deep .grid > app-button {
+    min-width: 0;
+  }
+
+  :host ::ng-deep .flex > app-button.flex-1 button,
+  :host ::ng-deep .grid > app-button button {
+    width: 100%;
+  }
+}

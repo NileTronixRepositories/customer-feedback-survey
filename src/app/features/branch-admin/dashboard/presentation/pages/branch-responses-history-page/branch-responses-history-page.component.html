@@ -56,26 +56,30 @@
           [attr.inert]="advancedFiltersOpen() ? null : ''"
         >
           <div class="flex flex-wrap items-end gap-3">
-            <label class="filter-label flex-1 min-w-[200px] sm:max-w-md">
+            <label class="filter-label flex-1 min-w-[240px]">
               <span class="filter-label-text">
                 {{ 'branchResponsesHistory.search' | t }}
               </span>
-              <input
-                class="filter-control"
-                type="search"
-                formControlName="searchText"
-                [placeholder]="'branchResponsesHistory.searchPlaceholder' | t"
-              />
+              <div class="relative flex items-center">
+                <span
+                  class="pointer-events-none absolute inset-y-0 start-0 z-10 flex items-center ps-3.5 text-slate-400"
+                >
+                  <app-icon [icon]="searchIcon" [size]="16" />
+                </span>
+                <input
+                  class="filter-control filter-control-search w-full"
+                  type="search"
+                  formControlName="searchText"
+                  [placeholder]="'branchResponsesHistory.searchPlaceholder' | t"
+                />
+              </div>
             </label>
 
-            <label class="filter-label w-24 sm:w-28">
+            <label class="filter-label w-full sm:w-auto sm:min-w-[6.5rem] sm:max-w-[8rem]">
               <span class="filter-label-text">
                 {{ 'branchResponsesHistory.pageSize' | t }}
               </span>
-              <select
-                class="filter-control filter-select"
-                formControlName="pageSize"
-              >
+              <select class="filter-control filter-select" formControlName="pageSize">
                 <option value="10">10</option>
                 <option value="25">25</option>
                 <option value="50">50</option>
@@ -83,13 +87,24 @@
               </select>
             </label>
 
-            <div class="flex items-center gap-2 pt-1 sm:pt-0 shrink-0 self-end">
-              <app-button type="submit" size="md" [loading]="historyStore.loading()">
+            <div class="flex w-full items-center gap-2 pt-1 sm:w-auto sm:pt-0 shrink-0 self-end">
+              <app-button
+                class="flex-1 sm:flex-initial"
+                type="submit"
+                size="md"
+                [loading]="historyStore.loading()"
+              >
                 <app-icon [icon]="searchIcon" [size]="14" />
                 {{ 'common.search' | t }}
               </app-button>
 
-              <app-button type="button" size="md" variant="secondary" (pressed)="clearFilters()">
+              <app-button
+                class="flex-1 sm:flex-initial"
+                type="button"
+                size="md"
+                variant="secondary"
+                (pressed)="clearFilters()"
+              >
                 {{ 'common.clear' | t }}
               </app-button>
             </div>
@@ -100,30 +115,19 @@
               <span class="filter-label-text">
                 {{ 'branchResponsesHistory.from' | t }}
               </span>
-              <input
-                class="filter-control"
-                type="date"
-                formControlName="from"
-              />
+              <input class="filter-control" type="date" formControlName="from" />
             </label>
             <label class="filter-label flex-1 min-w-[130px]">
               <span class="filter-label-text">
                 {{ 'branchResponsesHistory.to' | t }}
               </span>
-              <input
-                class="filter-control"
-                type="date"
-                formControlName="to"
-              />
+              <input class="filter-control" type="date" formControlName="to" />
             </label>
             <label class="filter-label flex-[1.4] min-w-[170px]">
               <span class="filter-label-text">
                 {{ 'branchResponsesHistory.template' | t }}
               </span>
-              <select
-                class="filter-control filter-select"
-                formControlName="templateId"
-              >
+              <select class="filter-control filter-select" formControlName="templateId">
                 <option value="">{{ 'branchResponsesHistory.allTemplates' | t }}</option>
                 @for (
                   template of branchStore.branch()?.templates ?? [];
@@ -163,10 +167,7 @@
               <span class="filter-label-text">
                 {{ 'branchResponsesHistory.complaint' | t }}
               </span>
-              <select
-                class="filter-control filter-select"
-                formControlName="hasComplaint"
-              >
+              <select class="filter-control filter-select" formControlName="hasComplaint">
                 <option value="">{{ 'branchResponsesHistory.all' | t }}</option>
                 <option value="true">{{ 'branchResponsesHistory.withComplaint' | t }}</option>
                 <option value="false">{{ 'branchResponsesHistory.noComplaint' | t }}</option>
@@ -176,10 +177,7 @@
               <span class="filter-label-text">
                 {{ 'branchResponsesHistory.voice' | t }}
               </span>
-              <select
-                class="filter-control filter-select"
-                formControlName="hasVoice"
-              >
+              <select class="filter-control filter-select" formControlName="hasVoice">
                 <option value="">{{ 'branchResponsesHistory.all' | t }}</option>
                 <option value="true">{{ 'branchResponsesHistory.withVoice' | t }}</option>
                 <option value="false">{{ 'branchResponsesHistory.noVoice' | t }}</option>

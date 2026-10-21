@@ -89,22 +89,47 @@ function readProblemDetails(
   url?: string,
 ): ApiProblemDetails {
   const problem = isRecord(body) ? body : {};
-  const errors = readErrorMessages(problem['errors']);
+  const errors = readErrorMessages(problem['errors'], i18n);
   const detail =
     readString(problem['detail']) ||
     readString(problem['message']) ||
     (typeof body === 'string' ? body.trim() : '');
   const safeDetail = isHttpClientFailureMessage(detail) ? '' : detail;
-  const title = readString(problem['title']) || statusTitle(error.status, i18n);
+  const translatedDetail = safeDetail ? i18n.translate(safeDetail) : '';
+  const rawTitle = readString(problem['title']);
+  const title = resolveTitle(rawTitle, error.status, i18n);
 
   return {
     title,
     detail:
       errors.length > 0
         ? errors.slice(0, 3).join('\n')
-        : safeDetail || statusDescription(error.status, i18n, url),
+        : translatedDetail || statusDescription(error.status, i18n, url),
     errors,
   };
+}
+
+function resolveTitle(rawTitle: string, status: number, i18n: I18nService): string {
+  if (!rawTitle) {
+    return statusTitle(status, i18n);
+  }
+  const translated = i18n.translate(rawTitle);
+  if (translated !== rawTitle) {
+    return translated;
+  }
+  const normalized = rawTitle.trim().toLowerCase();
+  if (
+    normalized === 'one or more validation errors occurred.' ||
+    normalized === 'bad request' ||
+    normalized === 'unauthorized' ||
+    normalized === 'forbidden' ||
+    normalized === 'not found' ||
+    normalized === 'internal server error' ||
+    normalized === 'an error occurred while processing your request.'
+  ) {
+    return statusTitle(status, i18n);
+  }
+  return rawTitle;
 }
 
 function parseProblemText(text: string): unknown {
@@ -115,20 +140,47 @@ function parseProblemText(text: string): unknown {
   }
 }
 
-function readErrorMessages(errors: unknown): readonly string[] {
-  if (!Array.isArray(errors)) {
+function readErrorMessages(errors: unknown, i18n: I18nService): readonly string[] {
+  if (!errors) {
     return [];
   }
 
-  return errors
-    .map((error) => {
-      if (!isRecord(error)) {
+  if (Array.isArray(errors)) {
+    return errors
+      .map((error) => {
+        if (typeof error === 'string') {
+          return i18n.translate(error.trim());
+        }
+        if (isRecord(error)) {
+          const msg =
+            readString(error['message']) ||
+            readString(error['code']) ||
+            readString(error['description']);
+          return msg ? i18n.translate(msg) : '';
+        }
         return '';
-      }
+      })
+      .filter((message) => message.length > 0);
+  }
 
-      return readString(error['message']) || readString(error['code']);
-    })
-    .filter((message) => message.length > 0);
+  if (isRecord(errors)) {
+    const messages: string[] = [];
+    for (const key of Object.keys(errors)) {
+      const val = errors[key];
+      if (Array.isArray(val)) {
+        for (const item of val) {
+          if (typeof item === 'string' && item.trim()) {
+            messages.push(i18n.translate(item.trim()));
+          }
+        }
+      } else if (typeof val === 'string' && val.trim()) {
+        messages.push(i18n.translate(val.trim()));
+      }
+    }
+    return messages;
+  }
+
+  return [];
 }
 
 function statusTitle(status: number, i18n: I18nService): string {

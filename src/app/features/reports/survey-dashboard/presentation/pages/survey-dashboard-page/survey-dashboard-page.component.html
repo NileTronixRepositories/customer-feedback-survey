@@ -629,7 +629,7 @@
     >
       <div class="flex items-center gap-2">
         <app-icon [icon]="alertIcon" [size]="18" />
-        <span>{{ store.error() }}</span>
+        <span>{{ (store.error() ?? '') | t }}</span>
       </div>
     </section>
   } @else if (store.dashboard(); as dashboard) {
@@ -1075,7 +1075,9 @@
                 {{ 'surveyDashboard.satisfactionTrend' | t }}
               </h2>
             </div>
-            <span class="text-[11px] font-bold text-slate-400">
+            <span
+              class="inline-flex items-center rounded-lg bg-slate-100 px-2.5 py-1 text-[11px] font-bold text-slate-600 border border-slate-200/60"
+            >
               {{
                 dashboard.period.groupBy === 'Month'
                   ? ('surveyDashboard.month' | t)
@@ -1085,7 +1087,7 @@
           </div>
 
           @if (dashboard.satisfactionTrend.length > 0) {
-            <div class="h-[360px] lg:h-[420px] w-full min-w-0 pt-2">
+            <div class="h-[340px] lg:h-[380px] w-full min-w-0 pt-2">
               <canvas #trendCanvas></canvas>
             </div>
           } @else {

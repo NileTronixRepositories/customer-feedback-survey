@@ -1,14 +1,14 @@
-import { ChangeDetectionStrategy, Component, HostListener, computed, effect, inject, signal } from '@angular/core';
-import { Router, RouterOutlet } from '@angular/router';
 import {
-  Briefcase,
-  KeyRound,
-  Languages,
-  LogOut,
-  Menu,
-  ShieldCheck,
-  Store,
-} from 'lucide-angular';
+  ChangeDetectionStrategy,
+  Component,
+  HostListener,
+  computed,
+  effect,
+  inject,
+  signal,
+} from '@angular/core';
+import { Router, RouterOutlet } from '@angular/router';
+import { Briefcase, KeyRound, Languages, LogOut, Menu, ShieldCheck, Store } from 'lucide-angular';
 import { AuthStore } from '../../features/auth/presentation/state/auth.store';
 import { BranchContextService } from '../../core/services/branch-context.service';
 import { I18nService } from '../../core/services/i18n.service';
@@ -126,7 +126,8 @@ export class MainLayoutComponent {
   private branchUserTitle(): string {
     const assignedRoles = this.authStore
       .apiRoles()
-      .filter((role) => this.normalizeRole(role) !== 'branchuser');
+      .filter((role) => this.normalizeRole(role) !== 'branchuser')
+      .map((role) => this.i18n.translateRole(role));
 
     return assignedRoles.length > 0 ? assignedRoles.join(', ') : this.userDisplayName();
   }

@@ -4,11 +4,7 @@
     [description]="'globalQuestionGroups.description' | t"
     [icon]="groupIcon"
   >
-    <button
-      class="filter-toggle-btn"
-      type="button"
-      (click)="toggleAdvancedFilters()"
-    >
+    <button class="filter-toggle-btn" type="button" (click)="toggleAdvancedFilters()">
       <app-icon [icon]="filterIcon" [size]="14" />
       {{
         advancedFiltersOpen()
@@ -24,8 +20,6 @@
     }
   </app-page-header>
 
-
-
   <app-card [title]="''" [subtitle]="''">
     <div
       class="grid transition-[grid-template-rows,opacity] duration-300 ease-out motion-reduce:transition-none"
@@ -35,90 +29,102 @@
       [class.opacity-0]="!advancedFiltersOpen()"
     >
       <div class="min-h-0 overflow-hidden">
-      <form
-        class="mb-3 flex flex-wrap items-end gap-2.5 rounded-xl border border-slate-200/80 bg-slate-50/70 p-3 shadow-xs transition-[transform,opacity] duration-300 ease-out motion-reduce:transition-none"
-        [formGroup]="searchForm"
-        (ngSubmit)="searchGroups()"
-        [class.translate-y-0]="advancedFiltersOpen()"
-        [class.-translate-y-2]="!advancedFiltersOpen()"
-        [class.pointer-events-none]="!advancedFiltersOpen()"
-        [attr.aria-hidden]="!advancedFiltersOpen()"
-        [attr.inert]="advancedFiltersOpen() ? null : ''"
-      >
-      <app-input
-        size="md"
-        [label]="'globalQuestionGroups.search' | t"
-        [placeholder]="'globalQuestionGroups.searchPlaceholder' | t"
-        formControlName="searchText"
-      />
-      <label class="filter-label sm:min-w-[9rem] sm:max-w-[11rem]">
-        <span class="filter-label-text">{{ 'globalQuestionGroups.isActiveFilter' | t }}</span>
-        <select
-          class="filter-control filter-select"
-          formControlName="isActive"
+        <form
+          class="mb-3.5 flex flex-wrap items-end gap-3 rounded-xl border border-slate-200/80 bg-slate-50/70 p-3.5 shadow-xs transition-[transform,opacity] duration-300 ease-out motion-reduce:transition-none"
+          [formGroup]="searchForm"
+          (ngSubmit)="searchGroups()"
+          [class.translate-y-0]="advancedFiltersOpen()"
+          [class.-translate-y-2]="!advancedFiltersOpen()"
+          [class.pointer-events-none]="!advancedFiltersOpen()"
+          [attr.aria-hidden]="!advancedFiltersOpen()"
+          [attr.inert]="advancedFiltersOpen() ? null : ''"
         >
-          <option value="">{{ 'globalQuestionGroups.allGroups' | t }}</option>
-          <option value="true">{{ 'common.active' | t }}</option>
-          <option value="false">{{ 'branches.inactive' | t }}</option>
-        </select>
-      </label>
-      <label class="filter-label sm:min-w-[7rem] sm:max-w-[9rem]">
-        <span class="filter-label-text">{{ 'globalQuestionGroups.pageSize' | t }}</span>
-        <select
-          class="filter-control filter-select"
-          formControlName="pageSize"
-        >
-          <option value="10">10</option>
-          <option value="25">25</option>
-          <option value="50">50</option>
-          <option value="100">100</option>
-        </select>
-      </label>
-      <label class="filter-label sm:min-w-[7rem] sm:max-w-[9rem]">
-        <span class="filter-label-text">{{ 'globalQuestionGroups.orderSort' | t }}</span>
-        <select
-          class="filter-control filter-select"
-          formControlName="orderSort"
-        >
-          <option value="">{{ 'globalQuestionGroups.defaultSort' | t }}</option>
-          <option value="Newest">{{ 'globalQuestionGroups.newest' | t }}</option>
-          <option value="Oldest">{{ 'globalQuestionGroups.oldest' | t }}</option>
-        </select>
-      </label>
-      <div class="flex items-end gap-2">
-        <app-button size="md" type="submit" [loading]="globalQuestionGroupsStore.loading()">
-          <app-icon [icon]="searchIcon" [size]="16" />
-          {{ 'branches.searchAction' | t }}
-        </app-button>
-        <app-button size="md" type="button" variant="secondary" (pressed)="clearGroupSearch()">
-          {{ 'branches.clearSearch' | t }}
-        </app-button>
-      </div>
-    </form>
+          <label class="filter-label flex-1 min-w-[220px]">
+            <span class="filter-label-text">{{ 'globalQuestionGroups.search' | t }}</span>
+            <div class="relative flex items-center">
+              <span
+                class="pointer-events-none absolute inset-y-0 start-0 z-10 flex items-center ps-3.5 text-slate-400"
+              >
+                <app-icon [icon]="searchIcon" [size]="16" />
+              </span>
+              <input
+                type="text"
+                class="filter-control filter-control-search w-full"
+                [placeholder]="'globalQuestionGroups.searchPlaceholder' | t"
+                formControlName="searchText"
+              />
+            </div>
+          </label>
+          <label class="filter-label w-full sm:w-auto sm:min-w-[9rem] sm:max-w-[11rem]">
+            <span class="filter-label-text">{{ 'globalQuestionGroups.isActiveFilter' | t }}</span>
+            <select class="filter-control filter-select" formControlName="isActive">
+              <option value="">{{ 'globalQuestionGroups.allGroups' | t }}</option>
+              <option value="true">{{ 'common.active' | t }}</option>
+              <option value="false">{{ 'branches.inactive' | t }}</option>
+            </select>
+          </label>
+          <label class="filter-label w-full sm:w-auto sm:min-w-[7rem] sm:max-w-[8.5rem]">
+            <span class="filter-label-text">{{ 'globalQuestionGroups.pageSize' | t }}</span>
+            <select class="filter-control filter-select" formControlName="pageSize">
+              <option value="10">10</option>
+              <option value="25">25</option>
+              <option value="50">50</option>
+              <option value="100">100</option>
+            </select>
+          </label>
+          <label class="filter-label w-full sm:w-auto sm:min-w-[8rem] sm:max-w-[9.5rem]">
+            <span class="filter-label-text">{{ 'globalQuestionGroups.orderSort' | t }}</span>
+            <select class="filter-control filter-select" formControlName="orderSort">
+              <option value="">{{ 'globalQuestionGroups.defaultSort' | t }}</option>
+              <option value="Newest">{{ 'globalQuestionGroups.newest' | t }}</option>
+              <option value="Oldest">{{ 'globalQuestionGroups.oldest' | t }}</option>
+            </select>
+          </label>
+          <div class="flex w-full items-center gap-2 sm:w-auto shrink-0">
+            <app-button
+              class="flex-1 sm:flex-initial"
+              size="md"
+              type="submit"
+              [loading]="globalQuestionGroupsStore.loading()"
+            >
+              <app-icon [icon]="searchIcon" [size]="16" />
+              {{ 'branches.searchAction' | t }}
+            </app-button>
+            <app-button
+              class="flex-1 sm:flex-initial"
+              size="md"
+              type="button"
+              variant="secondary"
+              (pressed)="clearGroupSearch()"
+            >
+              {{ 'branches.clearSearch' | t }}
+            </app-button>
+          </div>
+        </form>
       </div>
     </div>
 
     <div class="hidden overflow-hidden rounded-lg border border-slate-100 bg-white lg:block">
       <div class="overflow-x-auto">
-        <table class="w-full table-fixed divide-y divide-slate-100">
+        <table class="w-full min-w-[56rem] table-fixed divide-y divide-slate-100">
           <colgroup>
             <col class="w-[28%]" />
-            <col class="w-[14%]" />
-            <col class="w-[14%]" />
+            <col class="w-[12%]" />
+            <col class="w-[12%]" />
             <col class="w-[14%]" />
             <col class="w-[16%]" />
-            <col class="w-[14%]" />
+            <col class="w-[18%]" />
           </colgroup>
           <thead
-            class="bg-slate-50 text-start text-xs font-bold uppercase tracking-wide text-slate-500"
+            class="border-b border-slate-100 bg-slate-50/90 text-start text-xs font-extrabold uppercase tracking-wider text-slate-600"
           >
             <tr>
               <th class="px-4 py-3">{{ 'common.name' | t }}</th>
-              <th class="px-4 py-3">{{ 'common.scope' | t }}</th>
-              <th class="px-4 py-3">{{ 'common.status' | t }}</th>
-              <th class="px-4 py-3">{{ 'branches.questionsCount' | t }}</th>
-              <th class="px-4 py-3">{{ 'branches.createdOn' | t }}</th>
-              <th class="px-4 py-3 text-end">{{ 'branches.actions' | t }}</th>
+              <th class="px-4 py-3 whitespace-nowrap">{{ 'common.scope' | t }}</th>
+              <th class="px-4 py-3 whitespace-nowrap">{{ 'common.status' | t }}</th>
+              <th class="px-4 py-3 whitespace-nowrap">{{ 'branches.questionsCount' | t }}</th>
+              <th class="px-4 py-3 whitespace-nowrap">{{ 'branches.createdOn' | t }}</th>
+              <th class="px-4 py-3 text-end whitespace-nowrap">{{ 'branches.actions' | t }}</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100 bg-white">
@@ -143,14 +149,14 @@
                       {{ groupDisplayName(group) }}
                     </p>
                   </td>
-                  <td class="px-4 py-3">
+                  <td class="px-4 py-3 whitespace-nowrap">
                     <span
                       class="rounded-full bg-[var(--theme-color-accent-softest)] px-2.5 py-1 text-xs font-bold text-[var(--theme-color-secondary)]"
                     >
                       {{ 'globalQuestionGroups.globalBadge' | t }}
                     </span>
                   </td>
-                  <td class="px-4 py-3">
+                  <td class="px-4 py-3 whitespace-nowrap">
                     <span
                       class="rounded-full px-2.5 py-1 text-xs font-bold"
                       [class.bg-emerald-50]="group.isActive"
@@ -161,12 +167,14 @@
                       {{ (group.isActive ? 'common.active' : 'branches.inactive') | t }}
                     </span>
                   </td>
-                  <td class="px-4 py-3 text-slate-700">{{ group.questionsCount }}</td>
-                  <td class="px-4 py-3 text-slate-700">
+                  <td class="px-4 py-3 text-slate-700 whitespace-nowrap">
+                    {{ group.questionsCount }}
+                  </td>
+                  <td class="px-4 py-3 text-slate-700 whitespace-nowrap">
                     {{ group.createdOnUtc ? (group.createdOnUtc | date: 'mediumDate') : '-' }}
                   </td>
-                  <td class="px-4 py-3">
-                    <div class="flex justify-end gap-2">
+                  <td class="px-4 py-3 whitespace-nowrap">
+                    <div class="flex items-center justify-end gap-2">
                       @if (canEditGroup(group)) {
                         <app-button
                           size="sm"
@@ -380,7 +388,9 @@
 >
   @if (groupPendingDelete(); as group) {
     <div class="space-y-4">
-      <div class="flex items-start gap-3 rounded-xl border border-red-200/60 bg-red-50/50 p-3 text-xs text-red-700">
+      <div
+        class="flex items-start gap-3 rounded-xl border border-red-200/60 bg-red-50/50 p-3 text-xs text-red-700"
+      >
         <app-icon [icon]="deleteIcon" [size]="18" class="mt-0.5 shrink-0 text-red-500" />
         <p class="font-medium leading-relaxed">{{ 'globalQuestionGroups.deleteConfirm' | t }}</p>
       </div>
@@ -390,7 +400,9 @@
           <p class="break-words text-xs font-bold text-slate-900 [overflow-wrap:anywhere]">
             {{ groupDisplayName(group) }}
           </p>
-          <span class="rounded-full bg-[var(--theme-color-accent-softest)] px-2 py-0.5 text-[11px] font-bold text-[var(--theme-color-secondary)]">
+          <span
+            class="rounded-full bg-[var(--theme-color-accent-softest)] px-2 py-0.5 text-[11px] font-bold text-[var(--theme-color-secondary)]"
+          >
             {{ 'globalQuestionGroups.globalBadge' | t }}
           </span>
         </div>
@@ -444,7 +456,9 @@
       />
     </div>
 
-    <div class="sticky bottom-0 -mx-4 -mb-4 mt-4 flex items-center justify-end gap-2 border-t border-slate-100 bg-white/95 px-4 py-3 backdrop-blur-sm sm:-mx-5 sm:-mb-5 sm:px-5 z-10">
+    <div
+      class="sticky bottom-0 -mx-4 -mb-4 mt-4 flex items-center justify-end gap-2 border-t border-slate-100 bg-white/95 px-4 py-3 backdrop-blur-sm sm:-mx-5 sm:-mb-5 sm:px-5 z-10"
+    >
       <app-button type="button" variant="secondary" (pressed)="closeCreateGroup()">
         {{ 'common.cancel' | t }}
       </app-button>
@@ -478,7 +492,9 @@
       />
     </div>
 
-    <div class="sticky bottom-0 -mx-4 -mb-4 mt-4 flex items-center justify-end gap-2 border-t border-slate-100 bg-white/95 px-4 py-3 backdrop-blur-sm sm:-mx-5 sm:-mb-5 sm:px-5 z-10">
+    <div
+      class="sticky bottom-0 -mx-4 -mb-4 mt-4 flex items-center justify-end gap-2 border-t border-slate-100 bg-white/95 px-4 py-3 backdrop-blur-sm sm:-mx-5 sm:-mb-5 sm:px-5 z-10"
+    >
       <app-button type="button" variant="secondary" (pressed)="closeEditGroup()">
         {{ 'common.cancel' | t }}
       </app-button>

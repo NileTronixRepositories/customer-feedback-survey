@@ -1,1 +1,35 @@
-/* Styles are composed with Tailwind utility classes in the component template. */
+/* Sticky Action Column */
+.sticky-action-col {
+  position: sticky;
+  z-index: 10;
+}
+
+:host-context([dir='rtl']) .sticky-action-col,
+[dir='rtl'] .sticky-action-col {
+  left: 0;
+  right: auto;
+  box-shadow: -4px 0 8px -2px rgba(15, 23, 42, 0.08);
+}
+
+:host-context([dir='ltr']) .sticky-action-col,
+[dir='ltr'] .sticky-action-col {
+  right: 0;
+  left: auto;
+  box-shadow: 4px 0 8px -2px rgba(15, 23, 42, 0.08);
+}
+
+th.sticky-action-col {
+  background-color: #f8fafc; /* bg-slate-50 */
+}
+
+td.sticky-action-col {
+  background-color: #ffffff;
+}
+
+tr:hover td.sticky-action-col {
+  background-color: #f8fafc; /* bg-slate-50 on row hover */
+}
+
+tr.bg-slate-50 td.sticky-action-col {
+  background-color: #f8fafc;
+}

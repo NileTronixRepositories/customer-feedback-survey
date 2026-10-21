@@ -1,7 +1,25 @@
 import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ChevronLeft, ChevronRight, KeyRound, Pencil, RotateCcw, Search, SlidersHorizontal, Trash2, UserPlus, UsersRound } from 'lucide-angular';
+import {
+  ChevronLeft,
+  ChevronRight,
+  KeyRound,
+  Pencil,
+  RotateCcw,
+  Search,
+  SlidersHorizontal,
+  Trash2,
+  UserPlus,
+  UsersRound,
+} from 'lucide-angular';
 import { I18nService } from '../../../../../../core/services/i18n.service';
 import { AuthStore } from '../../../../../auth/presentation/state/auth.store';
 import { TranslatePipe } from '../../../../../../shared/pipes/translate.pipe';
@@ -73,9 +91,7 @@ export class BranchUsersPageComponent implements OnInit {
   readonly canUpdate = computed(() => this.authStore.canManageBranchUsers('Update'));
   readonly canDelete = computed(() => this.authStore.canManageBranchUsers('Delete'));
   readonly canRestore = computed(() => this.authStore.canManageBranchUsers('Restore'));
-  readonly canResetBranchUserPassword = computed(() =>
-    this.authStore.canResetBranchUserPassword(),
-  );
+  readonly canResetBranchUserPassword = computed(() => this.authStore.canResetBranchUserPassword());
   readonly canAssignRoles = computed(() => this.authStore.canManageBranchUsers('AssignRoles'));
   readonly canUseActiveActions = computed(
     () =>
@@ -185,9 +201,8 @@ export class BranchUsersPageComponent implements OnInit {
       return;
     }
 
-    this.branchUsersStore.createBranchUser(
-      this.buildCreatePayload(),
-      () => this.closeCreateBranchUser(),
+    this.branchUsersStore.createBranchUser(this.buildCreatePayload(), () =>
+      this.closeCreateBranchUser(),
     );
   }
 
@@ -312,6 +327,11 @@ export class BranchUsersPageComponent implements OnInit {
     this.assignRoleIds.update((roleIds) => this.toggleRoleId(roleIds, roleId));
   }
 
+  roleDisplayName(role: string | { name?: string } | null | undefined): string {
+    const rawName = typeof role === 'string' ? role : (role?.name ?? '');
+    return this.i18n.translateRole(rawName);
+  }
+
   branchUserFieldError(field: keyof typeof this.branchUserForm.controls): string {
     const control = this.branchUserForm.controls[field];
     const backendError = this.createBackendFieldError(field);
@@ -344,7 +364,7 @@ export class BranchUsersPageComponent implements OnInit {
 
   editBranchUserFieldError(field: keyof typeof this.editBranchUserForm.controls): string {
     const control = this.editBranchUserForm.controls[field];
-    const backendError = field === 'email' ? this.branchUsersStore.updateEmailError() ?? '' : '';
+    const backendError = field === 'email' ? (this.branchUsersStore.updateEmailError() ?? '') : '';
     if (backendError.length > 0) {
       return backendError;
     }
@@ -388,7 +408,9 @@ export class BranchUsersPageComponent implements OnInit {
       return backendError;
     }
 
-    return this.branchUserForm.touched && this.createRoleIds().length === 0 ? 'branchUsers.roleIdsRequired' : '';
+    return this.branchUserForm.touched && this.createRoleIds().length === 0
+      ? 'branchUsers.roleIdsRequired'
+      : '';
   }
 
   assignRolesError(): string {
@@ -497,5 +519,4 @@ export class BranchUsersPageComponent implements OnInit {
 
     return errorKeys[field];
   }
-
 }

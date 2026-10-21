@@ -250,7 +250,10 @@
                         {{ lifecycleLabelKey(template) | t }}
                       </span>
                       @if (template.isManagedGlobalCopy) {
-                        <span class="text-[10px] font-bold text-violet-700">
+                        <span
+                          class="text-[10px] font-bold text-violet-700"
+                          [title]="'superAdminTemplates.managedCopyTooltip' | t"
+                        >
                           {{ 'superAdminTemplates.managedCopy' | t }}
                         </span>
                       }

@@ -41,14 +41,14 @@
     <!-- 1. EXECUTIVE TEMPLATE HERO CARD -->
     <!-- ========================================================================= -->
     <div
-      class="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs"
+      class="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-4 sm:p-5 lg:p-6 shadow-xs"
     >
-      <div class="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-        <div class="flex items-start gap-4">
+      <div class="flex flex-col gap-4 2xl:flex-row 2xl:items-center 2xl:justify-between">
+        <div class="flex min-w-0 flex-1 items-start sm:items-center gap-3 sm:gap-4">
           <!-- Logo Squircle / Branded Avatar -->
           @if (logoUrl(template); as logo) {
             <div
-              class="flex h-16 w-16 sm:h-20 sm:w-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-1.5 shadow-sm ring-4 ring-slate-100/80"
+              class="flex h-14 w-14 sm:h-20 sm:w-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-1.5 shadow-sm ring-4 ring-slate-100/80"
             >
               <img
                 class="h-full w-full object-contain"
@@ -58,9 +58,9 @@
             </div>
           } @else {
             <div
-              class="flex h-16 w-16 sm:h-20 sm:w-20 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#148496] via-[#0f5b67] to-[#0a3a42] text-white shadow-md shadow-[#148496]/20 ring-4 ring-[#148496]/10"
+              class="flex h-14 w-14 sm:h-20 sm:w-20 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#148496] via-[#0f5b67] to-[#0a3a42] text-white shadow-md shadow-[#148496]/20 ring-4 ring-[#148496]/10"
             >
-              <app-icon [icon]="template.isGlobal ? globeIcon : fileTextIcon" [size]="32" />
+              <app-icon [icon]="template.isGlobal ? globeIcon : fileTextIcon" [size]="28" />
             </div>
           }
 
@@ -80,6 +80,7 @@
               @if (template.isManagedGlobalCopy) {
                 <span
                   class="rounded-md bg-violet-100/70 px-2 py-0.5 text-xs font-bold text-violet-800"
+                  [title]="'superAdminTemplates.managedCopyTooltip' | t"
                 >
                   {{ 'superAdminTemplates.managedCopy' | t }}
                 </span>
@@ -111,12 +112,12 @@
               </span>
             </div>
 
-            <h1 class="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
+            <h1 class="text-lg sm:text-2xl font-black tracking-tight text-slate-900 break-words">
               {{ templateDisplayName(template) }}
             </h1>
 
             @if (template.description) {
-              <p class="text-xs leading-relaxed text-slate-600 max-w-3xl">
+              <p class="text-xs leading-relaxed text-slate-600 max-w-3xl break-words">
                 {{ template.description }}
               </p>
             }
@@ -124,7 +125,7 @@
         </div>
 
         <!-- Action Toolbar -->
-        <div class="flex flex-wrap items-center gap-2 pt-2 lg:pt-0 lg:justify-end shrink-0">
+        <div class="flex flex-wrap items-center gap-2 pt-3 2xl:pt-0 2xl:justify-end border-t border-slate-100/80 2xl:border-t-0">
           @if (canManageQuestions(template)) {
             <app-button size="md" type="button" [routerLink]="['questions']">
               <app-icon [icon]="listChecksIcon" [size]="16" />

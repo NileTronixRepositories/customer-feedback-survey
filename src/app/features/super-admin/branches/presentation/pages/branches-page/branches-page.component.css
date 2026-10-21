@@ -10,12 +10,19 @@
 }
 
 @media (max-width: 640px) {
-  :host ::ng-deep app-button {
+  :host ::ng-deep .hero-actions app-button,
+  :host ::ng-deep .hero-actions app-button button {
     display: block;
     width: 100%;
   }
 
-  :host ::ng-deep app-button button {
+  :host ::ng-deep .flex > app-button.flex-1,
+  :host ::ng-deep .grid > app-button {
+    min-width: 0;
+  }
+
+  :host ::ng-deep .flex > app-button.flex-1 button,
+  :host ::ng-deep .grid > app-button button {
     width: 100%;
   }
 }
@@ -67,8 +74,14 @@
   background: rgba(45, 186, 211, 0.06);
 }
 
-:host-context([dir='ltr']) .branches-hero::before { right: auto; left: -100px; }
-:host-context([dir='ltr']) .branches-hero::after  { right: auto; left: 30px; }
+:host-context([dir='ltr']) .branches-hero::before {
+  right: auto;
+  left: -100px;
+}
+:host-context([dir='ltr']) .branches-hero::after {
+  right: auto;
+  left: 30px;
+}
 
 /* =============================== */
 /* CONTENT                         */

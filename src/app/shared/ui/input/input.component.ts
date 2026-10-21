@@ -10,12 +10,13 @@ import {
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { Eye, EyeOff } from 'lucide-angular';
 import { I18nService } from '../../../core/services/i18n.service';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 import { IconComponent } from '../icon/icon.component';
 
 @Component({
   selector: 'app-input',
   standalone: true,
-  imports: [IconComponent],
+  imports: [IconComponent, TranslatePipe],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,

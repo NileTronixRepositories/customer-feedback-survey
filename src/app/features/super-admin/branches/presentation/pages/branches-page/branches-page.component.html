@@ -40,8 +40,6 @@
   </div>
 </div>
 
-
-
 <!-- الكروت الثلاثة -->
 <div class="grid grid-cols-1 gap-3 md:grid-cols-3 mt-2">
   <!-- 1. الفروع المنشأة -->
@@ -154,7 +152,7 @@
     [formGroup]="searchForm"
     (ngSubmit)="searchBranches()"
   >
-    <label class="filter-label flex-1 min-w-[260px] max-w-2xl">
+    <label class="filter-label flex-1 min-w-[260px]">
       <span class="filter-label-text">{{ 'branches.search' | t }}</span>
       <div class="relative flex items-center">
         <span
@@ -171,12 +169,23 @@
       </div>
     </label>
 
-    <div class="flex items-center gap-2 shrink-0">
-      <app-button type="submit" size="md" [loading]="branchesStore.loading()">
+    <div class="flex w-full items-center gap-2 sm:w-auto shrink-0">
+      <app-button
+        class="flex-1 sm:flex-initial"
+        type="submit"
+        size="md"
+        [loading]="branchesStore.loading()"
+      >
         <app-icon [icon]="searchIcon" [size]="16" />
         {{ 'branches.searchAction' | t }}
       </app-button>
-      <app-button type="button" size="md" variant="secondary" (pressed)="clearBranchSearch()">
+      <app-button
+        class="flex-1 sm:flex-initial"
+        type="button"
+        size="md"
+        variant="secondary"
+        (pressed)="clearBranchSearch()"
+      >
         {{ 'branches.clearSearch' | t }}
       </app-button>
     </div>
@@ -434,7 +443,7 @@
                     <span
                       class="rounded-full bg-slate-100 border border-slate-200/80 px-2.5 py-0.5 text-[11px] font-semibold text-slate-600"
                     >
-                      {{ role.name }}
+                      {{ role.name | t }}
                     </span>
                   }
                 </div>

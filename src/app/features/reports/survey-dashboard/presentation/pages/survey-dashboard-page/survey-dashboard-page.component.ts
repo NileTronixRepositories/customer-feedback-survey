@@ -694,14 +694,16 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
   branchUserRoles(user: BranchAdminBranchUser): string {
     return (
       user.roles
-        .map((role) => role.name)
+        .map((role) => this.i18n.translateRole(role.name))
         .filter((role) => role.length > 0)
         .join(', ') || '-'
     );
   }
 
   branchUserRoleList(user: BranchAdminBranchUser): string[] {
-    return user.roles.map((role) => role.name).filter((role) => role && role.length > 0);
+    return user.roles
+      .map((role) => this.i18n.translateRole(role.name))
+      .filter((role) => role && role.length > 0);
   }
 
   userInitials(name: string | null | undefined): string {

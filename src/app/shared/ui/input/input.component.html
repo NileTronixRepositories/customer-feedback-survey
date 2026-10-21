@@ -31,7 +31,7 @@
   }
   @if (error()) {
     <span [class]="feedbackClasses() + ' font-medium text-[var(--theme-color-danger)]'">{{
-      error()
+      error() | t
     }}</span>
   }
 </label>

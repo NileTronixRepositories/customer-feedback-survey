@@ -29,7 +29,7 @@
 
           <div class="min-w-0 flex-1">
             <div class="flex flex-wrap items-center gap-2">
-              <h3 class="break-words text-xs font-bold text-slate-900 [overflow-wrap:anywhere]">
+              <h3 class="break-words text-xs font-bold text-slate-900">
                 {{ questionText(node.question) }}
               </h3>
               <span class="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
@@ -38,7 +38,7 @@
             </div>
 
             @if (questionSecondaryText(node.question)) {
-              <p class="mt-1 break-words text-[11px] font-medium text-slate-400 [overflow-wrap:anywhere]">
+              <p class="mt-1 break-words text-[11px] font-medium text-slate-400">
                 {{ questionSecondaryText(node.question) }}
               </p>
             }
@@ -75,7 +75,7 @@
     </div>
 
     @if (node.children.length > 0) {
-      <div class="ms-6 mt-3 space-y-2 border-s-2 border-dashed border-slate-200 ps-4">
+      <div class="ms-2 sm:ms-5 mt-3 space-y-2 border-s-2 border-dashed border-slate-200 ps-2 sm:ps-3.5">
         @for (childNode of node.children; track childNode.question.templateQuestionId) {
           <ng-container
             [ngTemplateOutlet]="treeNode"

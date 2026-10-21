@@ -46,8 +46,6 @@
       {{ branchesStore.detailsError() ?? '' | t }}
     </div>
   } @else if (branchesStore.selectedBranchDetails(); as branch) {
-
-
     @if (resetPasswordSuccess()) {
       <div
         class="border border-emerald-100 bg-emerald-50 p-3 text-xs font-semibold text-emerald-700"
@@ -110,7 +108,9 @@
               {{ localizedDisplayName(branch) }}
             </h1>
 
-            <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500 font-medium">
+            <div
+              class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500 font-medium"
+            >
               @if (branch.address) {
                 <span class="inline-flex items-center gap-1.5">
                   <app-icon [icon]="mapPinIcon" [size]="13" class="text-slate-400" />
@@ -181,10 +181,16 @@
         class="flex items-center justify-between gap-3 rounded-xl border border-slate-200/80 bg-white px-3.5 py-2.5 shadow-2xs transition cursor-pointer hover:border-[#148496]/50 hover:shadow-xs focus:outline-none focus:ring-2 focus:ring-[#148496]/20"
       >
         <div class="min-w-0">
-          <p class="text-[11px] font-bold text-slate-500 truncate">{{ 'branches.branchAdminsCount' | t }}</p>
-          <p class="mt-0.5 text-xl font-black tracking-tight text-slate-900">{{ branch.summary.branchAdminsCount }}</p>
+          <p class="text-[11px] font-bold text-slate-500 truncate">
+            {{ 'branches.branchAdminsCount' | t }}
+          </p>
+          <p class="mt-0.5 text-xl font-black tracking-tight text-slate-900">
+            {{ branch.summary.branchAdminsCount }}
+          </p>
         </div>
-        <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-cyan-50 text-[#148496]">
+        <div
+          class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-cyan-50 text-[#148496]"
+        >
           <app-icon [icon]="shieldCheckIcon" [size]="16" />
         </div>
       </div>
@@ -198,10 +204,16 @@
         class="flex items-center justify-between gap-3 rounded-xl border border-slate-200/80 bg-white px-3.5 py-2.5 shadow-2xs transition cursor-pointer hover:border-[#148496]/50 hover:shadow-xs focus:outline-none focus:ring-2 focus:ring-[#148496]/20"
       >
         <div class="min-w-0">
-          <p class="text-[11px] font-bold text-slate-500 truncate">{{ 'branches.departmentsCount' | t }}</p>
-          <p class="mt-0.5 text-xl font-black tracking-tight text-slate-900">{{ branch.summary.departmentsCount }}</p>
+          <p class="text-[11px] font-bold text-slate-500 truncate">
+            {{ 'branches.departmentsCount' | t }}
+          </p>
+          <p class="mt-0.5 text-xl font-black tracking-tight text-slate-900">
+            {{ branch.summary.departmentsCount }}
+          </p>
         </div>
-        <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-teal-50 text-[#0f5b67]">
+        <div
+          class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-teal-50 text-[#0f5b67]"
+        >
           <app-icon [icon]="layersIcon" [size]="16" />
         </div>
       </div>
@@ -215,10 +227,16 @@
         class="flex items-center justify-between gap-3 rounded-xl border border-slate-200/80 bg-white px-3.5 py-2.5 shadow-2xs transition cursor-pointer hover:border-[#148496]/50 hover:shadow-xs focus:outline-none focus:ring-2 focus:ring-[#148496]/20"
       >
         <div class="min-w-0">
-          <p class="text-[11px] font-bold text-slate-500 truncate">{{ 'branches.branchUsersCount' | t }}</p>
-          <p class="mt-0.5 text-xl font-black tracking-tight text-slate-900">{{ branch.summary.branchUsersCount }}</p>
+          <p class="text-[11px] font-bold text-slate-500 truncate">
+            {{ 'branches.branchUsersCount' | t }}
+          </p>
+          <p class="mt-0.5 text-xl font-black tracking-tight text-slate-900">
+            {{ branch.summary.branchUsersCount }}
+          </p>
         </div>
-        <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-sky-50 text-sky-700">
+        <div
+          class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-sky-50 text-sky-700"
+        >
           <app-icon [icon]="usersIcon" [size]="16" />
         </div>
       </div>
@@ -232,18 +250,28 @@
         class="flex items-center justify-between gap-3 rounded-xl border border-slate-200/80 bg-white px-3.5 py-2.5 shadow-2xs transition cursor-pointer hover:border-[#148496]/50 hover:shadow-xs focus:outline-none focus:ring-2 focus:ring-[#148496]/20"
       >
         <div class="min-w-0">
-          <p class="text-[11px] font-bold text-slate-500 truncate">{{ 'branches.questionsCount' | t }}</p>
-          <p class="mt-0.5 text-xl font-black tracking-tight text-slate-900">{{ branch.summary.questionsCount }}</p>
+          <p class="text-[11px] font-bold text-slate-500 truncate">
+            {{ 'branches.questionsCount' | t }}
+          </p>
+          <p class="mt-0.5 text-xl font-black tracking-tight text-slate-900">
+            {{ branch.summary.questionsCount }}
+          </p>
         </div>
-        <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-50 text-amber-700">
+        <div
+          class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-50 text-amber-700"
+        >
           <app-icon [icon]="questionIcon" [size]="16" />
         </div>
       </div>
     </section>
 
     <!-- ==================== Quick Navigation / Tab Bar ==================== -->
-    <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200/70 pb-1">
-      <div class="flex flex-wrap items-center gap-1.5 p-1 bg-slate-100/90 rounded-xl border border-slate-200/60">
+    <div
+      class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200/70 pb-1"
+    >
+      <div
+        class="flex flex-wrap items-center gap-1.5 p-1 bg-slate-100/90 rounded-xl border border-slate-200/60"
+      >
         <!-- Tab: All -->
         <button
           type="button"
@@ -355,16 +383,24 @@
       @if (activeTab() === 'all' || activeTab() === 'personnel') {
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <!-- Card A: Branch Admins -->
-          <section class="rounded-xl border border-slate-200/80 bg-white p-3.5 shadow-2xs flex flex-col">
-            <div class="mb-3 flex items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
+          <section
+            class="rounded-xl border border-slate-200/80 bg-white p-3.5 shadow-2xs flex flex-col"
+          >
+            <div
+              class="mb-3 flex items-center justify-between gap-2 border-b border-slate-100 pb-2.5"
+            >
               <div class="flex items-center gap-2 min-w-0">
-                <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-cyan-50 text-[#148496]">
+                <span
+                  class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-cyan-50 text-[#148496]"
+                >
                   <app-icon [icon]="shieldCheckIcon" [size]="14" />
                 </span>
                 <h2 class="text-xs font-black text-slate-900 truncate">
                   {{ 'branches.branchAdmins' | t }}
                 </h2>
-                <span class="rounded-full bg-cyan-50 px-2 py-0.5 text-[10px] font-bold text-[#148496] border border-cyan-100/60">
+                <span
+                  class="rounded-full bg-cyan-50 px-2 py-0.5 text-[10px] font-bold text-[#148496] border border-cyan-100/60"
+                >
                   {{ branch.branchAdmins.length }}
                 </span>
               </div>
@@ -392,12 +428,16 @@
                             class="text-start focus:outline-none"
                             (click)="openBranchAdminDetails(admin)"
                           >
-                            <span class="text-xs font-black text-slate-900 hover:text-[#148496] transition truncate">
+                            <span
+                              class="text-xs font-black text-slate-900 hover:text-[#148496] transition truncate"
+                            >
                               {{ localizedDisplayName(admin) }}
                             </span>
                           </button>
                           @if (admin.userName) {
-                            <span class="rounded bg-slate-100/80 px-1.5 py-0.2 text-[10px] font-semibold text-slate-500">
+                            <span
+                              class="rounded bg-slate-100/80 px-1.5 py-0.2 text-[10px] font-semibold text-slate-500"
+                            >
                               @{{ admin.userName }}
                             </span>
                           }
@@ -419,16 +459,26 @@
                         </div>
 
                         <!-- Meta Line: Email & Phone inline -->
-                        <div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px] text-slate-500 font-medium">
+                        <div
+                          class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px] text-slate-500 font-medium"
+                        >
                           @if (admin.email) {
                             <span class="inline-flex items-center gap-1 truncate max-w-[200px]">
-                              <app-icon [icon]="mailIcon" [size]="11" class="shrink-0 text-slate-400" />
+                              <app-icon
+                                [icon]="mailIcon"
+                                [size]="11"
+                                class="shrink-0 text-slate-400"
+                              />
                               <span class="truncate">{{ admin.email }}</span>
                             </span>
                           }
                           @if (admin.phoneNumber) {
                             <span class="inline-flex items-center gap-1">
-                              <app-icon [icon]="phoneIcon" [size]="11" class="shrink-0 text-slate-400" />
+                              <app-icon
+                                [icon]="phoneIcon"
+                                [size]="11"
+                                class="shrink-0 text-slate-400"
+                              />
                               <span>{{ admin.phoneNumber }}</span>
                             </span>
                           }
@@ -437,13 +487,27 @@
                     </div>
 
                     <!-- Actions toolbar -->
-                    <div class="flex items-center gap-1 sm:justify-end shrink-0 self-end sm:self-center">
-                      @if (admin.isActive && canResetPassword('BRANCH_ADMIN', admin.applicationUserId)) {
+                    <div
+                      class="flex items-center gap-1 sm:justify-end shrink-0 self-end sm:self-center"
+                    >
+                      @if (
+                        admin.isActive && canResetPassword('BRANCH_ADMIN', admin.applicationUserId)
+                      ) {
                         <button
                           type="button"
                           class="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2 py-1 text-[11px] font-bold text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition shadow-2xs"
-                          [disabled]="resettingPassword() && resetPasswordTarget()?.applicationUserId === admin.applicationUserId"
-                          (click)="openResetPassword('BRANCH_ADMIN', admin.applicationUserId, localizedDisplayName(admin), $event)"
+                          [disabled]="
+                            resettingPassword() &&
+                            resetPasswordTarget()?.applicationUserId === admin.applicationUserId
+                          "
+                          (click)="
+                            openResetPassword(
+                              'BRANCH_ADMIN',
+                              admin.applicationUserId,
+                              localizedDisplayName(admin),
+                              $event
+                            )
+                          "
                           [title]="'users.resetPassword' | t"
                         >
                           <app-icon [icon]="resetPasswordIcon" [size]="12" />
@@ -459,7 +523,9 @@
                           [title]="'branchAdmins.deactivateAction' | t"
                         >
                           <app-icon [icon]="deactivateIcon" [size]="12" />
-                          <span class="hidden sm:inline">{{ 'branchAdmins.deactivateAction' | t }}</span>
+                          <span class="hidden sm:inline">{{
+                            'branchAdmins.deactivateAction' | t
+                          }}</span>
                         </button>
                       }
                       @if (canRestoreBranchAdmin(admin)) {
@@ -478,27 +544,41 @@
                   </div>
                 </div>
               } @empty {
-                <div class="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 py-5 text-center">
-                  <div class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+                <div
+                  class="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 py-5 text-center"
+                >
+                  <div
+                    class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-400"
+                  >
                     <app-icon [icon]="shieldCheckIcon" [size]="16" />
                   </div>
-                  <p class="mt-1.5 text-xs font-semibold text-slate-500">{{ 'common.noRecords' | t }}</p>
+                  <p class="mt-1.5 text-xs font-semibold text-slate-500">
+                    {{ 'common.noRecords' | t }}
+                  </p>
                 </div>
               }
             </div>
           </section>
 
           <!-- Card B: Branch Users -->
-          <section class="rounded-xl border border-slate-200/80 bg-white p-3.5 shadow-2xs flex flex-col">
-            <div class="mb-3 flex items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
+          <section
+            class="rounded-xl border border-slate-200/80 bg-white p-3.5 shadow-2xs flex flex-col"
+          >
+            <div
+              class="mb-3 flex items-center justify-between gap-2 border-b border-slate-100 pb-2.5"
+            >
               <div class="flex items-center gap-2 min-w-0">
-                <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-sky-50 text-sky-700">
+                <span
+                  class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-sky-50 text-sky-700"
+                >
                   <app-icon [icon]="usersIcon" [size]="14" />
                 </span>
                 <h2 class="text-xs font-black text-slate-900 truncate">
                   {{ 'branches.branchUsers' | t }}
                 </h2>
-                <span class="rounded-full bg-sky-50 px-2 py-0.5 text-[10px] font-bold text-sky-700 border border-sky-100/60">
+                <span
+                  class="rounded-full bg-sky-50 px-2 py-0.5 text-[10px] font-bold text-sky-700 border border-sky-100/60"
+                >
                   {{ branch.branchUsers.length }}
                 </span>
               </div>
@@ -518,16 +598,26 @@
                       </div>
                       <div class="min-w-0">
                         <div class="flex items-center gap-1.5 flex-wrap">
-                          <span class="text-xs font-black text-slate-900 truncate">{{ localizedDisplayName(user) }}</span>
+                          <span class="text-xs font-black text-slate-900 truncate">{{
+                            localizedDisplayName(user)
+                          }}</span>
                           @if (user.userName) {
-                            <span class="rounded bg-slate-100/80 px-1.5 py-0.2 text-[10px] font-semibold text-slate-500">
+                            <span
+                              class="rounded bg-slate-100/80 px-1.5 py-0.2 text-[10px] font-semibold text-slate-500"
+                            >
                               @{{ user.userName }}
                             </span>
                           }
                         </div>
                         @if (user.email) {
-                          <div class="mt-0.5 flex items-center gap-1 text-[11px] font-medium text-slate-500 truncate">
-                            <app-icon [icon]="mailIcon" [size]="11" class="shrink-0 text-slate-400" />
+                          <div
+                            class="mt-0.5 flex items-center gap-1 text-[11px] font-medium text-slate-500 truncate"
+                          >
+                            <app-icon
+                              [icon]="mailIcon"
+                              [size]="11"
+                              class="shrink-0 text-slate-400"
+                            />
                             <span class="truncate">{{ user.email }}</span>
                           </div>
                         }
@@ -537,7 +627,7 @@
                               <span
                                 class="rounded-md bg-slate-100 px-1.5 py-0.5 text-[9px] font-bold text-slate-600 border border-slate-200/40"
                               >
-                                {{ role.name }}
+                                {{ role.name | t }}
                               </span>
                             }
                           </div>
@@ -550,8 +640,18 @@
                         <button
                           type="button"
                           class="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2 py-1 text-[11px] font-bold text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition shadow-2xs"
-                          [disabled]="resettingPassword() && resetPasswordTarget()?.applicationUserId === user.applicationUserId"
-                          (click)="openResetPassword('BRANCH_USER', user.applicationUserId, localizedDisplayName(user), $event)"
+                          [disabled]="
+                            resettingPassword() &&
+                            resetPasswordTarget()?.applicationUserId === user.applicationUserId
+                          "
+                          (click)="
+                            openResetPassword(
+                              'BRANCH_USER',
+                              user.applicationUserId,
+                              localizedDisplayName(user),
+                              $event
+                            )
+                          "
                           [title]="'users.resetPassword' | t"
                         >
                           <app-icon [icon]="resetPasswordIcon" [size]="12" />
@@ -562,11 +662,17 @@
                   </div>
                 </div>
               } @empty {
-                <div class="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 py-5 text-center">
-                  <div class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+                <div
+                  class="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 py-5 text-center"
+                >
+                  <div
+                    class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-400"
+                  >
                     <app-icon [icon]="usersIcon" [size]="16" />
                   </div>
-                  <p class="mt-1.5 text-xs font-semibold text-slate-500">{{ 'common.noRecords' | t }}</p>
+                  <p class="mt-1.5 text-xs font-semibold text-slate-500">
+                    {{ 'common.noRecords' | t }}
+                  </p>
                 </div>
               }
             </div>
@@ -583,15 +689,21 @@
               class="rounded-xl border border-slate-200/80 bg-white p-3.5 shadow-2xs flex flex-col"
               [class.lg:col-span-2]="activeTab() === 'departments'"
             >
-              <div class="mb-3 flex items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
+              <div
+                class="mb-3 flex items-center justify-between gap-2 border-b border-slate-100 pb-2.5"
+              >
                 <div class="flex items-center gap-2 min-w-0">
-                  <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-teal-50 text-[#0f5b67]">
+                  <span
+                    class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-teal-50 text-[#0f5b67]"
+                  >
                     <app-icon [icon]="layersIcon" [size]="14" />
                   </span>
                   <h2 class="text-xs font-black text-slate-900 truncate">
                     {{ 'common.departments' | t }}
                   </h2>
-                  <span class="rounded-full bg-teal-50 px-2 py-0.5 text-[10px] font-bold text-[#0f5b67] border border-teal-100/60">
+                  <span
+                    class="rounded-full bg-teal-50 px-2 py-0.5 text-[10px] font-bold text-[#0f5b67] border border-teal-100/60"
+                  >
                     {{ branch.departments.length }}
                   </span>
                 </div>
@@ -616,7 +728,9 @@
                         </div>
                         <div class="min-w-0">
                           <div class="flex items-center gap-2 flex-wrap">
-                            <p class="font-bold text-xs text-slate-900 transition group-hover:text-[#148496] truncate">
+                            <p
+                              class="font-bold text-xs text-slate-900 transition group-hover:text-[#148496] truncate"
+                            >
                               {{ codedDisplayName(department) }}
                             </p>
                             <span
@@ -631,12 +745,16 @@
                                 [class.bg-emerald-500]="department.isActive"
                                 [class.bg-slate-400]="!department.isActive"
                               ></span>
-                              {{ (department.isActive ? 'common.active' : 'branches.inactive') | t }}
+                              {{
+                                (department.isActive ? 'common.active' : 'branches.inactive') | t
+                              }}
                             </span>
                           </div>
                           <p class="mt-0.5 text-[11px] text-slate-500">
                             {{ 'branches.operatorsCount' | t }}:
-                            <span class="font-bold text-slate-700">{{ department.operatorsCount }}</span>
+                            <span class="font-bold text-slate-700">{{
+                              department.operatorsCount
+                            }}</span>
                           </p>
                         </div>
                       </div>
@@ -646,7 +764,9 @@
                           <button
                             type="button"
                             class="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2 py-1 text-[11px] font-bold text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition shadow-2xs"
-                            (click)="$event.stopPropagation(); openCreateDepartmentAdmin(department)"
+                            (click)="
+                              $event.stopPropagation(); openCreateDepartmentAdmin(department)
+                            "
                           >
                             <app-icon [icon]="userPlusIcon" [size]="12" />
                             <span>{{ 'departmentAdmins.createDepartmentAdmin' | t }}</span>
@@ -657,9 +777,13 @@
 
                     <!-- Nested Department Admins List (compact) -->
                     @if (department.departmentAdmins.length > 0) {
-                      <div class="mt-2 space-y-1 rounded-lg border border-slate-100 bg-slate-50/70 p-2">
+                      <div
+                        class="mt-2 space-y-1 rounded-lg border border-slate-100 bg-slate-50/70 p-2"
+                      >
                         <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                          {{ 'branches.branchAdmins' | t }} ({{ department.departmentAdmins.length }})
+                          {{ 'branches.branchAdmins' | t }} ({{
+                            department.departmentAdmins.length
+                          }})
                         </p>
                         @for (admin of department.departmentAdmins; track admin.departmentAdminId) {
                           <div
@@ -698,8 +822,19 @@
                                 <button
                                   type="button"
                                   class="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-white px-1.5 py-0.5 text-[10px] font-bold text-slate-600 hover:bg-slate-50 transition"
-                                  [disabled]="resettingPassword() && resetPasswordTarget()?.applicationUserId === admin.applicationUserId"
-                                  (click)="openResetPassword('DEPARTMENT_ADMIN', admin.applicationUserId, localizedDisplayName(admin), $event)"
+                                  [disabled]="
+                                    resettingPassword() &&
+                                    resetPasswordTarget()?.applicationUserId ===
+                                      admin.applicationUserId
+                                  "
+                                  (click)="
+                                    openResetPassword(
+                                      'DEPARTMENT_ADMIN',
+                                      admin.applicationUserId,
+                                      localizedDisplayName(admin),
+                                      $event
+                                    )
+                                  "
                                 >
                                   <app-icon [icon]="resetPasswordIcon" [size]="11" />
                                 </button>
@@ -734,11 +869,17 @@
                   <div
                     class="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 py-5 text-center"
                   >
-                    <div class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+                    <div
+                      class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-400"
+                    >
                       <app-icon [icon]="layersIcon" [size]="16" />
                     </div>
-                    <p class="mt-1.5 text-xs font-semibold text-slate-600">{{ 'common.noRecords' | t }}</p>
-                    <p class="text-[10px] text-slate-400">{{ 'branches.departmentsCount' | t }}: 0</p>
+                    <p class="mt-1.5 text-xs font-semibold text-slate-600">
+                      {{ 'common.noRecords' | t }}
+                    </p>
+                    <p class="text-[10px] text-slate-400">
+                      {{ 'branches.departmentsCount' | t }}: 0
+                    </p>
                   </div>
                 }
               </div>
@@ -751,15 +892,21 @@
               class="rounded-xl border border-slate-200/80 bg-white p-3.5 shadow-2xs flex flex-col"
               [class.lg:col-span-1]="activeTab() === 'all' || activeTab() === 'surveys'"
             >
-              <div class="mb-3 flex items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
+              <div
+                class="mb-3 flex items-center justify-between gap-2 border-b border-slate-100 pb-2.5"
+              >
                 <div class="flex items-center gap-2 min-w-0">
-                  <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-cyan-50 text-[#148496]">
+                  <span
+                    class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-cyan-50 text-[#148496]"
+                  >
                     <app-icon [icon]="fileTextIcon" [size]="14" />
                   </span>
                   <h2 class="text-xs font-black text-slate-900 truncate">
                     {{ 'branches.templates' | t }}
                   </h2>
-                  <span class="rounded-full bg-cyan-50 px-2 py-0.5 text-[10px] font-bold text-[#148496] border border-cyan-100/60">
+                  <span
+                    class="rounded-full bg-cyan-50 px-2 py-0.5 text-[10px] font-bold text-[#148496] border border-cyan-100/60"
+                  >
                     {{ branch.templates.length }}
                   </span>
                 </div>
@@ -771,13 +918,19 @@
                     class="flex items-center justify-between gap-3 rounded-xl border border-slate-200/70 bg-white p-2.5 shadow-2xs transition hover:border-[#148496]/50 hover:shadow-xs"
                   >
                     <div class="flex items-center gap-2.5 min-w-0">
-                      <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-cyan-50 text-[#148496]">
+                      <div
+                        class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-cyan-50 text-[#148496]"
+                      >
                         <app-icon [icon]="fileTextIcon" [size]="16" />
                       </div>
                       <div class="min-w-0">
-                        <p class="font-bold text-xs text-slate-900 truncate">{{ localizedDisplayName(template) }}</p>
+                        <p class="font-bold text-xs text-slate-900 truncate">
+                          {{ localizedDisplayName(template) }}
+                        </p>
                         @if (template.description) {
-                          <p class="text-[11px] text-slate-400 truncate max-w-[240px]">{{ template.description }}</p>
+                          <p class="text-[11px] text-slate-400 truncate max-w-[240px]">
+                            {{ template.description }}
+                          </p>
                         }
                       </div>
                     </div>
@@ -791,10 +944,14 @@
                   <div
                     class="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 py-5 text-center"
                   >
-                    <div class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+                    <div
+                      class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-400"
+                    >
                       <app-icon [icon]="fileTextIcon" [size]="16" />
                     </div>
-                    <p class="mt-1.5 text-xs font-semibold text-slate-600">{{ 'common.noRecords' | t }}</p>
+                    <p class="mt-1.5 text-xs font-semibold text-slate-600">
+                      {{ 'common.noRecords' | t }}
+                    </p>
                   </div>
                 }
               </div>
@@ -806,15 +963,21 @@
       <!-- Row 3: Question Groups (Full Width or 2-col) -->
       @if (activeTab() === 'all' || activeTab() === 'surveys') {
         <section class="rounded-xl border border-slate-200/80 bg-white p-3.5 shadow-2xs">
-          <div class="mb-3 flex items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
+          <div
+            class="mb-3 flex items-center justify-between gap-2 border-b border-slate-100 pb-2.5"
+          >
             <div class="flex items-center gap-2 min-w-0">
-              <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-amber-50 text-amber-700">
+              <span
+                class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-amber-50 text-amber-700"
+              >
                 <app-icon [icon]="questionIcon" [size]="14" />
               </span>
               <h2 class="text-xs font-black text-slate-900 truncate">
                 {{ 'branches.questionGroups' | t }}
               </h2>
-              <span class="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-700 border border-amber-100/60">
+              <span
+                class="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-700 border border-amber-100/60"
+              >
                 {{ branch.questionGroups.length }}
               </span>
             </div>
@@ -826,21 +989,31 @@
                 class="rounded-xl border border-slate-200/70 bg-white p-3 shadow-2xs transition hover:border-[#148496]/50 hover:shadow-xs flex flex-col justify-between"
               >
                 <div>
-                  <div class="flex items-center justify-between gap-2 border-b border-slate-100 pb-2">
+                  <div
+                    class="flex items-center justify-between gap-2 border-b border-slate-100 pb-2"
+                  >
                     <div class="flex items-center gap-2 min-w-0">
-                      <div class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-amber-50 text-amber-700">
+                      <div
+                        class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-amber-50 text-amber-700"
+                      >
                         <app-icon [icon]="questionIcon" [size]="14" />
                       </div>
-                      <p class="text-xs font-bold text-slate-900 truncate">{{ localizedDisplayName(group) }}</p>
+                      <p class="text-xs font-bold text-slate-900 truncate">
+                        {{ localizedDisplayName(group) }}
+                      </p>
                     </div>
-                    <span class="rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold text-slate-600 shrink-0">
+                    <span
+                      class="rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold text-slate-600 shrink-0"
+                    >
                       {{ group.questions.length }}
                     </span>
                   </div>
 
                   <div class="mt-2 space-y-1">
                     @for (question of group.questions; track question.questionId) {
-                      <div class="flex items-center justify-between gap-2 rounded-lg bg-slate-50/80 px-2.5 py-1.5 border border-slate-100">
+                      <div
+                        class="flex items-center justify-between gap-2 rounded-lg bg-slate-50/80 px-2.5 py-1.5 border border-slate-100"
+                      >
                         <p class="text-[11px] font-semibold text-slate-700 truncate min-w-0">
                           {{ questionDisplayText(question) }}
                         </p>
@@ -852,8 +1025,16 @@
                           [class.text-amber-700]="question.type.toLowerCase().includes('star')"
                           [class.bg-rose-50]="question.type.toLowerCase().includes('complain')"
                           [class.text-rose-700]="question.type.toLowerCase().includes('complain')"
-                          [class.bg-slate-200/60]="!question.type.toLowerCase().includes('single') && !question.type.toLowerCase().includes('star') && !question.type.toLowerCase().includes('complain')"
-                          [class.text-slate-600]="!question.type.toLowerCase().includes('single') && !question.type.toLowerCase().includes('star') && !question.type.toLowerCase().includes('complain')"
+                          [class.bg-slate-200/60]="
+                            !question.type.toLowerCase().includes('single') &&
+                            !question.type.toLowerCase().includes('star') &&
+                            !question.type.toLowerCase().includes('complain')
+                          "
+                          [class.text-slate-600]="
+                            !question.type.toLowerCase().includes('single') &&
+                            !question.type.toLowerCase().includes('star') &&
+                            !question.type.toLowerCase().includes('complain')
+                          "
                         >
                           {{ question.type }}
                         </span>
@@ -868,10 +1049,14 @@
               <div
                 class="col-span-full flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 py-5 text-center"
               >
-                <div class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+                <div
+                  class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-400"
+                >
                   <app-icon [icon]="questionIcon" [size]="16" />
                 </div>
-                <p class="mt-1.5 text-xs font-semibold text-slate-600">{{ 'common.noRecords' | t }}</p>
+                <p class="mt-1.5 text-xs font-semibold text-slate-600">
+                  {{ 'common.noRecords' | t }}
+                </p>
               </div>
             }
           </div>

@@ -181,13 +181,19 @@
                       {{ lifecycleLabelKey(template) | t }}
                     </span>
                     @if (template.isManagedGlobalCopy) {
-                      <span class="text-[10px] font-bold text-violet-700">{{
-                        'superAdminTemplates.managedCopy' | t
-                      }}</span>
+                      <span
+                        class="text-[10px] font-bold text-violet-700"
+                        [title]="'superAdminTemplates.managedCopyTooltip' | t"
+                      >
+                        {{ 'superAdminTemplates.managedCopy' | t }}
+                      </span>
                     } @else if (isGlobalSource(template)) {
-                      <span class="text-[10px] font-bold text-violet-700">{{
-                        'superAdminTemplates.globalSource' | t
-                      }}</span>
+                      <span
+                        class="text-[10px] font-bold text-violet-700"
+                        [title]="'superAdminTemplates.globalSourceTooltip' | t"
+                      >
+                        {{ 'superAdminTemplates.globalSource' | t }}
+                      </span>
                     }
                   </div>
                 </td>

@@ -10,18 +10,66 @@
     </app-button>
   </app-page-header>
 
-  <section class="grid gap-4 sm:grid-cols-2">
+  <section class="grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-3">
     <app-card
       [title]="'departments.totalDepartments' | t"
       [subtitle]="'departments.totalDepartmentsSubtitle' | t"
     >
-      <div class="flex items-center gap-3">
+      <div class="flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <span
+            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-cyan-50 text-[var(--theme-color-accent)] ring-1 ring-cyan-500/15"
+          >
+            <app-icon [icon]="departmentIcon" [size]="18" />
+          </span>
+          <p class="text-2xl font-black text-slate-900 leading-none">
+            {{ departmentsStore.totalItems() }}
+          </p>
+        </div>
         <span
-          class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-cyan-50 text-[var(--theme-color-accent)]"
+          class="rounded-full bg-cyan-50 px-2.5 py-1 text-xs font-bold text-[var(--theme-color-secondary)]"
         >
-          <app-icon [icon]="departmentIcon" [size]="18" />
+          {{ 'departments.totalItems' | t }}
         </span>
-        <p class="font-bold text-slate-900">{{ departmentsStore.totalItems() }}</p>
+      </div>
+    </app-card>
+
+    <app-card [title]="'common.active' | t" [subtitle]="'departments.activeDepartmentsHint' | t">
+      <div class="flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <span
+            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 ring-1 ring-emerald-500/15"
+          >
+            <app-icon [icon]="activeIcon" [size]="18" />
+          </span>
+          <p class="text-2xl font-black text-emerald-600 leading-none">
+            {{ activeDepartmentsCount() }}
+          </p>
+        </div>
+        <span class="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700">
+          {{ 'common.active' | t }}
+        </span>
+      </div>
+    </app-card>
+
+    <app-card
+      [title]="'branches.inactive' | t"
+      [subtitle]="'departments.inactiveDepartmentsHint' | t"
+    >
+      <div class="flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <span
+            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500 ring-1 ring-slate-200"
+          >
+            <app-icon [icon]="inactiveIcon" [size]="18" />
+          </span>
+          <p class="text-2xl font-black text-slate-600 leading-none">
+            {{ inactiveDepartmentsCount() }}
+          </p>
+        </div>
+        <span class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-600">
+          {{ 'branches.inactive' | t }}
+        </span>
       </div>
     </app-card>
   </section>
@@ -50,7 +98,7 @@
         </div>
       </div>
 
-      <div class="flex items-center gap-2 shrink-0">
+      <div class="table-header-action flex items-center gap-2 shrink-0">
         <app-button type="button" size="sm" (pressed)="openCreate()">
           <app-icon [icon]="createIcon" [size]="15" />
           {{ 'departments.createDepartment' | t }}
@@ -81,12 +129,23 @@
         </div>
       </label>
 
-      <div class="flex items-center gap-2 shrink-0">
-        <app-button size="md" type="submit" [loading]="departmentsStore.loading()">
+      <div class="flex w-full items-center gap-2 sm:w-auto shrink-0">
+        <app-button
+          class="flex-1 sm:flex-initial"
+          size="md"
+          type="submit"
+          [loading]="departmentsStore.loading()"
+        >
           <app-icon [icon]="searchIcon" [size]="16" />
           {{ 'branches.searchAction' | t }}
         </app-button>
-        <app-button size="md" type="button" variant="secondary" (pressed)="clearSearch()">
+        <app-button
+          class="flex-1 sm:flex-initial"
+          size="md"
+          type="button"
+          variant="secondary"
+          (pressed)="clearSearch()"
+        >
           {{ 'branches.clearSearch' | t }}
         </app-button>
       </div>

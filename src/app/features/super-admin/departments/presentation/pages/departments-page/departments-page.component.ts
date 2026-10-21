@@ -1,8 +1,27 @@
 import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ChevronLeft, ChevronRight, CirclePlus, Eye, Network, Pencil, RotateCcw, Search, Trash2 } from 'lucide-angular';
+import {
+  CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
+  CirclePlus,
+  Eye,
+  Network,
+  Pencil,
+  RotateCcw,
+  Search,
+  Trash2,
+  XCircle,
+} from 'lucide-angular';
 import { I18nService } from '../../../../../../core/services/i18n.service';
 import { TranslatePipe } from '../../../../../../shared/pipes/translate.pipe';
 import { ButtonComponent } from '../../../../../../shared/ui/button/button.component';
@@ -51,11 +70,20 @@ export class DepartmentsPageComponent implements OnInit {
   readonly createIcon = CirclePlus;
   readonly detailsIcon = Eye;
   readonly departmentIcon = Network;
+  readonly activeIcon = CheckCircle2;
+  readonly inactiveIcon = XCircle;
   readonly editIcon = Pencil;
   readonly searchIcon = Search;
   readonly deleteIcon = Trash2;
   readonly restoreIcon = RotateCcw;
   readonly canRestoreDepartments = computed(() => this.authStore.canRestoreDepartments());
+
+  readonly activeDepartmentsCount = computed(
+    () => this.departmentsStore.departments().filter((d) => d.isActive).length,
+  );
+  readonly inactiveDepartmentsCount = computed(
+    () => this.departmentsStore.departments().filter((d) => !d.isActive).length,
+  );
 
   readonly searchForm = this.formBuilder.nonNullable.group({
     searchText: [''],

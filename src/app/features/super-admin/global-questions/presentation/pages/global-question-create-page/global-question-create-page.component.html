@@ -41,7 +41,7 @@
     >
       <div class="min-h-0 overflow-hidden">
         <form
-          class="mb-3 flex flex-wrap items-end gap-2.5 rounded-xl border border-slate-200/80 bg-slate-50/70 p-3 shadow-xs transition-[transform,opacity] duration-300 ease-out motion-reduce:transition-none"
+          class="mb-3.5 flex flex-wrap items-end gap-3 rounded-xl border border-slate-200/80 bg-slate-50/70 p-3.5 shadow-xs transition-[transform,opacity] duration-300 ease-out motion-reduce:transition-none"
           [formGroup]="searchForm"
           (ngSubmit)="searchQuestions()"
           [class.translate-y-0]="advancedFiltersOpen()"
@@ -50,15 +50,25 @@
           [attr.aria-hidden]="!advancedFiltersOpen()"
           [attr.inert]="advancedFiltersOpen() ? null : ''"
         >
-          <app-input
-            size="md"
-            [label]="'globalQuestions.search' | t"
-            [placeholder]="'globalQuestions.searchPlaceholder' | t"
-            formControlName="searchText"
-          />
+          <label class="filter-label flex-1 min-w-[220px]">
+            <span class="filter-label-text">{{ 'globalQuestions.search' | t }}</span>
+            <div class="relative flex items-center">
+              <span
+                class="pointer-events-none absolute inset-y-0 start-0 z-10 flex items-center ps-3.5 text-slate-400"
+              >
+                <app-icon [icon]="searchIcon" [size]="16" />
+              </span>
+              <input
+                type="text"
+                class="filter-control filter-control-search w-full"
+                [placeholder]="'globalQuestions.searchPlaceholder' | t"
+                formControlName="searchText"
+              />
+            </div>
+          </label>
 
           @if (!isGroupScoped()) {
-            <label class="filter-label sm:min-w-[10rem] sm:max-w-[14rem]">
+            <label class="filter-label w-full sm:w-auto sm:min-w-[10rem] sm:max-w-[13rem]">
               <span class="filter-label-text">{{ 'globalQuestions.groupFilter' | t }}</span>
               <select
                 class="filter-control filter-select disabled:bg-slate-100"
@@ -75,7 +85,7 @@
             </label>
           }
 
-          <label class="filter-label sm:min-w-[9rem] sm:max-w-[11rem]">
+          <label class="filter-label w-full sm:w-auto sm:min-w-[9rem] sm:max-w-[11rem]">
             <span class="filter-label-text">{{ 'globalQuestions.isActiveFilter' | t }}</span>
             <select class="filter-control filter-select" formControlName="isActive">
               <option value="">{{ 'globalQuestions.allQuestions' | t }}</option>
@@ -84,7 +94,7 @@
             </select>
           </label>
 
-          <label class="filter-label sm:min-w-[7rem] sm:max-w-[9rem]">
+          <label class="filter-label w-full sm:w-auto sm:min-w-[7rem] sm:max-w-[8.5rem]">
             <span class="filter-label-text">{{ 'globalQuestions.pageSize' | t }}</span>
             <select class="filter-control filter-select" formControlName="pageSize">
               <option value="10">10</option>
@@ -94,7 +104,7 @@
             </select>
           </label>
 
-          <label class="filter-label sm:min-w-[7rem] sm:max-w-[9rem]">
+          <label class="filter-label w-full sm:w-auto sm:min-w-[8rem] sm:max-w-[9.5rem]">
             <span class="filter-label-text">{{ 'globalQuestions.orderSort' | t }}</span>
             <select class="filter-control filter-select" formControlName="orderSort">
               <option value="">{{ 'globalQuestions.defaultSort' | t }}</option>
@@ -103,12 +113,18 @@
             </select>
           </label>
 
-          <div class="flex items-end gap-2">
-            <app-button size="md" type="submit" [loading]="globalQuestionsStore.loading()">
+          <div class="flex w-full items-center gap-2 sm:w-auto shrink-0">
+            <app-button
+              class="flex-1 sm:flex-initial"
+              size="md"
+              type="submit"
+              [loading]="globalQuestionsStore.loading()"
+            >
               <app-icon [icon]="searchIcon" [size]="16" />
               {{ 'branches.searchAction' | t }}
             </app-button>
             <app-button
+              class="flex-1 sm:flex-initial"
               size="md"
               type="button"
               variant="secondary"
@@ -123,29 +139,29 @@
 
     <div class="hidden overflow-hidden rounded-lg border border-slate-100 bg-white lg:block">
       <div class="overflow-x-auto">
-        <table class="w-full table-fixed divide-y divide-slate-100">
+        <table class="w-full min-w-[66rem] table-fixed divide-y divide-slate-100">
           <colgroup>
-            <col class="w-[22%]" />
-            <col class="w-[17%]" />
-            <col class="w-[11%]" />
-            <col class="w-[9%]" />
+            <col class="w-[20%]" />
+            <col class="w-[15%]" />
             <col class="w-[10%]" />
-            <col class="w-[11%]" />
-            <col class="w-[12%]" />
             <col class="w-[8%]" />
+            <col class="w-[8%]" />
+            <col class="w-[12%]" />
+            <col class="w-[14%]" />
+            <col class="w-[13%]" />
           </colgroup>
           <thead
-            class="bg-slate-50 text-start text-xs font-bold uppercase tracking-wide text-slate-500"
+            class="border-b border-slate-100 bg-slate-50/90 text-start text-xs font-extrabold uppercase tracking-wider text-slate-600"
           >
             <tr>
               <th class="px-4 py-3">{{ 'survey.questionText' | t }}</th>
-              <th class="px-4 py-3">{{ 'globalQuestions.group' | t }}</th>
-              <th class="px-4 py-3">{{ 'globalQuestions.answerType' | t }}</th>
-              <th class="px-4 py-3">{{ 'common.scope' | t }}</th>
-              <th class="px-4 py-3">{{ 'common.status' | t }}</th>
-              <th class="px-4 py-3">{{ 'branches.createdOn' | t }}</th>
-              <th class="px-4 py-3">{{ 'globalQuestions.options' | t }}</th>
-              <th class="px-4 py-3 text-end">{{ 'branches.actions' | t }}</th>
+              <th class="px-3.5 py-3">{{ 'globalQuestions.group' | t }}</th>
+              <th class="px-3 py-3 whitespace-nowrap">{{ 'globalQuestions.answerType' | t }}</th>
+              <th class="px-3 py-3 whitespace-nowrap">{{ 'common.scope' | t }}</th>
+              <th class="px-3 py-3 whitespace-nowrap">{{ 'common.status' | t }}</th>
+              <th class="px-3.5 py-3 whitespace-nowrap">{{ 'branches.createdOn' | t }}</th>
+              <th class="px-3.5 py-3">{{ 'globalQuestions.options' | t }}</th>
+              <th class="px-4 py-3 text-end whitespace-nowrap">{{ 'branches.actions' | t }}</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100 bg-white">
@@ -169,22 +185,22 @@
                       {{ questionDisplayText(question) }}
                     </p>
                   </td>
-                  <td class="text-slate-700">
+                  <td class="px-3.5 py-3 text-slate-700">
                     <p class="break-words font-semibold [overflow-wrap:anywhere]">
                       {{ questionGroupDisplayName(question) }}
                     </p>
                   </td>
-                  <td class="text-slate-700">
+                  <td class="px-3 py-3 text-slate-700 whitespace-nowrap">
                     {{ answerTypeLabel(question.type, question.typeName) | t }}
                   </td>
-                  <td class="px-4 py-3">
+                  <td class="px-3 py-3 whitespace-nowrap">
                     <span
                       class="rounded-full bg-violet-50 px-2.5 py-1 text-xs font-bold text-violet-700"
                     >
                       {{ 'globalQuestions.globalBadge' | t }}
                     </span>
                   </td>
-                  <td class="px-4 py-3">
+                  <td class="px-3 py-3 whitespace-nowrap">
                     <span
                       class="rounded-full px-2.5 py-1 text-xs font-bold"
                       [class.bg-emerald-50]="question.isActive"
@@ -195,10 +211,10 @@
                       {{ (question.isActive ? 'common.active' : 'branches.inactive') | t }}
                     </span>
                   </td>
-                  <td class="text-slate-700">
+                  <td class="px-3.5 py-3 text-slate-700 whitespace-nowrap">
                     {{ question.createdOnUtc ? (question.createdOnUtc | date: 'mediumDate') : '-' }}
                   </td>
-                  <td class="text-slate-700">
+                  <td class="px-3.5 py-3 text-slate-700">
                     @if (question.options.length > 0) {
                       <div class="space-y-1">
                         @for (option of question.options; track option.optionId) {
@@ -211,8 +227,8 @@
                       <span>-</span>
                     }
                   </td>
-                  <td class="px-4 py-3">
-                    <div class="flex justify-end gap-2">
+                  <td class="px-4 py-3 whitespace-nowrap">
+                    <div class="flex items-center justify-end gap-2">
                       @if (canEditQuestion(question)) {
                         <app-button
                           size="sm"

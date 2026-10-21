@@ -10,12 +10,21 @@
 }
 
 @media (max-width: 640px) {
-  :host ::ng-deep app-button {
+  :host ::ng-deep app-page-header app-button,
+  :host ::ng-deep app-page-header app-button button,
+  :host ::ng-deep .table-header-action app-button,
+  :host ::ng-deep .table-header-action app-button button {
     display: block;
     width: 100%;
   }
 
-  :host ::ng-deep app-button button {
+  :host ::ng-deep .flex > app-button.flex-1,
+  :host ::ng-deep .grid > app-button {
+    min-width: 0;
+  }
+
+  :host ::ng-deep .flex > app-button.flex-1 button,
+  :host ::ng-deep .grid > app-button button {
     width: 100%;
   }
 }

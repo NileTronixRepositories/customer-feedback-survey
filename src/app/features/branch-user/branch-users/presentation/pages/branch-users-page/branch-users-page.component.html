@@ -8,12 +8,10 @@
           <p class="mt-1 text-xs text-slate-500">{{ 'branchUsers.subtitle' | t }}</p>
         </div>
       </div>
-      <div class="grid grid-cols-2 gap-2 sm:flex sm:shrink-0 sm:flex-wrap sm:items-center sm:justify-end">
-        <button
-          class="filter-toggle-btn"
-          type="button"
-          (click)="toggleAdvancedFilters()"
-        >
+      <div
+        class="grid grid-cols-2 gap-2 sm:flex sm:shrink-0 sm:flex-wrap sm:items-center sm:justify-end"
+      >
+        <button class="filter-toggle-btn" type="button" (click)="toggleAdvancedFilters()">
           <app-icon [icon]="filterIcon" [size]="14" />
           {{
             advancedFiltersOpen()
@@ -34,8 +32,6 @@
         }
       </div>
     </div>
-
-
 
     <app-card [title]="''" [subtitle]="''">
       <div
@@ -92,11 +88,7 @@
               </select>
             </label>
             <div class="flex items-end gap-2">
-              <app-button
-                type="submit"
-                size="md"
-                [loading]="branchUsersStore.loading()"
-              >
+              <app-button type="submit" size="md" [loading]="branchUsersStore.loading()">
                 <app-icon [icon]="searchIcon" [size]="16" />
                 {{ 'branches.searchAction' | t }}
               </app-button>
@@ -165,10 +157,12 @@
                           <span
                             class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600"
                           >
-                            {{ role.name }}
+                            {{ roleDisplayName(role.name) }}
                           </span>
                         } @empty {
-                          <span class="text-xs text-slate-500">{{ 'branchUsers.noRolesAssigned' | t }}</span>
+                          <span class="text-xs text-slate-500">{{
+                            'branchUsers.noRolesAssigned' | t
+                          }}</span>
                         }
                       </div>
                     </td>
@@ -251,7 +245,10 @@
                             </button>
                           }
                         }
-                        @if ((user.isActive && !canUseActiveActions()) || (!user.isActive && !canRestore())) {
+                        @if (
+                          (user.isActive && !canUseActiveActions()) ||
+                          (!user.isActive && !canRestore())
+                        ) {
                           <span class="text-xs font-semibold text-slate-400">-</span>
                         }
                       </div>
@@ -334,7 +331,9 @@
                     {{ user.email }}
                   </p>
                   @if (user.phoneNumber) {
-                    <p class="mt-1 break-words text-xs text-slate-500 [overflow-wrap:anywhere]">{{ user.phoneNumber }}</p>
+                    <p class="mt-1 break-words text-xs text-slate-500 [overflow-wrap:anywhere]">
+                      {{ user.phoneNumber }}
+                    </p>
                   }
                 </div>
                 <div class="min-w-0 rounded-lg bg-slate-50 p-3">
@@ -372,10 +371,12 @@
                     <span
                       class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600"
                     >
-                      {{ role.name }}
+                      {{ roleDisplayName(role.name) }}
                     </span>
                   } @empty {
-                    <span class="text-xs text-slate-500">{{ 'branchUsers.noRolesAssigned' | t }}</span>
+                    <span class="text-xs text-slate-500">{{
+                      'branchUsers.noRolesAssigned' | t
+                    }}</span>
                   }
                 </div>
               </div>
@@ -441,7 +442,9 @@
                     </app-button>
                   }
                 }
-                @if ((user.isActive && !canUseActiveActions()) || (!user.isActive && !canRestore())) {
+                @if (
+                  (user.isActive && !canUseActiveActions()) || (!user.isActive && !canRestore())
+                ) {
                   <p class="text-xs font-semibold text-slate-400">-</p>
                 }
               </div>
@@ -559,18 +562,22 @@
                 [checked]="isCreateRoleSelected(role.id)"
                 (change)="toggleCreateRole(role.id)"
               />
-              {{ role.name }}
+              {{ roleDisplayName(role.name) }}
             </label>
           } @empty {
             <p class="text-xs text-slate-500">{{ 'branchUsers.noAssignableRoles' | t }}</p>
           }
         </div>
         @if (createRolesError()) {
-          <p class="text-xs font-semibold text-[var(--theme-color-danger)]">{{ createRolesError() | t }}</p>
+          <p class="text-xs font-semibold text-[var(--theme-color-danger)]">
+            {{ createRolesError() | t }}
+          </p>
         }
       </div>
 
-      <div class="sticky bottom-0 -mx-4 -mb-4 mt-4 flex items-center justify-end gap-2 border-t border-slate-100 bg-white/95 px-4 py-3 backdrop-blur-sm sm:-mx-5 sm:-mb-5 sm:px-5 z-10">
+      <div
+        class="sticky bottom-0 -mx-4 -mb-4 mt-4 flex items-center justify-end gap-2 border-t border-slate-100 bg-white/95 px-4 py-3 backdrop-blur-sm sm:-mx-5 sm:-mb-5 sm:px-5 z-10"
+      >
         <app-button type="button" variant="secondary" (pressed)="closeCreateBranchUser()">
           {{ 'common.cancel' | t }}
         </app-button>
@@ -593,7 +600,9 @@
           class="flex items-center gap-2 rounded-xl border border-[var(--theme-color-accent)]/20 bg-[var(--theme-color-accent-softest)]/50 p-3 text-xs font-semibold text-slate-700 shadow-2xs"
         >
           <span class="text-slate-500">{{ 'branchUsers.selectedUser' | t }}:</span>
-          <span class="font-bold text-[var(--theme-color-secondary)]">{{ user.nameEn }} - {{ user.userName }}</span>
+          <span class="font-bold text-[var(--theme-color-secondary)]"
+            >{{ user.nameEn }} - {{ user.userName }}</span
+          >
         </div>
       }
 
@@ -635,7 +644,9 @@
         />
       </div>
 
-      <div class="sticky bottom-0 -mx-4 -mb-4 mt-4 flex items-center justify-end gap-2 border-t border-slate-100 bg-white/95 px-4 py-3 backdrop-blur-sm sm:-mx-5 sm:-mb-5 sm:px-5 z-10">
+      <div
+        class="sticky bottom-0 -mx-4 -mb-4 mt-4 flex items-center justify-end gap-2 border-t border-slate-100 bg-white/95 px-4 py-3 backdrop-blur-sm sm:-mx-5 sm:-mb-5 sm:px-5 z-10"
+      >
         <app-button type="button" variant="secondary" (pressed)="closeEditBranchUser()">
           {{ 'common.cancel' | t }}
         </app-button>
@@ -666,7 +677,9 @@
           class="flex items-center gap-2 rounded-xl border border-[var(--theme-color-accent)]/20 bg-[var(--theme-color-accent-softest)]/50 p-3 text-xs font-semibold text-slate-700 shadow-2xs"
         >
           <span class="text-slate-500">{{ 'branchUsers.selectedUser' | t }}:</span>
-          <span class="font-bold text-[var(--theme-color-secondary)]">{{ user.nameEn }} - {{ user.userName }}</span>
+          <span class="font-bold text-[var(--theme-color-secondary)]"
+            >{{ user.nameEn }} - {{ user.userName }}</span
+          >
         </div>
       }
 
@@ -683,18 +696,22 @@
                 [checked]="isAssignRoleSelected(role.id)"
                 (change)="toggleAssignRole(role.id)"
               />
-              {{ role.name }}
+              {{ roleDisplayName(role.name) }}
             </label>
           } @empty {
             <p class="text-xs text-slate-500">{{ 'branchUsers.noAssignableRoles' | t }}</p>
           }
         </div>
         @if (assignRolesError()) {
-          <p class="text-xs font-semibold text-[var(--theme-color-danger)]">{{ assignRolesError() | t }}</p>
+          <p class="text-xs font-semibold text-[var(--theme-color-danger)]">
+            {{ assignRolesError() | t }}
+          </p>
         }
       </div>
 
-      <div class="sticky bottom-0 -mx-4 -mb-4 mt-4 flex items-center justify-end gap-2 border-t border-slate-100 bg-white/95 px-4 py-3 backdrop-blur-sm sm:-mx-5 sm:-mb-5 sm:px-5 z-10">
+      <div
+        class="sticky bottom-0 -mx-4 -mb-4 mt-4 flex items-center justify-end gap-2 border-t border-slate-100 bg-white/95 px-4 py-3 backdrop-blur-sm sm:-mx-5 sm:-mb-5 sm:px-5 z-10"
+      >
         <app-button type="button" variant="secondary" (pressed)="closeAssignRoles()">
           {{ 'common.cancel' | t }}
         </app-button>

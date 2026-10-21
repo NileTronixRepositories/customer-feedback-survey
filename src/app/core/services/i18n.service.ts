@@ -249,9 +249,11 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'superAdminTemplates.lifecycle': 'Lifecycle',
     'superAdminTemplates.available': 'Available',
     'superAdminTemplates.archived': 'Archived',
-    'superAdminTemplates.archive': 'Archive',
-    'superAdminTemplates.globalSource': 'Global source',
-    'superAdminTemplates.managedCopy': 'Managed copy',
+    'superAdminTemplates.globalSource': 'Global source template',
+    'superAdminTemplates.globalSourceTooltip': 'Central template that can be assigned to branches',
+    'superAdminTemplates.managedCopy': 'Global template copy',
+    'superAdminTemplates.managedCopyTooltip':
+      'Branch survey linked to and centrally managed by the global template',
     'superAdminTemplates.pageSize': 'Page size',
     'superAdminTemplates.orderSort': 'Sort',
     'superAdminTemplates.defaultSort': 'Default',
@@ -816,6 +818,12 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'branchUsers.assignRoles': 'Assign roles',
     'branchUsers.assignableRoles': 'Assignable roles',
     'branchUsers.noAssignableRoles': 'No assignable roles are available.',
+    'roles.questionEditor': 'Question Editor',
+    'roles.reportViewer': 'Report Viewer',
+    'roles.templateEditor': 'Template Editor',
+    'Question Editor': 'Question Editor',
+    'Report Viewer': 'Report Viewer',
+    'Template Editor': 'Template Editor',
     'branchUsers.selectedUser': 'Selected user',
     'branchUsers.search': 'Search branch users',
     'branchUsers.searchPlaceholder': 'Search by name, username, email, or phone',
@@ -2027,6 +2035,8 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'departments.totalDepartments': 'Created departments',
     'departments.totalDepartmentsSubtitle': 'Departments available in the workspace',
     'departments.totalItems': 'departments',
+    'departments.activeDepartmentsHint': 'Active and operational departments',
+    'departments.inactiveDepartmentsHint': 'Inactive or suspended departments',
     'departments.search': 'Search departments',
     'departments.searchPlaceholder': 'Search by English or Arabic name',
     'departments.detailsAction': 'Details',
@@ -3006,9 +3016,10 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'superAdminTemplates.lifecycle': 'دورة الحياة',
     'superAdminTemplates.available': 'متاح',
     'superAdminTemplates.archived': 'مؤرشف',
-    'superAdminTemplates.archive': 'أرشفة',
-    'superAdminTemplates.globalSource': 'مصدر عام',
-    'superAdminTemplates.managedCopy': 'نسخة مُدارة',
+    'superAdminTemplates.globalSource': 'نموذج عام (مركزي)',
+    'superAdminTemplates.globalSourceTooltip': 'النموذج العام المركزي المتاح تعيينه للفروع',
+    'superAdminTemplates.managedCopy': 'نسخة من نموذج عام',
+    'superAdminTemplates.managedCopyTooltip': 'استبيان للفرع مرتبط بنموذج عام مركزي ومُدار منه',
     'superAdminTemplates.pageSize': 'حجم الصفحة',
     'superAdminTemplates.orderSort': 'الترتيب',
     'superAdminTemplates.defaultSort': 'الافتراضي',
@@ -3499,6 +3510,12 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'branchUsers.assignRoles': 'تعيين الصلاحيات',
     'branchUsers.assignableRoles': 'الصلاحيات المتاحة',
     'branchUsers.noAssignableRoles': 'لا توجد صلاحيات متاحة للتعيين.',
+    'roles.questionEditor': 'محرر الأسئلة',
+    'roles.reportViewer': 'مستعرض التقارير',
+    'roles.templateEditor': 'محرر النماذج',
+    'Question Editor': 'محرر الأسئلة',
+    'Report Viewer': 'مستعرض التقارير',
+    'Template Editor': 'محرر النماذج',
     'branchUsers.selectedUser': 'المستخدم المحدد',
     'branchUsers.search': 'بحث مستخدمي الفرع',
     'branchUsers.searchPlaceholder': 'ابحث بالاسم أو اسم المستخدم أو البريد أو الهاتف',
@@ -4630,6 +4647,8 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'departments.totalDepartments': 'الأقسام المنشأة',
     'departments.totalDepartmentsSubtitle': 'الأقسام المتاحة في مساحة العمل',
     'departments.totalItems': 'قسم',
+    'departments.activeDepartmentsHint': 'الأقسام النشطة والفعالة في مساحة العمل',
+    'departments.inactiveDepartmentsHint': 'الأقسام المعطلة أو غير النشطة',
     'departments.search': 'بحث الأقسام',
     'departments.searchPlaceholder': 'ابحث بالاسم الإنجليزي أو العربي',
     'departments.detailsAction': 'التفاصيل',
@@ -5430,6 +5449,41 @@ export class I18nService {
 
   translate(key: string): string {
     return TRANSLATIONS[this.languageSignal()][key] ?? TRANSLATIONS.en[key] ?? key;
+  }
+
+  translateRole(roleName: string): string {
+    if (!roleName) {
+      return '';
+    }
+    const normalized = roleName
+      .trim()
+      .replace(/[\s_-]/g, '')
+      .toLowerCase();
+    if (normalized === 'questioneditor') {
+      return this.translate('roles.questionEditor');
+    }
+    if (normalized === 'reportviewer') {
+      return this.translate('roles.reportViewer');
+    }
+    if (normalized === 'templateeditor') {
+      return this.translate('roles.templateEditor');
+    }
+    if (normalized === 'branchadmin') {
+      return this.translate('common.branchAdmin');
+    }
+    if (normalized === 'branchuser') {
+      return this.translate('common.branchUser');
+    }
+    if (normalized === 'departmentadmin') {
+      return this.translate('common.departmentAdmin');
+    }
+    if (normalized === 'operator') {
+      return this.translate('common.operator');
+    }
+    if (normalized === 'superadmin' || normalized === 'systemadministrator') {
+      return this.translate('common.superAdmin');
+    }
+    return this.translate(roleName);
   }
 
   private initialLanguage(): Language {

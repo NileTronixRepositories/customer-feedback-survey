@@ -7,10 +7,10 @@
   position: relative;
   width: 100%;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 18px 24px;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 14px;
+  padding: 16px 20px;
   border-radius: 14px;
   background: linear-gradient(270deg, #f8fdff 0%, #ffffff 48%, #fbfdff 100%);
   border: 1px solid rgba(226, 232, 240, 0.85);
@@ -41,6 +41,7 @@
   display: flex;
   align-items: center;
   gap: 14px;
+  width: 100%;
   min-width: 0;
   z-index: 2;
 }
@@ -65,21 +66,25 @@
 
 .ph-text {
   min-width: 0;
+  flex: 1 1 auto;
 }
 
 .ph-title {
   margin: 0 0 3px;
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 800;
   color: #0f1e3a;
   line-height: 1.25;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .ph-desc {
   margin: 0;
-  font-size: 14.5px;
+  font-size: 13.5px;
   color: #7b8ba6;
   line-height: 1.4;
+  overflow-wrap: break-word;
 }
 
 .ph-actions {
@@ -87,26 +92,62 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 8px;
-  flex-shrink: 0;
+  width: 100%;
+  justify-content: flex-start;
   z-index: 2;
 }
 
-@media (max-width: 640px) {
+/* Wide screen layouts (>= 1280px) where title and actions can comfortably share a single row */
+@media (min-width: 1280px) {
   .ph-root {
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 16px;
-    gap: 14px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 24px;
+    gap: 16px;
+  }
+
+  .ph-start {
+    width: auto;
+    flex: 1 1 340px;
+  }
+
+  .ph-title {
+    font-size: 22px;
+  }
+
+  .ph-desc {
+    font-size: 14.5px;
   }
 
   .ph-actions {
-    width: 100%;
-    justify-content: flex-start;
+    width: auto;
+    flex: 0 1 auto;
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 768px) {
+  .ph-root {
+    padding: 14px 16px;
+    gap: 12px;
   }
 
-  .ph-actions > * {
-    flex: 1 1 auto;
-    min-width: 0;
+  .ph-start {
+    gap: 12px;
+  }
+
+  .ph-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .ph-title {
+    font-size: 1.125rem;
+  }
+
+  .ph-desc {
+    font-size: 0.8125rem;
   }
 }
 
@@ -117,22 +158,25 @@
   }
 
   .ph-start {
-    width: 100%;
     align-items: flex-start;
     gap: 0.625rem;
   }
 
   .ph-icon {
-    width: 2.5rem;
-    height: 2.5rem;
+    width: 2.25rem;
+    height: 2.25rem;
   }
 
   .ph-title {
-    font-size: 1.125rem;
-    overflow-wrap: anywhere;
+    font-size: 1rem;
   }
 
   .ph-desc {
-    font-size: 0.8125rem;
+    font-size: 0.75rem;
+  }
+
+  .ph-actions > * {
+    flex: 1 1 auto;
+    min-width: 0;
   }
 }
