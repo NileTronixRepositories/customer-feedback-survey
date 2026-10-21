@@ -36,10 +36,6 @@
   .app-content {
     padding: 1.5rem;
   }
-
-  .mobile-menu-btn {
-    display: none;
-  }
 }
 
 .header-container {
@@ -65,6 +61,12 @@
   border-color: rgb(var(--theme-accent-rgb) / 28%);
   color: var(--theme-color-secondary);
   background: var(--theme-color-page);
+}
+
+@media (min-width: 1280px) {
+  .mobile-menu-btn {
+    display: none;
+  }
 }
 
 .role-icon-tile {
