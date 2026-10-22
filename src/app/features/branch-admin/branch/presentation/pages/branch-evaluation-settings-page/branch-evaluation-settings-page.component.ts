@@ -7,17 +7,22 @@ import {
   effect,
   inject,
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import {
+  Activity,
   AlertCircle,
   AlertTriangle,
   CheckCircle2,
+  Clock,
   HelpCircle,
   Percent,
   RotateCcw,
   Save,
   Shield,
+  ShieldAlert,
   Sliders,
+  Smile,
   Sparkles,
 } from 'lucide-angular';
 import { I18nService } from '../../../../../../core/services/i18n.service';
@@ -54,7 +59,7 @@ export class BranchEvaluationSettingsPageComponent implements OnInit {
   readonly branchStore = inject(BranchAdminBranchStore);
   private readonly authStore = inject(AuthStore);
   private readonly formBuilder = inject(FormBuilder);
-  private readonly i18n = inject(I18nService);
+  readonly i18n = inject(I18nService);
 
   readonly slidersIcon = Sliders;
   readonly saveIcon = Save;
@@ -63,9 +68,13 @@ export class BranchEvaluationSettingsPageComponent implements OnInit {
   readonly alertCircleIcon = AlertCircle;
   readonly percentIcon = Percent;
   readonly shieldIcon = Shield;
+  readonly shieldAlertIcon = ShieldAlert;
   readonly sparklesIcon = Sparkles;
   readonly helpIcon = HelpCircle;
   readonly resetIcon = RotateCcw;
+  readonly smileIcon = Smile;
+  readonly activityIcon = Activity;
+  readonly clockIcon = Clock;
 
   readonly canManage = computed(
     () =>
@@ -82,6 +91,42 @@ export class BranchEvaluationSettingsPageComponent implements OnInit {
     satisfiedMinimum: [80, [Validators.required, Validators.min(0), Validators.max(100)]],
     mediumRiskMinimum: [50, [Validators.required, Validators.min(0), Validators.max(100)]],
     healthyMinimum: [75, [Validators.required, Validators.min(0), Validators.max(100)]],
+  });
+
+  readonly formValues = toSignal(this.form.valueChanges, {
+    initialValue: this.form.getRawValue(),
+  });
+
+  readonly satisfactionBreakdown = computed(() => {
+    const raw = this.formValues();
+    const neutral = Math.max(0, Math.min(100, Number(raw?.neutralMinimum ?? 60)));
+    const satisfied = Math.max(0, Math.min(100, Number(raw?.satisfiedMinimum ?? 80)));
+    const unhappyWidth = Math.min(neutral, satisfied);
+    const neutralWidth = Math.max(0, satisfied - neutral);
+    const satisfiedWidth = Math.max(0, 100 - Math.max(neutral, satisfied));
+    return {
+      unhappyWidth,
+      neutralWidth,
+      satisfiedWidth,
+      neutral,
+      satisfied,
+    };
+  });
+
+  readonly riskBreakdown = computed(() => {
+    const raw = this.formValues();
+    const mediumRisk = Math.max(0, Math.min(100, Number(raw?.mediumRiskMinimum ?? 50)));
+    const healthy = Math.max(0, Math.min(100, Number(raw?.healthyMinimum ?? 75)));
+    const highRiskWidth = Math.min(mediumRisk, healthy);
+    const mediumRiskWidth = Math.max(0, healthy - mediumRisk);
+    const healthyWidth = Math.max(0, 100 - Math.max(mediumRisk, healthy));
+    return {
+      highRiskWidth,
+      mediumRiskWidth,
+      healthyWidth,
+      mediumRisk,
+      healthy,
+    };
   });
 
   readonly validationErrors = computed(() => {
@@ -109,7 +154,7 @@ export class BranchEvaluationSettingsPageComponent implements OnInit {
             mediumRiskMinimum: settings.mediumRiskMinimum,
             healthyMinimum: settings.healthyMinimum,
           },
-          { emitEvent: false },
+          { emitEvent: true },
         );
       }
     });
@@ -144,12 +189,15 @@ export class BranchEvaluationSettingsPageComponent implements OnInit {
   resetToEffective(): void {
     const settings = this.store.settings();
     if (settings) {
-      this.form.patchValue({
-        neutralMinimum: settings.neutralMinimum,
-        satisfiedMinimum: settings.satisfiedMinimum,
-        mediumRiskMinimum: settings.mediumRiskMinimum,
-        healthyMinimum: settings.healthyMinimum,
-      });
+      this.form.patchValue(
+        {
+          neutralMinimum: settings.neutralMinimum,
+          satisfiedMinimum: settings.satisfiedMinimum,
+          mediumRiskMinimum: settings.mediumRiskMinimum,
+          healthyMinimum: settings.healthyMinimum,
+        },
+        { emitEvent: true },
+      );
       this.store.dismissSuccess();
     }
   }

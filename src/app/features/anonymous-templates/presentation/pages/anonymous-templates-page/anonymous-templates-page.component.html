@@ -267,7 +267,7 @@
                         {{ template.activeFrom ? (template.activeFrom | date: 'mediumDate') : '-' }}
                       </span>
                       <span class="text-slate-400 whitespace-nowrap">
-                        إلى: {{
+                        {{ 'common.to' | t }}: {{
                           template.expireTo
                             ? (template.expireTo | date: 'mediumDate')
                             : ('anonymousTemplates.openEnded' | t)

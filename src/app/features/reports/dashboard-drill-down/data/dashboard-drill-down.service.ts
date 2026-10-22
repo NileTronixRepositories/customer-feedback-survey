@@ -290,12 +290,24 @@ export class DashboardDrillDownService {
     const labelAr = customInput
       ? this.readNullableString(item, 'labelArSnapshot')
       : this.readNullableString(item, 'questionTextAr');
+
+    const starRatingValue = this.readNullableNumber(item, 'starRatingValue');
+    const smileValue = this.readNullableNumber(item, 'smileValue');
+    const selectedOptionValue = this.readNullableNumber(item, 'selectedOptionValue');
+    const questionOrder = this.readNullableNumber(item, 'questionOrder') ?? undefined;
+    const questionType =
+      this.readString(item, 'questionType') || this.readString(item, 'questionTypeName');
+
     const value =
       this.readString(item, 'displayValue') ||
       this.readString(item, 'textAnswer') ||
       this.readString(item, 'selectedOptionTextEn') ||
-      this.readDisplayValue(item['stringValue'] ?? item['integerValue']);
-    const type = this.readString(item, customInput ? 'typeName' : 'questionTypeName');
+      this.readDisplayValue(item['stringValue'] ?? item['integerValue']) ||
+      (starRatingValue !== null ? `${starRatingValue} / 5` : '') ||
+      (smileValue !== null ? `${smileValue} / 5` : '');
+
+    const type =
+      this.readString(item, customInput ? 'typeName' : 'questionTypeName') || questionType;
 
     const rawVoice =
       this.readNullableString(item, 'voiceFileUrl') ??
@@ -314,6 +326,11 @@ export class DashboardDrillDownService {
       selectedOptionTextEn: this.readNullableString(item, 'selectedOptionTextEn'),
       selectedOptionTextAr: this.readNullableString(item, 'selectedOptionTextAr'),
       type,
+      questionType,
+      starRatingValue,
+      smileValue,
+      selectedOptionValue,
+      questionOrder,
       voiceUrl: resolveMediaUrl(rawVoice),
       imageUrl: resolveMediaUrl(rawImage),
       children: this.readArray(item['children'] ?? item['childAnswers']).map((child) =>

@@ -15,15 +15,20 @@ import {
   AlertTriangle,
   Building2,
   Calendar,
+  CheckCircle2,
   ChevronLeft,
   ChevronRight,
   Eye,
   FileText,
+  Hash,
   History,
+  MessageSquareText,
   MessageSquareWarning,
   Mic,
   Search,
   SlidersHorizontal,
+  Smile,
+  Star,
   User,
   UsersRound,
   X,
@@ -32,9 +37,9 @@ import { I18nService } from '../../../../../../core/services/i18n.service';
 import { TranslatePipe } from '../../../../../../shared/pipes/translate.pipe';
 import { ButtonComponent } from '../../../../../../shared/ui/button/button.component';
 import { IconComponent } from '../../../../../../shared/ui/icon/icon.component';
-import { ModalComponent } from '../../../../../../shared/ui/modal/modal.component';
 import { PageHeaderComponent } from '../../../../../../shared/ui/page-header/page-header.component';
 import { DashboardDrillDownService } from '../../../data/dashboard-drill-down.service';
+import { DashboardResponseDetailsModalComponent } from '../../components/dashboard-response-details-modal/dashboard-response-details-modal.component';
 import {
   DashboardDetailsNavigation,
   DashboardResponseDetailItem,
@@ -47,9 +52,9 @@ import {
   selector: 'app-dashboard-responses-page',
   imports: [
     ButtonComponent,
+    DashboardResponseDetailsModalComponent,
     DatePipe,
     IconComponent,
-    ModalComponent,
     PageHeaderComponent,
     ReactiveFormsModule,
     TranslatePipe,
@@ -74,6 +79,12 @@ export class DashboardResponsesPageComponent {
   readonly slidersIcon = SlidersHorizontal;
   readonly templateIcon = FileText;
   readonly userIcon = User;
+  readonly checkCircleIcon = CheckCircle2;
+  readonly hashIcon = Hash;
+  readonly messageIcon = MessageSquareText;
+  readonly smileIcon = Smile;
+  readonly starIcon = Star;
+  readonly scaleSlots = [1, 2, 3, 4, 5];
 
   private readonly route = inject(ActivatedRoute);
   private readonly destroyRef = inject(DestroyRef);
@@ -234,12 +245,16 @@ export class DashboardResponsesPageComponent {
       const fromItem = this.localized(matching.operatorNameEn, matching.operatorNameAr);
       if (fromItem !== '—') return fromItem;
       if (matching.source === 'Anonymous') {
-        return this.i18n.language() === 'ar' ? 'استبيان عام (بدون مشغل)' : 'Public Survey (No Operator)';
+        return this.i18n.language() === 'ar'
+          ? 'استبيان عام (بدون مشغل)'
+          : 'Public Survey (No Operator)';
       }
     }
 
     if (this.currentPath().includes('anonymous')) {
-      return this.i18n.language() === 'ar' ? 'استبيان عام (بدون مشغل)' : 'Public Survey (No Operator)';
+      return this.i18n.language() === 'ar'
+        ? 'استبيان عام (بدون مشغل)'
+        : 'Public Survey (No Operator)';
     }
 
     return '—';
@@ -336,6 +351,44 @@ export class DashboardResponsesPageComponent {
       return 'bg-rose-50 text-rose-700 border-rose-200/70';
     }
     return 'bg-slate-100 text-slate-800 border-slate-200/80';
+  }
+
+  isStarActive(slot: number, value: number | null | undefined): boolean {
+    return slot <= (value ?? 0);
+  }
+
+  isComplaintOrFreeText(item: DashboardResponseDetailItem): boolean {
+    const qType = (item.questionType || item.type || '').toLowerCase();
+    return qType.includes('complain') || qType.includes('freetext') || qType.includes('text');
+  }
+
+  customInputTypeLabel(typeName: string | null | undefined): string {
+    if (!typeName) return '';
+    const lower = typeName.toLowerCase();
+    if (lower.includes('int') || lower.includes('num')) {
+      return this.i18n.translate('surveyDashboard.typeInteger');
+    }
+    return this.i18n.translate('surveyDashboard.typeString');
+  }
+
+  questionTypeLabel(item: DashboardResponseDetailItem): string {
+    const qType = item.questionType || item.type || '';
+    switch (qType) {
+      case 'SingleChoice':
+        return this.i18n.translate('questions.typeSingleChoice');
+      case 'StarRating':
+        return this.i18n.translate('questions.typeStarRating');
+      case 'Smiles':
+        return this.i18n.translate('questions.typeSmiles');
+      case 'Complain':
+        return this.i18n.translate('questions.typeComplain');
+      case 'Voice':
+        return this.i18n.translate('questions.typeVoice');
+      case 'Image':
+        return this.i18n.translate('questions.typeImage');
+      default:
+        return item.type || qType;
+    }
   }
 
   goBack(): void {

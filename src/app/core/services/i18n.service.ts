@@ -94,6 +94,9 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'nav.globalQuestions': 'Anonymous questions',
     'nav.anonymousTemplates': 'Anonymous templates',
     'nav.templates': 'Templates',
+    'nav.evaluationSettings': 'Evaluation Settings',
+    'nav.operators': 'Operators',
+    'nav.operatorWorkspace': 'My templates',
     'publicAnonymousTemplates.publicSurvey': 'Public survey',
     'publicAnonymousTemplates.headerTitle': 'Customer feedback survey system',
     'publicAnonymousTemplates.cleopatraLogoAlt': 'Cleopatra Hospitals Group',
@@ -2788,6 +2791,152 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'departmentResponseDetails.notFound':
       'Operator or response not found inside current department.',
     'departmentResponseDetails.invalidRequest': 'Invalid response details request.',
+    'branchEvaluationSettings.title': 'Branch Evaluation Settings',
+    'branchEvaluationSettings.subtitle':
+      'Configure satisfaction score cutoffs and operational risk classification thresholds for this branch.',
+    'branchEvaluationSettings.navTitle': 'Evaluation Settings',
+    'branchEvaluationSettings.usesDefaults': 'Default System Policy',
+    'branchEvaluationSettings.customOverride': 'Custom Branch Policy',
+    'branchEvaluationSettings.lastUpdated': 'Last updated',
+    'branchEvaluationSettings.saveSuccess': 'Evaluation settings saved successfully.',
+    'branchEvaluationSettings.viewOnlyMode': 'View-Only Access',
+    'branchEvaluationSettings.viewOnlyNotice':
+      'You have permission to view evaluation thresholds, but managing them requires the Branches.ManageEvaluationSettings permission.',
+    'branchEvaluationSettings.satisfactionThresholds': 'Customer Satisfaction Thresholds',
+    'branchEvaluationSettings.satisfactionThresholdsSubtitle':
+      'Define the minimum percentage cutoffs to categorize responses as Unhappy, Neutral, or Satisfied.',
+    'branchEvaluationSettings.neutralMinimum': 'Neutral Score Minimum',
+    'branchEvaluationSettings.neutralMinimumHint':
+      'Scores below this percentage are classified as Unhappy (0% to this cutoff).',
+    'branchEvaluationSettings.satisfiedMinimum': 'Satisfied Score Minimum',
+    'branchEvaluationSettings.satisfiedMinimumHint':
+      'Scores at or above this cutoff are classified as Satisfied. Scores between Neutral and Satisfied minimums are Neutral.',
+    'branchEvaluationSettings.previewClassification': 'Satisfaction Classification Breakdown',
+    'branchEvaluationSettings.riskThresholds': 'Branch Operational Risk Thresholds',
+    'branchEvaluationSettings.riskThresholdsSubtitle':
+      'Define the overall satisfaction benchmarks to categorize branch operational health into High Risk, Medium Risk, or Healthy.',
+    'branchEvaluationSettings.mediumRiskMinimum': 'Medium Risk Minimum',
+    'branchEvaluationSettings.mediumRiskMinimumHint':
+      'Branch satisfaction below this percentage indicates High Operational Risk.',
+    'branchEvaluationSettings.healthyMinimum': 'Healthy Status Minimum',
+    'branchEvaluationSettings.healthyMinimumHint':
+      'Branch satisfaction at or above this percentage indicates a Healthy operational state.',
+    'branchEvaluationSettings.previewRiskClassification':
+      'Operational Risk Classification Breakdown',
+    'branchEvaluationSettings.saveSettings': 'Save Changes',
+    'branchEvaluationSettings.saving': 'Saving Settings...',
+    'branchEvaluationSettings.resetChanges': 'Reset to Effective Settings',
+    'branchEvaluationSettings.invalidOrder':
+      'Satisfied minimum must be strictly greater than Neutral minimum, and Healthy minimum must be strictly greater than Medium Risk minimum.',
+    'branchEvaluationSettings.errors.neutralRange': 'Neutral minimum must be between 0% and 100%.',
+    'branchEvaluationSettings.errors.satisfiedRange':
+      'Satisfied minimum must be between 0% and 100%.',
+    'branchEvaluationSettings.errors.neutralLessThanSatisfied':
+      'Neutral minimum must be strictly less than Satisfied minimum.',
+    'branchEvaluationSettings.errors.mediumRiskRange':
+      'Medium risk minimum must be between 0% and 100%.',
+    'branchEvaluationSettings.errors.healthyRange': 'Healthy minimum must be between 0% and 100%.',
+    'branchEvaluationSettings.errors.mediumRiskLessThanHealthy':
+      'Medium risk minimum must be strictly less than Healthy minimum.',
+    'satisfaction.unhappy': 'Unhappy',
+    'satisfaction.neutral': 'Neutral',
+    'satisfaction.satisfied': 'Satisfied',
+    'historicalAvailability.title': 'Template Historical Availability',
+    'historicalAvailability.subtitle':
+      'Tracks whether survey templates were active and available during the selected date window.',
+    'historicalAvailability.verifiedComplete': 'Historical data complete',
+    'historicalAvailability.coveragePartial': 'Partial coverage',
+    'historicalAvailability.availableDuringPeriod': 'Available during period',
+    'historicalAvailability.templatesWithResponses': 'Templates with responses',
+    'historicalAvailability.currentlyAvailable': 'Currently active',
+    'historicalAvailability.incompleteWarning':
+      'Historical tracking began after the requested date range start.',
+    'historicalAvailability.coverageStarts': 'Coverage starts',
+    'historicalCompleteness.modeUnavailable':
+      'Historical baseline responses are unavailable for the requested calculation mode in this period.',
+    'surveyDashboard.complaintsSubtitle':
+      'Review recorded customer complaints, audio transcripts, and drill down to inspect responses.',
+    'surveyDashboard.complaintSingle': 'complaint',
+    'surveyDashboard.complaintsCountLabel': 'complaints',
+    'surveyDashboard.ofTotalResponses': 'of total survey responses',
+    'surveyDashboard.noComplaintsSubtitle':
+      'All customer responses recorded in this window are positive or without written complaints.',
+    'surveyDashboard.onlyWithComplaints': 'Show templates with complaints only',
+    'surveyDashboard.showingAllTemplates': 'Showing all templates',
+    'anonymousTemplates.anonymousRespondent': 'Anonymous respondent',
+    'surveyDashboard.searchComplaintsPlaceholder':
+      'Search complaint text, operator name, template, or response ID...',
+    'surveyDashboard.viewModeFeed': 'All Complaints Stream',
+    'surveyDashboard.viewModeGrouped': 'Grouped by Template',
+    'surveyDashboard.noSearchResults': 'No complaints match the search query.',
+    'surveyDashboard.showingComplaintsCount': 'Showing',
+    'surveyDashboard.totalComplaintsInPage': 'complaints on this page',
+    'surveyDashboard.filterByTemplate': 'Filter by template',
+    'surveyDashboard.allTemplatesWithCount': 'All Templates',
+    'surveyDashboard.clearSearch': 'Clear search',
+    'surveyDashboard.viewModeTable': 'Interactive Table',
+    'surveyDashboard.viewModeCards': 'Cards Grid',
+    'surveyDashboard.complaintText': 'Complaint Text',
+    'surveyDashboard.actions': 'Actions',
+    'surveyDashboard.quickPreview': 'Details',
+    'surveyDashboard.expandRow': 'Expand row',
+    'surveyDashboard.collapseRow': 'Collapse row',
+    'surveyDashboard.tableIndex': '#',
+    'surveyDashboard.responseCode': 'Response ID',
+
+    // Common additions
+    'common.loading': 'Loading...',
+    'common.error': 'An unexpected error occurred',
+    'common.previous': 'Previous',
+    'common.next': 'Next',
+    'common.to': 'To',
+    'common.from': 'From',
+    'common.rowsPerPage': 'Rows per page',
+
+    // Survey Dashboard Complaints & Pagination
+    'surveyDashboard.showing': 'Showing',
+    'surveyDashboard.of': 'of',
+    'surveyDashboard.page': 'Page',
+    'surveyDashboard.complaintsTwo': '2 complaints',
+
+    // Drill down & anonymous dashboard
+    'dashboardDrillDown.summaryActions': 'Summary Actions',
+    'dashboardDrillDown.viewResponses': 'View Responses',
+    'anonymousDashboard.customSegments': 'Custom Input Segments',
+
+    // Score calculation modes
+    'scoreMode.title': 'Score Calculation Mode',
+    'scoreMode.rootQuestions': 'Root Questions Only',
+    'scoreMode.lowestConditionLevel': 'Deepest Conditional Level',
+    'scoreMode.allAnsweredQuestions': 'All Answered Questions',
+
+    // Best rated questions widget
+    'bestRatedQuestions.title': 'Best Rated Questions',
+    'bestRatedQuestions.subtitle': 'Questions with the highest customer satisfaction scores',
+    'bestRatedQuestions.count': 'Questions',
+    'bestRatedQuestions.empty': 'No questions evaluated in this window',
+    'bestRatedQuestions.answers': 'Responses',
+
+    // Historical verification & fallback badges
+    'historicalData.unverifiedTitle': 'Historical data unverified',
+    'historicalData.unverifiedDescription':
+      'This response was recorded prior to schema versioning or contains reconstructed historical dependencies.',
+    'scoreDerivation.fallback': 'Fallback',
+    'scoreDerivation.fallbackTooltip': 'Requested scoring mode unavailable for this record',
+
+    // Branch templates & logic
+    'branchTemplates.tryPathHint':
+      'Click "Try this path" to activate and test any condition immediately',
+    'branchTemplates.activeInputsShort': 'active inputs',
+    'branchTemplates.logicConditionsSubtitle': 'Logical branch conditions',
+    'branchTemplates.totalResponsesSubtitle': 'Total recorded responses',
+    'branchTemplates.activeConditionsShort': 'active conditions',
+
+    // Anonymous templates cards & empty states
+    'anonymousTemplates.scoredSubtext': 'Subject to scoring',
+    'anonymousTemplates.scoredResponsesInPage': 'From current page responses',
+    'anonymousTemplates.totalAnswersInPage': 'Total answers on current page',
+    'anonymousTemplates.noFilteredResponses': 'No responses match the selected filters.',
   },
   ar: {
     'app.brand': 'استبيان العملاء',
@@ -2876,6 +3025,9 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'nav.globalQuestions': 'الأسئلة العامة',
     'nav.anonymousTemplates': 'النماذج Anonymous',
     'nav.templates': 'النماذج',
+    'nav.evaluationSettings': 'إعدادات التقييم',
+    'nav.operators': 'المشغلون',
+    'nav.operatorWorkspace': 'نماذجي',
     'publicAnonymousTemplates.publicSurvey': 'استبيان عام',
     'publicAnonymousTemplates.headerTitle': 'نظام استطلاع رأي العملاء',
     'publicAnonymousTemplates.cleopatraLogoAlt': 'مجموعة مستشفيات كليوباترا',
@@ -5427,6 +5579,152 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'anonymousTemplates.responseAnswersSubtitle': 'الإجابات المرسلة مرتبة حسب ترتيب الأسئلة.',
     'anonymousTemplates.answer': 'الإجابة',
     'anonymousTemplates.noResponseAnswers': 'لم يتم إرسال إجابات.',
+    'branchEvaluationSettings.title': 'إعدادات تقييم الفرع',
+    'branchEvaluationSettings.subtitle':
+      'تخصيص حدود درجات الرضا وتصنيف المخاطر التشغيلية لهذا الفرع.',
+    'branchEvaluationSettings.navTitle': 'إعدادات التقييم',
+    'branchEvaluationSettings.usesDefaults': 'السياسة الافتراضية للنظام',
+    'branchEvaluationSettings.customOverride': 'سياسة فرع مخصصة',
+    'branchEvaluationSettings.lastUpdated': 'آخر تحديث',
+    'branchEvaluationSettings.saveSuccess': 'تم حفظ إعدادات التقييم بنجاح.',
+    'branchEvaluationSettings.viewOnlyMode': 'وضع القراءة فقط',
+    'branchEvaluationSettings.viewOnlyNotice':
+      'لديك صلاحية عرض إعدادات التقييم، وتعديلها يتطلب صلاحية إدارة إعدادات الفروع (Branches.ManageEvaluationSettings).',
+    'branchEvaluationSettings.satisfactionThresholds': 'حدود درجات رضا العملاء',
+    'branchEvaluationSettings.satisfactionThresholdsSubtitle':
+      'تحديد النسب المئوية الدنيا لتصنيف استجابات العملاء إلى: غير راضٍ، محايد، أو راضٍ.',
+    'branchEvaluationSettings.neutralMinimum': 'الحد الأدنى للمحايد',
+    'branchEvaluationSettings.neutralMinimumHint':
+      'الدرجات الأقل من هذه النسبة تصنف كـ (غير راضٍ) من 0% حتى هذا الحد.',
+    'branchEvaluationSettings.satisfiedMinimum': 'الحد الأدنى للراضي',
+    'branchEvaluationSettings.satisfiedMinimumHint':
+      'الدرجات التي تعادل هذه النسبة أو تتجاوزها تصنف كـ (راضٍ). وما بين المحايد والراضي يكون (محايد).',
+    'branchEvaluationSettings.previewClassification': 'معاينة شريط تصنيف الرضا',
+    'branchEvaluationSettings.riskThresholds': 'حدود المخاطر التشغيلية للفرع',
+    'branchEvaluationSettings.riskThresholdsSubtitle':
+      'تحديد معايير الرضا الإجمالية لتصنيف الحالة التشغيلية للفرع إلى: عالي المخاطر، متوسط المخاطر، أو سليم.',
+    'branchEvaluationSettings.mediumRiskMinimum': 'الحد الأدنى للمخاطر المتوسطة',
+    'branchEvaluationSettings.mediumRiskMinimumHint':
+      'معدل رضا الفرع الأقل من هذه النسبة يشير إلى مخاطر تشغيلية عالية.',
+    'branchEvaluationSettings.healthyMinimum': 'الحد الأدنى للحالة السليمة',
+    'branchEvaluationSettings.healthyMinimumHint':
+      'معدل رضا الفرع الذي يعادل هذه النسبة أو يتجاوزها يشير إلى حالة تشغيلية ممتازة وسليمة.',
+    'branchEvaluationSettings.previewRiskClassification': 'معاينة شريط تصنيف المخاطر',
+    'branchEvaluationSettings.saveSettings': 'حفظ الإعدادات',
+    'branchEvaluationSettings.saving': 'جاري الحفظ...',
+    'branchEvaluationSettings.resetChanges': 'إعادة تعيين للقيم الحالية',
+    'branchEvaluationSettings.invalidOrder':
+      'يجب أن يكون الحد الأدنى للراضي أعلى من المحايد، والحد الأدنى للسليم أعلى من متوسط المخاطر.',
+    'branchEvaluationSettings.errors.neutralRange':
+      'يجب أن يكون الحد الأدنى للمحايد بين 0% و 100%.',
+    'branchEvaluationSettings.errors.satisfiedRange':
+      'يجب أن يكون الحد الأدنى للراضي بين 0% و 100%.',
+    'branchEvaluationSettings.errors.neutralLessThanSatisfied':
+      'يجب أن يكون الحد الأدنى للمحايد أقل تماماً من الحد الأدنى للراضي.',
+    'branchEvaluationSettings.errors.mediumRiskRange':
+      'يجب أن يكون الحد الأدنى لمتوسط المخاطر بين 0% و 100%.',
+    'branchEvaluationSettings.errors.healthyRange':
+      'يجب أن يكون الحد الأدنى للحالة السليمة بين 0% و 100%.',
+    'branchEvaluationSettings.errors.mediumRiskLessThanHealthy':
+      'يجب أن يكون الحد الأدنى لمتوسط المخاطر أقل تماماً من الحد الأدنى للحالة السليمة.',
+    'satisfaction.unhappy': 'غير راضٍ',
+    'satisfaction.neutral': 'محايد',
+    'satisfaction.satisfied': 'راضٍ',
+    'historicalAvailability.title': 'التوفر التاريخي للنماذج',
+    'historicalAvailability.subtitle':
+      'تتبع حالة توفر النماذج ونشاطها خلال الفترة الزمنية المحددة.',
+    'historicalAvailability.verifiedComplete': 'البيانات التاريخية مكتملة',
+    'historicalAvailability.coveragePartial': 'تغطية جزئية',
+    'historicalAvailability.availableDuringPeriod': 'نماذج متاحة خلال الفترة',
+    'historicalAvailability.templatesWithResponses': 'نماذج مسجل بها ردود',
+    'historicalAvailability.currentlyAvailable': 'نشطة حالياً',
+    'historicalAvailability.incompleteWarning':
+      'بدأ التتبع التاريخي بعد تاريخ بداية الفترة المحددة، قد تكون بعض البيانات التاريخية غير مكتملة.',
+    'historicalAvailability.coverageStarts': 'تاريخ بدء التغطية',
+    'historicalCompleteness.modeUnavailable':
+      'البيانات التاريخية الأساسية غير متوفرة لنمط الحساب المطلوب خلال هذه الفترة.',
+    'surveyDashboard.complaintsSubtitle':
+      'مراجعة شكاوى وملاحظات العملاء المسجلة والاطلاع على تفاصيل الردود بالكامل.',
+    'surveyDashboard.complaintSingle': 'شكوى',
+    'surveyDashboard.complaintsCountLabel': 'شكاوى',
+    'surveyDashboard.ofTotalResponses': 'من إجمالي الردود',
+    'surveyDashboard.noComplaintsSubtitle':
+      'جميع استجابات العملاء خلال هذه الفترة إيجابية أو بدون شكاوى مسجلة.',
+    'surveyDashboard.onlyWithComplaints': 'عرض النماذج التي بها شكاوى فقط',
+    'surveyDashboard.showingAllTemplates': 'عرض جميع النماذج',
+    'anonymousTemplates.anonymousRespondent': 'مجيب غير معروف (Anonymous)',
+    'surveyDashboard.searchComplaintsPlaceholder':
+      'بحث في نص الشكوى، اسم المشغل، النموذج، أو معرف الرد...',
+    'surveyDashboard.viewModeFeed': 'عرض متتالي للشكاوى',
+    'surveyDashboard.viewModeGrouped': 'مجمعة حسب النموذج',
+    'surveyDashboard.noSearchResults': 'لا توجد شكاوى مطابقة لكلمة البحث.',
+    'surveyDashboard.showingComplaintsCount': 'عرض',
+    'surveyDashboard.totalComplaintsInPage': 'شكوى في هذه الصفحة',
+    'surveyDashboard.filterByTemplate': 'تصفية حسب النموذج',
+    'surveyDashboard.allTemplatesWithCount': 'جميع النماذج',
+    'surveyDashboard.clearSearch': 'مسح البحث',
+    'surveyDashboard.viewModeTable': 'الجدول التفاعلي',
+    'surveyDashboard.viewModeCards': 'عرض الكروت',
+    'surveyDashboard.complaintText': 'نص الشكوى',
+    'surveyDashboard.actions': 'الإجراءات',
+    'surveyDashboard.quickPreview': 'التفاصيل',
+    'surveyDashboard.expandRow': 'عرض التفاصيل',
+    'surveyDashboard.collapseRow': 'إخفاء التفاصيل',
+    'surveyDashboard.tableIndex': '#',
+    'surveyDashboard.responseCode': 'معرف الرد',
+
+    // Common additions
+    'common.loading': 'جاري التحميل...',
+    'common.error': 'حدث خطأ غير متوقع',
+    'common.previous': 'السابق',
+    'common.next': 'التالي',
+    'common.to': 'إلى',
+    'common.from': 'من',
+    'common.rowsPerPage': 'لكل صفحة',
+
+    // Survey Dashboard Complaints & Pagination
+    'surveyDashboard.showing': 'عرض',
+    'surveyDashboard.of': 'من',
+    'surveyDashboard.page': 'صفحة',
+    'surveyDashboard.complaintsTwo': 'شكوتان',
+
+    // Drill down & anonymous dashboard
+    'dashboardDrillDown.summaryActions': 'إجراءات ملخص الردود',
+    'dashboardDrillDown.viewResponses': 'عرض الردود',
+    'anonymousDashboard.customSegments': 'شرائح المدخلات المخصصة',
+
+    // Score calculation modes
+    'scoreMode.title': 'نمط حساب الدرجات',
+    'scoreMode.rootQuestions': 'الأسئلة الرئيسية فقط',
+    'scoreMode.lowestConditionLevel': 'أعمق مستوى شرطي',
+    'scoreMode.allAnsweredQuestions': 'جميع الأسئلة المجاب عنها',
+
+    // Best rated questions widget
+    'bestRatedQuestions.title': 'أعلى الأسئلة تقييماً',
+    'bestRatedQuestions.subtitle': 'الأسئلة الحاصلة على أعلى معدلات رضا من العملاء',
+    'bestRatedQuestions.count': 'أسئلة',
+    'bestRatedQuestions.empty': 'لا توجد أسئلة مسجل لها تقييمات في هذه الفترة',
+    'bestRatedQuestions.answers': 'ردود',
+
+    // Historical verification & fallback badges
+    'historicalData.unverifiedTitle': 'البيانات التاريخية غير موثقة',
+    'historicalData.unverifiedDescription':
+      'تم تسجيل هذا الرد قبل تطبيق نظام إصدارات المخطط أو يحتوي على تبعيات تاريخية معاد بناؤها.',
+    'scoreDerivation.fallback': 'احتياطي',
+    'scoreDerivation.fallbackTooltip': 'نمط حساب النقاط المطلوب غير متاح لهذا السجل',
+
+    // Branch templates & logic
+    'branchTemplates.tryPathHint': 'اضغط على "تجربة هذا المسار" لتفعيل وتجربة أي شرط فوراً',
+    'branchTemplates.activeInputsShort': 'حقل مفعل',
+    'branchTemplates.logicConditionsSubtitle': 'شروط التفرع المنطقي',
+    'branchTemplates.totalResponsesSubtitle': 'إجمالي الردود المسجلة',
+    'branchTemplates.activeConditionsShort': 'شروط مفعلة',
+
+    // Anonymous templates cards & empty states
+    'anonymousTemplates.scoredSubtext': 'خاضع للتقييم',
+    'anonymousTemplates.scoredResponsesInPage': 'من إجمالي ردود الصفحة الحالية',
+    'anonymousTemplates.totalAnswersInPage': 'إجمالي الإجابات بالصفحة الحالية',
+    'anonymousTemplates.noFilteredResponses': 'لم يتم العثور على أي ردود مطابقة للفلاتر المحددة.',
   },
 };
 

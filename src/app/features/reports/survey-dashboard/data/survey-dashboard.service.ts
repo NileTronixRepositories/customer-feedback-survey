@@ -103,6 +103,7 @@ export class SurveyDashboardService {
   getComplaints(query: SurveyDashboardComplaintsQuery): Observable<SurveyDashboardComplaintsPage> {
     let params = this.toAnalyticsParams(query, false)
       .set('pageNumber', String(query.pageNumber))
+      .set('page', String(query.pageNumber))
       .set('pageSize', String(query.pageSize));
 
     if (query.searchText) {
@@ -291,21 +292,31 @@ export class SurveyDashboardService {
               : this.readPageArray(response).map((item) => this.toComplaint(item)),
           );
 
-    const totalItems =
+    const totalCountFromResponse =
+      this.readNumber(response, 'totalCount') ||
+      this.readNumber(response, 'totalComplaints') ||
       this.readNumber(response, 'totalItems') ||
+      this.readNumber(response, 'totalRecords') ||
+      this.readNumber(response, 'total');
+
+    const totalItemsInPayload =
       pageItems.length ||
       templateGroups.reduce((total, group) => total + group.complaints.length, 0);
+
+    const totalItems = totalCountFromResponse || totalItemsInPayload;
     const pageSize = this.readNumber(response, 'pageSize') || query.pageSize;
+    const totalPages =
+      this.readNumber(response, 'totalPages') || Math.ceil(totalItems / (pageSize || 1)) || 1;
 
     return {
-      totalComplaints: this.readNumber(response, 'totalComplaints') || totalItems,
+      totalComplaints: totalCountFromResponse || totalItems,
       responsesWithComplaints: this.readNumber(response, 'responsesWithComplaints'),
       totalResponses: this.readNullableNumber(response, 'totalResponses') ?? undefined,
       complaintRate: this.readNumber(response, 'complaintRate'),
       currentPage: this.readNumber(response, 'currentPage') || query.pageNumber,
       pageSize,
       totalItems,
-      totalPages: this.readNumber(response, 'totalPages') || Math.ceil(totalItems / pageSize),
+      totalPages,
       page: pageItems.length > 0 ? pageItems : undefined,
       templateGroups,
     };
@@ -517,7 +528,6 @@ export class SurveyDashboardService {
     };
   }
 
-
   private toSourceBreakdown(breakdown: ApiRecord | null): SurveyDashboardSourceBreakdown {
     return {
       internal: this.toSourceMetrics(this.readRecord(breakdown?.['internal'])),
@@ -654,7 +664,6 @@ export class SurveyDashboardService {
       detailsNavigation: this.toNavigation(this.readRecord(item['detailsNavigation'])),
     };
   }
-
 
   private toLowestRatedQuestion(item: ApiRecord): SurveyDashboardLowestRatedQuestion {
     return {

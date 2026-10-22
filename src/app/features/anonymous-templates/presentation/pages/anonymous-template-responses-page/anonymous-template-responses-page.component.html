@@ -171,7 +171,7 @@
       >
         <div class="flex items-center justify-between">
           <span class="text-[11px] font-bold text-slate-500">
-            {{ 'anonymousTemplates.score' | t }} (خاضع للتقييم)
+            {{ 'anonymousTemplates.score' | t }} ({{ 'anonymousTemplates.scoredSubtext' | t }})
           </span>
           <div
             class="flex h-9 w-9 items-center justify-center rounded-xl bg-sky-50 text-sky-600 ring-1 ring-sky-100"
@@ -182,7 +182,7 @@
         <p class="mt-2 text-2xl font-black text-slate-900 tracking-tight">
           {{ scoredResponsesCount() | number }}
         </p>
-        <p class="mt-0.5 text-[10px] font-medium text-slate-400">من إجمالي ردود الصفحة الحالية</p>
+        <p class="mt-0.5 text-[10px] font-medium text-slate-400">{{ 'anonymousTemplates.scoredResponsesInPage' | t }}</p>
       </div>
 
       <!-- Answers Received in Page -->
@@ -202,7 +202,7 @@
         <p class="mt-2 text-2xl font-black text-slate-900 tracking-tight">
           {{ totalAnswersInPage() | number }}
         </p>
-        <p class="mt-0.5 text-[10px] font-medium text-slate-400">إجمالي الإجابات بالصفحة الحالية</p>
+        <p class="mt-0.5 text-[10px] font-medium text-slate-400">{{ 'anonymousTemplates.totalAnswersInPage' | t }}</p>
       </div>
     </div>
 
@@ -465,7 +465,7 @@
                 {{ 'anonymousTemplates.noResponses' | t }}
               </p>
               <p class="mt-0.5 text-[11px] text-slate-400">
-                لم يتم العثور على أي ردود مطابقة للفلاتر المحددة.
+                {{ 'anonymousTemplates.noFilteredResponses' | t }}
               </p>
             </div>
           }
@@ -658,7 +658,7 @@
                         {{ 'anonymousTemplates.noResponses' | t }}
                       </p>
                       <p class="mt-1 text-[11px] text-slate-400">
-                        لا توجد ردود مسجلة لهذا القالب تطابق معايير الفلترة الحالية.
+                        {{ 'anonymousTemplates.noFilteredResponses' | t }}
                       </p>
                       <div class="mt-4">
                         <app-button

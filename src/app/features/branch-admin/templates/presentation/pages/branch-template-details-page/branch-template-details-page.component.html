@@ -484,7 +484,7 @@
             {{ template.customInputsCount }}
           </p>
           <p class="mt-0.5 truncate text-[10px] font-medium text-slate-400">
-            {{ activeCustomInputs().length }} حقل مفعل
+            {{ activeCustomInputs().length }} {{ 'branchTemplates.activeInputsShort' | t }}
           </p>
         </div>
 
@@ -504,7 +504,7 @@
             {{ logicConditionsCount() }}
           </p>
           <p class="mt-0.5 truncate text-[10px] font-medium text-slate-400">
-            شروط التفرع المنطقي
+            {{ 'branchTemplates.logicConditionsSubtitle' | t }}
           </p>
         </div>
 
@@ -524,7 +524,7 @@
             {{ totalResponsesCount() | number }}
           </p>
           <p class="mt-0.5 truncate text-[10px] font-medium text-slate-400">
-            إجمالي الردود المسجلة
+            {{ 'branchTemplates.totalResponsesSubtitle' | t }}
           </p>
         </div>
       </div>
@@ -553,7 +553,7 @@
               </div>
 
               <span class="inline-flex items-center rounded-full bg-violet-50 px-2.5 py-0.5 text-[10px] font-bold text-violet-700">
-                {{ logicConditionsCount() }} شروط مفعلة
+                {{ logicConditionsCount() }} {{ 'branchTemplates.activeConditionsShort' | t }}
               </span>
             </div>
 

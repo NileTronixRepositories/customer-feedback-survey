@@ -99,6 +99,11 @@ export interface DashboardResponseDetailItem {
   voiceUrl: string | null;
   imageUrl: string | null;
   children: readonly DashboardResponseDetailItem[];
+  questionType?: string;
+  starRatingValue?: number | null;
+  smileValue?: number | null;
+  selectedOptionValue?: number | null;
+  questionOrder?: number;
 }
 
 export interface DashboardResponseDetails {

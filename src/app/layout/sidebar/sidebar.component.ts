@@ -92,7 +92,7 @@ const MENU_ITEMS: readonly MenuItem[] = [
     exact: true,
   },
   {
-    labelKey: 'branchEvaluationSettings.navTitle',
+    labelKey: 'nav.evaluationSettings',
     path: '/branch-admin/evaluation-settings',
     icon: Sliders,
     roles: [],

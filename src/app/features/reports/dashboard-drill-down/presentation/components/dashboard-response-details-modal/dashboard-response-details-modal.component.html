@@ -1,0 +1,435 @@
+<app-modal
+  [open]="open()"
+  [title]="'dashboardDrillDown.responseDetails' | t"
+  size="xl"
+  (closed)="onClose()"
+>
+  @if (loading()) {
+    <div class="flex flex-col items-center justify-center p-12 gap-3">
+      <span class="loader" aria-hidden="true"></span>
+      <p class="text-xs font-bold text-slate-500">
+        {{ 'dashboardDrillDown.detailsLoading' | t }}
+      </p>
+    </div>
+  } @else if (errorKey()) {
+    <div
+      class="rounded-xl border border-rose-200 bg-rose-50/80 p-4 text-center text-xs font-bold text-rose-700 m-2 flex items-center justify-center gap-2"
+      role="alert"
+    >
+      <app-icon [icon]="alertIcon" [size]="16" />
+      <span>{{ errorKey() | t }}</span>
+    </div>
+  } @else if (details(); as details) {
+    <div class="space-y-3.5 text-xs">
+      <!-- 1. Response Metadata Summary Card -->
+      <div
+        class="rounded-2xl border border-slate-200/90 bg-slate-50/50 p-3.5 sm:p-4 shadow-2xs space-y-3"
+      >
+        <!-- Top Row: Template & Score -->
+        <div
+          class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-200/70"
+        >
+          <div class="flex items-center gap-2.5 min-w-0">
+            <span
+              class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[var(--theme-color-accent-softest)] text-[var(--theme-color-secondary)] shadow-2xs"
+            >
+              <app-icon [icon]="templateIcon" [size]="15" />
+            </span>
+            <div class="min-w-0">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">{{
+                'dashboardDrillDown.template' | t
+              }}</span>
+              <h4
+                class="text-sm sm:text-base font-black text-slate-900 truncate"
+                [title]="templateDisplayName(details)"
+              >
+                {{ templateDisplayName(details) }}
+              </h4>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2 shrink-0">
+            @if (details.isScored && details.scorePercentage !== null) {
+              <span
+                class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-black shadow-2xs border"
+                [class.bg-emerald-50]="details.scorePercentage >= 80"
+                [class.text-emerald-700]="details.scorePercentage >= 80"
+                [class.border-emerald-200]="details.scorePercentage >= 80"
+                [class.bg-amber-50]="details.scorePercentage >= 60 && details.scorePercentage < 80"
+                [class.text-amber-700]="
+                  details.scorePercentage >= 60 && details.scorePercentage < 80
+                "
+                [class.border-amber-200]="
+                  details.scorePercentage >= 60 && details.scorePercentage < 80
+                "
+                [class.bg-rose-50]="details.scorePercentage < 60"
+                [class.text-rose-700]="details.scorePercentage < 60"
+                [class.border-rose-200]="details.scorePercentage < 60"
+              >
+                <span
+                  class="h-2 w-2 rounded-full"
+                  [class.bg-emerald-500]="details.scorePercentage >= 80"
+                  [class.bg-amber-500]="
+                    details.scorePercentage >= 60 && details.scorePercentage < 80
+                  "
+                  [class.bg-rose-500]="details.scorePercentage < 60"
+                ></span>
+                {{ details.scorePercentage.toFixed(1) }}%
+              </span>
+            } @else {
+              <span
+                class="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-black text-slate-500 border border-slate-200"
+              >
+                N/A
+              </span>
+            }
+            @if (details.scoreDerivation) {
+              <span
+                class="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-bold border"
+                [class.bg-indigo-50]="details.scoreDerivation === 'SubmissionSnapshot'"
+                [class.text-indigo-700]="details.scoreDerivation === 'SubmissionSnapshot'"
+                [class.border-indigo-200]="details.scoreDerivation === 'SubmissionSnapshot'"
+                [class.bg-amber-50]="details.scoreDerivation === 'StoredRootBaseline'"
+                [class.text-amber-800]="details.scoreDerivation === 'StoredRootBaseline'"
+                [class.border-amber-200]="details.scoreDerivation === 'StoredRootBaseline'"
+              >
+                <app-icon [icon]="historyIcon" [size]="10" />
+                {{ derivationLabel(details.scoreDerivation) }}
+              </span>
+            }
+          </div>
+        </div>
+
+        <!-- Bottom Row: Branch, Operator & Submission Date Mini-Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
+          <div
+            class="flex items-center gap-2.5 rounded-xl bg-white border border-slate-200/80 p-2.5 shadow-2xs min-w-0 transition hover:border-slate-300"
+          >
+            <span
+              class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600"
+            >
+              <app-icon [icon]="branchIcon" [size]="14" />
+            </span>
+            <div class="min-w-0">
+              <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">{{
+                'dashboardDrillDown.branch' | t
+              }}</span>
+              <span
+                class="font-bold text-slate-900 text-xs block truncate"
+                [title]="branchDisplayName(details)"
+                >{{ branchDisplayName(details) }}</span
+              >
+            </div>
+          </div>
+
+          <div
+            class="flex items-center gap-2.5 rounded-xl bg-white border border-slate-200/80 p-2.5 shadow-2xs min-w-0 transition hover:border-slate-300"
+          >
+            <span
+              class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600"
+            >
+              <app-icon [icon]="userIcon" [size]="14" />
+            </span>
+            <div class="min-w-0">
+              <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">{{
+                'dashboardDrillDown.operator' | t
+              }}</span>
+              <span
+                class="font-bold text-slate-900 text-xs block truncate"
+                [title]="operatorDisplayName(details)"
+                >{{ operatorDisplayName(details) }}</span
+              >
+            </div>
+          </div>
+
+          <div
+            class="flex items-center gap-2.5 rounded-xl bg-white border border-slate-200/80 p-2.5 shadow-2xs min-w-0 transition hover:border-slate-300"
+          >
+            <span
+              class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600"
+            >
+              <app-icon [icon]="calendarIcon" [size]="14" />
+            </span>
+            <div class="min-w-0">
+              <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">{{
+                'dashboardDrillDown.submittedOn' | t
+              }}</span>
+              <span class="font-bold text-slate-900 text-xs block truncate">{{
+                details.submittedOnUtc | date: 'medium'
+              }}</span>
+            </div>
+          </div>
+        </div>
+
+        @if (details.isHistoricalDataVerified === false) {
+          <div
+            class="flex items-start gap-2.5 rounded-xl border border-amber-300 bg-amber-50/90 p-3 text-xs text-amber-900 shadow-2xs mt-2"
+            role="alert"
+          >
+            <app-icon [icon]="alertIcon" [size]="16" class="text-amber-600 shrink-0 mt-0.5" />
+            <div class="flex-1">
+              <p class="font-bold">{{ 'historicalData.unverifiedTitle' | t }}</p>
+              <p class="text-[11px] text-amber-800 mt-0.5 leading-relaxed">
+                {{ 'historicalData.unverifiedDescription' | t }}
+              </p>
+            </div>
+          </div>
+        }
+
+        @if (details.historicalSurvey; as hs) {
+          <div
+            class="rounded-xl border border-indigo-100 bg-indigo-50/60 p-2.5 sm:p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 mt-2"
+          >
+            <div class="flex items-center gap-2 min-w-0">
+              <span
+                class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-indigo-100 text-indigo-700"
+              >
+                <app-icon [icon]="historyIcon" [size]="14" />
+              </span>
+              <div class="min-w-0">
+                <span class="text-xs font-bold text-indigo-950 block"
+                  >Historical Schema Snapshot</span
+                >
+                <span class="text-[11px] text-indigo-700/90 block" dir="auto">
+                  Survey structure captured with {{ hs.questions.length }} questions and
+                  {{ hs.conditions.length }} branching conditions
+                </span>
+              </div>
+            </div>
+            <span
+              class="shrink-0 rounded-md bg-indigo-100/90 border border-indigo-200 px-2 py-0.5 text-[10px] font-black text-indigo-700"
+              dir="ltr"
+            >
+              v{{ hs.schemaVersion || '1' }} · {{ hs.provenance }}
+            </span>
+          </div>
+        }
+      </div>
+
+      <!-- 2. Custom Inputs Section -->
+      @if (details.customInputs.length > 0) {
+        <section class="space-y-2">
+          <h3 class="text-xs font-black text-slate-900 flex items-center gap-1.5">
+            <app-icon [icon]="slidersIcon" [size]="14" class="text-slate-400" />
+            {{ 'dashboardDrillDown.customInputs' | t }}
+            <span
+              class="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-black text-slate-600"
+            >
+              {{ details.customInputs.length }}
+            </span>
+          </h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+            @for (item of details.customInputs; track item.labelEn) {
+              <div
+                class="flex flex-col justify-between gap-1.5 rounded-xl border border-slate-200/80 bg-white p-2.5 sm:p-3 shadow-2xs hover:border-slate-300 transition"
+              >
+                <div class="flex items-center justify-between gap-2 text-[11px]">
+                  <span
+                    class="font-bold text-slate-500 truncate"
+                    [title]="localized(item.labelEn, item.labelAr)"
+                  >
+                    {{ localized(item.labelEn, item.labelAr) }}
+                  </span>
+                  @if (item.type) {
+                    <span
+                      class="text-[9px] font-bold text-slate-400 bg-slate-100 px-1.5 py-0.2 rounded border border-slate-200/60 shrink-0"
+                    >
+                      {{ customInputTypeLabel(item.type) }}
+                    </span>
+                  }
+                </div>
+                <div
+                  class="text-xs sm:text-sm font-black text-slate-900 font-mono select-all break-words [overflow-wrap:anywhere]"
+                >
+                  {{ detailValue(item) }}
+                </div>
+              </div>
+            }
+          </div>
+        </section>
+      }
+
+      <!-- 3. Questions & Answers Section -->
+      <section class="space-y-2">
+        <div class="flex items-center justify-between gap-2">
+          <h3 class="text-xs font-black text-slate-900 flex items-center gap-1.5">
+            <app-icon
+              [icon]="templateIcon"
+              [size]="14"
+              class="text-[var(--theme-color-secondary)]"
+            />
+            {{ 'dashboardDrillDown.answers' | t }}
+            <span
+              class="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-black text-slate-600"
+            >
+              {{ details.answers.length }}
+            </span>
+          </h3>
+        </div>
+
+        <div
+          class="grid grid-cols-1 md:grid-cols-2 gap-3 items-stretch max-h-[54vh] overflow-y-auto pe-1"
+        >
+          @for (item of details.answers; track $index) {
+            <article
+              class="flex flex-col justify-between gap-2.5 rounded-xl border border-slate-200/90 bg-white p-3 sm:p-3.5 shadow-2xs transition-all hover:border-slate-300 hover:shadow-xs min-h-[84px]"
+            >
+              <!-- Top Question Header: Order # + Type badge + Question Text -->
+              <div>
+                <div class="flex items-center justify-between gap-2 mb-1.5">
+                  <div class="flex items-center gap-1.5 min-w-0">
+                    <span
+                      class="shrink-0 inline-flex items-center justify-center h-5 w-5 rounded-md bg-slate-100 text-slate-700 text-[10px] font-black font-mono border border-slate-200/80"
+                    >
+                      {{ item.questionOrder || $index + 1 }}
+                    </span>
+                    <span
+                      class="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold text-slate-500 truncate"
+                    >
+                      {{ questionTypeLabel(item) }}
+                    </span>
+                  </div>
+                </div>
+
+                <h4
+                  class="text-xs font-black text-slate-900 leading-snug break-words [overflow-wrap:anywhere]"
+                >
+                  {{ localized(item.labelEn, item.labelAr) }}
+                </h4>
+              </div>
+
+              <!-- Answer Container -->
+              <div class="pt-2 border-t border-slate-100">
+                @if (item.starRatingValue !== null && item.starRatingValue !== undefined) {
+                  <!-- Star Rating with visual stars -->
+                  <div
+                    class="flex items-center justify-between gap-2 rounded-lg bg-amber-50/60 border border-amber-200/70 px-2.5 py-1.5"
+                  >
+                    <div class="flex items-center gap-1">
+                      @for (slot of scaleSlots; track slot) {
+                        <svg
+                          class="h-4 w-4"
+                          viewBox="0 0 24 24"
+                          [class.text-amber-400]="isStarActive(slot, item.starRatingValue)"
+                          [class.fill-amber-400]="isStarActive(slot, item.starRatingValue)"
+                          [class.text-slate-200]="!isStarActive(slot, item.starRatingValue)"
+                          [class.fill-slate-100]="!isStarActive(slot, item.starRatingValue)"
+                        >
+                          <polygon
+                            points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
+                            stroke="currentColor"
+                            stroke-width="1.5"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                          />
+                        </svg>
+                      }
+                    </div>
+                    <span class="font-black text-amber-800 text-xs font-mono">
+                      {{ item.starRatingValue }} / 5
+                    </span>
+                  </div>
+                } @else if (item.smileValue !== null && item.smileValue !== undefined) {
+                  <!-- Smile Rating -->
+                  <div
+                    class="flex items-center justify-between gap-2 rounded-lg bg-emerald-50/60 border border-emerald-200/70 px-2.5 py-1.5"
+                  >
+                    <div class="flex items-center gap-1.5">
+                      @for (slot of scaleSlots; track slot) {
+                        <span
+                          class="h-2.5 w-2.5 rounded-full"
+                          [class.bg-emerald-500]="isStarActive(slot, item.smileValue)"
+                          [class.bg-slate-200]="!isStarActive(slot, item.smileValue)"
+                        ></span>
+                      }
+                    </div>
+                    <span class="font-black text-emerald-800 text-xs font-mono">
+                      {{ item.smileValue }} / 5
+                    </span>
+                  </div>
+                } @else if (isComplaintOrFreeText(item)) {
+                  <!-- Complaint or Free Text Feedback Box -->
+                  <div class="rounded-lg bg-rose-50/50 border border-rose-200/80 p-2.5">
+                    <div class="flex items-center gap-1 text-[10px] font-bold text-rose-700 mb-1">
+                      <app-icon [icon]="messageIcon" [size]="11" />
+                      <span>{{ 'surveyDashboard.complaintSingle' | t }}</span>
+                    </div>
+                    <p
+                      class="text-xs font-bold text-rose-950 leading-relaxed break-words [overflow-wrap:anywhere] select-text"
+                    >
+                      "{{ detailValue(item) }}"
+                    </p>
+                  </div>
+                } @else {
+                  <!-- Standard Option / Text Answer Badge -->
+                  <div class="flex items-center justify-between gap-2">
+                    <span
+                      class="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-black border shadow-2xs {{
+                        answerBadgeClass(detailValue(item))
+                      }}"
+                    >
+                      <app-icon [icon]="checkCircleIcon" [size]="12" class="shrink-0 opacity-80" />
+                      <span class="break-words [overflow-wrap:anywhere]">{{
+                        detailValue(item)
+                      }}</span>
+                    </span>
+                    @if (
+                      item.selectedOptionValue !== null && item.selectedOptionValue !== undefined
+                    ) {
+                      <span
+                        class="shrink-0 rounded border border-slate-200/80 bg-white px-1.5 py-0.5 text-[10px] font-bold text-slate-600 shadow-2xs font-mono"
+                      >
+                        {{ item.selectedOptionValue }}
+                      </span>
+                    }
+                  </div>
+                }
+
+                <!-- Audio Voice Attachment (if any) -->
+                @if (item.voiceUrl) {
+                  <div class="mt-2 pt-2 border-t border-slate-100">
+                    <audio class="w-full h-8" controls [src]="item.voiceUrl"></audio>
+                  </div>
+                }
+
+                <!-- Image Attachment (if any) -->
+                @if (item.imageUrl) {
+                  <div class="mt-2 pt-2 border-t border-slate-100 flex flex-col gap-1.5">
+                    <a
+                      [href]="item.imageUrl"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="group block overflow-hidden rounded-lg border border-slate-200/80 bg-slate-50 p-1 text-center hover:border-slate-300 transition-colors"
+                    >
+                      <img
+                        [src]="item.imageUrl"
+                        alt="Answer Attachment"
+                        class="max-h-48 mx-auto rounded object-contain transition-transform duration-200 group-hover:scale-105"
+                        loading="lazy"
+                      />
+                    </a>
+                    <a
+                      [href]="item.imageUrl"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="inline-flex items-center gap-1.5 text-xs font-bold text-[var(--theme-color-secondary)] hover:underline"
+                    >
+                      <app-icon [icon]="detailsIcon" [size]="14" />
+                      {{ 'dashboardDrillDown.openImage' | t }}
+                    </a>
+                  </div>
+                }
+              </div>
+            </article>
+          } @empty {
+            <div
+              class="col-span-full rounded-xl bg-slate-50 border border-dashed border-slate-200 p-6 text-center text-xs font-bold text-slate-400"
+            >
+              {{ 'dashboardDrillDown.noAnswers' | t }}
+            </div>
+          }
+        </div>
+      </section>
+    </div>
+  }
+</app-modal>

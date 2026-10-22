@@ -238,9 +238,9 @@
                         </span>
                       }
                       @if (row.requestedModeAvailable === false) {
-                        <span class="inline-flex items-center gap-0.5 text-[9px] font-semibold text-amber-700" title="Requested scoring mode unavailable for this record">
+                        <span class="inline-flex items-center gap-0.5 text-[9px] font-semibold text-amber-700" [title]="'scoreDerivation.fallbackTooltip' | t">
                           <app-icon [icon]="alertIcon" [size]="9" class="text-amber-600" />
-                          <span>Fallback</span>
+                          <span>{{ 'scoreDerivation.fallback' | t }}</span>
                         </span>
                       }
                     </div>

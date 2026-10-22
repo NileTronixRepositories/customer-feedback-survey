@@ -157,9 +157,9 @@
         >
           <app-icon [icon]="alertIcon" [size]="15" class="text-amber-600 shrink-0 mt-0.5" />
           <div class="flex-1">
-            <p class="font-bold">Historical data unverified</p>
+            <p class="font-bold">{{ 'historicalData.unverifiedTitle' | t }}</p>
             <p class="text-[11px] text-amber-800 leading-tight">
-              This response was recorded prior to schema versioning or contains reconstructed historical dependencies.
+              {{ 'historicalData.unverifiedDescription' | t }}
             </p>
           </div>
         </div>
