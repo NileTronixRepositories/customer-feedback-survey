@@ -113,6 +113,7 @@ export class BranchResponsesHistoryStore {
 
   private normalizeQuery(query: BranchSurveyResponsesQuery): BranchSurveyResponsesQuery {
     return {
+      ...query,
       from: query.from || undefined,
       to: query.to || undefined,
       templateId: query.templateId || undefined,

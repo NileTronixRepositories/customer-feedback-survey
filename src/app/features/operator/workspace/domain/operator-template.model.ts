@@ -1,3 +1,4 @@
+import { TemplateCustomInputType } from '../../../../shared/models/custom-input.model';
 import {
   QuestionAnswerOption,
   QuestionAnswerOptionApiResponse,
@@ -42,7 +43,7 @@ export interface OperatorAssignedTemplate {
   questionConditions: readonly QuestionCondition[];
 }
 
-export type OperatorTemplateCustomInputType = 1 | 2;
+export type OperatorTemplateCustomInputType = TemplateCustomInputType;
 
 export interface OperatorAssignedTemplateCustomInput {
   customInputId: string;
@@ -50,6 +51,8 @@ export interface OperatorAssignedTemplateCustomInput {
   labelAr: string | null;
   type: OperatorTemplateCustomInputType;
   typeName: string;
+  isSystemField?: boolean;
+  systemFieldKey?: string | null;
   isRequired: boolean;
   minLength: number | null;
   maxLength: number | null;
@@ -142,6 +145,7 @@ export interface OperatorTemplateResponseCustomInput {
   typeName: string;
   stringValue: string | null;
   integerValue: number | null;
+  dateValue?: string | null;
 }
 
 export interface OperatorMyTemplatesApiResponse {
@@ -181,6 +185,8 @@ export interface OperatorAssignedTemplateCustomInputApiResponse {
   labelAr?: string | null;
   type?: number | string | null;
   typeName?: string | null;
+  isSystemField?: boolean;
+  systemFieldKey?: string | null;
   isRequired?: boolean;
   minLength?: number | null;
   maxLength?: number | null;
@@ -252,6 +258,7 @@ export interface OperatorTemplateResponseApiResponse {
 }
 
 export interface OperatorTemplateResponseCustomInputApiResponse {
+  typeSnapshot?: number | string | null;
   customInputId?: string | number;
   labelEnSnapshot?: string | null;
   labelArSnapshot?: string | null;
@@ -259,4 +266,5 @@ export interface OperatorTemplateResponseCustomInputApiResponse {
   typeName?: string | null;
   stringValue?: string | null;
   integerValue?: number | null;
+  dateValue?: string | null;
 }

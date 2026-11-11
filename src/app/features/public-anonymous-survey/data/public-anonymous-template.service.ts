@@ -1,3 +1,4 @@
+import { normalizeCustomInputType } from '../../../shared/models/custom-input.model';
 import { HttpClient, HttpContext } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
@@ -21,7 +22,6 @@ import {
   PublicAnonymousTemplateQuestionOptionApiResponse,
   PublicAnonymousSubmissionApiResponse,
   PublicAnonymousSubmissionResult,
-  PublicCustomInputType,
   SubmitPublicAnonymousResponsePayload,
 } from '../domain/public-anonymous-template.model';
 
@@ -108,15 +108,17 @@ export class PublicAnonymousTemplateService {
   private toCustomInput(
     response: PublicAnonymousTemplateCustomInputApiResponse,
   ): PublicAnonymousTemplateCustomInput {
-    const type = this.toCustomInputType(response.type ?? response.typeName);
+    const type = normalizeCustomInputType(response.type ?? response.typeName);
 
     return {
       customInputId: this.readRecordId(response.customInputId),
       labelEn: response.labelEn ?? null,
       labelAr: response.labelAr ?? null,
       type,
-      typeName: response.typeName ?? (type === 2 ? 'Integer' : 'String'),
-      isRequired: response.isRequired ?? false,
+      typeName: response.typeName ?? (type === 3 ? 'Date' : type === 2 ? 'Integer' : 'String'),
+      isSystemField: response.isSystemField === true,
+      systemFieldKey: response.systemFieldKey ?? null,
+      isRequired: response.isSystemField || response.systemFieldKey === 'VisitTime' ? false : response.isRequired ?? false,
       minLength: response.minLength ?? null,
       maxLength: response.maxLength ?? null,
       minValue: response.minValue ?? null,
@@ -199,6 +201,7 @@ export class PublicAnonymousTemplateService {
     fallbackAnonymousTemplateId: string,
   ): PublicAnonymousSubmissionResult {
     return {
+      customInputValues: response.customInputValues ?? [],
       anonymousSurveyResponseId: this.readRecordId(response.anonymousSurveyResponseId),
       anonymousTemplateId:
         this.readRecordId(response.anonymousTemplateId) || fallbackAnonymousTemplateId,
@@ -221,6 +224,7 @@ export class PublicAnonymousTemplateService {
       if (customInput.stringValue !== null) {
         formData.append(`${prefix}.StringValue`, customInput.stringValue);
       }
+      if (customInput.dateValue) formData.append(`${prefix}.DateValue`, customInput.dateValue);
       if (customInput.integerValue !== null) {
         formData.append(`${prefix}.IntegerValue`, String(customInput.integerValue));
       }
@@ -284,13 +288,6 @@ export class PublicAnonymousTemplateService {
       : questions.slice(0, 1).map((question) => question.anonymousTemplateQuestionId);
   }
 
-  private toCustomInputType(type: number | string | null | undefined): PublicCustomInputType {
-    const normalizedType = String(type ?? '')
-      .trim()
-      .toLowerCase();
-
-    return normalizedType === '2' || normalizedType === 'integer' ? 2 : 1;
-  }
 
   private toNumber(value: number | string | null | undefined): number | null {
     const numericValue = typeof value === 'string' ? Number(value) : value;

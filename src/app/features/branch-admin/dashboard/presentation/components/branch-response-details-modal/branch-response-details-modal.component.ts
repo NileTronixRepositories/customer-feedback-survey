@@ -135,6 +135,7 @@ export class BranchResponseDetailsModalComponent {
   }
 
   customInputTypeLabel(typeName: string): string {
+    if (typeName?.toLowerCase() === 'date' || typeName === '3') return this.i18n.translate('branchTemplates.customInputTypeDate');
     if (typeName.toLowerCase().includes('int') || typeName.toLowerCase().includes('num')) {
       return this.i18n.translate('surveyDashboard.typeInteger');
     }

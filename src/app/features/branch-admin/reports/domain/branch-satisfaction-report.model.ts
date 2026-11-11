@@ -1,3 +1,4 @@
+import { DashboardDetailsNavigation } from '../../../reports/dashboard-drill-down/domain/dashboard-drill-down.model';
 import { ScoreCalculationMode } from '../../../../shared/models/score-calculation-mode.model';
 
 export interface BranchSatisfactionReportQuery {
@@ -59,6 +60,7 @@ export interface SatisfactionByTemplateItem {
 }
 
 export interface SatisfactionTrendItem {
+  detailsNavigation?: DashboardDetailsNavigation | null;
   date: string;
   score: number;
   responsesCount: number;

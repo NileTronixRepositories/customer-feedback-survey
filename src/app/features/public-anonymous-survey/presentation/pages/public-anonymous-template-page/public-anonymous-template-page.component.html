@@ -78,7 +78,7 @@
                   </span>
                   <input
                     class="h-11 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm font-semibold text-slate-950 outline-none transition duration-200 placeholder:text-slate-300 hover:border-slate-300 focus:border-[var(--theme-color-accent)] focus:bg-white focus:ring-4 focus:ring-cyan-50"
-                    [type]="input.type === 2 ? 'number' : 'text'"
+                    [type]="customInputHtmlType(input.type)"
                     [value]="customInputValue(input)"
                     [attr.min]="input.type === 2 ? input.minValue : null"
                     [attr.max]="input.type === 2 ? input.maxValue : null"

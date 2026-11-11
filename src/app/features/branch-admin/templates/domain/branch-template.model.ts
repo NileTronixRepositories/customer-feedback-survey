@@ -1,3 +1,4 @@
+import { TemplateCustomInputType } from '../../../../shared/models/custom-input.model';
 import {
   QuestionAnswerOption,
   QuestionAnswerOptionApiResponse,
@@ -42,7 +43,7 @@ export interface BranchTemplate {
   questionConditions: readonly QuestionCondition[];
 }
 
-export type BranchTemplateCustomInputType = 1 | 2;
+export type BranchTemplateCustomInputType = TemplateCustomInputType;
 
 export interface BranchTemplateCustomInput {
   customInputId: string;
@@ -50,6 +51,8 @@ export interface BranchTemplateCustomInput {
   labelAr: string | null;
   type: BranchTemplateCustomInputType;
   typeName: string;
+  isSystemField?: boolean;
+  systemFieldKey?: string | null;
   isRequired: boolean;
   minLength: number | null;
   maxLength: number | null;
@@ -223,6 +226,8 @@ export interface BranchTemplateCustomInputApiResponse {
   labelAr?: string | null;
   type?: number | string | null;
   typeName?: string | null;
+  isSystemField?: boolean;
+  systemFieldKey?: string | null;
   isRequired?: boolean;
   minLength?: number | null;
   maxLength?: number | null;

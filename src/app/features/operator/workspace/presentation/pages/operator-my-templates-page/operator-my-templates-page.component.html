@@ -1,131 +1,72 @@
-<div class="w-full space-y-5 text-xs">
-  <app-page-header
-    [title]="'operatorTemplates.title' | t"
-    [description]="'operatorTemplates.description' | t"
-    [icon]="fileTextIcon"
-  >
-    <app-button
-      type="button"
-      variant="secondary"
-      [loading]="operatorTemplatesStore.loading()"
-      (pressed)="reloadTemplates()"
+<div class="w-full space-y-4 text-xs">
+  @if (!activeTemplate()) {
+    <app-page-header
+      [title]="'operatorTemplates.title' | t"
+      [description]="'operatorTemplates.description' | t"
+      [icon]="fileTextIcon"
     >
-      <app-icon [icon]="refreshIcon" [size]="15" />
-      {{ 'operatorTemplates.refresh' | t }}
-    </app-button>
-  </app-page-header>
+      <app-button
+        type="button"
+        variant="secondary"
+        [loading]="operatorTemplatesStore.loading()"
+        (pressed)="reloadTemplates()"
+      >
+        <app-icon [icon]="refreshIcon" [size]="15" />
+        {{ 'operatorTemplates.refresh' | t }}
+      </app-button>
+    </app-page-header>
+  } @else {
+    @let template = activeTemplate()!;
+    <app-page-header
+      [title]="template.name"
+      [description]="template.branchName || template.branchCode || ''"
+      [icon]="fileTextIcon"
+    >
+      <div class="flex flex-wrap items-center gap-2">
+        <app-button
+          type="button"
+          variant="secondary"
+          size="sm"
+          (pressed)="closeResponseWizard()"
+        >
+          <app-icon [icon]="arrowLeftIcon" [size]="13" [flipRtl]="true" />
+          {{ 'operatorTemplates.backToTemplates' | t }}
+        </app-button>
 
+        <span
+          class="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold transition"
+          [class.bg-emerald-50]="allQuestionsValid()"
+          [class.text-emerald-700]="allQuestionsValid()"
+          [class.bg-cyan-50]="!allQuestionsValid()"
+          [class.text-[var(--theme-color-accent)]]="!allQuestionsValid()"
+        >
+          @if (allQuestionsValid()) {
+            <app-icon [icon]="checkIcon" [size]="12" />
+          }
+          {{ answeredQuestionsCount() }} / {{ visibleQuestions().length }}
+          {{ 'operatorTemplates.questionsAnswered' | t }}
+        </span>
 
+        <app-button
+          type="button"
+          size="sm"
+          [disabled]="
+            !allQuestionsValid() ||
+            activeTemplateInactive() ||
+            operatorTemplatesStore.submitting()
+          "
+          [loading]="operatorTemplatesStore.submitting()"
+          (pressed)="submitResponse()"
+        >
+          <app-icon [icon]="sendIcon" [size]="13" />
+          {{ 'operatorTemplates.submitResponse' | t }}
+        </app-button>
+      </div>
+    </app-page-header>
+  }
 
   @if (activeTemplate(); as template) {
-    <section class="space-y-4">
-      <div
-        class="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs"
-      >
-        <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-          <div class="min-w-0 flex-1">
-            <button
-              type="button"
-              class="mb-3.5 inline-flex items-center gap-1.5 rounded-xl border border-slate-200/90 bg-white px-3 py-1.5 text-xs font-bold text-slate-600 shadow-2xs transition hover:border-[#148496]/50 hover:bg-slate-50 hover:text-[var(--theme-color-accent)]"
-              (click)="closeResponseWizard()"
-            >
-              <app-icon [icon]="arrowLeftIcon" [size]="14" [flipRtl]="true" />
-              {{ 'operatorTemplates.backToTemplates' | t }}
-            </button>
-
-            <div class="flex min-w-0 items-center gap-4">
-              <div
-                class="flex h-16 w-16 sm:h-20 sm:w-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-1.5 shadow-sm ring-4 ring-slate-100/80 transition hover:shadow-md hover:scale-[1.02]"
-              >
-                @if (hasTemplateLogo(template)) {
-                  <img
-                    class="h-full w-full rounded-xl object-contain"
-                    [src]="template.logoUrl"
-                    alt=""
-                    aria-hidden="true"
-                    decoding="async"
-                    (error)="handleTemplateLogoError(template.templateId)"
-                  />
-                } @else {
-                  <div
-                    class="flex h-full w-full items-center justify-center rounded-xl bg-gradient-to-br from-[#148496] via-[#0f5b67] to-[#0a3a42] text-white shadow-xs"
-                  >
-                    <app-icon [icon]="fileTextIcon" [size]="28" />
-                  </div>
-                }
-              </div>
-
-              <div class="min-w-0 pt-0.5">
-                <h2
-                  class="break-words text-lg font-extrabold leading-tight text-slate-900 [overflow-wrap:anywhere]"
-                >
-                  {{ template.name }}
-                </h2>
-                @if (template.secondaryName) {
-                  <p
-                    class="mt-1 break-words text-xs font-semibold text-slate-500 [overflow-wrap:anywhere]"
-                  >
-                    {{ template.secondaryName }}
-                  </p>
-                }
-                @if (template.description) {
-                  <p
-                    class="mt-2 max-w-3xl break-words text-xs leading-5 text-slate-600 [overflow-wrap:anywhere]"
-                  >
-                    {{ template.description }}
-                  </p>
-                }
-                <p
-                  class="mt-2 inline-flex max-w-full items-center gap-1.5 text-xs font-bold text-slate-600"
-                >
-                  <app-icon class="shrink-0" [icon]="branchIcon" [size]="14" />
-                  <span class="min-w-0 break-words [overflow-wrap:anywhere]">
-                    {{
-                      template.branchName || template.branchCode || ('operatorTemplates.branch' | t)
-                    }}
-                  </span>
-                  @if (template.branchName && template.branchCode) {
-                    <span class="shrink-0 text-slate-400" aria-hidden="true">&middot;</span>
-                    <span class="shrink-0 text-slate-500" dir="ltr">{{ template.branchCode }}</span>
-                  }
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div class="flex flex-wrap gap-2 lg:max-w-[34rem] lg:justify-end">
-            <span
-              class="rounded-xl border border-slate-100 bg-slate-50 px-3 py-1 text-xs font-bold text-slate-600 shadow-2xs"
-            >
-              {{ 'branchTemplates.activeFrom' | t }}:
-              {{ template.activeFrom ? (template.activeFrom | date: 'medium') : '-' }}
-            </span>
-            <span
-              class="rounded-xl border border-slate-100 bg-slate-50 px-3 py-1 text-xs font-bold text-slate-600 shadow-2xs"
-            >
-              {{ 'branchTemplates.expireTo' | t }}:
-              {{
-                template.expireTo
-                  ? (template.expireTo | date: 'medium')
-                  : ('branchTemplates.open' | t)
-              }}
-            </span>
-            <span
-              class="rounded-xl border border-cyan-100 bg-cyan-50 px-3 py-1 text-xs font-bold text-[var(--theme-color-accent)] shadow-2xs"
-            >
-              {{ answeredQuestionsCount() }} / {{ visibleQuestions().length }}
-              {{ 'operatorTemplates.questionsAnswered' | t }}
-            </span>
-            @if (template.customInputsCount > 0) {
-              <span
-                class="rounded-xl border border-slate-100 bg-slate-50 px-3 py-1 text-xs font-bold text-slate-600 shadow-2xs"
-              >
-                {{ template.customInputsCount }} {{ 'operatorTemplates.customInputs' | t }}
-              </span>
-            }
-          </div>
-        </div>
-      </div>
+    <section class="space-y-3">
 
       @if (operatorTemplatesStore.submitSuccess()) {
         <div
@@ -146,40 +87,49 @@
         </div>
       }
 
-      <div class="grid gap-4 lg:grid-cols-[15rem_minmax(0,1fr)]">
+      <div class="grid gap-3.5 md:grid-cols-[12rem_minmax(0,1fr)] lg:grid-cols-[13rem_minmax(0,1fr)]">
         <aside
-          class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/50"
+          class="sticky top-14 self-start max-h-[calc(100vh-4.5rem)] overflow-y-auto rounded-xl border border-slate-200/70 bg-white p-2.5 shadow-2xs"
         >
-          <p class="mb-3 text-[10px] font-bold uppercase text-slate-400">
-            {{ 'operatorTemplates.surveySteps' | t }}
-          </p>
-          <div class="space-y-1.5">
+          <div class="mb-2 flex items-center justify-between px-1">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+              {{ 'operatorTemplates.surveySteps' | t }}
+            </span>
+            <span
+              class="rounded-full bg-cyan-50 px-1.5 py-0.5 text-[10px] font-bold text-[var(--theme-color-secondary)]"
+            >
+              {{ answeredQuestionsCount() }}/{{ visibleQuestions().length }}
+            </span>
+          </div>
+
+          <div class="space-y-1">
             @if (template.customInputs.length > 0) {
               <button
                 type="button"
-                class="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-start transition"
-                [class.bg-cyan-50]="customInputsOpen()"
-                [class.text-[var(--theme-color-secondary)]]="customInputsOpen()"
-                [class.bg-white]="!customInputsOpen()"
-                [class.text-slate-600]="!customInputsOpen()"
+                class="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-start text-xs transition"
+                [class.bg-cyan-50/70]="currentQuestionIndex() === -1"
+                [class.text-[var(--theme-color-secondary)]]="currentQuestionIndex() === -1"
+                [class.font-bold]="currentQuestionIndex() === -1"
+                [class.text-slate-600]="currentQuestionIndex() !== -1"
+                [class.hover:bg-slate-50]="currentQuestionIndex() !== -1"
                 [disabled]="responseSubmitted()"
                 (click)="openCustomInputsStep()"
               >
                 <span
-                  class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-bold"
+                  class="flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[9px] font-bold"
                   [class.bg-emerald-50]="allCustomInputsValid()"
                   [class.text-emerald-700]="allCustomInputsValid()"
                   [class.bg-slate-100]="!allCustomInputsValid()"
-                  [class.text-slate-500]="!allCustomInputsValid()"
+                  [class.text-slate-400]="!allCustomInputsValid()"
                 >
                   @if (allCustomInputsValid()) {
-                    <app-icon [icon]="checkIcon" [size]="13" />
+                    <app-icon [icon]="checkIcon" [size]="10" />
                   } @else {
-                    0
+                    &bull;
                   }
                 </span>
-                <span class="min-w-0 flex-1 truncate text-[11px] font-bold">
-                  {{ 'operatorTemplates.customInputsStep' | t }}
+                <span class="truncate">
+                  {{ 'operatorTemplates.customInputs' | t }}
                 </span>
               </button>
             }
@@ -187,18 +137,17 @@
             @for (question of visibleQuestions(); track question.id; let index = $index) {
               <button
                 type="button"
-                class="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-start transition"
-                [class.bg-cyan-50]="!summaryOpen() && currentQuestionIndex() === index"
-                [class.text-[var(--theme-color-secondary)]]="
-                  !summaryOpen() && currentQuestionIndex() === index
-                "
-                [class.bg-white]="summaryOpen() || currentQuestionIndex() !== index"
-                [class.text-slate-600]="summaryOpen() || currentQuestionIndex() !== index"
+                class="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-start text-xs transition"
+                [class.bg-cyan-50/70]="currentQuestionIndex() === index"
+                [class.text-[var(--theme-color-secondary)]]="currentQuestionIndex() === index"
+                [class.font-bold]="currentQuestionIndex() === index"
+                [class.text-slate-600]="currentQuestionIndex() !== index"
+                [class.hover:bg-slate-50]="currentQuestionIndex() !== index"
                 [disabled]="responseSubmitted()"
                 (click)="goToQuestion(index)"
               >
                 <span
-                  class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-bold"
+                  class="flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[9px] font-bold"
                   [class.bg-emerald-50]="
                     visibleQuestionError(question).length === 0 && isQuestionValid(question)
                   "
@@ -212,433 +161,274 @@
                   [class.bg-slate-100]="
                     !isQuestionValid(question) && visibleQuestionError(question).length === 0
                   "
-                  [class.text-slate-500]="
+                  [class.text-slate-400]="
                     !isQuestionValid(question) && visibleQuestionError(question).length === 0
                   "
                 >
                   @if (isQuestionValid(question)) {
-                    <app-icon [icon]="checkIcon" [size]="13" />
+                    <app-icon [icon]="checkIcon" [size]="10" />
                   } @else {
                     {{ index + 1 }}
                   }
                 </span>
-                <span class="min-w-0 flex-1 truncate text-[11px] font-bold">
-                  {{ 'operatorTemplates.question' | t }} {{ index + 1 }}
+                <span class="truncate min-w-0 flex-1">
+                  {{ question.text }}
                 </span>
               </button>
             }
-
-            <button
-              type="button"
-              class="mt-3 flex w-full items-center gap-2 rounded-lg border border-slate-100 px-2 py-2 text-start text-slate-600 transition hover:bg-slate-50"
-              [class.bg-cyan-50]="summaryOpen()"
-              [class.text-[var(--theme-color-secondary)]]="summaryOpen()"
-              [disabled]="!allQuestionsValid() || responseSubmitted()"
-              (click)="openSummary()"
-            >
-              <span
-                class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-500"
-              >
-                <app-icon [icon]="clipboardIcon" [size]="13" />
-              </span>
-              <span class="min-w-0 flex-1 truncate text-[11px] font-bold">{{
-                'operatorTemplates.summary' | t
-              }}</span>
-            </button>
           </div>
         </aside>
 
-        <section
-          class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/50"
-        >
-          @if (responseSubmitted()) {
-            <div class="flex flex-col items-center gap-4 py-6 text-center">
+        @if (responseSubmitted()) {
+          <section
+            class="rounded-xl border border-slate-200/80 bg-white p-5 shadow-2xs text-center"
+          >
+            <div class="flex flex-col items-center gap-4 py-4">
               <span
                 class="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-50 text-emerald-700"
               >
                 <app-icon [icon]="checkIcon" [size]="24" />
               </span>
-              <h3 class="text-lg font-bold text-slate-900">
+              <h3 class="text-base font-bold text-slate-900">
                 {{ 'operatorTemplates.responseSubmittedTitle' | t }}
               </h3>
-              <p class="max-w-xl text-xs leading-6 text-slate-500">
+              <p class="max-w-md text-xs text-slate-500">
                 {{ 'operatorTemplates.responseSubmittedDescription' | t }}
               </p>
               @if (submittedResponse(); as response) {
                 <div
-                  class="grid w-full max-w-5xl gap-3 text-start text-xs sm:grid-cols-2 xl:grid-cols-[repeat(5,minmax(7rem,1fr))_minmax(12rem,1.4fr)]"
+                  class="grid w-full max-w-2xl grid-cols-2 sm:grid-cols-4 gap-2 text-start text-xs"
                 >
-                  <div class="rounded-lg bg-slate-50 p-3.5">
-                    <p class="font-bold text-slate-400">
-                      {{ 'operatorTemplates.customInputs' | t }}
-                    </p>
-                    <p class="mt-1 font-bold text-slate-900">{{ response.customInputsCount }}</p>
-                  </div>
-                  <div class="rounded-lg bg-slate-50 p-3.5">
-                    <p class="font-bold text-slate-400">
+                  <div class="rounded-lg bg-slate-50 p-2.5">
+                    <p class="text-[10px] font-bold text-slate-400">
                       {{ 'operatorTemplates.answersCount' | t }}
                     </p>
-                    <p class="mt-1 font-bold text-slate-900">{{ response.answersCount }}</p>
+                    <p class="mt-0.5 text-sm font-bold text-slate-900">{{ response.answersCount }}</p>
                   </div>
-                  <div class="rounded-lg bg-slate-50 p-3.5">
-                    <p class="font-bold text-slate-400">
+                  <div class="rounded-lg bg-slate-50 p-2.5">
+                    <p class="text-[10px] font-bold text-slate-400">
                       {{ 'operatorTemplates.actualScore' | t }}
                     </p>
-                    <p class="mt-1 font-bold text-slate-900">{{ response.actualScore }}</p>
+                    <p class="mt-0.5 text-sm font-bold text-slate-900">{{ response.actualScore }}</p>
                   </div>
-                  <div class="rounded-lg bg-slate-50 p-3.5">
-                    <p class="font-bold text-slate-400">
-                      {{ 'operatorTemplates.maxScore' | t }}
-                    </p>
-                    <p class="mt-1 font-bold text-slate-900">{{ response.maxScore }}</p>
-                  </div>
-                  <div class="rounded-lg bg-slate-50 p-3.5">
-                    <p class="font-bold text-slate-400">
+                  <div class="rounded-lg bg-slate-50 p-2.5">
+                    <p class="text-[10px] font-bold text-slate-400">
                       {{ 'operatorTemplates.percentage' | t }}
                     </p>
-                    <p class="mt-1 font-bold text-slate-900">{{ response.scorePercentage }}%</p>
+                    <p class="mt-0.5 text-sm font-bold text-slate-900">{{ response.scorePercentage }}%</p>
                   </div>
-                  <div class="rounded-lg bg-slate-50 p-3.5">
-                    <p class="font-bold text-slate-400">
+                  <div class="rounded-lg bg-slate-50 p-2.5">
+                    <p class="text-[10px] font-bold text-slate-400">
                       {{ 'operatorTemplates.submittedOn' | t }}
                     </p>
-                    <p class="mt-1 break-words font-bold text-slate-900 [overflow-wrap:anywhere]">
-                      {{
-                        response.submittedOnUtc ? (response.submittedOnUtc | date: 'medium') : '-'
-                      }}
+                    <p class="mt-0.5 truncate font-bold text-slate-900">
+                      {{ response.submittedOnUtc ? (response.submittedOnUtc | date: 'short') : '-' }}
                     </p>
                   </div>
                 </div>
-                @if (response.customInputs.length > 0) {
-                  <div
-                    class="w-full max-w-4xl rounded-lg border border-slate-100 bg-slate-50 p-3 text-start"
-                  >
-                    <p class="mb-2 text-xs font-bold text-slate-900">
-                      {{ 'operatorTemplates.customInputs' | t }}
-                    </p>
-                    <div class="grid gap-2 md:grid-cols-2">
-                      @for (customInput of response.customInputs; track customInput.customInputId) {
-                        <div class="rounded-lg bg-white p-2">
-                          <p class="text-[11px] font-bold text-slate-700">
-                            {{ responseCustomInputLabel(customInput) || customInput.typeName }}
-                          </p>
-                          <p
-                            class="mt-1 break-words text-xs font-semibold text-slate-900 [overflow-wrap:anywhere]"
-                          >
-                            {{
-                              customInput.stringValue ??
-                                customInput.integerValue ??
-                                ('operatorTemplates.noAnswer' | t)
-                            }}
-                          </p>
-                        </div>
-                      }
-                    </div>
-                  </div>
-                }
               }
-              <div class="flex flex-wrap justify-center gap-2">
-                <app-button type="button" variant="secondary" (pressed)="closeResponseWizard()">
+              <div class="flex flex-wrap justify-center gap-2 pt-2">
+                <app-button type="button" variant="secondary" size="sm" (pressed)="closeResponseWizard()">
                   {{ 'operatorTemplates.backToTemplates' | t }}
                 </app-button>
-                <app-button type="button" (pressed)="submitAnotherResponse()">
+                <app-button type="button" size="sm" (pressed)="submitAnotherResponse()">
                   {{ 'operatorTemplates.submitAnotherResponse' | t }}
                 </app-button>
               </div>
             </div>
-          } @else if (customInputsOpen()) {
-            <div class="space-y-3">
-              <div class="border-b border-slate-100 pb-4">
-                <p class="text-[10px] font-bold uppercase text-[var(--theme-color-secondary)]">
-                  {{ 'operatorTemplates.customInputsStep' | t }}
-                </p>
-                <h3 class="mt-1 text-lg font-bold text-slate-900">
-                  {{ 'operatorTemplates.customInputs' | t }}
-                </h3>
-                <p class="mt-1 text-xs text-slate-500">
-                  {{ 'operatorTemplates.customInputsDescription' | t }}
-                </p>
-              </div>
-
-              <div class="grid gap-3 md:grid-cols-2">
-                @for (customInput of template.customInputs; track customInput.customInputId) {
-                  <label class="block rounded-lg border border-slate-100 bg-slate-50 p-3">
+          </section>
+        } @else {
+          <div class="space-y-3">
+            @if (template.customInputs.length > 0) {
+              <section
+                id="custom-inputs-section"
+                class="scroll-mt-16 rounded-xl border border-slate-200/80 bg-white p-3.5 sm:p-4 shadow-2xs space-y-3"
+              >
+                <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                  <h3 class="text-xs font-bold text-slate-800">
+                    {{ 'operatorTemplates.customInputs' | t }}
+                  </h3>
+                  @if (allCustomInputsValid()) {
                     <span
-                      class="mb-1.5 flex flex-wrap items-center gap-1.5 text-xs font-bold text-slate-800"
+                      class="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700"
                     >
-                      {{ customInput.label }}
-                      <span
-                        class="rounded-full bg-white px-2 py-0.5 text-[10px] font-bold text-slate-500"
-                      >
-                        {{ customInput.typeName }}
-                      </span>
-                      @if (customInput.isRequired) {
-                        <span
-                          class="rounded-full bg-rose-50 px-2 py-0.5 text-[10px] font-bold text-[var(--theme-color-danger)]"
-                        >
-                          {{ 'branchTemplates.customInputIsRequired' | t }}
+                      <app-icon [icon]="checkIcon" [size]="11" />
+                      {{ 'operatorTemplates.questionsAnswered' | t }}
+                    </span>
+                  }
+                </div>
+
+                <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  @for (customInput of template.customInputs; track customInput.customInputId) {
+                    <div>
+                      <label class="mb-1 flex items-center justify-between text-xs font-semibold text-slate-700">
+                        <span class="flex items-center gap-1">
+                          {{ customInput.label }}
+                          @if (customInput.isRequired) {
+                            <span class="text-rose-500 font-bold">*</span>
+                          }
+                        </span>
+                        @if (customInput.secondaryLabel) {
+                          <span class="text-[10px] text-slate-400 font-normal">
+                            {{ customInput.secondaryLabel }}
+                          </span>
+                        }
+                      </label>
+                      <input
+                        [id]="'custom-input-' + customInput.customInputId"
+                        class="h-9 w-full rounded-lg border bg-slate-50/50 px-3 text-xs font-medium text-slate-900 outline-none transition placeholder:text-slate-400 focus:bg-white focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/10"
+                        [class.border-[var(--theme-color-danger)]]="
+                          visibleCustomInputError(customInput).length > 0
+                        "
+                        [class.border-slate-200]="visibleCustomInputError(customInput).length === 0"
+                        [type]="customInputHtmlType(customInput.type)"
+                        [attr.min]="
+                          customInput.type === 2 && customInput.minValue !== null
+                            ? customInput.minValue
+                            : null
+                        "
+                        [attr.max]="
+                          customInput.type === 2 && customInput.maxValue !== null
+                            ? customInput.maxValue
+                            : null
+                        "
+                        [attr.minlength]="
+                          customInput.type === 1 && customInput.minLength !== null
+                            ? customInput.minLength
+                            : null
+                        "
+                        [attr.maxlength]="
+                          customInput.type === 1 && customInput.maxLength !== null
+                            ? customInput.maxLength
+                            : null
+                        "
+                        [value]="customInputValue(customInput)"
+                        (input)="updateCustomInputValue(customInput, $event)"
+                        (change)="onCustomInputChange(customInput)"
+                        (keydown)="onCustomInputKeydown($event, customInput)"
+                      />
+                      @if (customInput.type === 1 && customInput.startWith) {
+                        <span class="mt-1 block text-[10px] text-slate-400">
+                          {{ 'operatorTemplates.customInputStartWithHint' | t }}
+                          {{ customInput.startWith }}
                         </span>
                       }
-                    </span>
-                    @if (customInput.secondaryLabel) {
-                      <span class="mb-2 block text-[11px] font-semibold text-slate-500">
-                        {{ customInput.secondaryLabel }}
-                      </span>
-                    }
-                    <input
-                      class="h-10 w-full rounded-lg border bg-white px-3 text-xs font-semibold text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/10"
-                      [class.border-[var(--theme-color-danger)]]="
-                        visibleCustomInputError(customInput).length > 0
-                      "
-                      [class.border-slate-200]="visibleCustomInputError(customInput).length === 0"
-                      [type]="customInput.type === 2 ? 'number' : 'text'"
-                      [attr.min]="
-                        customInput.type === 2 && customInput.minValue !== null
-                          ? customInput.minValue
-                          : null
-                      "
-                      [attr.max]="
-                        customInput.type === 2 && customInput.maxValue !== null
-                          ? customInput.maxValue
-                          : null
-                      "
-                      [attr.minlength]="
-                        customInput.type === 1 && customInput.minLength !== null
-                          ? customInput.minLength
-                          : null
-                      "
-                      [attr.maxlength]="
-                        customInput.type === 1 && customInput.maxLength !== null
-                          ? customInput.maxLength
-                          : null
-                      "
-                      [value]="customInputValue(customInput)"
-                      (input)="updateCustomInputValue(customInput, $event)"
-                    />
-                    @if (customInput.type === 1 && customInput.startWith) {
-                      <span class="mt-1.5 block text-[11px] font-semibold text-slate-500">
-                        {{ 'operatorTemplates.customInputStartWithHint' | t }}
-                        {{ customInput.startWith }}
-                      </span>
-                    }
-                    @if (visibleCustomInputError(customInput)) {
-                      <span
-                        class="mt-2 block text-xs font-semibold text-[var(--theme-color-danger)]"
-                      >
-                        {{ visibleCustomInputError(customInput) | t }}
-                      </span>
-                    }
-                  </label>
-                }
-              </div>
-
-              <div class="mt-4 flex flex-wrap justify-end gap-2 border-t border-slate-100 pt-4">
-                <app-button type="button" (pressed)="goToNextStep()">
-                  {{ 'operatorTemplates.nextQuestion' | t }}
-                  <app-icon [icon]="arrowRightIcon" [size]="15" [flipRtl]="true" />
-                </app-button>
-              </div>
-            </div>
-          } @else if (summaryOpen()) {
-            <div class="space-y-3">
-              <div>
-                <p class="text-[10px] font-bold uppercase text-[var(--theme-color-secondary)]">
-                  {{ 'operatorTemplates.reviewAnswers' | t }}
-                </p>
-                <h3 class="mt-1 text-lg font-bold text-slate-900">
-                  {{ 'operatorTemplates.summary' | t }}
-                </h3>
-                <p class="mt-1 text-xs text-slate-500">
-                  {{ 'operatorTemplates.summaryDescription' | t }}
-                </p>
-              </div>
-
-              @if (template.customInputs.length > 0) {
-                <div class="rounded-lg border border-slate-100 bg-slate-50 p-3">
-                  <p class="mb-2 text-xs font-bold text-slate-900">
-                    {{ 'operatorTemplates.customInputs' | t }}
-                  </p>
-                  <div class="grid gap-2 md:grid-cols-2">
-                    @for (customInput of template.customInputs; track customInput.customInputId) {
-                      <div class="rounded-lg bg-white p-2">
-                        <p class="text-[11px] font-bold text-slate-700">{{ customInput.label }}</p>
-                        <p
-                          class="mt-1 break-words text-xs font-semibold text-slate-900 [overflow-wrap:anywhere]"
+                      @if (visibleCustomInputError(customInput)) {
+                        <span
+                          class="mt-1 block text-[11px] font-semibold text-[var(--theme-color-danger)]"
                         >
-                          {{ customInputValue(customInput) || ('operatorTemplates.noAnswer' | t) }}
-                        </p>
-                      </div>
-                    }
-                  </div>
-                </div>
-              }
-
-              <div class="divide-y divide-slate-100 rounded-lg border border-slate-100">
-                @for (summary of summaryAnswers(); track summary.question.id; let index = $index) {
-                  <div
-                    class="grid gap-3 p-3 sm:grid-cols-[2rem_1fr_minmax(12rem,0.65fr)] sm:items-start"
-                  >
-                    <span
-                      class="flex h-7 w-7 items-center justify-center rounded-full bg-cyan-50 text-[11px] font-bold text-[var(--theme-color-secondary)]"
-                    >
-                      {{ index + 1 }}
-                    </span>
-                    <div class="min-w-0">
-                      <p class="break-words font-bold text-slate-900 [overflow-wrap:anywhere]">
-                        {{ summary.question.text }}
-                      </p>
-                      <p class="mt-1 text-[10px] font-bold uppercase text-slate-400">
-                        {{ answerTypeLabel(summary.question.type) }}
-                      </p>
-                      @if (summary.question.isGlobal) {
-                        <p class="mt-1 text-[10px] font-bold uppercase text-violet-700">
-                          {{ summary.question.scopeName }}
-                        </p>
+                          {{ visibleCustomInputError(customInput) | t }}
+                        </span>
                       }
                     </div>
-                    <p
-                      class="break-words rounded-lg bg-slate-50 p-2 text-xs font-semibold text-slate-700 [overflow-wrap:anywhere]"
-                    >
-                      {{ summary.answer || ('operatorTemplates.noAnswer' | t) }}
-                    </p>
-                  </div>
-                }
-              </div>
-
-              <div class="mt-4 flex flex-wrap justify-between gap-2 border-t border-slate-100 pt-4">
-                <app-button type="button" variant="secondary" (pressed)="goToPreviousStep()">
-                  <app-icon [icon]="arrowLeftIcon" [size]="15" [flipRtl]="true" />
-                  {{ 'operatorTemplates.previousQuestion' | t }}
-                </app-button>
-                <app-button
-                  type="button"
-                  [disabled]="
-                    !allQuestionsValid() ||
-                    activeTemplateInactive() ||
-                    operatorTemplatesStore.submitting()
-                  "
-                  [loading]="operatorTemplatesStore.submitting()"
-                  (pressed)="submitResponse()"
-                >
-                  <app-icon [icon]="sendIcon" [size]="15" />
-                  {{ 'operatorTemplates.submitResponse' | t }}
-                </app-button>
-              </div>
-            </div>
-          } @else if (currentQuestion(); as question) {
-            <div class="space-y-3">
-              <div
-                class="flex flex-col gap-3 border-b border-slate-100 pb-4 sm:flex-row sm:items-start sm:justify-between"
-              >
-                <div class="min-w-0">
-                  <p class="text-[10px] font-bold uppercase text-[var(--theme-color-secondary)]">
-                    {{ 'operatorTemplates.question' | t }} {{ currentQuestionIndex() + 1 }} /
-                    {{ visibleQuestions().length }}
-                  </p>
-                  <h3
-                    class="mt-2 break-words text-lg font-bold text-slate-900 [overflow-wrap:anywhere]"
-                  >
-                    {{ question.text }}
-                  </h3>
-                  @if (question.secondaryText) {
-                    <p
-                      class="mt-1 break-words text-xs font-semibold text-slate-500 [overflow-wrap:anywhere]"
-                    >
-                      {{ question.secondaryText }}
-                    </p>
-                  }
-                  @if (question.groupName) {
-                    <p class="mt-2 text-[10px] font-bold uppercase text-slate-400">
-                      {{ question.groupName }}
-                    </p>
                   }
                 </div>
-                <span
-                  class="w-fit rounded-full bg-slate-50 px-2.5 py-1 text-[11px] font-bold text-slate-600"
-                >
-                  {{ answerTypeLabel(question.type) }}
-                </span>
-                @if (question.isGlobal) {
-                  <span
-                    class="w-fit rounded-full bg-violet-50 px-2.5 py-1 text-[11px] font-bold text-violet-700"
-                  >
-                    {{ question.scopeName }}
-                  </span>
-                }
-              </div>
+              </section>
+            }
 
-              <div class="min-h-[10rem]">
-                @if (isSingleChoice(question)) {
-                  <div class="space-y-2">
-                    @for (option of question.options; track option.optionId) {
-                      <label
-                        class="flex min-h-14 cursor-pointer items-center gap-3 rounded-lg border p-3 transition hover:border-cyan-100 hover:bg-cyan-50/40"
-                        [class.border-cyan-200]="selectedOptionId(question) === option.optionId"
-                        [class.bg-cyan-50]="selectedOptionId(question) === option.optionId"
-                        [class.border-slate-100]="selectedOptionId(question) !== option.optionId"
+            @for (question of visibleQuestions(); track question.id; let index = $index) {
+              <section
+                [id]="'question-step-' + index"
+                class="scroll-mt-16 rounded-xl border border-slate-200/80 bg-white p-3.5 sm:p-4 shadow-2xs space-y-2.5 transition hover:border-slate-300"
+              >
+                <div class="flex items-center justify-between gap-3">
+                  <div class="flex items-baseline gap-2 min-w-0">
+                    <span class="text-xs font-extrabold text-cyan-700 shrink-0">
+                      {{ index + 1 }}.
+                    </span>
+                    <h3
+                      class="break-words text-xs sm:text-sm font-bold text-slate-900 leading-snug [overflow-wrap:anywhere]"
+                    >
+                      {{ question.text }}
+                    </h3>
+                  </div>
+
+                  <div class="flex items-center gap-1.5 shrink-0">
+                    @if (question.isGlobal) {
+                      <span
+                        class="rounded bg-violet-50 px-1.5 py-0.5 text-[9px] font-bold text-violet-700"
                       >
-                        <input
-                          type="radio"
-                          class="h-4 w-4 shrink-0 accent-[var(--theme-color-accent)]"
-                          [name]="'question-' + question.id"
-                          [checked]="selectedOptionId(question) === option.optionId"
-                          (change)="selectSingleChoice(question, option.optionId)"
-                        />
-                        <span class="flex min-h-8 min-w-0 flex-1 items-center">
-                          <span
-                            class="block break-words font-bold text-slate-800 [overflow-wrap:anywhere]"
-                          >
-                            {{ optionLabel(option) }}
-                          </span>
-                        </span>
-                      </label>
+                        {{ question.scopeName }}
+                      </span>
+                    }
+                    @if (isQuestionValid(question)) {
+                      <span
+                        class="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700"
+                      >
+                        <app-icon [icon]="checkIcon" [size]="11" />
+                      </span>
                     }
                   </div>
-                } @else if (isStarRating(question)) {
-                  <div class="space-y-3 rounded-lg border border-slate-100 bg-slate-50 p-3">
-                    <p class="text-xs font-semibold leading-5 text-slate-500">
-                      {{ 'operatorTemplates.starRatingHelp' | t }}
-                    </p>
-                    <div class="flex flex-wrap items-center gap-2">
+                </div>
+
+                @if (question.secondaryText) {
+                  <p class="text-[11px] text-slate-400 font-normal -mt-1 leading-normal">
+                    {{ question.secondaryText }}
+                  </p>
+                }
+
+                <div>
+                  @if (isSingleChoice(question)) {
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 pt-1">
+                      @for (option of question.options; track option.optionId) {
+                        <label
+                          class="flex h-10 cursor-pointer items-center gap-2.5 rounded-lg border px-3 transition select-none"
+                          [class.border-cyan-500]="selectedOptionId(question) === option.optionId"
+                          [class.bg-cyan-50/70]="selectedOptionId(question) === option.optionId"
+                          [class.text-cyan-950]="selectedOptionId(question) === option.optionId"
+                          [class.font-bold]="selectedOptionId(question) === option.optionId"
+                          [class.border-slate-200]="selectedOptionId(question) !== option.optionId"
+                          [class.bg-white]="selectedOptionId(question) !== option.optionId"
+                          [class.text-slate-700]="selectedOptionId(question) !== option.optionId"
+                          [class.hover:border-slate-300]="selectedOptionId(question) !== option.optionId"
+                          [class.hover:bg-slate-50/60]="selectedOptionId(question) !== option.optionId"
+                        >
+                          <input
+                            type="radio"
+                            class="h-3.5 w-3.5 shrink-0 accent-[var(--theme-color-accent)]"
+                            [name]="'question-' + question.id"
+                            [checked]="selectedOptionId(question) === option.optionId"
+                            (change)="selectSingleChoice(question, option.optionId)"
+                          />
+                          <span class="truncate text-xs">{{ optionLabel(option) }}</span>
+                        </label>
+                      }
+                    </div>
+                  } @else if (isStarRating(question)) {
+                    <div class="flex items-center gap-1.5 pt-1">
                       @for (value of ratingValues; track value) {
                         <button
                           type="button"
-                          class="flex h-12 w-12 items-center justify-center border bg-white transition duration-150 hover:border-amber-300 hover:bg-amber-50 hover:text-amber-400 sm:h-14 sm:w-14"
+                          class="flex h-9 w-9 items-center justify-center rounded-lg border bg-white transition hover:border-amber-300 hover:bg-amber-50 hover:text-amber-400"
                           [class.border-amber-300]="(starRatingValue(question) ?? 0) >= value"
                           [class.bg-amber-50]="(starRatingValue(question) ?? 0) >= value"
-                          [class.shadow-sm]="(starRatingValue(question) ?? 0) >= value"
-                          [class.ring-2]="starRatingValue(question) === value"
-                          [class.ring-amber-100]="starRatingValue(question) === value"
                           [class.text-amber-400]="(starRatingValue(question) ?? 0) >= value"
                           [class.border-slate-200]="(starRatingValue(question) ?? 0) < value"
                           [class.text-slate-300]="(starRatingValue(question) ?? 0) < value"
                           (click)="selectStarRating(question, value)"
                         >
-                          <app-icon [icon]="starIcon" [size]="30" />
+                          <app-icon [icon]="starIcon" [size]="20" />
                         </button>
                       }
+                      @if (starRatingValue(question)) {
+                        <span class="ms-2 text-xs font-bold text-amber-600">
+                          {{ starRatingValue(question) }} / 5
+                        </span>
+                      }
                     </div>
-                    <p class="text-[11px] font-semibold leading-5 text-slate-500">
-                      {{ 'questions.ratingScaleHint' | t }}
-                    </p>
-                  </div>
-                } @else if (isSmiles(question)) {
-                  <div class="space-y-3 rounded-lg border border-slate-100 bg-slate-50 p-3">
-                    <p class="text-xs font-semibold leading-5 text-slate-500">
-                      {{ 'operatorTemplates.smileHelp' | t }}
-                    </p>
-                    <div class="flex flex-wrap items-center gap-2">
+                  } @else if (isSmiles(question)) {
+                    <div class="flex items-center gap-2 pt-1">
                       @for (smileLevel of smileLevels; track smileLevel.value) {
                         <button
                           type="button"
-                          class="flex h-12 w-12 items-center justify-center border bg-white leading-none transition duration-150 hover:border-cyan-300 hover:bg-cyan-50 hover:opacity-100 sm:h-14 sm:w-14"
-                          [class.border-cyan-300]="smileValue(question) === smileLevel.value"
+                          class="flex h-9 w-9 items-center justify-center rounded-lg border bg-white text-lg transition hover:scale-105"
+                          [class.border-cyan-400]="smileValue(question) === smileLevel.value"
                           [class.bg-cyan-50]="smileValue(question) === smileLevel.value"
-                          [class.shadow-sm]="smileValue(question) === smileLevel.value"
                           [class.ring-2]="smileValue(question) === smileLevel.value"
                           [class.ring-cyan-100]="smileValue(question) === smileLevel.value"
                           [class.border-slate-200]="smileValue(question) !== smileLevel.value"
-                          [class.opacity-70]="smileValue(question) !== smileLevel.value"
+                          [class.opacity-60]="smileValue(question) !== smileLevel.value"
+                          [class.hover:opacity-100]="smileValue(question) !== smileLevel.value"
                           [attr.aria-label]="smileLevel.labelKey | t"
                           [title]="smileLevel.labelKey | t"
                           (click)="selectSmileValue(question, smileLevel.value)"
@@ -647,70 +437,27 @@
                         </button>
                       }
                     </div>
-                    <p class="text-[11px] font-semibold leading-5 text-slate-500">
-                      {{ 'questions.ratingScaleHint' | t }}
-                    </p>
-                  </div>
-                } @else if (isTextAnswer(question)) {
-                  <label class="block">
-                    <span class="mb-1.5 block text-xs font-semibold text-slate-700">{{
-                      (isComplain(question)
-                        ? 'operatorTemplates.complainText'
-                        : 'operatorTemplates.freeText') | t
-                    }}</span>
-                    <textarea
-                      class="min-h-48 w-full resize-y border border-slate-200 px-3.5 text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[var(--theme-color-accent)] focus:ring-4 focus:ring-[var(--theme-color-accent)]/10"
-                      maxlength="4000"
-                      [placeholder]="(isComplain(question)
-                        ? 'operatorTemplates.complainPlaceholder'
-                        : 'operatorTemplates.freeTextPlaceholder') | t"
-                      [value]="textAnswer(question)"
-                      (input)="updateTextAnswer(question, $event)"
-                    ></textarea>
-                    <span class="mt-1 block text-end text-[10px] font-semibold text-slate-400">
-                      {{ textAnswer(question).length }} / 4000
-                    </span>
-                  </label>
-                } @else if (isVoice(question)) {
-                  <div class="rounded-lg border border-dashed border-slate-200 bg-slate-50">
-                    <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                      <div class="flex items-start gap-3">
-                        <span
-                          class="flex w-11 shrink-0 items-center justify-center bg-white text-[var(--theme-color-accent)]"
-                        >
-                          <app-icon [icon]="micIcon" [size]="20" />
-                        </span>
-                        <div class="min-w-0">
-                          <h4 class="font-bold text-slate-900">
-                            {{ 'operatorTemplates.recordVoice' | t }}
-                          </h4>
-                          <p class="mt-1 max-w-xl text-xs leading-5 text-slate-500">
-                            {{ 'operatorTemplates.voiceHelp' | t }}
-                          </p>
-                        </div>
-                      </div>
-
-                      @if (isRecording(question)) {
-                        <span
-                          class="inline-flex w-fit items-center gap-2 rounded-full bg-rose-50 px-2.5 py-1 text-[11px] font-bold text-[var(--theme-color-danger)]"
-                        >
-                          <span
-                            class="h-2 w-2 animate-pulse rounded-full bg-[var(--theme-color-danger)]"
-                          ></span>
-                          {{ 'operatorTemplates.recording' | t }} {{ recordingDurationLabel() }}
-                        </span>
-                      }
+                  } @else if (isTextAnswer(question)) {
+                    <div class="pt-1">
+                      <textarea
+                        class="min-h-20 max-h-48 w-full resize-y rounded-lg border border-slate-200 bg-slate-50/40 p-2.5 text-xs text-slate-900 placeholder:text-slate-400 outline-none transition focus:bg-white focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/10"
+                        maxlength="4000"
+                        [placeholder]="(isComplain(question)
+                          ? 'operatorTemplates.complainPlaceholder'
+                          : 'operatorTemplates.freeTextPlaceholder') | t"
+                        [value]="textAnswer(question)"
+                        (input)="updateTextAnswer(question, $event)"
+                        (blur)="onTextAnswerBlur(question)"
+                        (keydown.control.enter)="onTextAnswerBlur(question)"
+                      ></textarea>
+                      <span class="mt-0.5 block text-end text-[10px] text-slate-400">
+                        {{ textAnswer(question).length }} / 4000
+                      </span>
                     </div>
-
-                    <div class="grid gap-3 lg:grid-cols-2">
-                      <div class="rounded-lg border border-slate-100 bg-white p-3">
-                        <p class="text-xs font-bold text-slate-800">
-                          {{ 'operatorTemplates.recordVoiceAnswer' | t }}
-                        </p>
-                        <p class="mt-1 text-[11px] leading-5 text-slate-500">
-                          {{ 'operatorTemplates.recordVoiceDescription' | t }}
-                        </p>
-                        <div class="mt-3 flex flex-wrap gap-2">
+                  } @else if (isVoice(question)) {
+                    <div class="rounded-lg border border-slate-200/80 bg-slate-50/50 p-2.5">
+                      <div class="flex flex-wrap items-center justify-between gap-2">
+                        <div class="flex items-center gap-2">
                           @if (isRecording(question)) {
                             <app-button
                               type="button"
@@ -719,7 +466,7 @@
                               (pressed)="stopVoiceRecording(question)"
                             >
                               <app-icon [icon]="stopIcon" [size]="14" />
-                              {{ 'operatorTemplates.stopRecording' | t }}
+                              {{ 'operatorTemplates.stopRecording' | t }} ({{ recordingDurationLabel() }})
                             </app-button>
                           } @else {
                             <app-button
@@ -732,164 +479,145 @@
                               {{ 'operatorTemplates.startRecording' | t }}
                             </app-button>
                           }
+
+                          <label class="cursor-pointer">
+                            <span class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition">
+                              <app-icon [icon]="fileTextIcon" [size]="13" />
+                              {{ 'operatorTemplates.uploadVoice' | t }}
+                            </span>
+                            <input
+                              class="hidden"
+                              type="file"
+                              accept=".mp3,.wav,.m4a,.aac,.ogg,audio/*"
+                              [disabled]="recordingQuestionId() !== null"
+                              (change)="updateVoiceFile(question, $event)"
+                            />
+                          </label>
                         </div>
-                      </div>
 
-                      <div class="rounded-lg border border-slate-100 bg-white p-3">
-                        <p class="text-xs font-bold text-slate-800">
-                          {{ 'operatorTemplates.uploadVoice' | t }}
-                        </p>
-                        <p class="mt-1 text-[11px] leading-5 text-slate-500">
-                          {{ 'operatorTemplates.uploadVoiceDescription' | t }}
-                        </p>
-                        <input
-                          class="mt-3 block w-full text-xs text-slate-600 file:me-3 file:rounded-lg file:border-0 file:bg-[var(--theme-color-accent)] file:px-3 file:py-2 file:text-xs file:font-bold file:text-white disabled:cursor-not-allowed disabled:opacity-60"
-                          type="file"
-                          accept=".mp3,.wav,.m4a,.aac,.ogg,audio/*"
-                          [disabled]="recordingQuestionId() !== null"
-                          (change)="updateVoiceFile(question, $event)"
-                        />
-                      </div>
-                    </div>
-
-                    @if (recordingError()) {
-                      <p
-                        class="mt-3 rounded-lg border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-[var(--theme-color-danger)]"
-                      >
-                        {{ recordingError() | t }}
-                      </p>
-                    }
-
-                    @if (voiceFileName(question)) {
-                      <div class="rounded-lg border border-emerald-100 bg-emerald-50 p-3">
-                        <div
-                          class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
-                        >
-                          <div class="min-w-0">
-                            <p class="text-xs font-bold text-emerald-800">
-                              {{ 'operatorTemplates.voiceAnswerReady' | t }}
-                            </p>
-                            <p
-                              class="mt-1 break-words text-[11px] font-semibold text-emerald-700 [overflow-wrap:anywhere]"
-                            >
+                        @if (voiceFileName(question)) {
+                          <div class="flex items-center gap-2">
+                            <span class="truncate max-w-xs text-xs font-bold text-emerald-700">
                               {{ voiceFileName(question) }}
-                            </p>
-                          </div>
-                          <app-button
-                            type="button"
-                            variant="secondary"
-                            size="sm"
-                            (pressed)="discardVoiceAnswer(question)"
-                          >
-                            <app-icon [icon]="trashIcon" [size]="14" />
-                            {{ 'operatorTemplates.discardVoiceAnswer' | t }}
-                          </app-button>
-                        </div>
-                        @if (voicePreviewUrl(question)) {
-                          <audio
-                            class="mt-3 w-full"
-                            controls
-                            [src]="voicePreviewUrl(question)"
-                          ></audio>
-                        }
-                      </div>
-                    }
-                  </div>
-                } @else if (isImage(question)) {
-                  <div class="rounded-lg border border-dashed border-slate-200 bg-slate-50 p-3">
-                    <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                      <div class="flex items-start gap-3">
-                        <span
-                          class="flex w-11 shrink-0 items-center justify-center bg-white text-[var(--theme-color-accent)]"
-                        >
-                          <app-icon [icon]="imageIcon" [size]="20" />
-                        </span>
-                        <div class="min-w-0">
-                          <h4 class="font-bold text-slate-900">
-                            {{ 'operatorTemplates.uploadImage' | t }}
-                          </h4>
-                          <p class="mt-1 max-w-xl text-xs leading-5 text-slate-500">
-                            {{ 'operatorTemplates.imageHelp' | t }}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <input
-                      class="mt-3 block w-full text-xs text-slate-600 file:me-3 file:rounded-lg file:border-0 file:bg-[var(--theme-color-accent)] file:px-3 file:py-2 file:text-xs file:font-bold file:text-white disabled:cursor-not-allowed disabled:opacity-60"
-                      type="file"
-                      accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
-                      (change)="updateImageFile(question, $event)"
-                    />
-
-                    @if (imageFileName(question)) {
-                      <div class="mt-3 rounded-lg border border-emerald-100 bg-emerald-50 p-3">
-                        <div
-                          class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
-                        >
-                          <div class="min-w-0">
-                            <p class="text-xs font-bold text-emerald-800">
-                              {{ 'operatorTemplates.imageAnswerReady' | t }}
-                            </p>
-                            <p
-                              class="mt-1 break-words text-[11px] font-semibold text-emerald-700 [overflow-wrap:anywhere]"
+                            </span>
+                            <app-button
+                              type="button"
+                              variant="secondary"
+                              size="sm"
+                              (pressed)="discardVoiceAnswer(question)"
                             >
-                              {{ imageFileName(question) }}
-                            </p>
+                              <app-icon [icon]="trashIcon" [size]="12" />
+                            </app-button>
                           </div>
-                          <app-button
-                            type="button"
-                            variant="secondary"
-                            size="sm"
-                            (pressed)="discardImageAnswer(question)"
-                          >
-                            <app-icon [icon]="trashIcon" [size]="14" />
-                            {{ 'operatorTemplates.discardImageAnswer' | t }}
-                          </app-button>
-                        </div>
-                        @if (imagePreviewUrl(question)) {
-                          <img
-                            class="mt-3 max-h-60 w-full rounded-lg object-contain ring-1 ring-emerald-100"
-                            [src]="imagePreviewUrl(question)"
-                            [alt]="imageFileName(question)"
-                          />
                         }
                       </div>
-                    }
-                  </div>
-                }
 
-                @if (visibleQuestionError(question)) {
-                  <p
-                    class="mt-3 rounded-lg border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-[var(--theme-color-danger)]"
-                  >
-                    {{ visibleQuestionError(question) | t }}
+                      @if (voicePreviewUrl(question)) {
+                        <audio class="mt-2 h-8 w-full" controls [src]="voicePreviewUrl(question)"></audio>
+                      }
+                      @if (recordingError()) {
+                        <p class="mt-2 text-xs font-semibold text-[var(--theme-color-danger)]">
+                          {{ recordingError() | t }}
+                        </p>
+                      }
+                    </div>
+                  } @else if (isImage(question)) {
+                    <div class="rounded-lg border border-slate-200/80 bg-slate-50/50 p-2.5">
+                      <div class="flex flex-wrap items-center justify-between gap-2">
+                        <label class="cursor-pointer">
+                          <span class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition">
+                            <app-icon [icon]="imageIcon" [size]="13" />
+                            {{ 'operatorTemplates.uploadImage' | t }}
+                          </span>
+                          <input
+                            class="hidden"
+                            type="file"
+                            accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                            (change)="updateImageFile(question, $event)"
+                          />
+                        </label>
+
+                        @if (imageFileName(question)) {
+                          <div class="flex items-center gap-2">
+                            <span class="truncate max-w-xs text-xs font-bold text-emerald-700">
+                              {{ imageFileName(question) }}
+                            </span>
+                            <app-button
+                              type="button"
+                              variant="secondary"
+                              size="sm"
+                              (pressed)="discardImageAnswer(question)"
+                            >
+                              <app-icon [icon]="trashIcon" [size]="12" />
+                            </app-button>
+                          </div>
+                        }
+                      </div>
+
+                      @if (imagePreviewUrl(question)) {
+                        <img
+                          class="mt-2 max-h-32 rounded-lg object-contain ring-1 ring-slate-200"
+                          [src]="imagePreviewUrl(question)"
+                          [alt]="imageFileName(question)"
+                        />
+                      }
+                    </div>
+                  }
+
+                  @if (visibleQuestionError(question)) {
+                    <p class="mt-1.5 text-xs font-semibold text-[var(--theme-color-danger)]">
+                      {{ visibleQuestionError(question) | t }}
+                    </p>
+                  }
+                </div>
+              </section>
+            }
+
+            <section
+              id="summary-section"
+              class="scroll-mt-16 rounded-xl border border-slate-200/80 bg-white p-4 shadow-2xs space-y-3"
+            >
+              <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+                <div>
+                  <h3 class="text-xs sm:text-sm font-bold text-slate-900">
+                    {{ 'operatorTemplates.submitResponse' | t }}
+                  </h3>
+                  <p class="text-[11px] text-slate-400">
+                    {{ answeredQuestionsCount() }} / {{ visibleQuestions().length }}
+                    {{ 'operatorTemplates.questionsAnswered' | t }}
                   </p>
+                </div>
+                @if (allQuestionsValid()) {
+                  <span
+                    class="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-bold text-emerald-700"
+                  >
+                    <app-icon [icon]="checkIcon" [size]="12" />
+                    {{ 'operatorTemplates.questionsAnswered' | t }}
+                  </span>
                 }
               </div>
 
-              <div class="mt-4 flex flex-wrap justify-between gap-2 border-t border-slate-100 pt-4">
+              <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
+                <app-button type="button" variant="secondary" (pressed)="closeResponseWizard()">
+                  {{ 'operatorTemplates.backToTemplates' | t }}
+                </app-button>
                 <app-button
                   type="button"
-                  variant="secondary"
-                  [disabled]="currentQuestionIndex() === 0 && template.customInputs.length === 0"
-                  (pressed)="goToPreviousStep()"
+                  [disabled]="
+                    !allQuestionsValid() ||
+                    activeTemplateInactive() ||
+                    operatorTemplatesStore.submitting()
+                  "
+                  [loading]="operatorTemplatesStore.submitting()"
+                  (pressed)="submitResponse()"
                 >
-                  <app-icon [icon]="arrowLeftIcon" [size]="15" [flipRtl]="true" />
-                  {{ 'operatorTemplates.previousQuestion' | t }}
-                </app-button>
-                <app-button type="button" (pressed)="goToNextStep()">
-                  @if (currentQuestionIndex() + 1 >= visibleQuestions().length) {
-                    {{ 'operatorTemplates.reviewAnswers' | t }}
-                  } @else {
-                    {{ 'operatorTemplates.nextQuestion' | t }}
-                  }
-                  <app-icon [icon]="arrowRightIcon" [size]="15" [flipRtl]="true" />
+                  <app-icon [icon]="sendIcon" [size]="14" />
+                  {{ 'operatorTemplates.submitResponse' | t }}
                 </app-button>
               </div>
-            </div>
-          }
-        </section>
+            </section>
+          </div>
+        }
       </div>
     </section>
   } @else {

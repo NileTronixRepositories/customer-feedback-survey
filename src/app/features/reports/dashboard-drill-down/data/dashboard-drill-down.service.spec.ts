@@ -55,6 +55,27 @@ describe('DashboardDrillDownService', () => {
     });
   });
 
+  it('preserves VisitTime, monthly boundaries and scoring while changing page or date input filters', () => {
+    const service = TestBed.inject(DashboardDrillDownService);
+    const original = '/api/anonymous-templates/template/responses?fromDate=2026-11-03&toDate=2026-11-10&dateBasis=VisitTime&scoreCalculationMode=LowestConditionLevel&branchId=branch&pageNumber=1';
+    const updated = service.updatePath(original, { pageNumber: 2, customInputType: '3', customInputValue: '2026-11-08' });
+    expect(updated).toBe(original.replace('pageNumber=1', 'pageNumber=2') + '&customInputType=3&customInputValue=2026-11-08');
+  });
+
+  it('renders historical Date snapshots in details and leaves missing dates empty', async () => {
+    const service = TestBed.inject(DashboardDrillDownService);
+    const result = firstValueFrom(service.loadDetails({ routeType: 'SurveyResponseDetails', method: 'GET', path: '/api/reports/branch-responses/response' }));
+    TestBed.inject(HttpTestingController).expectOne((request) => request.url.endsWith('/response')).flush({
+      customInputs: [
+        { typeSnapshot: 3, dateValue: '2026-11-08', labelEnSnapshot: 'Historical visit label' },
+        { type: 3, dateValue: null },
+      ],
+    });
+    const details = await result;
+    expect(details.customInputs[0]).toMatchObject({ labelEn: 'Historical visit label', value: '2026-11-08' });
+    expect(details.customInputs[1].value).toBe('');
+  });
+
   it('rejects external and non-GET navigation', () => {
     const service = TestBed.inject(DashboardDrillDownService);
 

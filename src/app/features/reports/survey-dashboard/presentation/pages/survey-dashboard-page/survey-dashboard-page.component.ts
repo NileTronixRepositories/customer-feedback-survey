@@ -1006,6 +1006,7 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
           },
           tooltip: {
             callbacks: {
+              beforeTitle: () => this.i18n.translate('customInputs.visitTime'),
               label: (context) => {
                 const value = context.parsed.y;
                 return `${context.dataset.label}: ${value === null ? this.i18n.translate('surveyDashboard.noData') : `${value.toFixed(1)}%`}`;

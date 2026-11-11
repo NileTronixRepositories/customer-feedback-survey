@@ -1,3 +1,7 @@
+import {
+  normalizeCustomInputType,
+  isSystemCustomInput,
+} from '../../../../../../shared/models/custom-input.model';
 import { DatePipe, DecimalPipe, Location } from '@angular/common';
 import {
   ChangeDetectionStrategy,
@@ -78,7 +82,7 @@ import {
 } from '../../../domain/branch-template.model';
 import { BranchTemplatesStore } from '../../state/branch-templates.store';
 
-type CustomInputTypeFormValue = '1' | '2';
+type CustomInputTypeFormValue = '1' | '2' | '3';
 type TemplateFieldName = 'nameEn' | 'nameAr' | 'description' | 'activeFrom' | 'expireTo';
 type CustomInputFieldName =
   | 'labelEn'
@@ -153,6 +157,8 @@ interface TemplateDetailsQuestionView {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BranchTemplateDetailsPageComponent implements OnInit {
+  readonly systemCustomInputGroups = new WeakSet<object>();
+
   readonly templatesStore = inject(BranchTemplatesStore);
   readonly responsesStore = inject(BranchResponsesHistoryStore);
   private readonly authStore = inject(AuthStore);
@@ -366,6 +372,7 @@ export class BranchTemplateDetailsPageComponent implements OnInit {
   }
 
   removeCustomInput(index: number): void {
+    if (this.systemCustomInputGroups.has(this.customInputsArray.at(index))) return;
     if (!this.canUpdate()) {
       return;
     }
@@ -561,12 +568,14 @@ export class BranchTemplateDetailsPageComponent implements OnInit {
   }
 
   customInputTypeLabel(type: BranchTemplate['customInputs'][number]['type']): string {
+    if (type === 3) return this.i18n.translate('branchTemplates.customInputTypeDate');
     return type === 2
       ? this.i18n.translate('branchTemplates.customInputTypeInteger')
       : this.i18n.translate('branchTemplates.customInputTypeString');
   }
 
   customInputValidationLabel(customInput: BranchTemplate['customInputs'][number]): string {
+    if (customInput.type === 3) return this.i18n.translate('branchTemplates.customInputTypeDate');
     if (customInput.type === 1) {
       const minLength = customInput.minLength ?? '-';
       const maxLength = customInput.maxLength ?? '-';
@@ -734,9 +743,10 @@ export class BranchTemplateDetailsPageComponent implements OnInit {
     order: number,
     customInput: BranchTemplate['customInputs'][number] | null = null,
   ): CustomInputFormGroup {
-    const type: CustomInputTypeFormValue = customInput?.type === 2 ? '2' : '1';
+    const type: CustomInputTypeFormValue =
+      customInput?.type === 3 ? '3' : customInput?.type === 2 ? '2' : '1';
 
-    return this.formBuilder.group<CustomInputFormControls>({
+    const group = this.formBuilder.group<CustomInputFormControls>({
       customInputId: new FormControl<string | null>(customInput?.customInputId || null),
       originalType: new FormControl<CustomInputTypeFormValue | null>(customInput ? type : null),
       labelEn: this.formBuilder.nonNullable.control(customInput?.labelEn ?? '', [
@@ -765,12 +775,18 @@ export class BranchTemplateDetailsPageComponent implements OnInit {
         Validators.min(1),
       ]),
     });
+    if (customInput && isSystemCustomInput(customInput)) {
+      this.systemCustomInputGroups.add(group);
+      group.disable({ emitEvent: false });
+    }
+    return group;
   }
 
   private validateCustomInputs(): void {
     const orders = new Map<number, number[]>();
 
     this.customInputsArray.controls.forEach((inputGroup, index) => {
+      if (this.systemCustomInputGroups.has(inputGroup)) return;
       this.clearCustomInputManualErrors(inputGroup);
 
       const value = inputGroup.getRawValue();
@@ -797,7 +813,11 @@ export class BranchTemplateDetailsPageComponent implements OnInit {
         inputGroup.controls.minLength.setValue(null, { emitEvent: false });
         inputGroup.controls.maxLength.setValue(null, { emitEvent: false });
         inputGroup.controls.startWith.setValue('', { emitEvent: false });
-        this.validateIntegerCustomInput(inputGroup);
+        if (value.type === '2') this.validateIntegerCustomInput(inputGroup);
+        if (value.type === '3') {
+          inputGroup.controls.minValue.setValue(null, { emitEvent: false });
+          inputGroup.controls.maxValue.setValue(null, { emitEvent: false });
+        }
       }
     });
 
@@ -882,24 +902,26 @@ export class BranchTemplateDetailsPageComponent implements OnInit {
   }
 
   private toUpdateCustomInputsPayload() {
-    return this.customInputsArray.controls.map((inputGroup) => {
-      const value = inputGroup.getRawValue();
-      const type: 1 | 2 = Number(value.type) === 2 ? 2 : 1;
+    return this.customInputsArray.controls
+      .filter((group) => !this.systemCustomInputGroups.has(group))
+      .map((inputGroup) => {
+        const value = inputGroup.getRawValue();
+        const type = normalizeCustomInputType(value.type);
 
-      return {
-        customInputId: value.customInputId,
-        labelEn: this.toNullableTrimmedText(value.labelEn),
-        labelAr: this.toNullableTrimmedText(value.labelAr),
-        type,
-        isRequired: value.isRequired,
-        minLength: type === 1 ? value.minLength : null,
-        maxLength: type === 1 ? value.maxLength : null,
-        startWith: type === 1 ? this.toNullableTrimmedText(value.startWith) : null,
-        minValue: type === 2 ? value.minValue : null,
-        maxValue: type === 2 ? value.maxValue : null,
-        order: value.order,
-      };
-    });
+        return {
+          customInputId: value.customInputId,
+          labelEn: this.toNullableTrimmedText(value.labelEn),
+          labelAr: this.toNullableTrimmedText(value.labelAr),
+          type,
+          isRequired: value.isRequired,
+          minLength: type === 1 ? value.minLength : null,
+          maxLength: type === 1 ? value.maxLength : null,
+          startWith: type === 1 ? this.toNullableTrimmedText(value.startWith) : null,
+          minValue: type === 2 ? value.minValue : null,
+          maxValue: type === 2 ? value.maxValue : null,
+          order: value.order,
+        };
+      });
   }
 
   private toNullableTrimmedText(value: string): string | null {

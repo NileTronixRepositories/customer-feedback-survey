@@ -1,9 +1,15 @@
+import {
+  normalizeCustomInputType,
+  isSystemCustomInput,
+} from '../../../../../shared/models/custom-input.model';
 import { DOCUMENT, DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import {
   ChangeDetectionStrategy,
   Component,
+  ElementRef,
   OnInit,
+  ViewChild,
   computed,
   inject,
   signal,
@@ -19,6 +25,7 @@ import {
 } from '@angular/forms';
 import {
   AlertTriangle,
+  ArrowLeftRight,
   BarChart3,
   Building2,
   Check,
@@ -67,7 +74,7 @@ import {
 import { AnonymousTemplatesStore } from '../../state/anonymous-templates.store';
 
 type AnonymousTemplateFieldName = 'nameEn' | 'nameAr' | 'description' | 'activeFrom' | 'expireTo';
-type CustomInputTypeFormValue = '1' | '2';
+type CustomInputTypeFormValue = '1' | '2' | '3';
 type CustomInputFieldName =
   | 'labelEn'
   | 'labelAr'
@@ -144,6 +151,8 @@ interface AssignmentApiErrorResponse {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AnonymousTemplatesPageComponent implements OnInit {
+  readonly systemCustomInputGroups = new WeakSet<object>();
+
   readonly anonymousTemplatesStore = inject(AnonymousTemplatesStore);
   private readonly authStore = inject(AuthStore);
   private readonly anonymousTemplatesService = inject(AnonymousTemplatesService);
@@ -173,6 +182,15 @@ export class AnonymousTemplatesPageComponent implements OnInit {
   readonly restoreIcon = RotateCcw;
   readonly searchIcon = Search;
   readonly filterIcon = SlidersHorizontal;
+  readonly arrowLeftRightIcon = ArrowLeftRight;
+
+  @ViewChild('tableScrollContainer') tableScrollContainer?: ElementRef<HTMLDivElement>;
+
+  scrollTable(delta: number): void {
+    const el = this.tableScrollContainer?.nativeElement;
+    if (!el) return;
+    el.scrollBy({ left: delta, behavior: 'smooth' });
+  }
 
   readonly advancedFiltersOpen = signal(true);
 
@@ -665,6 +683,7 @@ export class AnonymousTemplatesPageComponent implements OnInit {
   }
 
   removeCustomInput(index: number): void {
+    if (this.systemCustomInputGroups.has(this.customInputsArray.at(index))) return;
     this.customInputsArray.removeAt(index);
     this.validateCustomInputs();
   }
@@ -795,10 +814,7 @@ export class AnonymousTemplatesPageComponent implements OnInit {
     return this.localizedText(template.nameEn, template.nameAr);
   }
 
-  customInputDisplayLabel(input: {
-    labelEn: string | null;
-    labelAr: string | null;
-  }): string {
+  customInputDisplayLabel(input: { labelEn: string | null; labelAr: string | null }): string {
     return this.localizedText(input.labelEn, input.labelAr);
   }
 
@@ -962,6 +978,7 @@ export class AnonymousTemplatesPageComponent implements OnInit {
     const orders = new Map<number, number[]>();
 
     this.customInputsArray.controls.forEach((inputGroup, index) => {
+      if (this.systemCustomInputGroups.has(inputGroup)) return;
       this.clearCustomInputManualErrors(inputGroup);
 
       const value = inputGroup.getRawValue();
@@ -984,7 +1001,11 @@ export class AnonymousTemplatesPageComponent implements OnInit {
         inputGroup.controls.minLength.setValue(null, { emitEvent: false });
         inputGroup.controls.maxLength.setValue(null, { emitEvent: false });
         inputGroup.controls.startWith.setValue('', { emitEvent: false });
-        this.validateIntegerCustomInput(inputGroup);
+        if (value.type === '2') this.validateIntegerCustomInput(inputGroup);
+        if (value.type === '3') {
+          inputGroup.controls.minValue.setValue(null, { emitEvent: false });
+          inputGroup.controls.maxValue.setValue(null, { emitEvent: false });
+        }
       }
     });
 
@@ -1067,23 +1088,25 @@ export class AnonymousTemplatesPageComponent implements OnInit {
   }
 
   private toCustomInputsPayload(): readonly CreateAnonymousTemplateCustomInputPayload[] {
-    return this.customInputsArray.controls.map((inputGroup) => {
-      const value = inputGroup.getRawValue();
-      const type: AnonymousTemplateCustomInputType = Number(value.type) === 2 ? 2 : 1;
+    return this.customInputsArray.controls
+      .filter((group) => !this.systemCustomInputGroups.has(group))
+      .map((inputGroup) => {
+        const value = inputGroup.getRawValue();
+        const type = normalizeCustomInputType(value.type);
 
-      return {
-        labelEn: this.toNullableTrimmedText(value.labelEn),
-        labelAr: this.toNullableTrimmedText(value.labelAr),
-        type,
-        isRequired: value.isRequired,
-        minLength: type === 1 ? value.minLength : null,
-        maxLength: type === 1 ? value.maxLength : null,
-        minValue: type === 2 ? value.minValue : null,
-        maxValue: type === 2 ? value.maxValue : null,
-        startWith: type === 1 ? this.toNullableTrimmedText(value.startWith) : null,
-        order: value.order,
-      };
-    });
+        return {
+          labelEn: this.toNullableTrimmedText(value.labelEn),
+          labelAr: this.toNullableTrimmedText(value.labelAr),
+          type,
+          isRequired: value.isRequired,
+          minLength: type === 1 ? value.minLength : null,
+          maxLength: type === 1 ? value.maxLength : null,
+          minValue: type === 2 ? value.minValue : null,
+          maxValue: type === 2 ? value.maxValue : null,
+          startWith: type === 1 ? this.toNullableTrimmedText(value.startWith) : null,
+          order: value.order,
+        };
+      });
   }
 
   private validateTemplateDates(): void {
@@ -1178,6 +1201,7 @@ export class AnonymousTemplatesPageComponent implements OnInit {
   }
 
   removeEditCustomInput(index: number): void {
+    if (this.systemCustomInputGroups.has(this.editCustomInputsArray.at(index))) return;
     this.editCustomInputsArray.removeAt(index);
     this.validateEditCustomInputs();
   }
@@ -1302,6 +1326,7 @@ export class AnonymousTemplatesPageComponent implements OnInit {
     template.customInputs.forEach((customInput) => {
       this.editCustomInputsArray.push(
         this.createEditCustomInputGroup({
+          isSystemField: isSystemCustomInput(customInput),
           customInputId: customInput.customInputId,
           labelEn: customInput.labelEn ?? '',
           labelAr: customInput.labelAr ?? '',
@@ -1330,6 +1355,7 @@ export class AnonymousTemplatesPageComponent implements OnInit {
   }
 
   private createEditCustomInputGroup(value: {
+    isSystemField?: boolean;
     customInputId: string | null;
     labelEn: string;
     labelAr: string;
@@ -1342,7 +1368,7 @@ export class AnonymousTemplatesPageComponent implements OnInit {
     startWith: string;
     order: number;
   }): EditCustomInputFormGroup {
-    const type = String(value.type) === '2' ? '2' : '1';
+    const type = value.type === 3 ? '3' : value.type === 2 ? '2' : '1';
     const group = this.formBuilder.group<EditCustomInputFormControls>({
       customInputId: new FormControl<string | null>(value.customInputId),
       originalType: new FormControl<CustomInputTypeFormValue | null>(
@@ -1369,6 +1395,10 @@ export class AnonymousTemplatesPageComponent implements OnInit {
       group.controls.type.disable({ emitEvent: false });
     }
 
+    if (value.isSystemField) {
+      this.systemCustomInputGroups.add(group);
+      group.disable({ emitEvent: false });
+    }
     return group;
   }
 
@@ -1403,6 +1433,7 @@ export class AnonymousTemplatesPageComponent implements OnInit {
     const orders = new Map<number, number[]>();
 
     this.editCustomInputsArray.controls.forEach((inputGroup, index) => {
+      if (this.systemCustomInputGroups.has(inputGroup)) return;
       this.clearEditCustomInputManualErrors(inputGroup);
 
       const value = inputGroup.getRawValue();
@@ -1429,7 +1460,11 @@ export class AnonymousTemplatesPageComponent implements OnInit {
         inputGroup.controls.minLength.setValue(null, { emitEvent: false });
         inputGroup.controls.maxLength.setValue(null, { emitEvent: false });
         inputGroup.controls.startWith.setValue('', { emitEvent: false });
-        this.validateEditIntegerCustomInput(inputGroup);
+        if (value.type === '2') this.validateEditIntegerCustomInput(inputGroup);
+        if (value.type === '3') {
+          inputGroup.controls.minValue.setValue(null, { emitEvent: false });
+          inputGroup.controls.maxValue.setValue(null, { emitEvent: false });
+        }
       }
     });
 
@@ -1443,7 +1478,6 @@ export class AnonymousTemplatesPageComponent implements OnInit {
         );
       }
     });
-
   }
 
   private validateEditStringCustomInput(inputGroup: EditCustomInputFormGroup): void {
@@ -1512,23 +1546,25 @@ export class AnonymousTemplatesPageComponent implements OnInit {
   }
 
   private toEditCustomInputsPayload(): readonly UpdateAnonymousTemplateCustomInputPayload[] {
-    return this.editCustomInputsArray.controls.map((inputGroup) => {
-      const value = inputGroup.getRawValue();
-      const type: AnonymousTemplateCustomInputType = Number(value.type) === 2 ? 2 : 1;
+    return this.editCustomInputsArray.controls
+      .filter((group) => !this.systemCustomInputGroups.has(group))
+      .map((inputGroup) => {
+        const value = inputGroup.getRawValue();
+        const type = normalizeCustomInputType(value.type);
 
-      return {
-        customInputId: value.customInputId,
-        labelEn: this.toNullableTrimmedText(value.labelEn),
-        labelAr: this.toNullableTrimmedText(value.labelAr),
-        type,
-        isRequired: value.isRequired,
-        minLength: type === 1 ? value.minLength : null,
-        maxLength: type === 1 ? value.maxLength : null,
-        minValue: type === 2 ? value.minValue : null,
-        maxValue: type === 2 ? value.maxValue : null,
-        startWith: type === 1 ? this.toNullableTrimmedText(value.startWith) : null,
-        order: value.order,
-      };
-    });
+        return {
+          customInputId: value.customInputId,
+          labelEn: this.toNullableTrimmedText(value.labelEn),
+          labelAr: this.toNullableTrimmedText(value.labelAr),
+          type,
+          isRequired: value.isRequired,
+          minLength: type === 1 ? value.minLength : null,
+          maxLength: type === 1 ? value.maxLength : null,
+          minValue: type === 2 ? value.minValue : null,
+          maxValue: type === 2 ? value.maxValue : null,
+          startWith: type === 1 ? this.toNullableTrimmedText(value.startWith) : null,
+          order: value.order,
+        };
+      });
   }
 }

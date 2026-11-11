@@ -1,3 +1,4 @@
+import { customInputTypeName, customInputDisplayValue, normalizeCustomInputType } from '../../../../shared/models/custom-input.model';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
@@ -702,7 +703,7 @@ export class SurveyDashboardService {
 
   private toCustomInputSegmentValue(item: ApiRecord): SurveyDashboardCustomInputSegmentValue {
     return {
-      value: this.readString(item, 'value'),
+      value: customInputDisplayValue(item),
       responsesCount: this.readNumber(item, 'responsesCount'),
       internalResponses: this.readNumber(item, 'internalResponses'),
       anonymousResponses: this.readNumber(item, 'anonymousResponses'),
@@ -871,11 +872,12 @@ export class SurveyDashboardService {
       customInputId: this.readRecordId(item['customInputId']),
       labelEnSnapshot: this.readNullableString(item, 'labelEnSnapshot'),
       labelArSnapshot: this.readNullableString(item, 'labelArSnapshot'),
-      type: this.readString(item, 'type'),
-      typeName: this.readString(item, 'typeName'),
+      type: this.readString(item, 'typeSnapshot') || this.readString(item, 'type'),
+      typeName: this.readString(item, 'typeName') || customInputTypeName(item['typeSnapshot'] ?? item['type']),
       stringValue: this.readNullableString(item, 'stringValue'),
       integerValue: this.readNullableNumber(item, 'integerValue'),
-      displayValue: this.readString(item, 'displayValue') || this.readDisplayString(item['value']),
+      dateValue: this.readNullableString(item, 'dateValue'),
+      displayValue: customInputDisplayValue(item) || this.readDisplayString(item['value']),
     };
   }
 
@@ -945,17 +947,14 @@ export class SurveyDashboardService {
   private toAnonymousResponseCustomInput(
     item: ApiRecord,
   ): AnonymousTemplateResponseCustomInputValue {
-    const type = this.toAnonymousCustomInputType(item['type'] ?? item['typeName']);
+    const type = normalizeCustomInputType(item['typeSnapshot'] ?? item['type'] ?? item['typeName']);
     const value = item['value'];
     const stringValue =
       this.readNullableString(item, 'stringValue') ??
       (typeof value === 'string' || typeof value === 'number' ? String(value) : null);
     const integerValue =
       this.readNullableNumber(item, 'integerValue') ?? (typeof value === 'number' ? value : null);
-    const displayValue =
-      this.readString(item, 'displayValue') ??
-      stringValue ??
-      (integerValue === null ? '' : String(integerValue));
+    const displayValue = customInputDisplayValue(item);
 
     return {
       customInputValueId: this.readRecordId(item['customInputValueId']),
@@ -963,9 +962,10 @@ export class SurveyDashboardService {
       labelEnSnapshot: this.readNullableString(item, 'labelEnSnapshot'),
       labelArSnapshot: this.readNullableString(item, 'labelArSnapshot'),
       type,
-      typeName: this.readString(item, 'typeName') || (type === 2 ? 'Integer' : 'String'),
+      typeName: this.readString(item, 'typeName') || (type === 3 ? 'Date' : type === 2 ? 'Integer' : 'String'),
       stringValue,
       integerValue,
+      dateValue: this.readNullableString(item, 'dateValue'),
       displayValue,
     };
   }
@@ -1123,7 +1123,7 @@ export class SurveyDashboardService {
       labelAr: this.readNullableString(item, 'labelAr'),
       type: this.readDisplayString(item['type']) || this.readString(item, 'typeName'),
       typeName:
-        this.readString(item, 'typeName') || (String(item['type']) === '2' ? 'Integer' : 'String'),
+        this.readString(item, 'typeName') || (String(item['type']) === '3' ? 'Date' : String(item['type']) === '2' ? 'Integer' : 'String'),
       isRequired: this.readBoolean(item, 'isRequired'),
       minLength: this.readNullableNumber(item, 'minLength'),
       maxLength: this.readNullableNumber(item, 'maxLength'),
@@ -1252,12 +1252,6 @@ export class SurveyDashboardService {
     return 'SingleChoice';
   }
 
-  private toAnonymousCustomInputType(value: unknown): 1 | 2 {
-    const normalized = String(value ?? '')
-      .trim()
-      .toLowerCase();
-    return normalized === '2' || normalized === 'integer' ? 2 : 1;
-  }
 
   private unwrapDetailsRecord(response: ApiRecord): ApiRecord {
     const data = this.readRecord(response['data']);

@@ -269,6 +269,7 @@
                 class="group w-full min-w-0 text-start"
                 type="button"
                 [disabled]="!point.detailsNavigation"
+                [title]="('customInputs.visitTime' | t) + ': ' + point.period"
                 (click)="openNavigation(point.detailsNavigation, point.period)"
               >
                 <div class="mb-1 flex min-w-0 flex-col gap-1 text-[11px] sm:flex-row sm:items-center sm:justify-between">

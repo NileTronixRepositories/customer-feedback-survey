@@ -179,6 +179,7 @@ export class SystemReportsStore {
       isScored: query.isScored,
       questionId: query.questionId || undefined,
       customInputId: query.customInputId || undefined,
+      dateBasis: query.dateBasis,
       customInputType: query.customInputType || undefined,
       customInputValue: query.customInputValue || undefined,
       orderSort: query.orderSort,

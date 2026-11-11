@@ -108,6 +108,7 @@ export class BranchSatisfactionReportService {
   private toTrendItem(item: Partial<SatisfactionTrendItem>): SatisfactionTrendItem {
     return {
       date: item.date ?? '',
+      detailsNavigation: item.detailsNavigation ?? null,
       score: item.score ?? 0,
       responsesCount: item.responsesCount ?? 0,
     };

@@ -102,6 +102,7 @@ export class DepartmentOperatorResponsesStore {
 
   private normalizeQuery(query: DepartmentOperatorResponsesQuery): DepartmentOperatorResponsesQuery {
     return {
+      ...query,
       from: query.from || undefined,
       to: query.to || undefined,
       templateId: query.templateId || undefined,

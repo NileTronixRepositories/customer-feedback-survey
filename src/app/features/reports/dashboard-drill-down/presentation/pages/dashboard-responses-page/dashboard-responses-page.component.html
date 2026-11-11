@@ -72,6 +72,44 @@
         </select>
       </label>
     </div>
+    <form class="row g-3 mt-1 align-items-end" (ngSubmit)="applyCustomInputFilter()">
+      <label class="col-12 col-md-3">
+        <span class="d-block mb-1 text-xs font-bold">{{ 'customInputs.fieldId' | t }}</span>
+        <input class="filter-control w-full" [formControl]="customInputIdControl" />
+      </label>
+      <label class="col-12 col-md-2">
+        <span class="d-block mb-1 text-xs font-bold">{{
+          'branchTemplates.customInputType' | t
+        }}</span>
+        <select
+          class="filter-control filter-select w-full"
+          [formControl]="customInputTypeControl"
+          (change)="changeCustomInputType()"
+        >
+          <option value="1">{{ 'branchTemplates.customInputTypeString' | t }}</option>
+          <option value="2">{{ 'branchTemplates.customInputTypeInteger' | t }}</option>
+          <option value="3">{{ 'branchTemplates.customInputTypeDate' | t }}</option>
+        </select>
+      </label>
+      <label class="col-12 col-md-4">
+        <span class="d-block mb-1 text-xs font-bold">{{ 'customInputs.value' | t }}</span>
+        <input
+          class="filter-control w-full"
+          [type]="customInputHtmlType(+customInputTypeControl.value)"
+          [formControl]="customInputValueControl"
+          [attr.aria-invalid]="customInputErrorKey() ? true : null"
+          [attr.aria-describedby]="customInputErrorKey() ? 'custom-input-filter-error' : null"
+        />
+      </label>
+      <div class="col-12 col-md-3">
+        <app-button type="submit" [loading]="loading()">{{ 'customInputs.filter' | t }}</app-button>
+      </div>
+      @if (customInputErrorKey()) {
+        <p id="custom-input-filter-error" class="col-12 text-xs text-rose-700" role="alert">
+          {{ customInputErrorKey() | t }}
+        </p>
+      }
+    </form>
   </section>
 
   <!-- Content State -->

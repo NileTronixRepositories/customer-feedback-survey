@@ -1,3 +1,4 @@
+import { customInputDisplayValue } from '../../../../../shared/models/custom-input.model';
 import { DatePipe, DecimalPipe, Location, NgTemplateOutlet } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -118,7 +119,7 @@ export class AnonymousTemplateResponseDetailsPageComponent implements OnInit {
   }
 
   customInputDisplayValue(value: AnonymousTemplateResponseCustomInputValue): string {
-    return value.stringValue?.trim() || '-';
+    return customInputDisplayValue(value) || '-';
   }
 
   answerQuestionText(answer: AnonymousTemplateResponseAnswer): string {

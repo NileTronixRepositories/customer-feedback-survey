@@ -1,3 +1,5 @@
+import { TemplateCustomInputType } from '../../../shared/models/custom-input.model';
+import { ResponseDateBasis } from '../../../shared/models/custom-input.model';
 import {
   ScopeApiFields,
   ScopeState,
@@ -20,7 +22,7 @@ import {
 } from '../../../shared/models/historical-survey.model';
 
 export type AnonymousTemplateScope = 1 | 2;
-export type AnonymousTemplateCustomInputType = 1 | 2;
+export type AnonymousTemplateCustomInputType = TemplateCustomInputType;
 
 export interface AnonymousTemplateCustomInput {
   customInputId: string;
@@ -28,6 +30,8 @@ export interface AnonymousTemplateCustomInput {
   labelAr: string | null;
   type: AnonymousTemplateCustomInputType;
   typeName: string;
+  isSystemField?: boolean;
+  systemFieldKey?: string | null;
   isRequired: boolean;
   minLength: number | null;
   maxLength: number | null;
@@ -249,6 +253,7 @@ export interface AnonymousTemplateResponsesListQuery {
   isScored?: boolean;
   questionId?: string;
   customInputId?: string;
+  dateBasis?: ResponseDateBasis | 'SubmittedOnUtc' | 'VisitTime';
   customInputType?: string;
   customInputValue?: string;
   searchText?: string;
@@ -276,6 +281,7 @@ export interface BranchAnonymousResponsesQuery {
   isScored?: boolean;
   questionId?: string;
   customInputId?: string;
+  dateBasis?: ResponseDateBasis | 'SubmittedOnUtc' | 'VisitTime';
   customInputType?: string;
   customInputValue?: string;
   hasComplaint?: boolean;
@@ -355,6 +361,7 @@ export interface AnonymousTemplateResponseCustomInputValue {
   typeName: string;
   stringValue: string | null;
   integerValue: number | null;
+  dateValue?: string | null;
   displayValue: string;
 }
 
@@ -482,6 +489,8 @@ export interface AnonymousTemplateCustomInputApiResponse {
   labelAr?: string | null;
   type?: number | string | null;
   typeName?: string | null;
+  isSystemField?: boolean;
+  systemFieldKey?: string | null;
   isRequired?: boolean;
   minLength?: number | null;
   maxLength?: number | null;
@@ -620,6 +629,11 @@ export interface BranchAnonymousResponseApiResponse {
 }
 
 export interface BranchAnonymousResponseCustomInputPreviewApiResponse {
+  type?: number | string | null;
+  typeSnapshot?: number | string | null;
+  dateValue?: string | null;
+  stringValue?: string | null;
+  integerValue?: number | null;
   customInputId?: string | number;
   labelEnSnapshot?: string | null;
   labelArSnapshot?: string | null;
@@ -651,6 +665,7 @@ export interface AnonymousTemplateResponseApiResponse {
 }
 
 export interface AnonymousTemplateResponseCustomInputValueApiResponse {
+  typeSnapshot?: number | string | null;
   customInputValueId?: string | number;
   anonymousTemplateCustomInputId?: string | number;
   labelEnSnapshot?: string | null;
@@ -659,6 +674,7 @@ export interface AnonymousTemplateResponseCustomInputValueApiResponse {
   typeName?: string | null;
   stringValue?: string | null;
   integerValue?: number | null;
+  dateValue?: string | null;
   value?: string | number | null;
 }
 

@@ -491,6 +491,7 @@ export class BranchDashboardPageComponent implements OnInit, OnDestroy {
           legend: { display: false },
           tooltip: {
             callbacks: {
+              beforeTitle: () => this.i18n.translate('customInputs.visitTime'),
               afterLabel: (context) => {
                 const point = trend[context.dataIndex];
                 return `Responses: ${point?.responsesCount ?? 0}`;

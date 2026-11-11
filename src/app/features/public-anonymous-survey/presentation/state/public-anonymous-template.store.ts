@@ -136,6 +136,7 @@ export class PublicAnonymousTemplateStore {
 
     const resourceKey = this.readResourceKey(error);
     const normalizedKey = resourceKey.replace(/[\s_.-]/g, '').toLowerCase();
+    if (normalizedKey.includes('custominputdate')) return 'customInputs.invalidDate';
 
     if (normalizedKey.includes('hidden') && normalizedKey.includes('answer')) {
       return 'publicAnonymousTemplates.hiddenAnswersRejected';

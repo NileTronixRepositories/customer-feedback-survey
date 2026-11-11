@@ -1,3 +1,4 @@
+import { customInputDisplayValue, normalizeCustomInputType } from '../../../shared/models/custom-input.model';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
@@ -34,7 +35,6 @@ import {
   AnonymousTemplateDashboardTemplatePerformance,
   AnonymousTemplateCustomInput,
   AnonymousTemplateCustomInputApiResponse,
-  AnonymousTemplateCustomInputType,
   AnonymousTemplateListItem,
   AnonymousTemplateQuestion,
   AnonymousTemplateQuestionApiResponse,
@@ -301,6 +301,7 @@ export class AnonymousTemplatesService {
     if (query.isScored !== undefined) params = params.set('isScored', query.isScored);
     if (query.questionId) params = params.set('questionId', query.questionId);
     if (query.customInputId) params = params.set('customInputId', query.customInputId);
+    if (query.dateBasis !== undefined) params = params.set('dateBasis', String(query.dateBasis));
     if (query.customInputType) params = params.set('customInputType', query.customInputType);
     if (query.customInputValue) params = params.set('customInputValue', query.customInputValue);
     if (query.searchText) params = params.set('searchText', query.searchText);
@@ -359,6 +360,7 @@ export class AnonymousTemplatesService {
     if (query.isScored !== undefined) params = params.set('isScored', query.isScored);
     if (query.questionId) params = params.set('questionId', query.questionId);
     if (query.customInputId) params = params.set('customInputId', query.customInputId);
+    if (query.dateBasis !== undefined) params = params.set('dateBasis', String(query.dateBasis));
     if (query.customInputType) params = params.set('customInputType', query.customInputType);
     if (query.customInputValue) params = params.set('customInputValue', query.customInputValue);
 
@@ -719,7 +721,7 @@ export class AnonymousTemplatesService {
       customInputId: this.readRecordId(response.customInputId),
       labelEnSnapshot: response.labelEnSnapshot ?? null,
       labelArSnapshot: response.labelArSnapshot ?? null,
-      value: response.value === null || response.value === undefined ? '' : String(response.value),
+      value: customInputDisplayValue(response),
     };
   }
 
@@ -770,15 +772,13 @@ export class AnonymousTemplatesService {
   private toResponseCustomInputValue(
     response: AnonymousTemplateResponseCustomInputValueApiResponse,
   ): AnonymousTemplateResponseCustomInputValue {
-    const type = this.toCustomInputType(response.type ?? response.typeName);
+    const type = normalizeCustomInputType(response.typeSnapshot ?? response.type ?? response.typeName);
     const rawValue = response.value;
     const stringValue =
       response.stringValue ??
       (typeof rawValue === 'string' || typeof rawValue === 'number' ? String(rawValue) : null);
     const integerValue = response.integerValue ?? (typeof rawValue === 'number' ? rawValue : null);
-    const displayValue =
-      stringValue ??
-      (integerValue === null || integerValue === undefined ? '' : String(integerValue));
+    const displayValue = customInputDisplayValue(response);
 
     return {
       customInputValueId: this.readRecordId(response.customInputValueId),
@@ -786,9 +786,10 @@ export class AnonymousTemplatesService {
       labelEnSnapshot: response.labelEnSnapshot ?? null,
       labelArSnapshot: response.labelArSnapshot ?? null,
       type,
-      typeName: response.typeName ?? (type === 2 ? 'Integer' : 'String'),
+      typeName: response.typeName ?? (type === 3 ? 'Date' : type === 2 ? 'Integer' : 'String'),
       stringValue,
       integerValue,
+      dateValue: response.dateValue ?? null,
       displayValue,
     };
   }
@@ -937,15 +938,17 @@ export class AnonymousTemplatesService {
   private toCustomInput(
     response: AnonymousTemplateCustomInputApiResponse,
   ): AnonymousTemplateCustomInput {
-    const type = this.toCustomInputType(response.type ?? response.typeName);
+    const type = normalizeCustomInputType(response.type ?? response.typeName);
 
     return {
       customInputId: this.readRecordId(response.customInputId),
       labelEn: response.labelEn ?? null,
       labelAr: response.labelAr ?? null,
       type,
-      typeName: response.typeName ?? (type === 2 ? 'Integer' : 'String'),
-      isRequired: response.isRequired ?? false,
+      typeName: response.typeName ?? (type === 3 ? 'Date' : type === 2 ? 'Integer' : 'String'),
+      isSystemField: response.isSystemField === true,
+      systemFieldKey: response.systemFieldKey ?? null,
+      isRequired: response.isSystemField || response.systemFieldKey === 'VisitTime' ? false : response.isRequired ?? false,
       minLength: response.minLength ?? null,
       maxLength: response.maxLength ?? null,
       minValue: response.minValue ?? null,
@@ -1137,15 +1140,6 @@ export class AnonymousTemplatesService {
     };
   }
 
-  private toCustomInputType(
-    type: number | string | null | undefined,
-  ): AnonymousTemplateCustomInputType {
-    const normalizedType = String(type ?? '')
-      .trim()
-      .toLowerCase();
-
-    return normalizedType === '2' || normalizedType === 'integer' ? 2 : 1;
-  }
 
   private toNumber(value: number | string | null | undefined): number | null {
     if (typeof value === 'number') {

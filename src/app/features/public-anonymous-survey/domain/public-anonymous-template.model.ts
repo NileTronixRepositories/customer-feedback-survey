@@ -1,6 +1,7 @@
+import { TemplateCustomInputType } from '../../../shared/models/custom-input.model';
 import { ScopeApiFields, ScopeState } from '../../../shared/models/resource-scope.model';
 
-export type PublicCustomInputType = 1 | 2;
+export type PublicCustomInputType = TemplateCustomInputType;
 export type PublicQuestionKind =
   | 'singleChoice'
   | 'starRating'
@@ -38,6 +39,8 @@ export interface PublicAnonymousTemplateCustomInput {
   labelAr: string | null;
   type: PublicCustomInputType;
   typeName: string;
+  isSystemField?: boolean;
+  systemFieldKey?: string | null;
   isRequired: boolean;
   minLength: number | null;
   maxLength: number | null;
@@ -110,6 +113,8 @@ export interface PublicAnonymousTemplateCustomInputApiResponse {
   labelAr?: string | null;
   type?: number | string | null;
   typeName?: string | null;
+  isSystemField?: boolean;
+  systemFieldKey?: string | null;
   isRequired?: boolean;
   minLength?: number | null;
   maxLength?: number | null;
@@ -173,6 +178,7 @@ export interface PublicAnonymousCustomInputValuePayload {
   customInputId: string;
   stringValue: string | null;
   integerValue: number | null;
+  dateValue?: string | null;
 }
 
 export interface PublicAnonymousAnswerPayload {
@@ -186,6 +192,7 @@ export interface PublicAnonymousAnswerPayload {
 }
 
 export interface PublicAnonymousSubmissionResult {
+  customInputValues?: readonly PublicAnonymousSubmittedCustomInputValue[];
   anonymousSurveyResponseId: string;
   anonymousTemplateId: string;
   submittedOnUtc: string;
@@ -198,6 +205,7 @@ export interface PublicAnonymousSubmissionResult {
 }
 
 export interface PublicAnonymousSubmissionApiResponse {
+  customInputValues?: readonly PublicAnonymousSubmittedCustomInputValue[];
   anonymousSurveyResponseId?: string | number;
   anonymousTemplateId?: string | number;
   submittedOnUtc?: string | null;
@@ -207,4 +215,15 @@ export interface PublicAnonymousSubmissionApiResponse {
   visibleQuestionsCount?: number | null;
   answersCount?: number | null;
   customInputValuesCount?: number | null;
+}
+
+export interface PublicAnonymousSubmittedCustomInputValue {
+  customInputId?: string;
+  type?: PublicCustomInputType;
+  typeSnapshot?: PublicCustomInputType;
+  labelEnSnapshot?: string | null;
+  labelArSnapshot?: string | null;
+  stringValue?: string | null;
+  integerValue?: number | null;
+  dateValue?: string | null;
 }

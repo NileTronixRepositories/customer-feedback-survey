@@ -1,3 +1,4 @@
+import { customInputTypeName, customInputDisplayValue } from '../../../../shared/models/custom-input.model';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
@@ -114,6 +115,7 @@ export class SystemReportsService {
     if (query.isScored !== undefined) params = params.set('isScored', String(query.isScored));
     if (query.questionId) params = params.set('questionId', query.questionId);
     if (query.customInputId) params = params.set('customInputId', query.customInputId);
+    if (query.dateBasis !== undefined) params = params.set('dateBasis', String(query.dateBasis));
     if (query.customInputType) params = params.set('customInputType', query.customInputType);
     if (query.customInputValue) params = params.set('customInputValue', query.customInputValue);
     if (query.orderSort) params = params.set('orderSort', query.orderSort);
@@ -424,11 +426,12 @@ export class SystemReportsService {
       customInputId: this.readString(item, 'customInputId'),
       labelEnSnapshot: this.readNullableString(item, 'labelEnSnapshot'),
       labelArSnapshot: this.readNullableString(item, 'labelArSnapshot'),
-      type: this.readString(item, 'type'),
-      typeName: this.readString(item, 'typeName'),
+      type: this.readString(item, 'typeSnapshot') || this.readString(item, 'type'),
+      typeName: this.readString(item, 'typeName') || customInputTypeName(item['typeSnapshot'] ?? item['type']),
       stringValue: this.readNullableString(item, 'stringValue'),
       integerValue: this.readNullableNumber(item, 'integerValue'),
-      displayValue: this.readString(item, 'displayValue'),
+      dateValue: this.readNullableString(item, 'dateValue'),
+      displayValue: customInputDisplayValue(item),
     };
   }
 
@@ -472,7 +475,7 @@ export class SystemReportsService {
       customInputId: this.readString(item, 'customInputId'),
       labelEnSnapshot: this.readNullableString(item, 'labelEnSnapshot'),
       labelArSnapshot: this.readNullableString(item, 'labelArSnapshot'),
-      value: this.readString(item, 'value'),
+      value: customInputDisplayValue(item),
     };
   }
 

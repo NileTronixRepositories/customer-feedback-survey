@@ -1,20 +1,22 @@
 <div class="w-full space-y-4 text-xs">
-  <div class="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
-    <div class="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center">
-      <app-button type="button" variant="secondary" (pressed)="goBack()">
-        <app-icon [icon]="arrowLeftIcon" [size]="15" [flipRtl]="true" />
+  <div class="flex items-center justify-between gap-3">
+    <div class="flex items-center gap-2.5 min-w-0">
+      <app-button size="sm" type="button" variant="secondary" (pressed)="goBack()">
+        <app-icon [icon]="arrowLeftIcon" [size]="14" [flipRtl]="true" />
         {{ 'common.back' | t }}
       </app-button>
       <div class="min-w-0">
-        <p
-          class="inline-flex rounded-full bg-cyan-50 px-2 py-0.5 text-[10px] font-bold uppercase text-[var(--theme-color-secondary)]"
-        >
-          {{ 'anonymousTemplates.title' | t }}
-        </p>
-        <h2 class="mt-1 text-base font-bold text-slate-900">
-          {{ 'anonymousTemplates.detailsTitle' | t }}
-        </h2>
-        <p class="mt-0.5 text-[11px] text-slate-500">
+        <div class="flex items-center gap-2">
+          <span
+            class="rounded-full bg-cyan-50 px-2 py-0.5 text-[10px] font-bold uppercase text-[var(--theme-color-secondary)]"
+          >
+            {{ 'anonymousTemplates.title' | t }}
+          </span>
+          <h2 class="text-sm sm:text-base font-bold text-slate-900 truncate">
+            {{ 'anonymousTemplates.detailsTitle' | t }}
+          </h2>
+        </div>
+        <p class="text-[11px] text-slate-500 truncate">
           {{ 'anonymousTemplates.detailsSubtitle' | t }}
         </p>
       </div>
@@ -38,17 +40,16 @@
     </div>
   } @else if (anonymousTemplatesStore.selectedTemplate(); as template) {
     <!-- ========================================================================= -->
-    <!-- 1. EXECUTIVE TEMPLATE HERO CARD -->
+    <!-- 1. EXECUTIVE TEMPLATE HERO CARD WITH INTEGRATED STATS STRIP -->
     <!-- ========================================================================= -->
-    <div
-      class="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-4 sm:p-5 lg:p-6 shadow-xs"
-    >
-      <div class="flex flex-col gap-4 2xl:flex-row 2xl:items-center 2xl:justify-between">
-        <div class="flex min-w-0 flex-1 items-start sm:items-center gap-3 sm:gap-4">
+    <div class="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-xs">
+      <!-- Top: Branded Identity & Action Toolbar -->
+      <div class="p-4 sm:p-5 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        <div class="flex min-w-0 flex-1 items-start sm:items-center gap-3.5">
           <!-- Logo Squircle / Branded Avatar -->
           @if (logoUrl(template); as logo) {
             <div
-              class="flex h-14 w-14 sm:h-20 sm:w-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-1.5 shadow-sm ring-4 ring-slate-100/80"
+              class="flex h-14 w-14 sm:h-16 sm:w-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-1 shadow-xs ring-4 ring-slate-50"
             >
               <img
                 class="h-full w-full object-contain"
@@ -58,17 +59,17 @@
             </div>
           } @else {
             <div
-              class="flex h-14 w-14 sm:h-20 sm:w-20 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#148496] via-[#0f5b67] to-[#0a3a42] text-white shadow-md shadow-[#148496]/20 ring-4 ring-[#148496]/10"
+              class="flex h-14 w-14 sm:h-16 sm:w-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#148496] via-[#0f5b67] to-[#0a3a42] text-white shadow-sm shadow-[#148496]/20 ring-4 ring-[#148496]/10"
             >
-              <app-icon [icon]="template.isGlobal ? globeIcon : fileTextIcon" [size]="28" />
+              <app-icon [icon]="template.isGlobal ? globeIcon : fileTextIcon" [size]="26" />
             </div>
           }
 
           <!-- Template Details & Status -->
-          <div class="min-w-0 space-y-1.5 flex-1">
-            <div class="flex flex-wrap items-center gap-2">
+          <div class="min-w-0 space-y-1 flex-1">
+            <div class="flex flex-wrap items-center gap-1.5">
               <span
-                class="rounded-md px-2 py-0.5 font-mono text-xs font-semibold tracking-wider"
+                class="rounded-md px-2 py-0.5 font-mono text-[11px] font-bold tracking-wider"
                 [class.bg-violet-50]="template.isGlobal"
                 [class.text-violet-700]="template.isGlobal"
                 [class.bg-cyan-50]="!template.isGlobal"
@@ -79,7 +80,7 @@
 
               @if (template.isManagedGlobalCopy) {
                 <span
-                  class="rounded-md bg-violet-100/70 px-2 py-0.5 text-xs font-bold text-violet-800"
+                  class="rounded-md bg-violet-100/70 px-2 py-0.5 text-[11px] font-bold text-violet-800"
                   [title]="'superAdminTemplates.managedCopyTooltip' | t"
                 >
                   {{ 'superAdminTemplates.managedCopy' | t }}
@@ -88,7 +89,7 @@
 
               <!-- Living Pulse Status Badge -->
               <span
-                class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold"
+                class="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-semibold"
                 [class.bg-emerald-50]="template.isGlobal ? !template.isArchived : template.isActive"
                 [class.text-emerald-700]="
                   template.isGlobal ? !template.isArchived : template.isActive
@@ -112,12 +113,12 @@
               </span>
             </div>
 
-            <h1 class="text-lg sm:text-2xl font-black tracking-tight text-slate-900 break-words">
+            <h1 class="text-base sm:text-xl font-bold tracking-tight text-slate-900 break-words">
               {{ templateDisplayName(template) }}
             </h1>
 
             @if (template.description) {
-              <p class="text-xs leading-relaxed text-slate-600 max-w-3xl break-words">
+              <p class="text-[11px] sm:text-xs leading-relaxed text-slate-500 max-w-2xl break-words line-clamp-2">
                 {{ template.description }}
               </p>
             }
@@ -125,29 +126,29 @@
         </div>
 
         <!-- Action Toolbar -->
-        <div class="flex flex-wrap items-center gap-2 pt-3 2xl:pt-0 2xl:justify-end border-t border-slate-100/80 2xl:border-t-0">
+        <div class="flex flex-wrap items-center gap-2 lg:justify-end shrink-0">
           @if (canManageQuestions(template)) {
-            <app-button size="md" type="button" [routerLink]="['questions']">
-              <app-icon [icon]="listChecksIcon" [size]="16" />
+            <app-button size="sm" type="button" [routerLink]="['questions']">
+              <app-icon [icon]="listChecksIcon" [size]="15" />
               {{ 'anonymousTemplates.manageQuestions' | t }}
             </app-button>
           }
 
           @if (canViewTemplateResponses(template)) {
-            <app-button size="md" type="button" variant="secondary" [routerLink]="['responses']">
-              <app-icon [icon]="responsesIcon" [size]="16" />
+            <app-button size="sm" type="button" variant="secondary" [routerLink]="['responses']">
+              <app-icon [icon]="responsesIcon" [size]="15" />
               {{ 'anonymousTemplates.responsesTitle' | t }}
             </app-button>
           }
 
           @if (canUpdateTemplate(template)) {
             <app-button
-              size="md"
+              size="sm"
               type="button"
               variant="secondary"
               (pressed)="openEditTemplate(template)"
             >
-              <app-icon [icon]="editIcon" [size]="15" />
+              <app-icon [icon]="editIcon" [size]="14" />
               {{ 'common.edit' | t }}
             </app-button>
           }
@@ -159,13 +160,13 @@
             !template.isManagedGlobalCopy
           ) {
             <app-button
-              size="md"
+              size="sm"
               type="button"
               variant="secondary"
               [loading]="anonymousTemplatesStore.assetActionLoading()"
               (pressed)="copyAsAuthorized(template)"
             >
-              <app-icon [icon]="copyIcon" [size]="15" />
+              <app-icon [icon]="copyIcon" [size]="14" />
               {{ 'anonymousTemplates.copyAsAuthorized' | t }}
             </app-button>
           }
@@ -173,7 +174,7 @@
           <!-- Media / Logo Actions -->
           @if (!template.isGlobal && !template.isManagedGlobalCopy && canUpdate()) {
             <label
-              class="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 transition shadow-2xs"
+              class="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition shadow-2xs"
             >
               {{
                 (template.logoPath ? 'branchTemplates.replaceLogo' : 'branchTemplates.uploadLogo')
@@ -187,93 +188,79 @@
               />
             </label>
             @if (template.logoPath) {
-              <app-button size="md" type="button" variant="danger" (pressed)="removeLogo(template)">
+              <app-button size="sm" type="button" variant="danger" (pressed)="removeLogo(template)">
                 {{ 'branchTemplates.removeLogo' | t }}
               </app-button>
             }
           }
         </div>
       </div>
+
+      <!-- Integrated Executive KPI Bar (Clean, Borderless within the card) -->
+      <div
+        class="grid grid-cols-2 sm:grid-cols-4 border-t border-slate-100 bg-slate-50/50 divide-y sm:divide-y-0 divide-x sm:divide-x-reverse divide-slate-100"
+      >
+        <!-- KPI 1: Questions -->
+        <div class="flex items-center gap-3 p-3 sm:px-4 sm:py-3 transition hover:bg-slate-50">
+          <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-cyan-50 text-[#148496]">
+            <app-icon [icon]="listChecksIcon" [size]="16" />
+          </div>
+          <div class="min-w-0">
+            <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+              {{ 'anonymousTemplates.questionsShort' | t }}
+            </span>
+            <span class="text-base sm:text-lg font-bold text-slate-800">
+              {{ template.summary.questionsCount }}
+            </span>
+          </div>
+        </div>
+
+        <!-- KPI 2: Custom Inputs -->
+        <div class="flex items-center gap-3 p-3 sm:px-4 sm:py-3 transition hover:bg-slate-50">
+          <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-teal-50 text-[#0f5b67]">
+            <app-icon [icon]="slidersIcon" [size]="16" />
+          </div>
+          <div class="min-w-0">
+            <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+              {{ 'anonymousTemplates.inputsShort' | t }}
+            </span>
+            <span class="text-base sm:text-lg font-bold text-slate-800">
+              {{ template.summary.customInputsCount }}
+            </span>
+          </div>
+        </div>
+
+        <!-- KPI 3: Conditions -->
+        <div class="flex items-center gap-3 p-3 sm:px-4 sm:py-3 transition hover:bg-slate-50">
+          <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-50 text-amber-700">
+            <app-icon [icon]="flowIcon" [size]="16" />
+          </div>
+          <div class="min-w-0">
+            <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+              {{ 'anonymousTemplates.conditionsShort' | t }}
+            </span>
+            <span class="text-base sm:text-lg font-bold text-slate-800">
+              {{ template.summary.questionConditionsCount }}
+            </span>
+          </div>
+        </div>
+
+        <!-- KPI 4: Responses -->
+        <div class="flex items-center gap-3 p-3 sm:px-4 sm:py-3 transition hover:bg-slate-50">
+          <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-sky-50 text-sky-700">
+            <app-icon [icon]="responsesIcon" [size]="16" />
+          </div>
+          <div class="min-w-0">
+            <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+              {{ 'anonymousTemplates.responsesTitle' | t }}
+            </span>
+            <span class="text-base sm:text-lg font-bold text-slate-800">
+              {{ template.responsesCount }}
+            </span>
+          </div>
+        </div>
+      </div>
     </div>
-
-    <!-- ========================================================================= -->
-    <!-- 2. 4-COLUMN EXECUTIVE KPI STATS GRID -->
-    <!-- ========================================================================= -->
-    <section class="grid grid-cols-2 gap-3.5 sm:gap-4 lg:grid-cols-4">
-      <!-- KPI 1: Questions -->
-      <div
-        class="group relative overflow-hidden rounded-xl border border-slate-200/80 bg-white p-4 shadow-xs transition hover:border-[#148496]/40 hover:shadow-sm"
-      >
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-semibold text-slate-500">{{
-            'anonymousTemplates.questionsShort' | t
-          }}</span>
-          <div
-            class="flex h-9 w-9 items-center justify-center rounded-lg bg-cyan-50 text-[#148496]"
-          >
-            <app-icon [icon]="listChecksIcon" [size]="18" />
-          </div>
-        </div>
-        <p class="mt-2 text-2xl font-bold tracking-tight text-slate-900">
-          {{ template.summary.questionsCount }}
-        </p>
-      </div>
-
-      <!-- KPI 2: Custom Inputs -->
-      <div
-        class="group relative overflow-hidden rounded-xl border border-slate-200/80 bg-white p-4 shadow-xs transition hover:border-[#148496]/40 hover:shadow-sm"
-      >
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-semibold text-slate-500">{{
-            'anonymousTemplates.inputsShort' | t
-          }}</span>
-          <div
-            class="flex h-9 w-9 items-center justify-center rounded-lg bg-teal-50 text-[#0f5b67]"
-          >
-            <app-icon [icon]="slidersIcon" [size]="18" />
-          </div>
-        </div>
-        <p class="mt-2 text-2xl font-bold tracking-tight text-slate-900">
-          {{ template.summary.customInputsCount }}
-        </p>
-      </div>
-
-      <!-- KPI 3: Conditions -->
-      <div
-        class="group relative overflow-hidden rounded-xl border border-slate-200/80 bg-white p-4 shadow-xs transition hover:border-[#148496]/40 hover:shadow-sm"
-      >
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-semibold text-slate-500">{{
-            'anonymousTemplates.conditionsShort' | t
-          }}</span>
-          <div
-            class="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-50 text-amber-700"
-          >
-            <app-icon [icon]="flowIcon" [size]="18" />
-          </div>
-        </div>
-        <p class="mt-2 text-2xl font-bold tracking-tight text-slate-900">
-          {{ template.summary.questionConditionsCount }}
-        </p>
-      </div>
-
-      <!-- KPI 4: Responses -->
-      <div
-        class="group relative overflow-hidden rounded-xl border border-slate-200/80 bg-white p-4 shadow-xs transition hover:border-[#148496]/40 hover:shadow-sm"
-      >
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-semibold text-slate-500">{{
-            'anonymousTemplates.responsesTitle' | t
-          }}</span>
-          <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-sky-50 text-sky-700">
-            <app-icon [icon]="responsesIcon" [size]="18" />
-          </div>
-        </div>
-        <p class="mt-2 text-2xl font-bold tracking-tight text-slate-900">
-          {{ template.responsesCount }}
-        </p>
-      </div>
-    </section>
 
     <!-- ========================================================================= -->
     <!-- 3. 12-COLUMN ASYMMETRIC MASTER-DETAIL GRID -->
@@ -318,7 +305,7 @@
                 class="relative flex flex-col gap-3 rounded-xl border border-slate-200/70 bg-white p-4 shadow-xs transition hover:border-[#148496]/50 hover:shadow-xs"
               >
                 <!-- Question Header: Number, Title, and Clean Meta -->
-                <div class="flex flex-col gap-2.5 lg:flex-row lg:items-start lg:justify-between">
+                <div class="flex flex-col gap-2.5 xl:flex-row xl:items-start xl:justify-between">
                   <div class="flex items-start gap-3 min-w-0 flex-1">
                     <span
                       class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-cyan-50 text-xs font-bold text-[#148496] ring-1 ring-[#148496]/20 mt-0.5"
@@ -398,11 +385,11 @@
                 @if (question.options.length > 0) {
                   <div class="border-t border-slate-100 pt-3">
                     <div
-                      class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 w-full"
+                      class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-2 w-full"
                     >
                       @for (option of question.options; track option.optionId) {
                         <div
-                          class="group relative flex items-center justify-between gap-2 rounded-xl border border-slate-200/70 bg-slate-50/50 p-2.5 transition hover:border-[#148496]/50 hover:bg-white hover:shadow-xs"
+                          class="group relative flex items-center justify-between gap-2 rounded-xl border border-slate-200/70 bg-slate-50/50 p-2 sm:p-2.5 transition hover:border-[#148496]/50 hover:bg-white hover:shadow-xs min-w-0"
                         >
                           <div class="flex items-center gap-2 min-w-0 flex-1">
                             <span
@@ -411,7 +398,8 @@
                               <span class="h-1.5 w-1.5 rounded-full bg-[#148496] opacity-75"></span>
                             </span>
                             <span
-                              class="break-words text-xs font-bold text-slate-800 [overflow-wrap:anywhere] leading-snug"
+                              class="truncate text-xs font-bold text-slate-800 leading-snug"
+                              [title]="optionDisplayText(option)"
                             >
                               {{ optionDisplayText(option) }}
                             </span>
@@ -448,7 +436,7 @@
                           <div
                             class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 rounded-lg border border-cyan-100/70 bg-white p-2.5 text-xs shadow-2xs"
                           >
-                            <div class="flex items-center gap-2 min-w-0 flex-1">
+                            <div class="flex flex-wrap items-center gap-2 min-w-0 flex-1">
                               <span class="font-bold text-slate-700">
                                 {{ conditionTriggerDisplay(conditionView) }}
                               </span>
@@ -457,7 +445,7 @@
                               >
                                 {{ 'anonymousTemplates.thenShow' | t }}
                               </span>
-                              <span class="truncate font-bold text-slate-900">
+                              <span class="font-bold text-slate-900 break-words [overflow-wrap:anywhere]">
                                 {{
                                   conditionQuestionDisplayText(
                                     conditionView.child,
@@ -998,15 +986,17 @@
                         </p>
                       }
                     </div>
-                    <app-button
-                      type="button"
-                      size="sm"
-                      variant="danger"
-                      (pressed)="removeCustomInput(inputIndex)"
-                    >
-                      <app-icon [icon]="deleteIcon" [size]="14" />
-                      {{ 'common.delete' | t }}
-                    </app-button>
+                    @if (!systemCustomInputGroups.has(inputGroup)) {
+                      <app-button
+                        type="button"
+                        size="sm"
+                        variant="danger"
+                        (pressed)="removeCustomInput(inputIndex)"
+                      >
+                        <app-icon [icon]="deleteIcon" [size]="14" />
+                        {{ 'common.delete' | t }}
+                      </app-button>
+                    }
                   </div>
 
                   <div class="grid gap-2 md:grid-cols-3">
@@ -1073,6 +1063,7 @@
                         <option value="2">
                           {{ 'branchTemplates.customInputTypeInteger' | t }}
                         </option>
+                        <option value="3">{{ 'branchTemplates.customInputTypeDate' | t }}</option>
                       </select>
                       @if (customInputFieldError(inputIndex, 'type')) {
                         <span
@@ -1203,7 +1194,7 @@
                         }
                       </label>
                     </div>
-                  } @else {
+                  } @else if (inputGroup.controls.type.value === '2') {
                     <div class="mt-2 grid gap-2 md:grid-cols-2">
                       <label class="block">
                         <span class="mb-1 block text-[10px] font-semibold text-slate-700">

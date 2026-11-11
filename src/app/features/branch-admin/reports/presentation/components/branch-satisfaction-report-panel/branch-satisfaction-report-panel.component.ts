@@ -1,3 +1,4 @@
+import { DashboardDrillDownService } from '../../../../../reports/dashboard-drill-down/data/dashboard-drill-down.service';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -23,6 +24,7 @@ import { HistoricalWarningBannerComponent } from '../../../../../../shared/ui/hi
 import { ScoreCalculationMode } from '../../../../../../shared/models/score-calculation-mode.model';
 import { BranchAdminTemplate } from '../../../../branch/domain/branch-admin-branch.model';
 import {
+  SatisfactionTrendItem,
   SatisfactionByTemplateItem,
   SatisfactionDistributionItem,
 } from '../../../domain/branch-satisfaction-report.model';
@@ -49,6 +51,7 @@ Chart.register(...registerables);
 export class BranchSatisfactionReportPanelComponent implements OnInit, OnDestroy {
   readonly templates = input<readonly BranchAdminTemplate[]>([]);
   readonly reportStore = inject(BranchSatisfactionReportStore);
+  private readonly drillDown = inject(DashboardDrillDownService);
   private readonly formBuilder = inject(FormBuilder);
   private readonly i18n = inject(I18nService);
   private readonly themeColors = inject(ThemeColorService);
@@ -175,7 +178,7 @@ export class BranchSatisfactionReportPanelComponent implements OnInit, OnDestroy
 
   private renderTrendChart(
     canvas: HTMLCanvasElement,
-    trend: readonly { date: string; score: number; responsesCount: number }[],
+    trend: readonly SatisfactionTrendItem[],
     language: string,
   ): void {
     this.chart?.destroy();
@@ -197,6 +200,13 @@ export class BranchSatisfactionReportPanelComponent implements OnInit, OnDestroy
         ],
       },
       options: {
+        onClick: (_event, elements) => {
+          const point = trend[elements[0]?.index ?? -1];
+          if (point?.detailsNavigation) this.drillDown.open({
+            title: this.i18n.translate('branchDashboard.trendTitle'),
+            navigation: point.detailsNavigation,
+          });
+        },
         responsive: true,
         maintainAspectRatio: false,
         locale: language,
@@ -209,6 +219,7 @@ export class BranchSatisfactionReportPanelComponent implements OnInit, OnDestroy
           legend: { display: false },
           tooltip: {
             callbacks: {
+              beforeTitle: () => this.i18n.translate('customInputs.visitTime'),
               afterLabel: (context) => {
                 const point = trend[context.dataIndex];
                 return `${this.i18n.translate('branchReports.responses')}: ${point?.responsesCount ?? 0}`;

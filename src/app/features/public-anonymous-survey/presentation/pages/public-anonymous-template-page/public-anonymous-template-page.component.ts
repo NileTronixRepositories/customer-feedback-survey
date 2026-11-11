@@ -1,3 +1,4 @@
+import { customInputHtmlType, isValidDateOnly } from '../../../../../shared/models/custom-input.model';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -48,6 +49,8 @@ const MAX_IMAGE_FILE_BYTES = 5 * 1024 * 1024;
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PublicAnonymousTemplatePageComponent implements OnInit, OnDestroy {
+  readonly customInputHtmlType = customInputHtmlType;
+
   readonly publicAnonymousTemplateStore = inject(PublicAnonymousTemplateStore);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
@@ -173,6 +176,8 @@ export class PublicAnonymousTemplatePageComponent implements OnInit, OnDestroy {
     if (value.length === 0) {
       return '';
     }
+
+    if (input.type === 3) return isValidDateOnly(value) ? '' : this.i18n.translate('customInputs.invalidDate');
 
     if (input.type === 1) {
       if (input.minLength !== null && value.length < input.minLength) {
@@ -445,6 +450,7 @@ export class PublicAnonymousTemplatePageComponent implements OnInit, OnDestroy {
       customInputId: input.customInputId,
       stringValue: input.type === 1 ? value : null,
       integerValue: input.type === 2 ? Number(value) : null,
+      dateValue: input.type === 3 ? value : null,
     };
   }
 

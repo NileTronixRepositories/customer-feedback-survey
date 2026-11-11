@@ -1,3 +1,4 @@
+import { normalizeCustomInputType } from '../../../../shared/models/custom-input.model';
 import { HttpClient, HttpContext } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
@@ -16,7 +17,6 @@ import {
   OperatorAssignedTemplateCustomInputApiResponse,
   OperatorAssignedTemplateQuestion,
   OperatorAssignedTemplateQuestionApiResponse,
-  OperatorTemplateCustomInputType,
   OperatorLatestTemplateAnswer,
   OperatorLatestTemplateAnswerApiResponse,
   OperatorLatestTemplateResponse,
@@ -136,15 +136,17 @@ export class OperatorTemplatesService {
   private toCustomInput(
     response: OperatorAssignedTemplateCustomInputApiResponse,
   ): OperatorAssignedTemplateCustomInput {
-    const type = this.toCustomInputType(response.type ?? response.typeName);
+    const type = normalizeCustomInputType(response.type ?? response.typeName);
 
     return {
       customInputId: this.readRecordId(response.customInputId),
       labelEn: response.labelEn ?? null,
       labelAr: response.labelAr ?? null,
       type,
-      typeName: response.typeName ?? (type === 2 ? 'Integer' : 'String'),
-      isRequired: response.isRequired ?? false,
+      typeName: response.typeName ?? (type === 3 ? 'Date' : type === 2 ? 'Integer' : 'String'),
+      isSystemField: response.isSystemField === true,
+      systemFieldKey: response.systemFieldKey ?? null,
+      isRequired: response.isSystemField || response.systemFieldKey === 'VisitTime' ? false : response.isRequired ?? false,
       minLength: response.minLength ?? null,
       maxLength: response.maxLength ?? null,
       minValue: response.minValue ?? null,
@@ -272,16 +274,17 @@ export class OperatorTemplatesService {
   private toResponseCustomInput(
     response: OperatorTemplateResponseCustomInputApiResponse,
   ): OperatorTemplateResponseCustomInput {
-    const type = this.toCustomInputType(response.type ?? response.typeName);
+    const type = normalizeCustomInputType(response.typeSnapshot ?? response.type ?? response.typeName);
 
     return {
       customInputId: this.readRecordId(response.customInputId),
       labelEnSnapshot: response.labelEnSnapshot ?? null,
       labelArSnapshot: response.labelArSnapshot ?? null,
       type,
-      typeName: response.typeName ?? (type === 2 ? 'Integer' : 'String'),
+      typeName: response.typeName ?? (type === 3 ? 'Date' : type === 2 ? 'Integer' : 'String'),
       stringValue: response.stringValue ?? null,
       integerValue: response.integerValue ?? null,
+      dateValue: response.dateValue ?? null,
     };
   }
 
@@ -293,12 +296,6 @@ export class OperatorTemplatesService {
     return typeof id === 'string' || typeof id === 'number' ? String(id) : null;
   }
 
-  private toCustomInputType(
-    type: number | string | null | undefined,
-  ): OperatorTemplateCustomInputType {
-    const normalizedType = String(type ?? '').trim().toLowerCase();
-    return normalizedType === '2' || normalizedType === 'integer' ? 2 : 1;
-  }
 
   private toMediaUrl(url: string): string {
     if (/^https?:\/\//i.test(url)) {

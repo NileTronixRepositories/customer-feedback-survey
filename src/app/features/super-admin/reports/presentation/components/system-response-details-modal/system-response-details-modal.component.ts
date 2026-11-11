@@ -142,6 +142,7 @@ export class SystemResponseDetailsModalComponent {
   }
 
   customInputTypeLabel(typeName: string): string {
+    if (typeName?.toLowerCase() === 'date' || typeName === '3') return this.i18n.translate('branchTemplates.customInputTypeDate');
     const normalizedType = typeName.replace(/[\s_-]/g, '').toLowerCase();
     if (normalizedType === 'string') return this.i18n.translate('systemResponseDetails.typeString');
     if (normalizedType === 'integer' || normalizedType === 'int') {

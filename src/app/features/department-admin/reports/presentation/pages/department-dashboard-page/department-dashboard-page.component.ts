@@ -311,6 +311,7 @@ export class DepartmentDashboardPageComponent implements OnInit, OnDestroy {
   }
 
   customInputTypeLabel(typeName: string): string {
+    if (typeName?.toLowerCase() === 'date' || typeName === '3') return this.i18n.translate('branchTemplates.customInputTypeDate');
     if (typeName === 'String') return this.i18n.translate('branchTemplates.customInputTypeString');
     if (typeName === 'Integer') return this.i18n.translate('branchTemplates.customInputTypeInteger');
 
@@ -412,6 +413,7 @@ export class DepartmentDashboardPageComponent implements OnInit, OnDestroy {
           legend: { display: false },
           tooltip: {
             callbacks: {
+              beforeTitle: () => this.i18n.translate('customInputs.visitTime'),
               afterLabel: (context) => {
                 const point = trend[context.dataIndex];
                 return `${this.i18n.translate('departmentDashboard.responses')}: ${

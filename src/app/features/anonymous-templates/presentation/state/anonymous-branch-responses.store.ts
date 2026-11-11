@@ -99,6 +99,7 @@ export class AnonymousBranchResponsesStore {
       : '';
 
     return {
+      ...query,
       anonymousTemplateId: this.toOptionalText(query.anonymousTemplateId),
       from: this.toOptionalText(query.from),
       to: this.toOptionalText(query.to),

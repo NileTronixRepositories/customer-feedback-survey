@@ -1,3 +1,4 @@
+import { customInputDisplayValue } from '../../../../../../shared/models/custom-input.model';
 import { DatePipe, DecimalPipe, NgTemplateOutlet } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, input, output } from '@angular/core';
 import {
@@ -129,6 +130,7 @@ export class SurveyAnonymousResponseDetailsModalComponent {
   }
 
   customInputTypeLabel(typeName: string): string {
+    if (typeName?.toLowerCase() === 'date' || typeName === '3') return this.i18n.translate('branchTemplates.customInputTypeDate');
     if (typeName.toLowerCase().includes('int') || typeName.toLowerCase().includes('num')) {
       return this.i18n.translate('surveyDashboard.typeInteger');
     }
@@ -160,7 +162,7 @@ export class SurveyAnonymousResponseDetailsModalComponent {
   }
 
   customInputDisplayValue(input: AnonymousTemplateResponseCustomInputValue): string {
-    return input.displayValue || input.stringValue || (input.integerValue === null ? '-' : String(input.integerValue));
+    return customInputDisplayValue(input) || '-';
   }
 
   voiceUrl(answer: AnonymousTemplateResponseAnswer): string {

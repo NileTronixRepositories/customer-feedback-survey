@@ -165,6 +165,7 @@ export class DashboardResponseDetailsModalComponent {
   }
 
   customInputTypeLabel(typeName: string | null | undefined): string {
+    if (typeName?.toLowerCase() === 'date' || typeName === '3') return this.i18n.translate('branchTemplates.customInputTypeDate');
     if (!typeName) return '';
     const lower = typeName.toLowerCase();
     if (lower.includes('int') || lower.includes('num')) {

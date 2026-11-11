@@ -1,3 +1,4 @@
+import { customInputHtmlType, customInputDisplayValue, isValidDateOnly } from '../../../../../../shared/models/custom-input.model';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -81,7 +82,7 @@ interface OperatorCustomInputView {
   customInputId: string;
   label: string;
   secondaryLabel: string;
-  type: 1 | 2;
+  type: 1 | 2 | 3;
   typeName: string;
   isRequired: boolean;
   minLength: number | null;
@@ -197,6 +198,9 @@ const ALL_BRANCHES_FILTER_ID = 'all';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
+  readonly customInputHtmlType = customInputHtmlType;
+  readonly customInputDisplayValue = customInputDisplayValue;
+
   readonly operatorTemplatesStore = inject(OperatorTemplatesStore);
   private readonly i18n = inject(I18nService);
   private audioContext: AudioContext | null = null;
@@ -531,6 +535,63 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
     this.currentQuestionIndex.set(nextIndex);
   }
 
+  scrollToElement(elementId: string): void {
+    if (typeof document !== 'undefined') {
+      const element = document.getElementById(elementId);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+  }
+
+  navigateToNextUnanswered(fromIndex?: number): void {
+    const template = this.activeTemplate();
+    if (!template || this.responseSubmitted() || this.recordingQuestionId()) {
+      return;
+    }
+
+    // 1. If custom inputs exist and any is invalid, focus custom inputs first
+    if (template.customInputs.length > 0 && !this.allCustomInputsValid()) {
+      this.currentQuestionIndex.set(-1);
+      this.scrollToElement('custom-inputs-section');
+      return;
+    }
+
+    const questions = this.visibleQuestions();
+    if (questions.length === 0) {
+      return;
+    }
+
+    // 2. Find next unanswered question after fromIndex
+    const startIndex = fromIndex !== undefined ? fromIndex + 1 : 0;
+    let nextInvalidIndex = -1;
+
+    for (let i = startIndex; i < questions.length; i++) {
+      if (!this.isQuestionValid(questions[i])) {
+        nextInvalidIndex = i;
+        break;
+      }
+    }
+
+    // 3. If none found ahead, wrap around from beginning
+    if (nextInvalidIndex === -1 && startIndex > 0) {
+      for (let i = 0; i < startIndex; i++) {
+        if (!this.isQuestionValid(questions[i])) {
+          nextInvalidIndex = i;
+          break;
+        }
+      }
+    }
+
+    if (nextInvalidIndex !== -1) {
+      this.currentQuestionIndex.set(nextInvalidIndex);
+      this.scrollToElement('question-step-' + nextInvalidIndex);
+    } else if (this.allQuestionsValid()) {
+      // 4. All answered! Scroll to submit section
+      this.scrollToElement('summary-section');
+    }
+  }
+
   goToQuestion(index: number): void {
     const template = this.activeTemplate();
     if (!template || index < 0 || index >= this.visibleQuestions().length || this.responseSubmitted()) {
@@ -541,20 +602,13 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
       return;
     }
 
-    if (template.customInputs.length > 0 && !this.allCustomInputsValid()) {
-      this.markAllCustomInputsTouched();
-      this.customInputsOpen.set(true);
-      return;
-    }
-
-    this.summaryOpen.set(false);
-    this.customInputsOpen.set(false);
     this.currentQuestionIndex.set(index);
+    this.scrollToElement('question-step-' + index);
   }
 
   openSummary(): void {
     const template = this.activeTemplate();
-    if (!template) {
+    if (!template || this.responseSubmitted()) {
       return;
     }
 
@@ -562,18 +616,7 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.clearHiddenQuestionState(template);
-    this.markAllCustomInputsTouched();
-    this.markAllQuestionsTouched();
-    if (!this.allQuestionsValid()) {
-      if (!this.allCustomInputsValid()) {
-        this.customInputsOpen.set(true);
-      }
-      return;
-    }
-
-    this.customInputsOpen.set(false);
-    this.summaryOpen.set(true);
+    this.scrollToElement('summary-section');
   }
 
   submitResponse(): void {
@@ -596,7 +639,15 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
     this.markAllQuestionsTouched();
     if (!this.allQuestionsValid()) {
       if (!this.allCustomInputsValid()) {
-        this.customInputsOpen.set(true);
+        this.scrollToElement('custom-inputs-section');
+      } else {
+        const firstInvalidIndex = this.visibleQuestions().findIndex(
+          (q) => !this.isQuestionValid(q),
+        );
+        if (firstInvalidIndex >= 0) {
+          this.currentQuestionIndex.set(firstInvalidIndex);
+          this.scrollToElement('question-step-' + firstInvalidIndex);
+        }
       }
       return;
     }
@@ -651,8 +702,8 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.summaryOpen.set(false);
-    this.customInputsOpen.set(true);
+    this.currentQuestionIndex.set(-1);
+    this.scrollToElement('custom-inputs-section');
   }
 
   updateCustomInputValue(customInput: OperatorCustomInputView, event: Event): void {
@@ -675,21 +726,62 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
       : '';
   }
 
+  onCustomInputChange(customInput: OperatorCustomInputView): void {
+    if (this.allCustomInputsValid()) {
+      setTimeout(() => {
+        this.navigateToNextUnanswered();
+      }, 250);
+    }
+  }
+
+  onCustomInputKeydown(event: KeyboardEvent, customInput: OperatorCustomInputView): void {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      this.markCustomInputTouched(customInput.customInputId);
+      if (this.allCustomInputsValid()) {
+        this.navigateToNextUnanswered();
+      } else {
+        const template = this.activeTemplate();
+        if (template && typeof document !== 'undefined') {
+          const nextInvalid = template.customInputs.find(
+            (ci) => this.customInputError(ci).length > 0,
+          );
+          if (nextInvalid) {
+            const el = document.getElementById('custom-input-' + nextInvalid.customInputId);
+            el?.focus();
+          }
+        }
+      }
+    }
+  }
+
   selectSingleChoice(question: OperatorQuestionView, optionId: string): void {
     this.updateAnswer(question, { selectedQuestionOptionId: optionId });
     this.markQuestionTouched(question.id);
+    const index = this.visibleQuestions().findIndex((q) => q.id === question.id);
+    setTimeout(() => {
+      this.navigateToNextUnanswered(index);
+    }, 280);
   }
 
   selectStarRating(question: OperatorQuestionView, value: number): void {
     this.updateAnswer(question, { starRatingValue: value });
     this.markQuestionTouched(question.id);
     this.playScaleSelectionAnimation(question.id, value, 'star');
+    const index = this.visibleQuestions().findIndex((q) => q.id === question.id);
+    setTimeout(() => {
+      this.navigateToNextUnanswered(index);
+    }, 280);
   }
 
   selectSmileValue(question: OperatorQuestionView, value: number): void {
     this.updateAnswer(question, { smileValue: value });
     this.markQuestionTouched(question.id);
     this.playScaleSelectionAnimation(question.id, value, 'smile');
+    const index = this.visibleQuestions().findIndex((q) => q.id === question.id);
+    setTimeout(() => {
+      this.navigateToNextUnanswered(index);
+    }, 280);
   }
 
   updateTextAnswer(question: OperatorQuestionView, event: Event): void {
@@ -697,6 +789,15 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
     const textAnswer = target instanceof HTMLTextAreaElement ? target.value : '';
     this.updateAnswer(question, { textAnswer });
     this.markQuestionTouched(question.id);
+  }
+
+  onTextAnswerBlur(question: OperatorQuestionView): void {
+    if (this.isQuestionValid(question) && this.textAnswer(question).trim().length > 0) {
+      const index = this.visibleQuestions().findIndex((q) => q.id === question.id);
+      setTimeout(() => {
+        this.navigateToNextUnanswered(index);
+      }, 250);
+    }
   }
 
   updateVoiceFile(question: OperatorQuestionView, event: Event): void {
@@ -708,6 +809,11 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
     if (target instanceof HTMLInputElement) {
       target.value = '';
     }
+
+    const index = this.visibleQuestions().findIndex((q) => q.id === question.id);
+    setTimeout(() => {
+      this.navigateToNextUnanswered(index);
+    }, 300);
   }
 
   updateImageFile(question: OperatorQuestionView, event: Event): void {
@@ -719,6 +825,11 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
     if (target instanceof HTMLInputElement) {
       target.value = '';
     }
+
+    const index = this.visibleQuestions().findIndex((q) => q.id === question.id);
+    setTimeout(() => {
+      this.navigateToNextUnanswered(index);
+    }, 300);
   }
 
   async startVoiceRecording(question: OperatorQuestionView): Promise<void> {
@@ -785,6 +896,11 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
     const voiceFile = this.toWavFile(buffers, sampleRate, question.id);
     this.setVoiceFile(question, voiceFile);
     this.markQuestionTouched(question.id);
+
+    const index = this.visibleQuestions().findIndex((q) => q.id === question.id);
+    setTimeout(() => {
+      this.navigateToNextUnanswered(index);
+    }, 300);
   }
 
   discardVoiceAnswer(question: OperatorQuestionView): void {
@@ -988,7 +1104,7 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
       secondaryLabel: '',
       type: customInput.type,
       typeName:
-        customInput.type === 2
+        customInput.type === 3 ? this.i18n.translate('branchTemplates.customInputTypeDate') : customInput.type === 2
           ? this.i18n.translate('branchTemplates.customInputTypeInteger')
           : this.i18n.translate('branchTemplates.customInputTypeString'),
       isRequired: customInput.isRequired,
@@ -1069,9 +1185,7 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
       ),
       typeName: customInput.typeName,
       value:
-        customInput.type === 2
-          ? customInput.integerValue?.toString() ?? ''
-          : customInput.stringValue ?? '',
+        customInputDisplayValue(customInput),
     };
   }
 
@@ -1164,9 +1278,7 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
       (hydrateLatestResponse ? template.latestResponseSource?.customInputs ?? [] : []).map(
         (customInput) => [
           customInput.customInputId,
-          customInput.type === 2
-            ? customInput.integerValue?.toString() ?? ''
-            : customInput.stringValue ?? '',
+          customInputDisplayValue(customInput),
         ],
       ),
     );
@@ -1433,6 +1545,8 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
     if (!customInput.isRequired && value.length === 0) {
       return '';
     }
+
+    if (customInput.type === 3) return isValidDateOnly(value) ? '' : 'customInputs.invalidDate';
 
     if (customInput.type === 1) {
       if (customInput.minLength !== null && value.length < customInput.minLength) {

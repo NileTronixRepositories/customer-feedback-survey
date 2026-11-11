@@ -1,3 +1,4 @@
+import { ResponseDateBasis } from '../../../../shared/models/custom-input.model';
 import { ScoreCalculationMode } from '../../../../shared/models/score-calculation-mode.model';
 import {
   BestRatedQuestion,
@@ -49,6 +50,7 @@ export interface BranchSurveyResponsesQuery {
   isScored?: boolean;
   questionId?: string;
   customInputId?: string;
+  dateBasis?: ResponseDateBasis | 'SubmittedOnUtc' | 'VisitTime';
   customInputType?: string;
   customInputValue?: string;
   orderSort?: 'Newest' | 'Oldest';
@@ -250,6 +252,7 @@ export interface BranchSurveyResponseCustomInput {
   typeName: string;
   stringValue: string | null;
   integerValue: number | null;
+  dateValue?: string | null;
   displayValue: string;
 }
 

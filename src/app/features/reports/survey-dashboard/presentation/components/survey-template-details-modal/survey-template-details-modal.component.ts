@@ -83,6 +83,7 @@ export class SurveyTemplateDetailsModalComponent {
   }
 
   customInputTypeLabel(input: SurveyDashboardTemplateCustomInput): string {
+    if (input.typeName?.toLowerCase() === 'date' || String(input.type) === '3') return this.i18n.translate('branchTemplates.customInputTypeDate');
     if (this.isIntegerCustomInput(input)) {
       return this.i18n.translate('surveyDashboard.typeInteger');
     }

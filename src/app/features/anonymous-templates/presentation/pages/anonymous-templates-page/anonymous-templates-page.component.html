@@ -43,7 +43,6 @@
     </div>
   </app-page-header>
 
-
   @if (!canCreate()) {
     <div
       class="rounded-md border border-amber-100 bg-amber-50 p-2 text-[11px] font-semibold text-amber-700"
@@ -62,7 +61,7 @@
     >
       <div class="min-h-0 overflow-hidden">
         <form
-          class="mb-3 flex flex-wrap items-end gap-3 transition-[transform,opacity] duration-300 ease-out motion-reduce:transition-none"
+          class="mb-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:flex xl:flex-wrap items-end gap-2.5 transition-[transform,opacity] duration-300 ease-out motion-reduce:transition-none"
           [formGroup]="searchForm"
           (ngSubmit)="searchTemplates()"
           [class.translate-y-0]="advancedFiltersOpen()"
@@ -71,8 +70,8 @@
           [attr.aria-hidden]="!advancedFiltersOpen()"
           [attr.inert]="advancedFiltersOpen() ? null : ''"
         >
-          <label class="filter-label flex-1 min-w-[200px] sm:max-w-md">
-            <span class="filter-label-text">{{ 'anonymousTemplates.search' | t }}</span>
+          <label class="filter-label sm:col-span-2 md:col-span-2 lg:col-span-2 xl:flex-1 xl:min-w-[220px]">
+            <span class="filter-label-text truncate" [title]="'anonymousTemplates.search' | t">{{ 'anonymousTemplates.search' | t }}</span>
             <input
               class="filter-control"
               formControlName="searchText"
@@ -81,8 +80,8 @@
           </label>
 
           @if (showSuperAdminFilters()) {
-            <label class="filter-label flex-1 min-w-[130px]">
-              <span class="filter-label-text">{{ 'common.scope' | t }}</span>
+            <label class="filter-label sm:col-span-1 md:col-span-1 lg:col-span-1 xl:w-36">
+              <span class="filter-label-text truncate" [title]="'common.scope' | t">{{ 'common.scope' | t }}</span>
               <select class="filter-control filter-select" formControlName="scope">
                 <option value="">{{ 'anonymousTemplates.allScopes' | t }}</option>
                 <option value="1">{{ 'anonymousTemplates.branchScope' | t }}</option>
@@ -90,8 +89,8 @@
               </select>
             </label>
 
-            <label class="filter-label flex-[1.4] min-w-[160px]">
-              <span class="filter-label-text">{{ 'anonymousTemplates.branchFilter' | t }}</span>
+            <label class="filter-label sm:col-span-1 md:col-span-1 lg:col-span-1 xl:w-48">
+              <span class="filter-label-text truncate" [title]="'anonymousTemplates.branchFilter' | t">{{ 'anonymousTemplates.branchFilter' | t }}</span>
               <select class="filter-control filter-select" formControlName="branchId">
                 <option value="">
                   {{
@@ -107,8 +106,8 @@
             </label>
           }
 
-          <label class="filter-label flex-1 min-w-[120px]">
-            <span class="filter-label-text">{{ 'globalQuestionGroups.isActiveFilter' | t }}</span>
+          <label class="filter-label sm:col-span-1 md:col-span-1 lg:col-span-1 xl:w-36">
+            <span class="filter-label-text truncate" [title]="'globalQuestionGroups.isActiveFilter' | t">{{ 'globalQuestionGroups.isActiveFilter' | t }}</span>
             <select class="filter-control filter-select" formControlName="isActive">
               <option value="">{{ 'anonymousTemplates.allTemplates' | t }}</option>
               <option value="true">{{ 'common.active' | t }}</option>
@@ -116,8 +115,8 @@
             </select>
           </label>
 
-          <label class="filter-label w-24 sm:w-28">
-            <span class="filter-label-text">{{ 'globalQuestionGroups.pageSize' | t }}</span>
+          <label class="filter-label sm:col-span-1 md:col-span-1 lg:col-span-1 xl:w-28">
+            <span class="filter-label-text truncate" [title]="'globalQuestionGroups.pageSize' | t">{{ 'globalQuestionGroups.pageSize' | t }}</span>
             <select class="filter-control filter-select" formControlName="pageSize">
               <option value="10">10</option>
               <option value="25">25</option>
@@ -126,8 +125,8 @@
             </select>
           </label>
 
-          <label class="filter-label flex-1 min-w-[130px]">
-            <span class="filter-label-text">{{ 'globalQuestionGroups.orderSort' | t }}</span>
+          <label class="filter-label sm:col-span-1 md:col-span-1 lg:col-span-1 xl:w-36">
+            <span class="filter-label-text truncate" [title]="'globalQuestionGroups.orderSort' | t">{{ 'globalQuestionGroups.orderSort' | t }}</span>
             <select class="filter-control filter-select" formControlName="orderSort">
               <option value="">{{ 'globalQuestionGroups.defaultSort' | t }}</option>
               <option value="Newest">{{ 'globalQuestionGroups.newest' | t }}</option>
@@ -135,7 +134,7 @@
             </select>
           </label>
 
-          <div class="flex items-center gap-2 pt-1 sm:pt-0 shrink-0 self-end">
+          <div class="sm:col-span-2 md:col-span-1 lg:col-span-1 xl:w-auto flex items-center gap-2 pt-1 sm:pt-0 shrink-0 self-end">
             <app-button size="md" type="submit" [loading]="anonymousTemplatesStore.loading()">
               <app-icon [icon]="searchIcon" [size]="14" />
               {{ 'branches.searchAction' | t }}
@@ -153,19 +152,58 @@
       </div>
     </div>
 
-    <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm shadow-slate-200/50">
-      <div class="table-scroll-container">
-        <table class="w-full min-w-[56rem] divide-y divide-slate-100 text-start">
-          <thead class="bg-slate-50 text-start text-[10px] font-bold uppercase text-slate-500">
+    <div
+      class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm shadow-slate-200/50"
+    >
+      <!-- Horizontal Scroll Indicator & Quick Navigation Toolbar -->
+      <div
+        class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 bg-gradient-to-r from-slate-50 via-cyan-50/25 to-slate-50 px-3 py-1.5 text-xs text-slate-600"
+      >
+        <div class="flex items-center gap-2 min-w-0">
+          <span
+            class="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-cyan-100/70 text-[var(--theme-color-secondary)]"
+          >
+            <app-icon [icon]="arrowLeftRightIcon" [size]="12" />
+          </span>
+          <span class="text-[11px] font-bold text-slate-700 truncate">
+            {{ 'anonymousTemplates.horizontalScrollHint' | t }}
+          </span>
+        </div>
+
+        <div class="flex items-center gap-1.5 shrink-0 ms-auto">
+          <button
+            type="button"
+            class="inline-flex h-6 items-center gap-1 rounded-md border border-slate-200 bg-white px-2 text-[10px] font-bold text-slate-700 shadow-2xs transition hover:border-[#148496] hover:bg-cyan-50 hover:text-[var(--theme-color-secondary)] cursor-pointer"
+            (click)="scrollTable(350)"
+            title="تمرير لليمين"
+          >
+            <app-icon [icon]="chevronRightIcon" [size]="12" [flipRtl]="false" />
+            <span>يمين</span>
+          </button>
+          <button
+            type="button"
+            class="inline-flex h-6 items-center gap-1 rounded-md border border-slate-200 bg-white px-2 text-[10px] font-bold text-slate-700 shadow-2xs transition hover:border-[#148496] hover:bg-cyan-50 hover:text-[var(--theme-color-secondary)] cursor-pointer"
+            (click)="scrollTable(-350)"
+            title="تمرير لليسار"
+          >
+            <span>يسار</span>
+            <app-icon [icon]="chevronLeftIcon" [size]="12" [flipRtl]="false" />
+          </button>
+        </div>
+      </div>
+
+      <div #tableScrollContainer class="table-scroll-container">
+        <table class="w-full min-w-[78rem] divide-y divide-slate-100 text-start">
+          <thead class="sticky top-0 z-20 bg-slate-50 text-start text-[10px] font-bold uppercase text-slate-500 shadow-xs">
             <tr>
-              <th class="px-3 py-2.5">{{ 'anonymousTemplates.nameColumn' | t }}</th>
-              <th class="px-2.5 py-2.5">{{ 'anonymousTemplates.scopeAndBranch' | t }}</th>
-              <th class="px-2.5 py-2.5">{{ 'superAdminTemplates.lifecycle' | t }}</th>
-              <th class="px-2.5 py-2.5">{{ 'anonymousTemplates.scheduleColumn' | t }}</th>
-              <th class="px-2.5 py-2.5">{{ 'anonymousTemplates.countsColumn' | t }}</th>
-              <th class="px-2.5 py-2.5">{{ 'anonymousTemplates.createdOnColumn' | t }}</th>
-              <th class="px-2.5 py-2.5">{{ 'anonymousTemplates.quickAccess' | t }}</th>
-              <th class="sticky-action-col px-3 py-2.5 text-end">{{ 'branches.actions' | t }}</th>
+              <th class="w-[16rem] min-w-[14rem] px-3 py-2.5">{{ 'anonymousTemplates.nameColumn' | t }}</th>
+              <th class="w-[10rem] min-w-[8.5rem] px-2.5 py-2.5">{{ 'anonymousTemplates.scopeAndBranch' | t }}</th>
+              <th class="w-[7rem] min-w-[6.5rem] px-2.5 py-2.5">{{ 'superAdminTemplates.lifecycle' | t }}</th>
+              <th class="w-[10rem] min-w-[8.5rem] px-2.5 py-2.5">{{ 'anonymousTemplates.scheduleColumn' | t }}</th>
+              <th class="w-[9rem] min-w-[8rem] px-2.5 py-2.5">{{ 'anonymousTemplates.countsColumn' | t }}</th>
+              <th class="w-[8rem] min-w-[7.5rem] px-2.5 py-2.5">{{ 'anonymousTemplates.createdOnColumn' | t }}</th>
+              <th class="w-[12rem] min-w-[11rem] px-2.5 py-2.5">{{ 'anonymousTemplates.quickAccess' | t }}</th>
+              <th class="sticky-action-col min-w-[14.5rem] px-3 py-2.5 text-end">{{ 'branches.actions' | t }}</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100 bg-white">
@@ -191,7 +229,7 @@
                   [class.bg-slate-50]="template.isGlobal ? template.isArchived : !template.isActive"
                 >
                   <!-- 1. Name & Description -->
-                  <td class="px-3 py-2.5">
+                  <td class="w-[16rem] min-w-[14rem] px-3 py-2.5">
                     <p
                       class="break-words text-[11px] font-bold text-slate-900 [overflow-wrap:anywhere]"
                     >
@@ -207,7 +245,7 @@
                   </td>
 
                   <!-- 2. Scope & Branch -->
-                  <td class="px-2.5 py-2.5">
+                  <td class="w-[10rem] min-w-[8.5rem] px-2.5 py-2.5">
                     <div class="flex flex-col gap-0.5">
                       <span
                         class="w-fit rounded-full px-2 py-0.5 text-[10px] font-bold"
@@ -230,7 +268,7 @@
                   </td>
 
                   <!-- 3. Lifecycle Status -->
-                  <td class="px-2.5 py-2.5">
+                  <td class="w-[7rem] min-w-[6.5rem] px-2.5 py-2.5">
                     <div class="flex flex-col gap-1">
                       <span
                         class="w-fit rounded-full px-2 py-0.5 text-[10px] font-bold"
@@ -261,13 +299,14 @@
                   </td>
 
                   <!-- 4. Schedule (Validity Dates) -->
-                  <td class="px-2.5 py-2.5 text-[10px] leading-tight text-slate-700">
+                  <td class="w-[10rem] min-w-[8.5rem] px-2.5 py-2.5 text-[10px] leading-tight text-slate-700">
                     <div class="flex flex-col gap-0.5">
                       <span class="font-medium whitespace-nowrap">
                         {{ template.activeFrom ? (template.activeFrom | date: 'mediumDate') : '-' }}
                       </span>
                       <span class="text-slate-400 whitespace-nowrap">
-                        {{ 'common.to' | t }}: {{
+                        {{ 'common.to' | t }}:
+                        {{
                           template.expireTo
                             ? (template.expireTo | date: 'mediumDate')
                             : ('anonymousTemplates.openEnded' | t)
@@ -277,7 +316,7 @@
                   </td>
 
                   <!-- 5. Counts (Questions, Inputs, Responses) -->
-                  <td class="px-2.5 py-2.5">
+                  <td class="w-[9rem] min-w-[8rem] px-2.5 py-2.5">
                     <div class="flex flex-col gap-1 text-[10px] font-bold text-slate-600">
                       <span
                         class="w-fit rounded-full bg-cyan-50 px-2 py-0.5 text-[var(--theme-color-secondary)] whitespace-nowrap"
@@ -287,19 +326,21 @@
                       <span class="w-fit rounded-full bg-slate-50 px-2 py-0.5 whitespace-nowrap">
                         {{ template.customInputsCount }} {{ 'anonymousTemplates.inputsShort' | t }}
                       </span>
-                      <span class="w-fit rounded-full bg-emerald-50 px-2 py-0.5 text-emerald-700 whitespace-nowrap">
+                      <span
+                        class="w-fit rounded-full bg-emerald-50 px-2 py-0.5 text-emerald-700 whitespace-nowrap"
+                      >
                         {{ template.responsesCount }} {{ 'anonymousTemplates.responsesShort' | t }}
                       </span>
                     </div>
                   </td>
 
                   <!-- 6. Created On -->
-                  <td class="px-2.5 py-2.5 text-[11px] text-slate-700 whitespace-nowrap">
+                  <td class="w-[8rem] min-w-[7.5rem] px-2.5 py-2.5 text-[11px] text-slate-700 whitespace-nowrap">
                     {{ template.createdOnUtc ? (template.createdOnUtc | date: 'mediumDate') : '-' }}
                   </td>
 
                   <!-- 7. Quick Access (QR & Link) -->
-                  <td class="px-2.5 py-2.5">
+                  <td class="w-[12rem] min-w-[11rem] px-2.5 py-2.5">
                     <div class="flex items-center gap-1.5">
                       @if (template.qrCode) {
                         <button
@@ -319,13 +360,21 @@
                         <button
                           type="button"
                           class="inline-flex max-w-[8.5rem] items-center gap-1 rounded-md border border-slate-200 bg-slate-50 px-1.5 py-1 text-[10px] font-semibold text-slate-600 transition hover:border-cyan-300 hover:bg-cyan-50 hover:text-[var(--theme-color-secondary)] cursor-pointer"
-                          (click)="copyTemplatePublicUrl(template.anonymousTemplateId, template.publicUrl)"
+                          (click)="
+                            copyTemplatePublicUrl(template.anonymousTemplateId, template.publicUrl)
+                          "
                           [title]="template.publicUrl"
                         >
                           <app-icon
-                            [icon]="copiedTemplateId() === template.anonymousTemplateId ? checkIcon : copyIcon"
+                            [icon]="
+                              copiedTemplateId() === template.anonymousTemplateId
+                                ? checkIcon
+                                : copyIcon
+                            "
                             [size]="11"
-                            [class.text-emerald-600]="copiedTemplateId() === template.anonymousTemplateId"
+                            [class.text-emerald-600]="
+                              copiedTemplateId() === template.anonymousTemplateId
+                            "
                           />
                           <span class="truncate">
                             {{
@@ -342,7 +391,7 @@
                   </td>
 
                   <!-- 8. Sticky Actions Column -->
-                  <td class="sticky-action-col px-3 py-2.5">
+                  <td class="sticky-action-col min-w-[14.5rem] px-3 py-2.5">
                     <div class="flex items-center justify-end gap-1">
                       @if (canViewDetails()) {
                         <app-button
@@ -404,9 +453,15 @@
                         "
                       >
                         <app-icon
-                          [icon]="copiedTemplateId() === template.anonymousTemplateId ? checkIcon : copyIcon"
+                          [icon]="
+                            copiedTemplateId() === template.anonymousTemplateId
+                              ? checkIcon
+                              : copyIcon
+                          "
                           [size]="14"
-                          [class.text-emerald-600]="copiedTemplateId() === template.anonymousTemplateId"
+                          [class.text-emerald-600]="
+                            copiedTemplateId() === template.anonymousTemplateId
+                          "
                         />
                       </app-button>
                       <app-button
@@ -426,7 +481,12 @@
                           variant="danger"
                           [disabled]="anonymousTemplatesStore.deleting()"
                           [loading]="anonymousTemplatesStore.deleting()"
-                          [title]="(template.isGlobal ? 'superAdminTemplates.archive' : 'anonymousTemplates.deactivate') | t"
+                          [title]="
+                            (template.isGlobal
+                              ? 'superAdminTemplates.archive'
+                              : 'anonymousTemplates.deactivate'
+                            ) | t
+                          "
                           (pressed)="openDeleteTemplate(template)"
                         >
                           <app-icon [icon]="deleteIcon" [size]="14" />
@@ -702,9 +762,7 @@
             size="sm"
             type="submit"
             [loading]="assigningTemplate()"
-            [disabled]="
-              assignmentForm.invalid || branchOptionsLoading() || !!assignmentLogoError()
-            "
+            [disabled]="assignmentForm.invalid || branchOptionsLoading() || !!assignmentLogoError()"
           >
             <app-icon [icon]="filePlusIcon" [size]="14" />
             {{ 'superAdminTemplates.assignSubmit' | t }}
@@ -926,15 +984,17 @@
                   <p class="text-[11px] font-bold text-slate-800">
                     {{ 'branchTemplates.customInputItem' | t }} {{ inputIndex + 1 }}
                   </p>
-                  <app-button
-                    type="button"
-                    size="sm"
-                    variant="danger"
-                    (pressed)="removeCustomInput(inputIndex)"
-                  >
-                    <app-icon [icon]="deleteIcon" [size]="14" />
-                    {{ 'common.delete' | t }}
-                  </app-button>
+                  @if (!systemCustomInputGroups.has(inputGroup)) {
+                    <app-button
+                      type="button"
+                      size="sm"
+                      variant="danger"
+                      (pressed)="removeCustomInput(inputIndex)"
+                    >
+                      <app-icon [icon]="deleteIcon" [size]="14" />
+                      {{ 'common.delete' | t }}
+                    </app-button>
+                  }
                 </div>
 
                 <div class="grid gap-2 md:grid-cols-3">
@@ -995,6 +1055,7 @@
                     >
                       <option value="1">{{ 'branchTemplates.customInputTypeString' | t }}</option>
                       <option value="2">{{ 'branchTemplates.customInputTypeInteger' | t }}</option>
+                      <option value="3">{{ 'branchTemplates.customInputTypeDate' | t }}</option>
                     </select>
                   </label>
 
@@ -1116,7 +1177,7 @@
                       }
                     </label>
                   </div>
-                } @else {
+                } @else if (inputGroup.controls.type.value === '2') {
                   <div class="mt-2 grid gap-2 md:grid-cols-2">
                     <label class="block">
                       <span class="mb-1 block text-[10px] font-semibold text-slate-700">
@@ -1257,7 +1318,9 @@
             </span>
             <input
               class="h-8 w-full rounded-md border px-2.5 py-1.5 text-[11px] text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/10 disabled:bg-slate-100"
-              [class.border-[var(--theme-color-danger)]]="editTemplateFieldError('expireTo').length > 0"
+              [class.border-[var(--theme-color-danger)]]="
+                editTemplateFieldError('expireTo').length > 0
+              "
               [class.border-slate-200]="editTemplateFieldError('expireTo').length === 0"
               type="datetime-local"
               formControlName="expireTo"
@@ -1286,7 +1349,12 @@
                 {{ 'anonymousTemplates.updateCustomInputsSubtitle' | t }}
               </p>
             </div>
-            <app-button type="button" size="sm" variant="secondary" (pressed)="addEditCustomInput()">
+            <app-button
+              type="button"
+              size="sm"
+              variant="secondary"
+              (pressed)="addEditCustomInput()"
+            >
               <app-icon [icon]="plusIcon" [size]="14" />
               {{ 'branchTemplates.addCustomInput' | t }}
             </app-button>
@@ -1320,15 +1388,17 @@
                         </p>
                       }
                     </div>
-                    <app-button
-                      type="button"
-                      size="sm"
-                      variant="danger"
-                      (pressed)="removeEditCustomInput(inputIndex)"
-                    >
-                      <app-icon [icon]="deleteIcon" [size]="14" />
-                      {{ 'common.delete' | t }}
-                    </app-button>
+                    @if (!systemCustomInputGroups.has(inputGroup)) {
+                      <app-button
+                        type="button"
+                        size="sm"
+                        variant="danger"
+                        (pressed)="removeEditCustomInput(inputIndex)"
+                      >
+                        <app-icon [icon]="deleteIcon" [size]="14" />
+                        {{ 'common.delete' | t }}
+                      </app-button>
+                    }
                   </div>
 
                   <div class="grid gap-2 md:grid-cols-3">
@@ -1395,6 +1465,7 @@
                         <option value="2">
                           {{ 'branchTemplates.customInputTypeInteger' | t }}
                         </option>
+                        <option value="3">{{ 'branchTemplates.customInputTypeDate' | t }}</option>
                       </select>
                       @if (editCustomInputFieldError(inputIndex, 'type')) {
                         <span
@@ -1525,7 +1596,7 @@
                         }
                       </label>
                     </div>
-                  } @else {
+                  } @else if (inputGroup.controls.type.value === '2') {
                     <div class="mt-2 grid gap-2 md:grid-cols-2">
                       <label class="block">
                         <span class="mb-1 block text-[10px] font-semibold text-slate-700">

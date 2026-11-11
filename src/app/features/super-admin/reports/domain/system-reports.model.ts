@@ -1,3 +1,4 @@
+import { ResponseDateBasis } from '../../../../shared/models/custom-input.model';
 import {
   DashboardCharts,
   DashboardDetailsNavigation,
@@ -52,6 +53,7 @@ export interface SystemResponsesQuery {
   isScored?: boolean;
   questionId?: string;
   customInputId?: string;
+  dateBasis?: ResponseDateBasis | 'SubmittedOnUtc' | 'VisitTime';
   customInputType?: string;
   customInputValue?: string;
   orderSort?: 'Newest' | 'Oldest';
@@ -257,6 +259,7 @@ export interface SystemResponseCustomInput {
   typeName: string;
   stringValue: string | null;
   integerValue: number | null;
+  dateValue?: string | null;
   displayValue: string;
 }
 

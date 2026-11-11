@@ -378,6 +378,8 @@ export interface SurveyDashboardTemplateCustomInput {
   labelAr: string | null;
   type: string;
   typeName: string;
+  isSystemField?: boolean;
+  systemFieldKey?: string | null;
   isRequired: boolean;
   minLength: number | null;
   maxLength: number | null;

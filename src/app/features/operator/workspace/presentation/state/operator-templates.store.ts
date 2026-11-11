@@ -213,6 +213,7 @@ export class OperatorTemplatesStore {
     if (normalizedMarker.includes('hiddenquestionanswer') && normalizedMarker.includes('notallowed')) {
       return 'operatorTemplates.hiddenQuestionAnswerNotAllowed';
     }
+    if (normalizedMarker.includes('custominputdate')) return 'customInputs.invalidDate';
     if (normalizedMarker.includes('custominput') && normalizedMarker.includes('duplicated')) {
       return 'operatorTemplates.customInputDuplicated';
     }

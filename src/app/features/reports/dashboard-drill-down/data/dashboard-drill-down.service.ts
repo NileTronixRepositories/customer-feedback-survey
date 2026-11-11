@@ -1,3 +1,4 @@
+import { customInputDisplayValue } from '../../../../shared/models/custom-input.model';
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Router } from '@angular/router';
@@ -78,7 +79,7 @@ export class DashboardDrillDownService {
   updatePath(
     originalPath: string,
     updates: Readonly<
-      Partial<Record<'pageNumber' | 'pageSize' | 'searchText' | 'orderSort', string | number>>
+      Partial<Record<'pageNumber' | 'pageSize' | 'searchText' | 'orderSort' | 'customInputId' | 'customInputType' | 'customInputValue', string | number>>
     >,
   ): string {
     if (!this.parsePath(originalPath)) {
@@ -207,7 +208,7 @@ export class DashboardDrillDownService {
         customInputId: this.readString(input, 'customInputId'),
         labelEnSnapshot: this.readNullableString(input, 'labelEnSnapshot'),
         labelArSnapshot: this.readNullableString(input, 'labelArSnapshot'),
-        value: this.readDisplayValue(input['value']),
+        value: customInputDisplayValue(input),
       })),
       detailsNavigation: this.toNavigation(this.readRecord(item['detailsNavigation'])),
     };
@@ -302,12 +303,13 @@ export class DashboardDrillDownService {
       this.readString(item, 'displayValue') ||
       this.readString(item, 'textAnswer') ||
       this.readString(item, 'selectedOptionTextEn') ||
-      this.readDisplayValue(item['stringValue'] ?? item['integerValue']) ||
+      customInputDisplayValue(item) ||
       (starRatingValue !== null ? `${starRatingValue} / 5` : '') ||
       (smileValue !== null ? `${smileValue} / 5` : '');
 
     const type =
-      this.readString(item, customInput ? 'typeName' : 'questionTypeName') || questionType;
+      this.readString(item, customInput ? 'typeName' : 'questionTypeName') ||
+      (customInput ? this.readString(item, 'typeSnapshot') || this.readString(item, 'type') : questionType);
 
     const rawVoice =
       this.readNullableString(item, 'voiceFileUrl') ??

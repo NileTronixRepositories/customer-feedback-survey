@@ -327,6 +327,7 @@ export class AnonymousTemplateDashboardPageComponent implements OnInit, OnDestro
           legend: { display: false },
           tooltip: {
             callbacks: {
+              beforeTitle: () => this.i18n.translate('customInputs.visitTime'),
               afterLabel: (context) => {
                 const point = trend[context.dataIndex];
                 return `${this.i18n.translate('anonymousDashboard.responses')}: ${

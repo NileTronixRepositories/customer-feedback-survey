@@ -1,5 +1,9 @@
 import { DatePipe } from '@angular/common';
 import {
+  customInputHtmlType,
+  isValidDateOnly,
+} from '../../../../../../shared/models/custom-input.model';
+import {
   ChangeDetectionStrategy,
   Component,
   DestroyRef,
@@ -64,6 +68,11 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DashboardResponsesPageComponent {
+  readonly customInputHtmlType = customInputHtmlType;
+  readonly customInputIdControl = new FormControl('', { nonNullable: true });
+  readonly customInputTypeControl = new FormControl('1', { nonNullable: true });
+  readonly customInputValueControl = new FormControl('', { nonNullable: true });
+  readonly customInputErrorKey = signal('');
   readonly alertIcon = AlertTriangle;
   readonly branchIcon = Building2;
   readonly calendarIcon = Calendar;
@@ -138,6 +147,26 @@ export class DashboardResponsesPageComponent {
 
   applySearch(): void {
     this.loadWithUpdates({ pageNumber: 1, searchText: this.searchControl.value.trim() });
+  }
+
+  changeCustomInputType(): void {
+    this.customInputValueControl.setValue('');
+    this.customInputErrorKey.set('');
+  }
+
+  applyCustomInputFilter(): void {
+    const value = this.customInputValueControl.value.trim();
+    if (value && this.customInputTypeControl.value === '3' && !isValidDateOnly(value)) {
+      this.customInputErrorKey.set('customInputs.invalidDate');
+      return;
+    }
+    this.customInputErrorKey.set('');
+    this.loadWithUpdates({
+      pageNumber: 1,
+      customInputId: this.customInputIdControl.value.trim(),
+      customInputType: value ? this.customInputTypeControl.value : '',
+      customInputValue: value,
+    });
   }
 
   changeSort(): void {
@@ -363,6 +392,8 @@ export class DashboardResponsesPageComponent {
   }
 
   customInputTypeLabel(typeName: string | null | undefined): string {
+    if (typeName?.toLowerCase() === 'date' || typeName === '3')
+      return this.i18n.translate('branchTemplates.customInputTypeDate');
     if (!typeName) return '';
     const lower = typeName.toLowerCase();
     if (lower.includes('int') || lower.includes('num')) {
@@ -397,7 +428,18 @@ export class DashboardResponsesPageComponent {
 
   private loadWithUpdates(
     updates: Readonly<
-      Partial<Record<'pageNumber' | 'pageSize' | 'searchText' | 'orderSort', string | number>>
+      Partial<
+        Record<
+          | 'pageNumber'
+          | 'pageSize'
+          | 'searchText'
+          | 'orderSort'
+          | 'customInputId'
+          | 'customInputType'
+          | 'customInputValue',
+          string | number
+        >
+      >
     >,
   ): void {
     const path = this.drillDown.updatePath(this.currentPath() || this.originalPath(), updates);
@@ -487,6 +529,10 @@ export class DashboardResponsesPageComponent {
   private syncControls(path: string): void {
     try {
       const url = new URL(path, 'http://dashboard.local');
+      this.customInputIdControl.setValue(url.searchParams.get('customInputId') ?? '');
+      const type = url.searchParams.get('customInputType') ?? '1';
+      this.customInputTypeControl.setValue(type === 'Date' ? '3' : type === 'Integer' ? '2' : type);
+      this.customInputValueControl.setValue(url.searchParams.get('customInputValue') ?? '');
       this.searchControl.setValue(url.searchParams.get('searchText') ?? '', { emitEvent: false });
       this.sortControl.setValue(
         url.searchParams.get('orderSort') === 'Oldest' ? 'Oldest' : 'Newest',
