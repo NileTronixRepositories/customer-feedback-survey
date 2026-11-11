@@ -72,13 +72,13 @@
         </select>
       </label>
     </div>
-    <form class="row g-3 mt-1 align-items-end" (ngSubmit)="applyCustomInputFilter()">
-      <label class="col-12 col-md-3">
-        <span class="d-block mb-1 text-xs font-bold">{{ 'customInputs.fieldId' | t }}</span>
+    <form class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3 items-end pt-3 mt-3 border-t border-slate-100" (ngSubmit)="applyCustomInputFilter()">
+      <label class="sm:col-span-1 lg:col-span-3 flex flex-col gap-1">
+        <span class="text-[11px] font-bold text-slate-600">{{ 'customInputs.fieldId' | t }}</span>
         <input class="filter-control w-full" [formControl]="customInputIdControl" />
       </label>
-      <label class="col-12 col-md-2">
-        <span class="d-block mb-1 text-xs font-bold">{{
+      <label class="sm:col-span-1 lg:col-span-3 flex flex-col gap-1">
+        <span class="text-[11px] font-bold text-slate-600">{{
           'branchTemplates.customInputType' | t
         }}</span>
         <select
@@ -91,8 +91,8 @@
           <option value="3">{{ 'branchTemplates.customInputTypeDate' | t }}</option>
         </select>
       </label>
-      <label class="col-12 col-md-4">
-        <span class="d-block mb-1 text-xs font-bold">{{ 'customInputs.value' | t }}</span>
+      <label class="sm:col-span-1 lg:col-span-4 flex flex-col gap-1">
+        <span class="text-[11px] font-bold text-slate-600">{{ 'customInputs.value' | t }}</span>
         <input
           class="filter-control w-full"
           [type]="customInputHtmlType(+customInputTypeControl.value)"
@@ -101,11 +101,11 @@
           [attr.aria-describedby]="customInputErrorKey() ? 'custom-input-filter-error' : null"
         />
       </label>
-      <div class="col-12 col-md-3">
-        <app-button type="submit" [loading]="loading()">{{ 'customInputs.filter' | t }}</app-button>
+      <div class="sm:col-span-1 lg:col-span-2">
+        <app-button type="submit" size="md" [fullWidth]="true" [loading]="loading()">{{ 'customInputs.filter' | t }}</app-button>
       </div>
       @if (customInputErrorKey()) {
-        <p id="custom-input-filter-error" class="col-12 text-xs text-rose-700" role="alert">
+        <p id="custom-input-filter-error" class="col-span-full text-xs text-rose-700 font-semibold" role="alert">
           {{ customInputErrorKey() | t }}
         </p>
       }
@@ -168,27 +168,27 @@
         </div>
 
         <!-- Table Container -->
-        <div class="overflow-x-auto rounded-2xl border border-slate-200/80 bg-white shadow-xs">
-          <table class="w-full min-w-[64rem]">
+        <div class="overflow-x-auto rounded-xl border border-slate-200/80 bg-white shadow-xs table-scroll-container">
+          <table class="w-full min-w-[58rem] text-start">
             <thead
-              class="bg-slate-50/80 text-[11px] font-black uppercase tracking-wider text-slate-500"
+              class="sticky top-0 z-20 bg-slate-50 text-[10px] font-bold uppercase tracking-wider text-slate-600 border-b border-slate-200"
             >
               <tr>
-                <th class="px-3.5 py-3 text-start">{{ 'dashboardDrillDown.source' | t }}</th>
-                <th class="px-3.5 py-3 text-start">{{ 'dashboardDrillDown.template' | t }}</th>
-                <th class="px-3.5 py-3 text-start">{{ 'dashboardDrillDown.branch' | t }}</th>
-                <th class="px-3.5 py-3 text-start">{{ 'dashboardDrillDown.operator' | t }}</th>
-                <th class="px-3.5 py-3 text-start">{{ 'dashboardDrillDown.submittedOn' | t }}</th>
-                <th class="px-3.5 py-3 text-start">{{ 'dashboardDrillDown.score' | t }}</th>
-                <th class="px-3.5 py-3 text-start">{{ 'dashboardDrillDown.signals' | t }}</th>
-                <th class="px-3.5 py-3 text-start">{{ 'dashboardDrillDown.customInputs' | t }}</th>
-                <th class="px-3.5 py-3 text-start">{{ 'dashboardDrillDown.action' | t }}</th>
+                <th class="px-2.5 py-2.5 text-start w-[4.5rem] min-w-[4rem]">{{ 'dashboardDrillDown.source' | t }}</th>
+                <th class="px-2.5 py-2.5 text-start w-[12rem] min-w-[10rem]">{{ 'dashboardDrillDown.template' | t }}</th>
+                <th class="px-2.5 py-2.5 text-start w-[7rem] min-w-[6rem]">{{ 'dashboardDrillDown.branch' | t }}</th>
+                <th class="px-2.5 py-2.5 text-start w-[7.5rem] min-w-[6.5rem]">{{ 'dashboardDrillDown.operator' | t }}</th>
+                <th class="px-2.5 py-2.5 text-start w-[8.5rem] min-w-[7.5rem]">{{ 'dashboardDrillDown.submittedOn' | t }}</th>
+                <th class="px-2.5 py-2.5 text-start w-[5.5rem] min-w-[5rem]">{{ 'dashboardDrillDown.score' | t }}</th>
+                <th class="px-2.5 py-2.5 text-start w-[7.5rem] min-w-[6.5rem]">{{ 'dashboardDrillDown.signals' | t }}</th>
+                <th class="px-2.5 py-2.5 text-start w-[10rem] min-w-[8.5rem]">{{ 'dashboardDrillDown.customInputs' | t }}</th>
+                <th class="px-2.5 py-2.5 text-center w-[5rem] min-w-[4.5rem]">{{ 'dashboardDrillDown.action' | t }}</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-slate-100 text-xs">
+            <tbody class="divide-y divide-slate-100 text-[11px] bg-white">
               @for (item of result.data; track item.responseId) {
                 <tr class="transition hover:bg-slate-50/80">
-                  <td class="px-3.5 py-3">
+                  <td class="px-2.5 py-2">
                     <span
                       class="source-badge"
                       [class.source-badge--anonymous]="item.source === 'Anonymous'"
@@ -196,29 +196,29 @@
                       {{ item.source || '—' }}
                     </span>
                   </td>
-                  <td class="px-3.5 py-3">
+                  <td class="px-2.5 py-2">
                     <p
-                      class="max-w-[14rem] truncate font-black text-slate-950"
+                      class="max-w-[12rem] truncate font-bold text-slate-900 text-[11px]"
                       [title]="localized(item.templateNameEn, item.templateNameAr)"
                     >
                       {{ localized(item.templateNameEn, item.templateNameAr) }}
                     </p>
                   </td>
-                  <td class="px-3.5 py-3 font-semibold text-slate-600">
+                  <td class="px-2.5 py-2 font-semibold text-slate-700 text-[11px] whitespace-nowrap">
                     {{ localized(item.branchNameEn, item.branchNameAr) }}
                   </td>
-                  <td class="px-3.5 py-3 font-semibold text-slate-600">
+                  <td class="px-2.5 py-2 font-semibold text-slate-700 text-[11px] whitespace-nowrap">
                     {{ localized(item.operatorNameEn, item.operatorNameAr) }}
                   </td>
-                  <td class="px-3.5 py-3 font-semibold text-slate-500 whitespace-nowrap">
-                    {{ item.submittedOnUtc | date: 'medium' }}
+                  <td class="px-2.5 py-2 font-medium text-slate-500 text-[10px] whitespace-nowrap">
+                    {{ item.submittedOnUtc | date: 'short' }}
                   </td>
-                  <td class="px-3.5 py-3">
-                    <div class="flex flex-col gap-1 items-start">
+                  <td class="px-2.5 py-2">
+                    <div class="flex flex-col gap-0.5 items-start">
                       <span [class]="scoreClass(item.scorePercentage)">{{ score(item) }}</span>
                       @if (item.scoreDerivation) {
                         <span
-                          class="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[9px] font-bold border"
+                          class="inline-flex items-center gap-0.5 rounded px-1 py-0.5 text-[8px] font-bold border"
                           [class.bg-indigo-50]="item.scoreDerivation === 'SubmissionSnapshot'"
                           [class.text-indigo-700]="item.scoreDerivation === 'SubmissionSnapshot'"
                           [class.border-indigo-200]="item.scoreDerivation === 'SubmissionSnapshot'"
@@ -226,48 +226,48 @@
                           [class.text-amber-800]="item.scoreDerivation === 'StoredRootBaseline'"
                           [class.border-amber-200]="item.scoreDerivation === 'StoredRootBaseline'"
                         >
-                          <app-icon [icon]="historyIcon" [size]="9" />
+                          <app-icon [icon]="historyIcon" [size]="8" />
                           {{ derivationLabel(item.scoreDerivation) }}
                         </span>
                       }
                       @if (item.requestedModeAvailable === false) {
                         <span
-                          class="inline-flex items-center gap-0.5 text-[9px] font-semibold text-amber-700"
+                          class="inline-flex items-center gap-0.5 text-[8px] font-semibold text-amber-700"
                           [title]="'scoreDerivation.fallbackTooltip' | t"
                         >
-                          <app-icon [icon]="alertIcon" [size]="9" class="text-amber-600" />
+                          <app-icon [icon]="alertIcon" [size]="8" class="text-amber-600" />
                           <span>{{ 'scoreDerivation.fallback' | t }}</span>
                         </span>
                       }
                     </div>
                   </td>
-                  <td class="px-3.5 py-3">
-                    <div class="flex flex-col gap-1.5">
-                      <div class="flex items-center gap-1.5 flex-wrap">
+                  <td class="px-2.5 py-2">
+                    <div class="flex flex-col gap-1">
+                      <div class="flex items-center gap-1 flex-wrap">
                         @if (item.hasComplaint) {
                           <span
-                            class="inline-flex items-center gap-1 rounded-md bg-rose-50 border border-rose-200 px-2 py-0.5 text-[10px] font-black text-rose-700"
+                            class="inline-flex items-center gap-0.5 rounded bg-rose-50 border border-rose-200 px-1.5 py-0.5 text-[9px] font-bold text-rose-700"
                           >
-                            <app-icon [icon]="complaintIcon" [size]="11" />
+                            <app-icon [icon]="complaintIcon" [size]="10" />
                             {{ 'dashboardDrillDown.complaint' | t }}
                           </span>
                         } @else {
                           <span
-                            class="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-400"
+                            class="inline-flex items-center rounded bg-slate-100 px-1.5 py-0.5 text-[9px] font-medium text-slate-400"
                           >
                             {{ 'dashboardDrillDown.complaint' | t }}
                           </span>
                         }
                         @if (item.hasVoice) {
                           <span
-                            class="inline-flex items-center gap-1 rounded-md bg-cyan-50 border border-cyan-200 px-2 py-0.5 text-[10px] font-black text-cyan-700"
+                            class="inline-flex items-center gap-0.5 rounded bg-cyan-50 border border-cyan-200 px-1.5 py-0.5 text-[9px] font-bold text-cyan-700"
                           >
-                            <app-icon [icon]="micIcon" [size]="11" />
+                            <app-icon [icon]="micIcon" [size]="10" />
                             {{ 'dashboardDrillDown.voice' | t }}
                           </span>
                         } @else {
                           <span
-                            class="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-400"
+                            class="inline-flex items-center rounded bg-slate-100 px-1.5 py-0.5 text-[9px] font-medium text-slate-400"
                           >
                             {{ 'dashboardDrillDown.voice' | t }}
                           </span>
@@ -275,12 +275,12 @@
                       </div>
                       @if (item.complaintText) {
                         <div
-                          class="flex items-start gap-1 rounded-md bg-rose-50/90 border border-rose-200/70 p-1.5 text-[10px] text-rose-900 max-w-[14rem]"
+                          class="flex items-start gap-1 rounded bg-rose-50/90 border border-rose-200/70 p-1 text-[9px] text-rose-900 max-w-[10rem]"
                           [title]="item.complaintText"
                         >
                           <app-icon
                             [icon]="complaintIcon"
-                            [size]="11"
+                            [size]="10"
                             class="text-rose-600 shrink-0 mt-0.5"
                           />
                           <span class="line-clamp-2 leading-tight font-medium">{{
@@ -290,22 +290,22 @@
                       }
                     </div>
                   </td>
-                  <td class="px-3.5 py-3">
+                  <td class="px-2.5 py-2">
                     <p
-                      class="line-clamp-2 max-w-[16rem] text-[11px] font-semibold text-slate-500"
+                      class="line-clamp-2 max-w-[11rem] text-[10px] font-medium text-slate-500 leading-snug"
                       [title]="preview(item)"
                     >
                       {{ preview(item) }}
                     </p>
                   </td>
-                  <td class="px-3.5 py-3">
+                  <td class="px-2.5 py-2 text-center whitespace-nowrap">
                     <button
-                      class="inline-flex items-center gap-1 rounded-xl border border-cyan-200/80 bg-cyan-50/70 px-3 py-1.5 text-xs font-black text-[var(--theme-color-secondary)] transition hover:bg-cyan-100 hover:border-cyan-300"
+                      class="inline-flex items-center gap-1 rounded-lg border border-cyan-200/80 bg-cyan-50/70 px-2 py-1 text-[11px] font-bold text-[var(--theme-color-secondary)] transition hover:bg-cyan-100 hover:border-cyan-300 cursor-pointer"
                       type="button"
                       (click)="openDetails(item)"
                     >
-                      <app-icon [icon]="detailsIcon" [size]="13" />
-                      {{ 'dashboardDrillDown.open' | t }}
+                      <app-icon [icon]="detailsIcon" [size]="12" />
+                      <span>{{ 'dashboardDrillDown.open' | t }}</span>
                     </button>
                   </td>
                 </tr>
