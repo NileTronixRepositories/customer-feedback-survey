@@ -30,6 +30,29 @@ interface ApiErrorResponse {
 
 @Injectable()
 export class OperatorsStore {
+  readonly flagSubmissionUpdatingId = signal<string | null>(null);
+
+  setFlagSubmission(operator: OperatorListItem): void {
+    if (this.flagSubmissionUpdatingId()) return;
+    this.flagSubmissionUpdatingId.set(operator.operatorId);
+    this.operatorsService
+      .setFlagSubmission(operator.operatorId, !operator.canCreateFlagsOnSubmit)
+      .pipe(
+        take(1),
+        finalize(() => this.flagSubmissionUpdatingId.set(null)),
+      )
+      .subscribe({
+        next: (enabled) =>
+          this.operatorsSignal.update((items) =>
+            items.map((item) =>
+              item.operatorId === operator.operatorId
+                ? { ...item, canCreateFlagsOnSubmit: enabled }
+                : item,
+            ),
+          ),
+        error: () => this.errorSignal.set('flags.loadError'),
+      });
+  }
   private readonly defaultQuery: OperatorsQuery = {
     pageNumber: 1,
     pageSize: 10,
@@ -88,7 +111,9 @@ export class OperatorsStore {
   readonly activeTemplatesError = this.activeTemplatesErrorSignal.asReadonly();
   readonly error = this.errorSignal.asReadonly();
   readonly success = this.successSignal.asReadonly();
-  readonly totalPages = computed(() => Math.max(1, Math.ceil(this.totalItemsSignal() / this.pageSizeSignal())));
+  readonly totalPages = computed(() =>
+    Math.max(1, Math.ceil(this.totalItemsSignal() / this.pageSizeSignal())),
+  );
   readonly hasPreviousPage = computed(() => this.currentPageSignal() > 1);
   readonly hasNextPage = computed(() => this.currentPageSignal() < this.totalPages());
 
@@ -171,7 +196,9 @@ export class OperatorsStore {
         },
         error: (error: unknown) => {
           this.activeTemplatesSignal.set([]);
-          this.activeTemplatesErrorSignal.set(this.readErrorKey(error, 'operators.templatesCatalogLoadError'));
+          this.activeTemplatesErrorSignal.set(
+            this.readErrorKey(error, 'operators.templatesCatalogLoadError'),
+          );
         },
       });
   }
@@ -340,12 +367,18 @@ export class OperatorsStore {
         },
         error: (error: unknown) => {
           this.templatesSelectionSignal.set(null);
-          this.templatesSelectionErrorSignal.set(this.readErrorKey(error, 'operators.templatesSelectionLoadError'));
+          this.templatesSelectionErrorSignal.set(
+            this.readErrorKey(error, 'operators.templatesSelectionLoadError'),
+          );
         },
       });
   }
 
-  updateTemplatesSelection(operatorId: string, payload: UpdateOperatorTemplatesPayload, searchText = ''): void {
+  updateTemplatesSelection(
+    operatorId: string,
+    payload: UpdateOperatorTemplatesPayload,
+    searchText = '',
+  ): void {
     if (this.templatesSelectionSavingSignal()) {
       return;
     }
@@ -382,7 +415,9 @@ export class OperatorsStore {
           this.loadTemplatesSelection(operatorId, searchText);
         },
         error: (error: unknown) => {
-          this.templatesSelectionErrorSignal.set(this.readErrorKey(error, 'operators.templatesSelectionUpdateError'));
+          this.templatesSelectionErrorSignal.set(
+            this.readErrorKey(error, 'operators.templatesSelectionUpdateError'),
+          );
           if (this.shouldRefreshTemplatesSelectionAfterAssignError(error)) {
             this.loadTemplatesSelection(operatorId, searchText);
           }
@@ -519,7 +554,9 @@ export class OperatorsStore {
       return false;
     }
 
-    const marker = this.readErrorMarker(error.error).replace(/[\s_-]/g, '').toLowerCase();
+    const marker = this.readErrorMarker(error.error)
+      .replace(/[\s_-]/g, '')
+      .toLowerCase();
     return (
       error.status === 400 ||
       error.status === 422 ||
@@ -534,7 +571,9 @@ export class OperatorsStore {
       return false;
     }
 
-    const marker = this.readErrorMarker(error.error).replace(/[\s_.-]/g, '').toLowerCase();
+    const marker = this.readErrorMarker(error.error)
+      .replace(/[\s_.-]/g, '')
+      .toLowerCase();
     return (error.status === 400 || error.status === 422) && marker.includes(stateMarker);
   }
 
@@ -544,7 +583,13 @@ export class OperatorsStore {
     }
 
     const firstError = errorBody.errors?.[0];
-    return [firstError?.code, firstError?.messageName, firstError?.message, errorBody.detail, errorBody.title]
+    return [
+      firstError?.code,
+      firstError?.messageName,
+      firstError?.message,
+      errorBody.detail,
+      errorBody.title,
+    ]
       .filter((value): value is string => typeof value === 'string')
       .join(' ');
   }

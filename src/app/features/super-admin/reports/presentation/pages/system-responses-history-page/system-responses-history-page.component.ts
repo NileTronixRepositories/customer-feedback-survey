@@ -1,3 +1,8 @@
+import { DashboardDrillDownService } from '../../../../../reports/dashboard-drill-down/data/dashboard-drill-down.service';
+import { flagType } from '../../../../../../shared/models/response-flag.model';
+import { ResponseFlagCardComponent } from '../../../../../response-flags/presentation/response-flag-card.component';
+import { ResponseFlagDetails } from '../../../../../../shared/models/response-flag.model';
+import { ModalComponent } from '../../../../../../shared/ui/modal/modal.component';
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
@@ -21,6 +26,8 @@ type ScoreStatus = 'Healthy' | 'Neutral' | 'Critical' | 'Not Scored';
   selector: 'app-system-responses-history-page',
   standalone: true,
   imports: [
+    ResponseFlagCardComponent,
+    ModalComponent,
     ButtonComponent,
     DatePipe,
     IconComponent,
@@ -33,7 +40,10 @@ type ScoreStatus = 'Healthy' | 'Neutral' | 'Critical' | 'Not Scored';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SystemResponsesHistoryPageComponent implements OnInit {
+  readonly selectedFlag = signal<ResponseFlagDetails | null>(null);
+
   readonly store = inject(SystemReportsStore);
+  private readonly drillDown = inject(DashboardDrillDownService);
   private readonly formBuilder = inject(FormBuilder);
   private readonly i18n = inject(I18nService);
 
@@ -55,6 +65,7 @@ export class SystemResponsesHistoryPageComponent implements OnInit {
     maxScorePercentage: [''],
     hasComplaint: ['' as BooleanFilterValue],
     hasVoice: ['' as BooleanFilterValue],
+    flagType: [''],
     searchText: [''],
     pageSize: ['10'],
   });
@@ -76,6 +87,7 @@ export class SystemResponsesHistoryPageComponent implements OnInit {
       maxScorePercentage: this.toOptionalNumber(value.maxScorePercentage),
       hasComplaint: this.toOptionalBoolean(value.hasComplaint),
       hasVoice: this.toOptionalBoolean(value.hasVoice),
+      flagType: flagType(value.flagType) ?? undefined,
       searchText: value.searchText || undefined,
       pageNumber: 1,
       pageSize: this.toPageSize(value.pageSize),
@@ -93,6 +105,7 @@ export class SystemResponsesHistoryPageComponent implements OnInit {
       maxScorePercentage: '',
       hasComplaint: '',
       hasVoice: '',
+      flagType: '',
       searchText: '',
       pageSize: '10',
     });
@@ -104,6 +117,13 @@ export class SystemResponsesHistoryPageComponent implements OnInit {
   }
 
   openDetails(row: SystemResponseListItem): void {
+    if (row.detailsNavigation) {
+      this.drillDown.open({
+        title: this.i18n.translate('flags.viewSurvey'),
+        navigation: row.detailsNavigation,
+      });
+      return;
+    }
     this.store.loadDetails(row.surveyResponseId);
   }
 

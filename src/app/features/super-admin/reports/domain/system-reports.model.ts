@@ -1,3 +1,7 @@
+import {
+  ResponseFlagDetails,
+  SurveyResponseFlagType,
+} from '../../../../shared/models/response-flag.model';
 import { ResponseDateBasis } from '../../../../shared/models/custom-input.model';
 import {
   DashboardCharts,
@@ -16,13 +20,7 @@ import {
 export type SystemReportsGroupBy = 'Day' | 'Month';
 export type SystemReportsRiskLevel = 'Healthy' | 'MediumRisk' | 'HighRisk';
 export type SystemResponseQuestionType =
-  | 'SingleChoice'
-  | 'StarRating'
-  | 'Smiles'
-  | 'Complain'
-  | 'FreeText'
-  | 'Voice'
-  | 'Image';
+  'SingleChoice' | 'StarRating' | 'Smiles' | 'Complain' | 'FreeText' | 'Voice' | 'Image';
 
 export interface SystemDashboardQuery {
   from?: string;
@@ -45,6 +43,7 @@ export interface SystemResponsesQuery {
   scoreCalculationMode?: ScoreCalculationMode | string;
   scoreIncludedOnly?: boolean;
   complaintItemsOnly?: boolean;
+  flagType?: SurveyResponseFlagType;
   minScorePercentage?: number;
   maxScorePercentage?: number;
   hasComplaint?: boolean;
@@ -102,6 +101,8 @@ export interface SystemDashboardSummary {
   hasScoreData?: boolean;
   satisfactionPercentage?: number | null;
   complaintsCount: number;
+  suggestionsCount?: number;
+  commentsCount?: number;
   voiceAnswersCount: number;
 }
 
@@ -120,6 +121,8 @@ export interface SystemBranchPerformance {
   responsesCount: number;
   averageScorePercentage: number;
   complaintsCount: number;
+  suggestionsCount?: number;
+  commentsCount?: number;
   voiceAnswersCount: number;
   activeTemplatesCount: number;
   riskLevel: SystemReportsRiskLevel;
@@ -127,6 +130,9 @@ export interface SystemBranchPerformance {
 }
 
 export interface SystemDepartmentActivity {
+  complaintsCount?: number;
+  suggestionsCount?: number;
+  commentsCount?: number;
   departmentId: string;
   departmentNameEn: string;
   departmentNameAr: string | null;
@@ -146,6 +152,8 @@ export interface SystemTemplatePerformance {
   responsesCount: number;
   averageScorePercentage: number;
   complaintsCount: number;
+  suggestionsCount?: number;
+  commentsCount?: number;
   riskLevel: SystemReportsRiskLevel;
   detailsNavigation: DashboardDetailsNavigation | null;
 }
@@ -181,6 +189,10 @@ export interface SystemResponsesPagination {
 }
 
 export interface SystemResponseListItem {
+  itemKind?: 'QuestionAnswer' | 'ResponseFlag';
+  flagId?: string | null;
+  flag?: ResponseFlagDetails | null;
+  detailsNavigation?: DashboardDetailsNavigation | null;
   surveyResponseId: string;
   branchId: string;
   branchNameEn: string;

@@ -53,10 +53,18 @@ export class OperatorsService {
     }
 
     return this.http
-      .get<
-        OperatorsPageApiResponse | readonly OperatorApiResponse[] | OperatorApiResponse
-      >(this.operatorsUrl, { params })
+      .get<OperatorsPageApiResponse | readonly OperatorApiResponse[] | OperatorApiResponse>(
+        this.operatorsUrl,
+        { params },
+      )
       .pipe(map((response) => this.toPageResult(response, query)));
+  }
+
+  setFlagSubmission(operatorId: string, enabled: boolean): Observable<boolean> {
+    return this.http.put<boolean>(
+      `${this.operatorsUrl}/${encodeURIComponent(operatorId)}/flag-submission`,
+      { enabled },
+    );
   }
 
   create(payload: CreateOperatorPayload): Observable<CreateOperatorResponse> {
@@ -72,17 +80,21 @@ export class OperatorsService {
   }
 
   deactivate(operatorId: string): Observable<OperatorStateChangeResult> {
-    return this.http.put<OperatorStateChangeApiResponse | null>(
-      `${this.operatorsUrl}/${operatorId}/deactivate`,
-      null,
-    ).pipe(map((response) => this.toStateChange(response, operatorId, false)));
+    return this.http
+      .put<OperatorStateChangeApiResponse | null>(
+        `${this.operatorsUrl}/${operatorId}/deactivate`,
+        null,
+      )
+      .pipe(map((response) => this.toStateChange(response, operatorId, false)));
   }
 
   restore(operatorId: string): Observable<OperatorStateChangeResult> {
-    return this.http.put<OperatorStateChangeApiResponse | null>(
-      `${this.operatorsUrl}/${operatorId}/restore`,
-      null,
-    ).pipe(map((response) => this.toStateChange(response, operatorId, true)));
+    return this.http
+      .put<OperatorStateChangeApiResponse | null>(
+        `${this.operatorsUrl}/${operatorId}/restore`,
+        null,
+      )
+      .pipe(map((response) => this.toStateChange(response, operatorId, true)));
   }
 
   templatesSelection(
@@ -171,6 +183,7 @@ export class OperatorsService {
 
   private toOperator(response: OperatorApiResponse): OperatorListItem {
     return {
+      canCreateFlagsOnSubmit: response.canCreateFlagsOnSubmit ?? false,
       operatorId: this.readRecordId(response.operatorId),
       applicationUserId: this.readRecordId(response.applicationUserId),
       departmentId: this.readRecordId(response.departmentId),

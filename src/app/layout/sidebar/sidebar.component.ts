@@ -45,11 +45,28 @@ interface MenuItem {
     | 'systemReports'
     | 'departmentReports'
     | 'branchDashboard'
-    | 'evaluationSettings';
+    | 'evaluationSettings'
+    | 'flagOfficers'
+    | 'responseFlags';
   exact?: boolean;
 }
 
 const MENU_ITEMS: readonly MenuItem[] = [
+  {
+    labelKey: 'flags.officers',
+    path: '/flag-officers',
+    icon: UsersRound,
+    roles: [],
+    feature: 'flagOfficers',
+    exact: true,
+  },
+  {
+    labelKey: 'flags.workspace',
+    path: '/feedback',
+    icon: ClipboardList,
+    roles: [],
+    feature: 'responseFlags',
+  },
   {
     labelKey: 'nav.dashboard',
     superAdminLabelKey: 'nav.branchesDashboard',
@@ -193,7 +210,7 @@ const MENU_ITEMS: readonly MenuItem[] = [
     labelKey: 'nav.operators',
     path: '/operators',
     icon: UsersRound,
-    roles: ['DEPARTMENT_ADMIN'],
+    roles: ['SUPER_ADMIN', 'DEPARTMENT_ADMIN'],
     exact: true,
   },
   {
@@ -237,6 +254,8 @@ export class SidebarComponent {
   });
 
   private canAccessFeature(feature: MenuItem['feature']): boolean {
+    if (feature === 'flagOfficers') return this.authStore.canManageFlagOfficers();
+    if (feature === 'responseFlags') return this.authStore.canUseResponseFlags();
     if (feature === 'templates') {
       return this.authStore.canAccessTemplates();
     }

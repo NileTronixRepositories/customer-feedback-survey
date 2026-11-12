@@ -1,271 +1,535 @@
-<div class="w-full space-y-3">
-  <app-page-header
-    [title]="'operators.title' | t"
-    [description]="'operators.description' | t"
-    [icon]="operatorIcon"
-  >
-    <button class="filter-toggle-btn" type="button" (click)="toggleAdvancedFilters()">
-      <app-icon [icon]="filterIcon" [size]="14" />
-      {{
-        advancedFiltersOpen()
-          ? ('departmentDashboard.hideFilters' | t)
-          : ('departmentDashboard.showFilters' | t)
-      }}
-    </button>
-    <app-button
-      size="md"
-      type="button"
-      [disabled]="!canCreateOperator()"
-      (pressed)="openCreateOperator()"
-    >
-      <app-icon [icon]="plusIcon" [size]="15" />
-      {{ 'operators.createAction' | t }}
-    </app-button>
-  </app-page-header>
-
-  @if (!canCreateOperator()) {
-    <div class="border border-amber-100 bg-amber-50 p-3 text-xs font-semibold text-amber-700">
-      {{ 'operators.departmentScopeMissing' | t }}
-    </div>
-  }
-
-  <app-card [title]="''" [subtitle]="''">
-    <div
-      class="grid transition-[grid-template-rows,opacity] duration-300 ease-out motion-reduce:transition-none"
-      [class.grid-rows-[1fr]]="advancedFiltersOpen()"
-      [class.grid-rows-[0fr]]="!advancedFiltersOpen()"
-      [class.opacity-100]="advancedFiltersOpen()"
-      [class.opacity-0]="!advancedFiltersOpen()"
-    >
-      <div class="min-h-0 overflow-hidden">
-        <form
-          class="mb-3.5 flex flex-wrap items-end gap-3 rounded-xl border border-slate-200/80 bg-slate-50/70 p-3.5 shadow-xs transition-[transform,opacity] duration-300 ease-out motion-reduce:transition-none"
-          [formGroup]="searchForm"
-          (ngSubmit)="searchOperators()"
-          [class.translate-y-0]="advancedFiltersOpen()"
-          [class.-translate-y-2]="!advancedFiltersOpen()"
-          [class.pointer-events-none]="!advancedFiltersOpen()"
-          [attr.aria-hidden]="!advancedFiltersOpen()"
-          [attr.inert]="advancedFiltersOpen() ? null : ''"
+<div class="w-full space-y-4 sm:space-y-5 animate-enter">
+  <!-- 1. EXECUTIVE HERO HEADER -->
+  <section class="executive-hero-card rounded-3xl border border-slate-200/90 bg-white p-4.5 sm:p-6 shadow-xs relative overflow-hidden">
+    <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between relative z-10">
+      <!-- Title, Badge & Description -->
+      <div class="flex items-center gap-3.5 sm:gap-4 min-w-0">
+        <div
+          class="flex h-12 w-12 sm:h-13 sm:w-13 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--theme-color-primary,#148496)] to-[var(--theme-color-secondary,#0f6f7f)] text-white shadow-md shadow-teal-950/15 ring-4 ring-teal-500/10"
         >
-          <label class="filter-label flex-1 min-w-[220px]">
-            <span class="filter-label-text">{{ 'operators.search' | t }}</span>
-            <div class="relative flex items-center">
-              <span
-                class="pointer-events-none absolute inset-y-0 start-0 z-10 flex items-center ps-3.5 text-slate-400"
-              >
-                <app-icon [icon]="searchIcon" [size]="16" />
-              </span>
-              <input
-                type="text"
-                class="filter-control filter-control-search w-full"
-                [placeholder]="'operators.searchPlaceholder' | t"
-                formControlName="searchText"
-              />
-            </div>
-          </label>
+          <i class="fa-solid fa-users-gear text-xl sm:text-2xl"></i>
+        </div>
 
-          <label class="filter-label w-full sm:w-auto sm:min-w-[12rem] sm:max-w-[16rem]">
-            <span class="filter-label-text">{{ 'operators.department' | t }}</span>
-            <select
-              class="filter-control filter-select disabled:bg-slate-100 disabled:text-slate-400"
-              formControlName="departmentId"
-              [disabled]="!isSuperAdmin()"
+        <div class="min-w-0">
+          <div class="flex items-center gap-2 flex-wrap">
+            <h1 class="text-xl sm:text-2xl font-black tracking-tight text-slate-900 truncate">
+              {{ 'operators.title' | t }}
+            </h1>
+            <span
+              class="inline-flex items-center gap-1.5 rounded-full px-3 py-0.5 text-[11px] font-black bg-teal-50 text-[var(--theme-color-primary,#148496)] border border-teal-200/70 shadow-2xs"
             >
-              <option value="">
-                @if (isSuperAdmin()) {
-                  {{ 'operators.allDepartments' | t }}
-                } @else {
-                  {{ 'operators.currentDepartment' | t }}
-                }
-              </option>
-              @if (!isSuperAdmin() && currentDepartmentId()) {
-                <option [value]="currentDepartmentId()">
-                  {{ 'operators.currentDepartment' | t }}
-                </option>
-              }
-              @for (department of operatorsStore.departments(); track department.id) {
-                <option [value]="department.id">
-                  {{ department.nameEn }} - {{ department.nameAr }}
-                </option>
-              }
-            </select>
-          </label>
-
-          <label class="filter-label w-full sm:w-auto sm:min-w-[7rem] sm:max-w-[8.5rem]">
-            <span class="filter-label-text">{{ 'questionGroups.pageSize' | t }}</span>
-            <select class="filter-control filter-select" formControlName="pageSize">
-              <option value="10">10</option>
-              <option value="25">25</option>
-              <option value="50">50</option>
-              <option value="100">100</option>
-            </select>
-          </label>
-
-          <div class="flex w-full items-center gap-2 sm:w-auto shrink-0">
-            <app-button
-              class="flex-1 sm:flex-initial"
-              type="submit"
-              size="md"
-              [loading]="operatorsStore.loading()"
-            >
-              <app-icon [icon]="searchIcon" [size]="16" />
-              {{ 'branches.searchAction' | t }}
-            </app-button>
-            <app-button
-              class="flex-1 sm:flex-initial"
-              type="button"
-              size="md"
-              variant="secondary"
-              (pressed)="clearOperatorSearch()"
-            >
-              {{ 'branches.clearSearch' | t }}
-            </app-button>
+              <span class="h-1.5 w-1.5 rounded-full bg-teal-500 animate-pulse"></span>
+              <span>{{ operatorsStore.totalItems() }} {{ 'operators.totalItems' | t }}</span>
+            </span>
           </div>
-        </form>
+          <p class="text-xs font-semibold text-slate-500 mt-1 truncate">
+            {{ 'operators.description' | t }}
+          </p>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex flex-wrap items-center gap-2.5 sm:gap-3">
+        <button
+          type="button"
+          class="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-slate-200/90 bg-white px-3.5 text-xs font-bold text-slate-700 shadow-2xs transition hover:bg-slate-50 hover:border-slate-300 active:scale-95 cursor-pointer"
+          (click)="toggleAdvancedFilters()"
+        >
+          <i [class]="advancedFiltersOpen() ? 'fa-solid fa-filter-circle-xmark text-slate-500 text-sm' : 'fa-solid fa-filter text-slate-500 text-sm'"></i>
+          <span>
+            {{
+              advancedFiltersOpen()
+                ? ('departmentDashboard.hideFilters' | t)
+                : ('departmentDashboard.showFilters' | t)
+            }}
+          </span>
+        </button>
+
+        <button
+          type="button"
+          class="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[var(--theme-color-primary,#148496)] to-[var(--theme-color-secondary,#0f6f7f)] px-4.5 text-xs font-black text-white shadow-sm shadow-teal-950/20 transition hover:brightness-105 active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+          [disabled]="!canCreateOperator()"
+          (click)="openCreateOperator()"
+        >
+          <i class="fa-solid fa-user-plus text-sm"></i>
+          <span>{{ 'operators.createAction' | t }}</span>
+        </button>
       </div>
     </div>
 
-    <div class="hidden overflow-hidden border border-slate-100 lg:block">
-      <div class="overflow-x-auto">
-        <table class="w-full min-w-[62rem] table-fixed divide-y divide-slate-100">
-          <colgroup>
-            <col class="w-[14%]" />
-            <col class="w-[12%]" />
-            <col class="w-[18%]" />
-            <col class="w-[16%]" />
-            <col class="w-[13%]" />
-            <col class="w-[12%]" />
-            <col class="w-[15%]" />
-          </colgroup>
-          <thead
-            class="border-b border-slate-100 bg-slate-50/90 text-start text-xs font-extrabold uppercase tracking-wider text-slate-600"
-          >
-            <tr>
-              <th class="px-3 py-2">{{ 'common.name' | t }}</th>
-              <th class="px-3 py-2">{{ 'branches.userName' | t }}</th>
-              <th class="px-3 py-2">{{ 'common.email' | t }}</th>
-              <th class="px-3 py-2">{{ 'operators.department' | t }}</th>
-              <th class="px-3 py-2">{{ 'common.createdBy' | t }}</th>
-              <th class="px-3 py-2 whitespace-nowrap">{{ 'branches.createdOn' | t }}</th>
-              <th class="px-3 py-2 text-end whitespace-nowrap">{{ 'branches.actions' | t }}</th>
+    @if (canToggleFlags()) {
+      <div class="mt-3.5 flex items-center gap-2 rounded-xl bg-teal-50/70 border border-teal-200/60 px-3.5 py-2 text-xs font-semibold text-teal-800">
+        <i class="fa-solid fa-circle-info text-teal-600 text-sm shrink-0"></i>
+        <span>{{ 'flags.operatorPermissionHint' | t }}</span>
+      </div>
+    }
+  </section>
+
+  @if (!canCreateOperator()) {
+    <div class="flex items-center gap-2 rounded-2xl border border-amber-200 bg-amber-50/90 p-3.5 text-xs font-bold text-amber-800 shadow-2xs">
+      <i class="fa-solid fa-triangle-exclamation text-amber-600 text-sm"></i>
+      <span>{{ 'operators.departmentScopeMissing' | t }}</span>
+    </div>
+  }
+
+  <!-- 2. EXECUTIVE QUICK STATS BAR -->
+  <section class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-3.5">
+    <!-- Stat 1: Total Operators -->
+    <div class="stat-card flex items-center gap-3 sm:gap-3.5 rounded-2xl border border-slate-200/80 bg-white p-3.5 sm:p-4 shadow-xs transition-all hover:border-teal-300 hover:shadow-sm">
+      <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-teal-50 text-[var(--theme-color-primary,#148496)] border border-teal-200/70">
+        <i class="fa-solid fa-users text-lg"></i>
+      </div>
+      <div class="min-w-0 flex-1">
+        <span class="block text-[11px] font-bold text-slate-500 truncate">{{ 'operators.totalOperators' | t }}</span>
+        <span class="block text-xl font-black text-slate-900 tracking-tight">{{ operatorsStore.totalItems() }}</span>
+      </div>
+    </div>
+
+    <!-- Stat 2: Active Operators -->
+    <div class="stat-card flex items-center gap-3 sm:gap-3.5 rounded-2xl border border-slate-200/80 bg-white p-3.5 sm:p-4 shadow-xs transition-all hover:border-emerald-300 hover:shadow-sm">
+      <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-200/70">
+        <i class="fa-solid fa-user-check text-lg"></i>
+      </div>
+      <div class="min-w-0 flex-1">
+        <div class="flex items-center gap-1.5">
+          <span class="block text-[11px] font-bold text-slate-500 truncate">{{ 'operators.activeOperators' | t }}</span>
+          <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+        </div>
+        <span class="block text-xl font-black text-emerald-700 tracking-tight">{{ activeOperatorsCount() }}</span>
+      </div>
+    </div>
+
+    <!-- Stat 3: Inactive Operators -->
+    <div class="stat-card flex items-center gap-3 sm:gap-3.5 rounded-2xl border border-slate-200/80 bg-white p-3.5 sm:p-4 shadow-xs transition-all hover:border-slate-300 hover:shadow-sm">
+      <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500 border border-slate-200/70">
+        <i class="fa-solid fa-user-xmark text-lg"></i>
+      </div>
+      <div class="min-w-0 flex-1">
+        <span class="block text-[11px] font-bold text-slate-500 truncate">{{ 'operators.inactiveOperators' | t }}</span>
+        <span class="block text-xl font-black text-slate-700 tracking-tight">{{ inactiveOperatorsCount() }}</span>
+      </div>
+    </div>
+
+    <!-- Stat 4: Flag Submission Enabled -->
+    <div class="stat-card flex items-center gap-3 sm:gap-3.5 rounded-2xl border border-slate-200/80 bg-white p-3.5 sm:p-4 shadow-xs transition-all hover:border-sky-300 hover:shadow-sm">
+      <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-sky-50 text-sky-600 border border-sky-200/70">
+        <i class="fa-solid fa-flag text-lg"></i>
+      </div>
+      <div class="min-w-0 flex-1">
+        <span class="block text-[11px] font-bold text-slate-500 truncate">{{ 'operators.flagSubmissionEnabled' | t }}</span>
+        <span class="block text-xl font-black text-sky-700 tracking-tight">{{ flagsEnabledCount() }}</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. COLLAPSIBLE SMART FILTER TOOLBAR -->
+  <div
+    class="grid transition-[grid-template-rows,opacity] duration-300 ease-out motion-reduce:transition-none"
+    [class.grid-rows-[1fr]]="advancedFiltersOpen()"
+    [class.grid-rows-[0fr]]="!advancedFiltersOpen()"
+    [class.opacity-100]="advancedFiltersOpen()"
+    [class.opacity-0]="!advancedFiltersOpen()"
+  >
+    <div class="min-h-0 overflow-hidden">
+      <section class="rounded-3xl border border-slate-200/90 bg-white p-4 sm:p-5 shadow-xs mb-1">
+        <form [formGroup]="searchForm" (ngSubmit)="searchOperators()">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3 sm:gap-3.5 items-end">
+            <!-- Search Input -->
+            <div
+              class="col-span-1 sm:col-span-2"
+              [class.lg:col-span-5]="isSuperAdmin()"
+              [class.lg:col-span-7]="!isSuperAdmin()"
+            >
+              <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                <i class="fa-solid fa-magnifying-glass text-[11px] text-[var(--theme-color-primary,#148496)] me-1"></i>
+                {{ 'operators.search' | t }}
+              </label>
+              <div
+                class="relative flex h-10.5 w-full items-center rounded-xl border border-slate-200/90 bg-slate-50/80 px-3 transition hover:border-slate-300 focus-within:bg-white focus-within:border-[var(--theme-color-primary)] focus-within:ring-3 focus-within:ring-[var(--theme-color-primary)]/15"
+              >
+                <span class="pointer-events-none flex h-4 w-4 shrink-0 items-center justify-center text-slate-400 me-2.5">
+                  <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                </span>
+                <input
+                  type="text"
+                  formControlName="searchText"
+                  class="h-full w-full bg-transparent border-0 p-0 text-xs font-bold text-slate-800 placeholder:text-slate-400 outline-none focus:outline-none focus:ring-0 leading-normal"
+                  [placeholder]="'operators.searchPlaceholder' | t"
+                />
+                @if (searchForm.controls.searchText.value) {
+                  <button
+                    type="button"
+                    class="flex h-5 w-5 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-200 hover:text-slate-700 cursor-pointer ms-1"
+                    (click)="searchForm.controls.searchText.setValue(''); searchOperators()"
+                    [title]="'branches.clearSearch' | t"
+                  >
+                    <i class="fa-solid fa-xmark text-xs"></i>
+                  </button>
+                }
+              </div>
+            </div>
+
+            <!-- Department Field (for SuperAdmin) -->
+            @if (isSuperAdmin()) {
+              <div class="col-span-1 sm:col-span-1 lg:col-span-3">
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                  <i class="fa-solid fa-building-user text-[11px] text-[var(--theme-color-primary,#148496)] me-1"></i>
+                  {{ 'operators.department' | t }}
+                </label>
+                <div class="relative flex items-center">
+                  <select
+                    formControlName="departmentId"
+                    class="form-select-executive"
+                    [disabled]="!isSuperAdmin()"
+                  >
+                    <option value="">{{ 'operators.allDepartments' | t }}</option>
+                    @for (department of operatorsStore.departments(); track department.id) {
+                      <option [value]="department.id">
+                        {{ department.nameEn }} - {{ department.nameAr }}
+                      </option>
+                    }
+                  </select>
+                  <span class="pointer-events-none absolute end-3 inset-y-0 flex items-center justify-center text-slate-400">
+                    <i class="fa-solid fa-chevron-down text-[11px]"></i>
+                  </span>
+                </div>
+              </div>
+            }
+
+            <!-- Page Size -->
+            <div
+              class="col-span-1 sm:col-span-1"
+              [class.lg:col-span-2]="isSuperAdmin()"
+              [class.lg:col-span-2]="!isSuperAdmin()"
+            >
+              <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                <i class="fa-solid fa-list-ol text-[11px] text-[var(--theme-color-primary,#148496)] me-1"></i>
+                {{ 'questionGroups.pageSize' | t }}
+              </label>
+              <div class="relative flex items-center">
+                <select formControlName="pageSize" class="form-select-executive">
+                  <option value="10">10</option>
+                  <option value="25">25</option>
+                  <option value="50">50</option>
+                  <option value="100">100</option>
+                </select>
+                <span class="pointer-events-none absolute end-3 inset-y-0 flex items-center justify-center text-slate-400">
+                  <i class="fa-solid fa-chevron-down text-[11px]"></i>
+                </span>
+              </div>
+            </div>
+
+            <!-- Action Buttons (Clear & Search) -->
+            <div
+              class="col-span-1 sm:col-span-2"
+              [class.lg:col-span-2]="isSuperAdmin()"
+              [class.lg:col-span-3]="!isSuperAdmin()"
+            >
+              <label class="hidden sm:block text-xs font-bold text-transparent mb-1.5 select-none pointer-events-none">&nbsp;</label>
+              <div class="flex items-center gap-2 h-10.5">
+                <button
+                  type="button"
+                  class="flex-1 inline-flex h-10.5 items-center justify-center gap-1.5 rounded-xl border border-slate-200/90 bg-white px-3 text-xs font-bold text-slate-700 shadow-2xs transition hover:bg-slate-50 hover:border-slate-300 active:scale-95 cursor-pointer"
+                  (click)="clearOperatorSearch()"
+                  [title]="'branches.clearSearch' | t"
+                >
+                  <i class="fa-solid fa-arrow-rotate-left text-xs text-slate-500"></i>
+                  <span>{{ 'branches.clearSearch' | t }}</span>
+                </button>
+                <button
+                  type="submit"
+                  class="flex-1 inline-flex h-10.5 items-center justify-center gap-1.5 rounded-xl bg-[var(--theme-color-primary,#148496)] px-3.5 text-xs font-bold text-white shadow-2xs transition hover:opacity-95 active:scale-95 cursor-pointer disabled:opacity-50"
+                  [disabled]="operatorsStore.loading()"
+                >
+                  @if (operatorsStore.loading()) {
+                    <i class="fa-solid fa-circle-notch fa-spin text-xs"></i>
+                  } @else {
+                    <i class="fa-solid fa-filter text-xs"></i>
+                  }
+                  <span>{{ 'branches.searchAction' | t }}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </form>
+      </section>
+    </div>
+  </div>
+
+  <!-- 4. OPERATORS DATA LIST (DESKTOP & LAPTOP TABLE + MOBILE CARDS) -->
+  <section class="space-y-3" [attr.aria-busy]="operatorsStore.loading()">
+    <!-- Section Title & Counter -->
+    <div class="flex items-center justify-between px-1">
+      <div class="flex items-center gap-2">
+        <span class="text-xs font-black text-slate-800">
+          {{ 'operators.title' | t }}
+        </span>
+        <span class="inline-flex items-center justify-center min-w-[22px] h-5.5 px-2 rounded-full bg-teal-50 border border-teal-200/80 text-[11px] font-black text-[var(--theme-color-primary,#148496)]">
+          {{ operatorsStore.totalItems() }}
+        </span>
+      </div>
+    </div>
+
+    <!-- TABLE FOR DESKTOP & LAPTOPS (1024px and up) -->
+    <div class="hidden lg:block rounded-3xl border border-slate-200/80 bg-white shadow-xs overflow-hidden">
+      <div class="overflow-x-auto custom-scrollbar">
+        <table class="w-full text-start text-xs border-collapse">
+          <thead>
+            <tr class="bg-gradient-to-r from-slate-50 via-teal-50/25 to-slate-50 border-b border-slate-200/80 text-[11px] font-black uppercase tracking-wider text-slate-600">
+              <th scope="col" class="px-4 py-3.5 text-start whitespace-nowrap min-w-[190px]">
+                <i class="fa-solid fa-user-tie text-[10px] text-slate-400 me-1.5"></i>
+                {{ 'common.name' | t }}
+              </th>
+              <th scope="col" class="px-3.5 py-3.5 text-start whitespace-nowrap min-w-[120px]">
+                <i class="fa-solid fa-at text-[10px] text-slate-400 me-1.5"></i>
+                {{ 'branches.userName' | t }}
+              </th>
+              <th scope="col" class="px-3.5 py-3.5 text-start whitespace-nowrap min-w-[170px]">
+                <i class="fa-solid fa-flag text-[10px] text-slate-400 me-1.5"></i>
+                {{ 'flags.submissionPermission' | t }}
+              </th>
+              <th scope="col" class="px-3.5 py-3.5 text-start whitespace-nowrap min-w-[180px]">
+                <i class="fa-solid fa-address-book text-[10px] text-slate-400 me-1.5"></i>
+                {{ 'common.email' | t }}
+              </th>
+              <th scope="col" class="px-3.5 py-3.5 text-start whitespace-nowrap min-w-[150px]">
+                <i class="fa-solid fa-building text-[10px] text-slate-400 me-1.5"></i>
+                {{ 'operators.department' | t }}
+              </th>
+              <th scope="col" class="px-3.5 py-3.5 text-start whitespace-nowrap min-w-[130px]">
+                <i class="fa-solid fa-user-pen text-[10px] text-slate-400 me-1.5"></i>
+                {{ 'common.createdBy' | t }}
+              </th>
+              <th scope="col" class="px-3.5 py-3.5 text-start whitespace-nowrap min-w-[110px]">
+                <i class="fa-solid fa-calendar-days text-[10px] text-slate-400 me-1.5"></i>
+                {{ 'branches.createdOn' | t }}
+              </th>
+              <th scope="col" class="px-4 py-3.5 text-end whitespace-nowrap min-w-[160px]">
+                <i class="fa-solid fa-sliders text-[10px] text-slate-400 me-1.5"></i>
+                {{ 'branches.actions' | t }}
+              </th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-slate-100 bg-white">
+          <tbody class="divide-y divide-slate-100">
             @if (operatorsStore.loading()) {
               <tr>
-                <td class="py-8 text-center text-slate-500" colspan="7">
-                  <span
-                    class="mx-auto mb-2 block h-5 w-5 animate-spin rounded-full border-2 border-[var(--theme-color-accent)]/30 border-t-[var(--theme-color-accent)]"
-                  ></span>
-                  {{ 'operators.loading' | t }}
+                <td colspan="8" class="py-14 text-center">
+                  <i class="fa-solid fa-circle-notch fa-spin text-2xl text-[var(--theme-color-primary,#148496)] mb-2 block mx-auto"></i>
+                  <span class="text-xs font-bold text-slate-400">{{ 'operators.loading' | t }}</span>
                 </td>
               </tr>
             } @else {
               @for (operator of operatorsStore.operators(); track operator.operatorId) {
-                <tr class="align-top transition hover:bg-slate-50">
-                  <td class="px-3 py-2">
-                    <p class="break-words font-semibold text-slate-800 [overflow-wrap:anywhere]">
-                      {{ operator.nameEn }}
-                    </p>
-                    @if (operator.nameAr) {
-                      <p class="mt-1 break-words text-xs text-slate-500 [overflow-wrap:anywhere]">
-                        {{ operator.nameAr }}
-                      </p>
-                    }
-                    <span
-                      class="mt-2 inline-flex w-fit rounded-full px-2 py-0.5 text-[10px] font-bold"
-                      [class.bg-emerald-50]="operator.isActive"
-                      [class.text-emerald-700]="operator.isActive"
-                      [class.bg-slate-100]="!operator.isActive"
-                      [class.text-slate-500]="!operator.isActive"
-                    >
-                      {{ (operator.isActive ? 'common.active' : 'branches.inactive') | t }}
+                <tr class="hover:bg-slate-50/70 transition-colors group">
+                  <!-- Name with Avatar -->
+                  <td class="px-4 py-3.5">
+                    <div class="flex items-center gap-3 min-w-0">
+                      <div class="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-teal-500 to-cyan-600 text-white font-black text-xs shadow-2xs">
+                        {{ getInitials(operator) }}
+                        <span
+                          class="absolute -bottom-0.5 -end-0.5 h-2.5 w-2.5 rounded-full ring-2 ring-white"
+                          [class.bg-emerald-500]="operator.isActive"
+                          [class.bg-slate-400]="!operator.isActive"
+                        ></span>
+                      </div>
+                      <div class="min-w-0">
+                        <span class="block font-black text-slate-900 truncate">
+                          {{ operator.nameEn }}
+                        </span>
+                        @if (operator.nameAr) {
+                          <span class="block text-[11px] font-semibold text-slate-500 truncate">
+                            {{ operator.nameAr }}
+                          </span>
+                        }
+                        <span
+                          class="mt-1 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-bold"
+                          [class.bg-emerald-50]="operator.isActive"
+                          [class.text-emerald-700]="operator.isActive"
+                          [class.border]="true"
+                          [class.border-emerald-200/60]="operator.isActive"
+                          [class.bg-slate-100]="!operator.isActive"
+                          [class.text-slate-600]="!operator.isActive"
+                          [class.border-slate-200]="!operator.isActive"
+                        >
+                          <span
+                            class="h-1 w-1 rounded-full"
+                            [class.bg-emerald-500]="operator.isActive"
+                            [class.animate-pulse]="operator.isActive"
+                            [class.bg-slate-400]="!operator.isActive"
+                          ></span>
+                          {{ (operator.isActive ? 'common.active' : 'branches.inactive') | t }}
+                        </span>
+                      </div>
+                    </div>
+                  </td>
+
+                  <!-- Username -->
+                  <td class="px-3.5 py-3.5">
+                    <span class="inline-flex items-center gap-1 rounded-lg bg-slate-100/90 px-2.5 py-1 font-mono text-[11px] font-bold text-slate-700 border border-slate-200/60">
+                      <i class="fa-solid fa-at text-[10px] text-slate-400"></i>
+                      <span>{{ operator.userName }}</span>
                     </span>
                   </td>
-                  <td class="px-3 py-2 text-slate-700">
-                    <p class="break-words [overflow-wrap:anywhere]">{{ operator.userName }}</p>
+
+                  <!-- Flag Submission Permission -->
+                  <td class="px-3.5 py-3.5">
+                    <div class="space-y-1.5">
+                      @if (operator.canCreateFlagsOnSubmit) {
+                        <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-0.5 text-[10px] font-black text-emerald-800 border border-emerald-200/80 shadow-2xs">
+                          <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                          <i class="fa-solid fa-flag text-[9px] text-emerald-600"></i>
+                          <span>{{ 'flags.enabled' | t }}</span>
+                        </span>
+                      } @else {
+                        <span class="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-0.5 text-[10px] font-bold text-slate-600 border border-slate-200/80">
+                          <span class="h-1.5 w-1.5 rounded-full bg-slate-400"></span>
+                          <i class="fa-regular fa-flag text-[9px] text-slate-400"></i>
+                          <span>{{ 'flags.disabled' | t }}</span>
+                        </span>
+                      }
+
+                      @if (canToggleFlags()) {
+                        <div>
+                          <button
+                            type="button"
+                            class="inline-flex items-center gap-1 rounded-lg px-2 py-0.5 text-[10px] font-bold transition shadow-2xs active:scale-95 disabled:opacity-50 cursor-pointer"
+                            [class.border]="true"
+                            [class.border-rose-200]="operator.canCreateFlagsOnSubmit"
+                            [class.bg-rose-50]="operator.canCreateFlagsOnSubmit"
+                            [class.text-rose-700]="operator.canCreateFlagsOnSubmit"
+                            [class.hover:bg-rose-100]="operator.canCreateFlagsOnSubmit"
+                            [class.border-teal-200]="!operator.canCreateFlagsOnSubmit"
+                            [class.bg-teal-50]="!operator.canCreateFlagsOnSubmit"
+                            [class.text-teal-800]="!operator.canCreateFlagsOnSubmit"
+                            [class.hover:bg-teal-100]="!operator.canCreateFlagsOnSubmit"
+                            [disabled]="operatorsStore.flagSubmissionUpdatingId() !== null"
+                            (click)="toggleFlags(operator)"
+                          >
+                            @if (operatorsStore.flagSubmissionUpdatingId() === operator.operatorId) {
+                              <i class="fa-solid fa-circle-notch fa-spin text-[9px]"></i>
+                            } @else {
+                              <i [class]="operator.canCreateFlagsOnSubmit ? 'fa-solid fa-ban text-[9px]' : 'fa-solid fa-check text-[9px]'"></i>
+                            }
+                            <span>{{ (operator.canCreateFlagsOnSubmit ? 'flags.disableSubmission' : 'flags.enableSubmission') | t }}</span>
+                          </button>
+                        </div>
+                      }
+                    </div>
                   </td>
-                  <td class="px-3 py-2 text-slate-700">
-                    <p class="break-words [overflow-wrap:anywhere]">{{ operator.email }}</p>
-                    @if (operator.phoneNumber) {
-                      <p class="mt-1 break-words text-xs text-slate-500 [overflow-wrap:anywhere]">
-                        {{ operator.phoneNumber }}
-                      </p>
-                    }
-                  </td>
-                  <td class="px-3 py-2 text-slate-700">
-                    <p class="break-words font-semibold [overflow-wrap:anywhere]">
-                      {{ operator.departmentNameEn || '-' }}
-                    </p>
-                    @if (operator.departmentNameAr) {
-                      <p class="mt-1 break-words text-xs text-slate-500 [overflow-wrap:anywhere]">
-                        {{ operator.departmentNameAr }}
-                      </p>
-                    }
-                  </td>
-                  <td class="px-3 py-2 text-xs font-semibold text-slate-600">
-                    <p class="break-words [overflow-wrap:anywhere]">
-                      {{ createdByName(operator) }}
-                    </p>
-                  </td>
-                  <td class="px-3 py-2 text-slate-700 whitespace-nowrap">
-                    {{ operator.createdOnUtc ? (operator.createdOnUtc | date: 'mediumDate') : '-' }}
-                  </td>
-                  <td class="px-2 py-2 whitespace-nowrap">
-                    <div class="flex flex-nowrap items-center justify-end gap-1">
-                      @if (operator.isActive) {
-                        <app-button
-                          size="sm"
-                          type="button"
-                          variant="secondary"
-                          (pressed)="openOperatorTemplates(operator)"
+
+                  <!-- Email & Phone -->
+                  <td class="px-3.5 py-3.5 text-slate-700">
+                    <div class="space-y-1">
+                      <a
+                        [href]="'mailto:' + operator.email"
+                        class="flex items-center gap-1.5 text-[11px] font-bold text-slate-600 hover:text-[var(--theme-color-primary,#148496)] transition"
+                      >
+                        <i class="fa-solid fa-envelope text-[11px] text-slate-400 shrink-0"></i>
+                        <span class="truncate max-w-[170px]">{{ operator.email }}</span>
+                      </a>
+                      @if (operator.phoneNumber) {
+                        <a
+                          [href]="'tel:' + operator.phoneNumber"
+                          class="flex items-center gap-1.5 text-[11px] font-medium text-slate-500 hover:text-slate-800 transition"
                         >
-                          <app-icon [icon]="templatesIcon" [size]="15" />
-                        </app-button>
+                          <i class="fa-solid fa-phone text-[11px] text-slate-400 shrink-0"></i>
+                          <span>{{ operator.phoneNumber }}</span>
+                        </a>
+                      }
+                    </div>
+                  </td>
+
+                  <!-- Department -->
+                  <td class="px-3.5 py-3.5">
+                    <span class="inline-flex items-center gap-1.5 font-bold text-slate-700">
+                      <i class="fa-solid fa-building text-xs text-teal-600/70 shrink-0"></i>
+                      <span class="truncate">{{ operator.departmentNameEn || '-' }}</span>
+                    </span>
+                    @if (operator.departmentNameAr) {
+                      <span class="block text-[10px] text-slate-400 ps-4.5 truncate">
+                        {{ operator.departmentNameAr }}
+                      </span>
+                    }
+                  </td>
+
+                  <!-- Created By -->
+                  <td class="px-3.5 py-3.5 text-slate-600">
+                    <span class="inline-flex items-center gap-1.5 text-[11px] font-semibold text-slate-600">
+                      <i class="fa-solid fa-user-pen text-[10px] text-slate-400 shrink-0"></i>
+                      <span class="truncate">{{ createdByName(operator) }}</span>
+                    </span>
+                  </td>
+
+                  <!-- Created On -->
+                  <td class="px-3.5 py-3.5 text-slate-700 whitespace-nowrap text-[11px] font-medium">
+                    <span class="inline-flex items-center gap-1.5">
+                      <i class="fa-solid fa-calendar-days text-[10px] text-slate-400 shrink-0"></i>
+                      <span>{{ operator.createdOnUtc ? (operator.createdOnUtc | date: 'mediumDate') : '-' }}</span>
+                    </span>
+                  </td>
+
+                  <!-- Action Buttons -->
+                  <td class="px-4 py-3.5 text-end whitespace-nowrap">
+                    <div class="flex items-center justify-end gap-1.5">
+                      @if (operator.isActive) {
+                        <button
+                          type="button"
+                          class="action-btn text-teal-600 hover:bg-teal-50 hover:border-teal-200"
+                          [title]="'operators.manageTemplates' | t"
+                          (click)="openOperatorTemplates(operator)"
+                        >
+                          <i class="fa-solid fa-file-lines text-xs"></i>
+                        </button>
                       }
                       @if (canResetPassword(operator)) {
-                        <app-button
-                          size="sm"
+                        <button
                           type="button"
-                          variant="secondary"
-                          (pressed)="openResetPassword(operator)"
+                          class="action-btn text-amber-600 hover:bg-amber-50 hover:border-amber-200"
+                          [title]="'users.resetPassword' | t"
+                          (click)="openResetPassword(operator)"
                         >
-                          <app-icon [icon]="resetPasswordIcon" [size]="15" />
-                        </app-button>
+                          <i class="fa-solid fa-key text-xs"></i>
+                        </button>
                       }
                       @if (operator.isActive) {
-                        <app-button
-                          size="sm"
+                        <button
                           type="button"
-                          variant="secondary"
-                          (pressed)="openEditOperator(operator)"
+                          class="action-btn text-sky-600 hover:bg-sky-50 hover:border-sky-200"
+                          [title]="'common.edit' | t"
+                          (click)="openEditOperator(operator)"
                         >
-                          <app-icon [icon]="editIcon" [size]="15" />
-                        </app-button>
+                          <i class="fa-solid fa-pen-to-square text-xs"></i>
+                        </button>
                       }
                       @if (canDeactivate(operator)) {
-                        <app-button
-                          size="sm"
+                        <button
                           type="button"
-                          variant="danger"
-                          [loading]="operatorsStore.deactivating()"
-                          (pressed)="deactivateOperator(operator)"
+                          class="action-btn text-rose-600 hover:bg-rose-50 hover:border-rose-200"
+                          [title]="'operators.deactivateAction' | t"
+                          [disabled]="operatorsStore.deactivating()"
+                          (click)="deactivateOperator(operator)"
                         >
-                          <app-icon [icon]="deactivateIcon" [size]="15" />
-                        </app-button>
+                          @if (operatorsStore.deactivating()) {
+                            <i class="fa-solid fa-circle-notch fa-spin text-xs"></i>
+                          } @else {
+                            <i class="fa-solid fa-user-slash text-xs"></i>
+                          }
+                        </button>
                       }
                       @if (canRestore(operator)) {
-                        <app-button
-                          size="sm"
+                        <button
                           type="button"
-                          variant="secondary"
-                          [loading]="operatorsStore.restoring()"
-                          (pressed)="restoreOperator(operator)"
+                          class="action-btn text-emerald-600 hover:bg-emerald-50 hover:border-emerald-200"
+                          [title]="'operators.activateAction' | t"
+                          [disabled]="operatorsStore.restoring()"
+                          (click)="restoreOperator(operator)"
                         >
-                          <app-icon [icon]="restoreIcon" [size]="15" />
-                          {{ 'operators.activateAction' | t }}
-                        </app-button>
+                          @if (operatorsStore.restoring()) {
+                            <i class="fa-solid fa-circle-notch fa-spin text-xs"></i>
+                          } @else {
+                            <i class="fa-solid fa-user-check text-xs"></i>
+                          }
+                        </button>
                       }
                       @if (!operator.isActive && !canRestore(operator)) {
                         <span class="text-xs font-semibold text-slate-400">-</span>
@@ -275,13 +539,25 @@
                 </tr>
               } @empty {
                 <tr>
-                  <td class="py-8 text-center text-slate-500" colspan="7">
-                    <app-icon
-                      class="mx-auto mb-2 text-slate-300"
-                      [icon]="operatorIcon"
-                      [size]="24"
-                    />
-                    {{ 'common.noRecords' | t }}
+                  <td colspan="8" class="py-14 text-center">
+                    <div class="empty-state-box max-w-md mx-auto p-6 rounded-2xl">
+                      <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-teal-50 text-[var(--theme-color-primary,#148496)] border border-teal-200/80 mb-3.5 shadow-xs">
+                        <i class="fa-solid fa-users-slash text-2xl"></i>
+                      </div>
+                      <h3 class="text-sm font-black text-slate-800 mb-1">
+                        {{ 'common.noRecords' | t }}
+                      </h3>
+                      @if (canCreateOperator()) {
+                        <button
+                          type="button"
+                          class="inline-flex items-center gap-1.5 mt-3 rounded-xl bg-[var(--theme-color-primary,#148496)] px-4 py-2 text-xs font-bold text-white shadow-2xs hover:opacity-95 cursor-pointer"
+                          (click)="openCreateOperator()"
+                        >
+                          <i class="fa-solid fa-user-plus text-xs"></i>
+                          <span>{{ 'operators.createAction' | t }}</span>
+                        </button>
+                      }
+                    </div>
                   </td>
                 </tr>
               }
@@ -291,183 +567,243 @@
       </div>
     </div>
 
-    <div class="space-y-3 lg:hidden">
+    <!-- CARDS FOR MOBILE & TABLETS (< 1024px) -->
+    <div class="block lg:hidden space-y-3">
       @if (operatorsStore.loading()) {
-        <div class="border border-slate-100 bg-white text-center text-slate-500">
-          <span
-            class="mx-auto mb-2 block h-5 w-5 animate-spin rounded-full border-2 border-[var(--theme-color-accent)]/30 border-t-[var(--theme-color-accent)]"
-          ></span>
-          {{ 'operators.loading' | t }}
+        <div class="py-12 text-center bg-white rounded-2xl border border-slate-200/80 shadow-xs">
+          <i class="fa-solid fa-circle-notch fa-spin text-2xl text-[var(--theme-color-primary,#148496)] mb-2 block mx-auto"></i>
+          <span class="text-xs font-bold text-slate-400">{{ 'operators.loading' | t }}</span>
         </div>
       } @else {
         @for (operator of operatorsStore.operators(); track operator.operatorId) {
-          <article
-            class="border border-slate-100 bg-white transition hover:border-cyan-100 hover:bg-slate-50"
-          >
-            <div class="flex items-start gap-3">
-              <span
-                class="flex shrink-0 items-center justify-center bg-cyan-50 text-[var(--theme-color-accent)]"
-              >
-                <app-icon [icon]="operatorIcon" [size]="18" />
-              </span>
-              <div class="min-w-0 flex-1">
-                <p class="break-words font-bold text-slate-900 [overflow-wrap:anywhere]">
-                  {{ operator.nameEn }}
-                </p>
-                @if (operator.nameAr) {
-                  <p
-                    class="mt-1 break-words text-xs font-semibold text-slate-500 [overflow-wrap:anywhere]"
-                  >
-                    {{ operator.nameAr }}
-                  </p>
+          <article class="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs space-y-3.5">
+            <!-- Header: Avatar, Name, Status, Flag Status -->
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex items-center gap-3 min-w-0">
+                <div class="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-teal-500 to-cyan-600 text-white font-black text-xs shadow-2xs">
+                  {{ getInitials(operator) }}
+                  <span
+                    class="absolute -bottom-0.5 -end-0.5 h-2.5 w-2.5 rounded-full ring-2 ring-white"
+                    [class.bg-emerald-500]="operator.isActive"
+                    [class.bg-slate-400]="!operator.isActive"
+                  ></span>
+                </div>
+                <div class="min-w-0">
+                  <h3 class="font-black text-sm text-slate-900 truncate">
+                    {{ operator.nameEn }}
+                  </h3>
+                  @if (operator.nameAr) {
+                    <p class="text-xs font-semibold text-slate-500 truncate">
+                      {{ operator.nameAr }}
+                    </p>
+                  }
+                  <div class="flex items-center gap-1.5 mt-0.5">
+                    <span class="inline-flex items-center gap-1 rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[10px] font-bold text-slate-600">
+                      @{{ operator.userName }}
+                    </span>
+                    <span class="text-[10px] text-slate-400">·</span>
+                    <span
+                      class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-bold"
+                      [class.bg-emerald-50]="operator.isActive"
+                      [class.text-emerald-700]="operator.isActive"
+                      [class.bg-slate-100]="!operator.isActive"
+                      [class.text-slate-500]="!operator.isActive"
+                    >
+                      {{ (operator.isActive ? 'common.active' : 'branches.inactive') | t }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Flag Submission Badge -->
+              <div class="shrink-0">
+                @if (operator.canCreateFlagsOnSubmit) {
+                  <span class="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-black text-emerald-800 border border-emerald-200">
+                    <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <i class="fa-solid fa-flag text-[9px] text-emerald-600"></i>
+                    {{ 'flags.enabled' | t }}
+                  </span>
+                } @else {
+                  <span class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold text-slate-600 border border-slate-200">
+                    <span class="h-1.5 w-1.5 rounded-full bg-slate-400"></span>
+                    <i class="fa-regular fa-flag text-[9px] text-slate-400"></i>
+                    {{ 'flags.disabled' | t }}
+                  </span>
                 }
-                <span
-                  class="mt-2 inline-flex w-fit rounded-full px-2 py-0.5 text-[10px] font-bold"
-                  [class.bg-emerald-50]="operator.isActive"
-                  [class.text-emerald-700]="operator.isActive"
-                  [class.bg-slate-100]="!operator.isActive"
-                  [class.text-slate-500]="!operator.isActive"
-                >
-                  {{ (operator.isActive ? 'common.active' : 'branches.inactive') | t }}
-                </span>
               </div>
             </div>
 
-            <div class="grid gap-2 text-xs text-slate-600 sm:grid-cols-2">
-              <div class="rounded-lg bg-slate-50 p-2">
-                <p class="font-bold text-slate-400">{{ 'branches.userName' | t }}</p>
-                <p class="mt-1 break-words font-semibold text-slate-800 [overflow-wrap:anywhere]">
-                  {{ operator.userName }}
-                </p>
-              </div>
-              <div class="rounded-lg bg-slate-50 p-2">
-                <p class="font-bold text-slate-400">{{ 'operators.department' | t }}</p>
-                <p class="mt-1 break-words font-semibold text-slate-800 [overflow-wrap:anywhere]">
-                  {{ operator.departmentNameEn || '-' }}
-                </p>
-              </div>
-              <div class="rounded-lg bg-slate-50 p-2">
-                <p class="font-bold text-slate-400">{{ 'common.email' | t }}</p>
-                <p class="mt-1 break-words font-semibold text-slate-800 [overflow-wrap:anywhere]">
-                  {{ operator.email }}
-                </p>
-              </div>
-              <div class="rounded-lg bg-slate-50 p-2">
-                <p class="font-bold text-slate-400">{{ 'common.createdBy' | t }}</p>
-                <p class="mt-1 break-words font-semibold text-slate-800 [overflow-wrap:anywhere]">
-                  {{ createdByName(operator) }}
-                </p>
-              </div>
-              <div class="rounded-lg bg-slate-50 p-2">
-                <p class="font-bold text-slate-400">{{ 'branches.createdOn' | t }}</p>
-                <p class="mt-1 font-semibold text-slate-800">
-                  {{ operator.createdOnUtc ? (operator.createdOnUtc | date: 'mediumDate') : '-' }}
-                </p>
-              </div>
-            </div>
-
-            <div class="flex flex-wrap justify-end gap-2 border-t border-slate-100 pt-3">
-              @if (operator.isActive) {
-                <app-button
-                  size="sm"
+            <!-- Department & Flag Submission Toggle for Mobile -->
+            @if (canToggleFlags()) {
+              <div class="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-slate-50 border border-slate-200/70 text-xs">
+                <span class="font-bold text-slate-600 text-[11px]">{{ 'flags.submissionPermission' | t }}</span>
+                <button
                   type="button"
-                  variant="secondary"
-                  (pressed)="openOperatorTemplates(operator)"
+                  class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition shadow-2xs active:scale-95 disabled:opacity-50 cursor-pointer"
+                  [class.border]="true"
+                  [class.border-rose-200]="operator.canCreateFlagsOnSubmit"
+                  [class.bg-rose-50]="operator.canCreateFlagsOnSubmit"
+                  [class.text-rose-700]="operator.canCreateFlagsOnSubmit"
+                  [class.border-teal-200]="!operator.canCreateFlagsOnSubmit"
+                  [class.bg-teal-50]="!operator.canCreateFlagsOnSubmit"
+                  [class.text-teal-800]="!operator.canCreateFlagsOnSubmit"
+                  [disabled]="operatorsStore.flagSubmissionUpdatingId() !== null"
+                  (click)="toggleFlags(operator)"
                 >
-                  <app-icon [icon]="templatesIcon" [size]="15" />
-                  {{ 'operators.manageTemplates' | t }}
-                </app-button>
+                  <i [class]="operator.canCreateFlagsOnSubmit ? 'fa-solid fa-ban text-[10px]' : 'fa-solid fa-check text-[10px]'"></i>
+                  <span>{{ (operator.canCreateFlagsOnSubmit ? 'flags.disableSubmission' : 'flags.enableSubmission') | t }}</span>
+                </button>
+              </div>
+            }
+
+            <!-- Details Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs pt-1 border-t border-slate-100">
+              <div class="flex items-center gap-2 text-slate-700">
+                <i class="fa-solid fa-building text-teal-600/70 text-xs w-4 text-center shrink-0"></i>
+                <span class="font-bold truncate">{{ operator.departmentNameEn || '-' }}</span>
+              </div>
+              <div class="flex items-center gap-2 text-slate-600">
+                <i class="fa-solid fa-envelope text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                <a [href]="'mailto:' + operator.email" class="font-medium text-slate-600 hover:text-teal-600 truncate">{{ operator.email }}</a>
+              </div>
+              @if (operator.phoneNumber) {
+                <div class="flex items-center gap-2 text-slate-600">
+                  <i class="fa-solid fa-phone text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                  <a [href]="'tel:' + operator.phoneNumber" class="font-medium text-slate-600">{{ operator.phoneNumber }}</a>
+                </div>
+              }
+              <div class="flex items-center gap-2 text-slate-500 text-[11px]">
+                <i class="fa-solid fa-user-pen text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                <span class="truncate">{{ createdByName(operator) }}</span>
+              </div>
+              <div class="flex items-center gap-2 text-slate-500 text-[11px]">
+                <i class="fa-solid fa-calendar-days text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                <span>{{ operator.createdOnUtc ? (operator.createdOnUtc | date: 'mediumDate') : '-' }}</span>
+              </div>
+            </div>
+
+            <!-- Action Toolbar for Mobile -->
+            <div class="flex flex-wrap items-center justify-end gap-1.5 pt-2 border-t border-slate-100">
+              @if (operator.isActive) {
+                <button
+                  type="button"
+                  class="action-btn text-teal-600 hover:bg-teal-50 hover:border-teal-200"
+                  [title]="'operators.manageTemplates' | t"
+                  (click)="openOperatorTemplates(operator)"
+                >
+                  <i class="fa-solid fa-file-lines text-xs"></i>
+                </button>
               }
               @if (canResetPassword(operator)) {
-                <app-button
-                  size="sm"
+                <button
                   type="button"
-                  variant="secondary"
-                  (pressed)="openResetPassword(operator)"
+                  class="action-btn text-amber-600 hover:bg-amber-50 hover:border-amber-200"
+                  [title]="'users.resetPassword' | t"
+                  (click)="openResetPassword(operator)"
                 >
-                  <app-icon [icon]="resetPasswordIcon" [size]="15" />
-                  {{ 'users.resetPassword' | t }}
-                </app-button>
+                  <i class="fa-solid fa-key text-xs"></i>
+                </button>
               }
               @if (operator.isActive) {
-                <app-button
-                  size="sm"
+                <button
                   type="button"
-                  variant="secondary"
-                  (pressed)="openEditOperator(operator)"
+                  class="action-btn text-sky-600 hover:bg-sky-50 hover:border-sky-200"
+                  [title]="'common.edit' | t"
+                  (click)="openEditOperator(operator)"
                 >
-                  <app-icon [icon]="editIcon" [size]="15" />
-                  {{ 'common.edit' | t }}
-                </app-button>
+                  <i class="fa-solid fa-pen-to-square text-xs"></i>
+                </button>
               }
               @if (canDeactivate(operator)) {
-                <app-button
-                  size="sm"
+                <button
                   type="button"
-                  variant="danger"
-                  [loading]="operatorsStore.deactivating()"
-                  (pressed)="deactivateOperator(operator)"
+                  class="action-btn text-rose-600 hover:bg-rose-50 hover:border-rose-200"
+                  [title]="'operators.deactivateAction' | t"
+                  [disabled]="operatorsStore.deactivating()"
+                  (click)="deactivateOperator(operator)"
                 >
-                  <app-icon [icon]="deactivateIcon" [size]="15" />
-                  {{ 'operators.deactivateAction' | t }}
-                </app-button>
+                  <i class="fa-solid fa-user-slash text-xs"></i>
+                </button>
               }
               @if (canRestore(operator)) {
-                <app-button
-                  size="sm"
+                <button
                   type="button"
-                  variant="secondary"
-                  [loading]="operatorsStore.restoring()"
-                  (pressed)="restoreOperator(operator)"
+                  class="action-btn text-emerald-600 hover:bg-emerald-50 hover:border-emerald-200"
+                  [title]="'operators.activateAction' | t"
+                  [disabled]="operatorsStore.restoring()"
+                  (click)="restoreOperator(operator)"
                 >
-                  <app-icon [icon]="restoreIcon" [size]="15" />
-                  {{ 'operators.activateAction' | t }}
-                </app-button>
+                  <i class="fa-solid fa-user-check text-xs"></i>
+                </button>
               }
             </div>
           </article>
         } @empty {
-          <div class="border border-slate-100 bg-white text-center text-slate-500">
-            <app-icon class="mx-auto mb-2 text-slate-300" [icon]="operatorIcon" [size]="24" />
-            {{ 'common.noRecords' | t }}
+          <div class="p-8 text-center bg-white rounded-3xl border border-slate-200/80 shadow-xs">
+            <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-teal-50 text-[var(--theme-color-primary,#148496)] border border-teal-200/80 mb-3 shadow-xs">
+              <i class="fa-solid fa-users-slash text-xl"></i>
+            </div>
+            <h3 class="text-sm font-black text-slate-800 mb-1">
+              {{ 'common.noRecords' | t }}
+            </h3>
+            @if (canCreateOperator()) {
+              <button
+                type="button"
+                class="inline-flex items-center gap-1.5 mt-3 rounded-xl bg-[var(--theme-color-primary,#148496)] px-4 py-2 text-xs font-bold text-white shadow-2xs hover:opacity-95 cursor-pointer"
+                (click)="openCreateOperator()"
+              >
+                <i class="fa-solid fa-user-plus text-xs"></i>
+                <span>{{ 'operators.createAction' | t }}</span>
+              </button>
+            }
           </div>
         }
       }
     </div>
 
-    <div
-      class="flex flex-col gap-3 border-t border-slate-100 md:flex-row md:items-center md:justify-between"
+    <!-- 5. PAGINATION TOOLBAR -->
+    <nav
+      class="flex flex-wrap items-center justify-between gap-3 text-xs pt-2"
+      [attr.aria-label]="'branches.paginationSummary' | t"
     >
-      <p class="font-semibold text-slate-500">
-        {{ 'branches.paginationSummary' | t }}
-        {{ operatorsStore.currentPage() }} / {{ operatorsStore.totalPages() }}
-        -
-        {{ operatorsStore.totalItems() }} {{ 'operators.totalItems' | t }}
-      </p>
-      <div class="flex flex-wrap gap-2">
-        <app-button
-          size="sm"
-          type="button"
-          variant="secondary"
-          [disabled]="!operatorsStore.hasPreviousPage() || operatorsStore.loading()"
-          (pressed)="goToPreviousOperatorsPage()"
+      <div class="flex items-center gap-2">
+        <span
+          class="inline-flex items-center gap-2 rounded-xl bg-slate-50 border border-slate-200/80 px-3 py-1.5 font-bold text-slate-700 shadow-2xs"
         >
-          <app-icon [icon]="chevronLeftIcon" [size]="15" [flipRtl]="true" />
-          {{ 'branches.previousPage' | t }}
-        </app-button>
-        <app-button
-          size="sm"
-          type="button"
-          variant="secondary"
-          [disabled]="!operatorsStore.hasNextPage() || operatorsStore.loading()"
-          (pressed)="goToNextOperatorsPage()"
-        >
-          {{ 'branches.nextPage' | t }}
-          <app-icon [icon]="chevronRightIcon" [size]="15" [flipRtl]="true" />
-        </app-button>
+          <i class="fa-solid fa-layer-group text-[var(--theme-color-primary,#148496)] text-xs"></i>
+          <span>{{ operatorsStore.currentPage() }} / {{ operatorsStore.totalPages() }}</span>
+          <span class="text-slate-300">|</span>
+          <span class="text-slate-500 font-semibold">{{ operatorsStore.totalItems() }} {{ 'operators.totalItems' | t }}</span>
+        </span>
       </div>
-    </div>
-  </app-card>
+
+      <div class="flex items-center gap-1.5">
+        <button
+          type="button"
+          class="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-slate-200/90 bg-white px-3.5 text-xs font-bold text-slate-700 shadow-2xs transition hover:bg-slate-50 hover:border-slate-300 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+          [disabled]="!operatorsStore.hasPreviousPage() || operatorsStore.loading()"
+          (click)="goToPreviousOperatorsPage()"
+        >
+          <i
+            [class]="i18n.isRtl() ? 'fa-solid fa-chevron-right text-[11px]' : 'fa-solid fa-chevron-left text-[11px]'"
+          ></i>
+          <span>{{ 'branches.previousPage' | t }}</span>
+        </button>
+
+        <button
+          type="button"
+          class="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-slate-200/90 bg-white px-3.5 text-xs font-bold text-slate-700 shadow-2xs transition hover:bg-slate-50 hover:border-slate-300 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+          [disabled]="!operatorsStore.hasNextPage() || operatorsStore.loading()"
+          (click)="goToNextOperatorsPage()"
+        >
+          <span>{{ 'branches.nextPage' | t }}</span>
+          <i
+            [class]="i18n.isRtl() ? 'fa-solid fa-chevron-left text-[11px]' : 'fa-solid fa-chevron-right text-[11px]'"
+          ></i>
+        </button>
+      </div>
+    </nav>
+  </section>
 </div>
 
 <app-modal

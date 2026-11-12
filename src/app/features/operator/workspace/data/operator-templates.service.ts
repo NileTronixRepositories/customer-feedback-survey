@@ -1,3 +1,4 @@
+import { OperatorSurveyFlag } from '../../../../shared/models/response-flag.model';
 import { normalizeCustomInputType } from '../../../../shared/models/custom-input.model';
 import { HttpClient, HttpContext } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
@@ -48,15 +49,14 @@ export class OperatorTemplatesService {
     templateId: string,
     answers: readonly OperatorTemplateAnswerSubmission[],
     customInputs: readonly OperatorTemplateCustomInputSubmission[],
+    flags: readonly OperatorSurveyFlag[] = [],
   ): Observable<OperatorTemplateResponseResult> {
     return this.http
       .post<OperatorTemplateResponseApiResponse>(
         `${this.myTemplatesUrl}/${templateId}/responses`,
-        this.toResponseFormData(answers, customInputs),
+        this.toResponseFormData(answers, customInputs, flags),
         {
-          context: new HttpContext()
-            .set(SKIP_SUCCESS_TOAST, true)
-            .set(SKIP_ERROR_TOAST, true),
+          context: new HttpContext().set(SKIP_SUCCESS_TOAST, true).set(SKIP_ERROR_TOAST, true),
         },
       )
       .pipe(map((response) => this.toResponseResult(response, templateId)));
@@ -146,7 +146,10 @@ export class OperatorTemplatesService {
       typeName: response.typeName ?? (type === 3 ? 'Date' : type === 2 ? 'Integer' : 'String'),
       isSystemField: response.isSystemField === true,
       systemFieldKey: response.systemFieldKey ?? null,
-      isRequired: response.isSystemField || response.systemFieldKey === 'VisitTime' ? false : response.isRequired ?? false,
+      isRequired:
+        response.isSystemField || response.systemFieldKey === 'VisitTime'
+          ? false
+          : (response.isRequired ?? false),
       minLength: response.minLength ?? null,
       maxLength: response.maxLength ?? null,
       minValue: response.minValue ?? null,
@@ -156,7 +159,9 @@ export class OperatorTemplatesService {
     };
   }
 
-  private toLatestScore(response: OperatorLatestTemplateScoreApiResponse): OperatorLatestTemplateScore {
+  private toLatestScore(
+    response: OperatorLatestTemplateScoreApiResponse,
+  ): OperatorLatestTemplateScore {
     return {
       actualScore: response.actualScore ?? 0,
       maxScore: response.maxScore ?? 0,
@@ -187,7 +192,9 @@ export class OperatorTemplatesService {
     };
   }
 
-  private toQuestion(response: OperatorAssignedTemplateQuestionApiResponse): OperatorAssignedTemplateQuestion {
+  private toQuestion(
+    response: OperatorAssignedTemplateQuestionApiResponse,
+  ): OperatorAssignedTemplateQuestion {
     const questionId = this.readRecordId(response.questionId);
 
     return {
@@ -201,7 +208,7 @@ export class OperatorTemplatesService {
       type:
         response.type !== null && response.type !== undefined
           ? String(response.type)
-          : response.typeName ?? '',
+          : (response.typeName ?? ''),
       groupId: this.readRecordId(response.groupId),
       groupBranchId: this.readNullableRecordId(response.groupBranchId),
       groupNameEn: response.groupNameEn ?? '',
@@ -213,8 +220,13 @@ export class OperatorTemplatesService {
   private toResponseFormData(
     answers: readonly OperatorTemplateAnswerSubmission[],
     customInputs: readonly OperatorTemplateCustomInputSubmission[],
+    flags: readonly OperatorSurveyFlag[] = [],
   ): FormData {
     const formData = new FormData();
+    flags.forEach((flag, index) => {
+      formData.append(`Flags[${index}].Type`, String(flag.type));
+      if (flag.brief?.trim()) formData.append(`Flags[${index}].Brief`, flag.brief.trim());
+    });
 
     customInputs.forEach((customInput, index) => {
       const prefix = `CustomInputs[${index}]`;
@@ -274,7 +286,9 @@ export class OperatorTemplatesService {
   private toResponseCustomInput(
     response: OperatorTemplateResponseCustomInputApiResponse,
   ): OperatorTemplateResponseCustomInput {
-    const type = normalizeCustomInputType(response.typeSnapshot ?? response.type ?? response.typeName);
+    const type = normalizeCustomInputType(
+      response.typeSnapshot ?? response.type ?? response.typeName,
+    );
 
     return {
       customInputId: this.readRecordId(response.customInputId),
@@ -295,7 +309,6 @@ export class OperatorTemplatesService {
   private readNullableRecordId(id: string | number | null | undefined): string | null {
     return typeof id === 'string' || typeof id === 'number' ? String(id) : null;
   }
-
 
   private toMediaUrl(url: string): string {
     if (/^https?:\/\//i.test(url)) {

@@ -8,6 +8,7 @@ const LABEL_KEYS: Record<Role, string> = {
   DEPARTMENT_ADMIN: 'common.departmentAdmin',
   BRANCH_USER: 'common.branchUser',
   OPERATOR: 'common.operator',
+  FLAG_OFFICER: 'flags.officer',
 };
 
 @Pipe({

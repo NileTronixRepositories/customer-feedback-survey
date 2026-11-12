@@ -1,3 +1,4 @@
+import { ResponseFlagDetails } from '../../../../shared/models/response-flag.model';
 import {
   HistoricalDataProvenance,
   HistoricalSurvey,
@@ -23,6 +24,8 @@ export interface DashboardCharts {
 }
 
 export interface DashboardSummaryActions {
+  suggestions?: DashboardDetailsNavigation | null;
+  comments?: DashboardDetailsNavigation | null;
   allResponses: DashboardDetailsNavigation | null;
   complaints: DashboardDetailsNavigation | null;
   voiceAnswers: DashboardDetailsNavigation | null;
@@ -53,6 +56,9 @@ export interface DashboardResponseCustomInputPreview {
 }
 
 export interface DashboardResponseListItem {
+  itemKind?: 'QuestionAnswer' | 'ResponseFlag';
+  flagId?: string | null;
+  flag?: ResponseFlagDetails | null;
   responseId: string;
   source: DashboardResponseSource;
   branchNameEn: string;

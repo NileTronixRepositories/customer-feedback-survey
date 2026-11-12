@@ -127,6 +127,8 @@
       </div>
     </section>
   } @else if (store.dashboard(); as dashboard) {
+    <app-dashboard-feedback-counts [counts]="dashboard.summary" [actions]="dashboard.summaryActions" />
+
     @if (dashboard.requestedModeAvailable === false) {
       <app-historical-warning-banner />
     }
@@ -338,7 +340,7 @@
                   </div>
                   <div class="rounded-md bg-white p-2">
                     <p class="text-[9px] uppercase text-slate-400">{{ 'systemDashboard.complaints' | t }}</p>
-                    <p class="mt-1 text-slate-900">{{ branch.complaintsCount }}</p>
+                    <p class="mt-1 text-slate-900">{{ branch.complaintsCount }}<app-dashboard-feedback-counts [counts]="branch" [compact]="true" /></p>
                   </div>
                 </div>
                 <div class="mt-3 h-2 overflow-hidden rounded-full bg-white">
@@ -398,7 +400,7 @@
                           <span class="text-[13px] font-black text-slate-900">{{ branch.averageScorePercentage | number: '1.0-1' }}%</span>
                         </div>
                       </td>
-                      <td class="px-3 py-2.5 text-[13px] font-bold text-slate-600">{{ branch.complaintsCount }}</td>
+                      <td class="px-3 py-2.5 text-[13px] font-bold text-slate-600">{{ branch.complaintsCount }}<app-dashboard-feedback-counts [counts]="branch" [compact]="true" /></td>
                       <td class="px-3 py-2.5">
                         <span class="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-black"
                           [class.bg-rose-50]="branch.riskLevel === 'HighRisk'"
@@ -449,7 +451,7 @@
                 [disabled]="!department.detailsNavigation"
                 (click)="openNavigation(department.detailsNavigation, localized(department.departmentNameEn, department.departmentNameAr))"
               >
-                <span class="break-words text-slate-900 [overflow-wrap:anywhere] sm:truncate">{{ localized(department.departmentNameEn, department.departmentNameAr) }}</span>
+                <span class="break-words text-slate-900 [overflow-wrap:anywhere] sm:truncate">{{ localized(department.departmentNameEn, department.departmentNameAr) }}<span class="block text-xs">{{ department.complaintsCount ?? 0 }} {{ 'flags.complaints' | t }}</span><app-dashboard-feedback-counts [counts]="department" [compact]="true" /></span>
                 <span class="text-slate-600 sm:text-end">
                   {{ department.responsesCount }} {{ 'systemDashboard.responses' | t }}
                 </span>
@@ -478,7 +480,7 @@
                 [disabled]="!template.detailsNavigation"
                 (click)="openNavigation(template.detailsNavigation, localized(template.templateNameEn, template.templateNameAr))"
               >
-                <span class="break-words text-slate-900 [overflow-wrap:anywhere] sm:truncate">{{ localized(template.templateNameEn, template.templateNameAr) }}</span>
+                <span class="break-words text-slate-900 [overflow-wrap:anywhere] sm:truncate">{{ localized(template.templateNameEn, template.templateNameAr) }}<span class="block text-xs">{{ template.complaintsCount }} {{ 'flags.complaints' | t }}</span><app-dashboard-feedback-counts [counts]="template" [compact]="true" /></span>
                 <span class="text-slate-600 sm:text-end">
                   {{ template.responsesCount }} {{ 'systemDashboard.responses' | t }}
                 </span>

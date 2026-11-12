@@ -1,4 +1,18 @@
-import { customInputHtmlType, customInputDisplayValue, isValidDateOnly } from '../../../../../../shared/models/custom-input.model';
+import { AuthStore } from '../../../../../auth/presentation/state/auth.store';
+import {
+  FLAG_PERMISSIONS,
+  flagType,
+  operatorFlagsValid,
+} from '../../../../../../shared/models/response-flag.model';
+import {
+  OperatorFlagsInputComponent,
+  OperatorFlagDraft,
+} from '../../../../../response-flags/presentation/operator-flags-input.component';
+import {
+  customInputHtmlType,
+  customInputDisplayValue,
+  isValidDateOnly,
+} from '../../../../../../shared/models/custom-input.model';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -177,9 +191,10 @@ interface ScaleSelectionAnimation {
 }
 
 type AudioContextConstructor = typeof AudioContext;
-type WindowWithWebkitAudioContext = Window & typeof globalThis & {
-  webkitAudioContext?: AudioContextConstructor;
-};
+type WindowWithWebkitAudioContext = Window &
+  typeof globalThis & {
+    webkitAudioContext?: AudioContextConstructor;
+  };
 
 const VOICE_EXTENSIONS = new Set(['mp3', 'wav', 'm4a', 'aac', 'ogg']);
 const MAX_VOICE_FILE_BYTES = 10 * 1024 * 1024;
@@ -192,12 +207,29 @@ const ALL_BRANCHES_FILTER_ID = 'all';
 @Component({
   selector: 'app-operator-my-templates-page',
   standalone: true,
-  imports: [ButtonComponent, DatePipe, IconComponent, PageHeaderComponent, TranslatePipe],
+  imports: [
+    OperatorFlagsInputComponent,
+    ButtonComponent,
+    DatePipe,
+    IconComponent,
+    PageHeaderComponent,
+    TranslatePipe,
+  ],
   templateUrl: './operator-my-templates-page.component.html',
   styleUrl: './operator-my-templates-page.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
+  private readonly flagAuth = inject(AuthStore);
+  readonly canSubmitSurvey = computed(() =>
+    this.flagAuth.hasPermission('OperatorTemplates.SubmitResponse'),
+  );
+  readonly canSubmitFlags = computed(
+    () =>
+      this.flagAuth.role() === 'OPERATOR' && this.flagAuth.hasPermission(FLAG_PERMISSIONS.submit),
+  );
+  readonly flagDrafts = signal<readonly OperatorFlagDraft[]>([]);
+
   readonly customInputHtmlType = customInputHtmlType;
   readonly customInputDisplayValue = customInputDisplayValue;
 
@@ -245,7 +277,10 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
 
       branches.set(id, {
         id,
-        label: template.branchName || template.branchCode || this.i18n.translate('operatorTemplates.branch'),
+        label:
+          template.branchName ||
+          template.branchCode ||
+          this.i18n.translate('operatorTemplates.branch'),
         secondaryLabel: template.branchCode,
         code: template.branchCode,
       });
@@ -259,7 +294,9 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
       return this.templates();
     }
 
-    return this.templates().filter((template) => this.branchFilterId(template) === selectedBranchId);
+    return this.templates().filter(
+      (template) => this.branchFilterId(template) === selectedBranchId,
+    );
   });
   readonly displayedTemplatesCount = computed(() => this.filteredTemplates().length);
   readonly displayedQuestionsCount = computed(() =>
@@ -271,7 +308,8 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
     const template = this.activeTemplate();
     return (
       template !== null &&
-      (!template.isActive || this.operatorTemplatesStore.inactiveTemplateIds().has(template.templateId))
+      (!template.isActive ||
+        this.operatorTemplatesStore.inactiveTemplateIds().has(template.templateId))
     );
   });
   readonly selectedBranchId = signal(ALL_BRANCHES_FILTER_ID);
@@ -385,7 +423,11 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
       const refreshedTemplate = this.templates().find(
         (template) => template.templateId === templateId,
       );
-      if (!refreshedTemplate || !refreshedTemplate.isActive || refreshedTemplate.questions.length === 0) {
+      if (
+        !refreshedTemplate ||
+        !refreshedTemplate.isActive ||
+        refreshedTemplate.questions.length === 0
+      ) {
         this.closeRuntimeRefreshTemplate();
         return;
       }
@@ -437,9 +479,7 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
   }
 
   hasTemplateLogo(template: OperatorTemplateView): boolean {
-    return Boolean(
-      template.logoUrl && !this.failedLogoTemplateIds().has(template.templateId),
-    );
+    return Boolean(template.logoUrl && !this.failedLogoTemplateIds().has(template.templateId));
   }
 
   handleTemplateLogoError(templateId: string): void {
@@ -472,6 +512,7 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
     this.customInputsOpen.set(false);
     this.summaryOpen.set(false);
     this.responseSubmitted.set(false);
+    this.flagDrafts.set([]);
     this.customInputValues.set({});
     this.touchedCustomInputIds.set(new Set());
     this.answers.set({});
@@ -594,7 +635,12 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
 
   goToQuestion(index: number): void {
     const template = this.activeTemplate();
-    if (!template || index < 0 || index >= this.visibleQuestions().length || this.responseSubmitted()) {
+    if (
+      !template ||
+      index < 0 ||
+      index >= this.visibleQuestions().length ||
+      this.responseSubmitted()
+    ) {
       return;
     }
 
@@ -624,6 +670,7 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
     if (
       !template ||
       this.activeTemplateInactive() ||
+      !this.canSubmitSurvey() ||
       this.operatorTemplatesStore.submitting() ||
       this.responseSubmitted()
     ) {
@@ -634,6 +681,10 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
       return;
     }
 
+    if (this.canSubmitFlags() && !operatorFlagsValid(this.flagDrafts())) {
+      this.scrollToElement('operator-flags-section');
+      return;
+    }
     this.clearHiddenQuestionState(template);
     this.markAllCustomInputsTouched();
     this.markAllQuestionsTouched();
@@ -659,10 +710,11 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
       (response) => {
         this.submittedResponse.set(response);
         this.responseSubmitted.set(true);
+        this.flagDrafts.set([]);
         this.customInputsOpen.set(false);
         this.summaryOpen.set(true);
-        this.expandedLatestResponseTemplateIds.update(
-          (templateIds) => new Set(templateIds).add(template.templateId),
+        this.expandedLatestResponseTemplateIds.update((templateIds) =>
+          new Set(templateIds).add(template.templateId),
         );
       },
       (submitError) => {
@@ -675,6 +727,12 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
           this.pendingRuntimeRefreshTemplateId.set(template.templateId);
         }
       },
+      this.canSubmitFlags()
+        ? this.flagDrafts().map((flag) => ({
+            type: flagType(flag.type)!,
+            brief: flag.brief.trim() || null,
+          }))
+        : [],
     );
   }
 
@@ -971,9 +1029,7 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
   ): boolean {
     const animation = this.animatedScaleSelection();
     return (
-      animation?.questionId === question.id &&
-      animation.value === value &&
-      animation.kind === kind
+      animation?.questionId === question.id && animation.value === value && animation.kind === kind
     );
   }
 
@@ -1057,12 +1113,7 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
     return {
       templateId: template.templateId,
       name,
-      secondaryName: this.alternateLocalizedText(
-        template.nameEn,
-        template.nameAr,
-        isArabic,
-        name,
-      ),
+      secondaryName: this.alternateLocalizedText(template.nameEn, template.nameAr, isArabic, name),
       description: this.localizedOptionalText(
         template.descriptionEn,
         template.descriptionAr,
@@ -1079,11 +1130,7 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
       customInputsCount: template.customInputsCount,
       hasAnswered: template.hasAnswered,
       latestResponse: template.latestResponse
-        ? this.toLatestResponseView(
-            template.latestResponse,
-            isArabic,
-            questions,
-          )
+        ? this.toLatestResponseView(template.latestResponse, isArabic, questions)
         : null,
       latestResponseSource: template.latestResponse,
       customInputs: template.customInputs.map((customInput) =>
@@ -1104,9 +1151,11 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
       secondaryLabel: '',
       type: customInput.type,
       typeName:
-        customInput.type === 3 ? this.i18n.translate('branchTemplates.customInputTypeDate') : customInput.type === 2
-          ? this.i18n.translate('branchTemplates.customInputTypeInteger')
-          : this.i18n.translate('branchTemplates.customInputTypeString'),
+        customInput.type === 3
+          ? this.i18n.translate('branchTemplates.customInputTypeDate')
+          : customInput.type === 2
+            ? this.i18n.translate('branchTemplates.customInputTypeInteger')
+            : this.i18n.translate('branchTemplates.customInputTypeString'),
       isRequired: customInput.isRequired,
       minLength: customInput.minLength,
       maxLength: customInput.maxLength,
@@ -1184,8 +1233,7 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
         isArabic,
       ),
       typeName: customInput.typeName,
-      value:
-        customInputDisplayValue(customInput),
+      value: customInputDisplayValue(customInput),
     };
   }
 
@@ -1259,13 +1307,16 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
     }
 
     this.answers.set(answers);
-    this.customInputValues.set(this.createInitialCustomInputValues(template, hydrateLatestResponse));
+    this.customInputValues.set(
+      this.createInitialCustomInputValues(template, hydrateLatestResponse),
+    );
     this.touchedCustomInputIds.set(new Set());
     this.touchedQuestionIds.set(new Set());
     this.currentQuestionIndex.set(0);
     this.customInputsOpen.set(template.customInputs.length > 0);
     this.summaryOpen.set(false);
     this.responseSubmitted.set(false);
+    this.flagDrafts.set([]);
     this.submittedResponse.set(null);
     this.clearHiddenQuestionState(template);
   }
@@ -1275,11 +1326,8 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
     hydrateLatestResponse: boolean,
   ): Record<string, string> {
     const latestValues = new Map(
-      (hydrateLatestResponse ? template.latestResponseSource?.customInputs ?? [] : []).map(
-        (customInput) => [
-          customInput.customInputId,
-          customInputDisplayValue(customInput),
-        ],
+      (hydrateLatestResponse ? (template.latestResponseSource?.customInputs ?? []) : []).map(
+        (customInput) => [customInput.customInputId, customInputDisplayValue(customInput)],
       ),
     );
 
@@ -1300,6 +1348,7 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
     this.currentQuestionIndex.set(0);
     this.summaryOpen.set(false);
     this.responseSubmitted.set(false);
+    this.flagDrafts.set([]);
     this.customInputsOpen.set(false);
     this.customInputValues.set({});
     this.touchedCustomInputIds.set(new Set());
@@ -1317,6 +1366,7 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
     this.currentQuestionIndex.set(0);
     this.summaryOpen.set(false);
     this.responseSubmitted.set(false);
+    this.flagDrafts.set([]);
     this.customInputsOpen.set(false);
     this.customInputValues.set({});
     this.touchedCustomInputIds.set(new Set());
@@ -1834,7 +1884,11 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
     return true;
   }
 
-  private toWavFile(buffers: readonly Float32Array[], sampleRate: number, questionId: string): File {
+  private toWavFile(
+    buffers: readonly Float32Array[],
+    sampleRate: number,
+    questionId: string,
+  ): File {
     const samples = this.mergeAudioBuffers(buffers);
     const buffer = new ArrayBuffer(44 + samples.length * 2);
     const view = new DataView(buffer);

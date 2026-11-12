@@ -1,4 +1,7 @@
-import { customInputTypeName, customInputDisplayValue } from '../../../../shared/models/custom-input.model';
+import {
+  customInputTypeName,
+  customInputDisplayValue,
+} from '../../../../shared/models/custom-input.model';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
@@ -106,7 +109,8 @@ export class DepartmentReportsService {
     if (query.hasVoice !== undefined) {
       params = params.set('hasVoice', String(query.hasVoice));
     }
-    if (query.satisfactionCategory) params = params.set('satisfactionCategory', query.satisfactionCategory);
+    if (query.satisfactionCategory)
+      params = params.set('satisfactionCategory', query.satisfactionCategory);
     if (query.isScored !== undefined) params = params.set('isScored', String(query.isScored));
     if (query.questionId) params = params.set('questionId', query.questionId);
     if (query.scoreCalculationMode) {
@@ -128,7 +132,10 @@ export class DepartmentReportsService {
       .pipe(map((response) => this.toOperatorResponsesPagination(response)));
   }
 
-  getResponseDetails(operatorId: string, surveyResponseId: string): Observable<DepartmentResponseDetails> {
+  getResponseDetails(
+    operatorId: string,
+    surveyResponseId: string,
+  ): Observable<DepartmentResponseDetails> {
     return this.http
       .get<ApiRecord>(
         `${this.departmentOperatorsUrl}/${encodeURIComponent(operatorId)}/responses/${encodeURIComponent(
@@ -172,14 +179,19 @@ export class DepartmentReportsService {
       criticalResponses: this.readArray(response['criticalResponses']).map((item) =>
         this.toCriticalResponse(item),
       ),
-      scoreCalculationMode: (response['scoreCalculationMode'] as ScoreCalculationMode) ?? 'RootQuestions',
+      scoreCalculationMode:
+        (response['scoreCalculationMode'] as ScoreCalculationMode) ?? 'RootQuestions',
       classificationPolicy: (response['classificationPolicy'] as ClassificationPolicy) ?? null,
       hasMixedClassificationCriteria: Boolean(response['hasMixedClassificationCriteria']),
       storedBaselineResponsesCount: Number(response['storedBaselineResponsesCount'] ?? 0),
       hasCompleteQuestionScoreData: Boolean(response['hasCompleteQuestionScoreData']),
       requestedModeAvailable:
-        response['requestedModeAvailable'] === undefined ? true : Boolean(response['requestedModeAvailable']),
-      availability: response['availability'] ? this.toAvailability(this.readRecord(response['availability'])) : null,
+        response['requestedModeAvailable'] === undefined
+          ? true
+          : Boolean(response['requestedModeAvailable']),
+      availability: response['availability']
+        ? this.toAvailability(this.readRecord(response['availability']))
+        : null,
       bestRatedQuestions: this.readArray(response['bestRatedQuestions']).map((item) =>
         this.toBestRatedQuestion(item),
       ),
@@ -205,15 +217,19 @@ export class DepartmentReportsService {
       totalResponses: this.readNumber(summary, 'totalResponses'),
       averageScorePercentage: this.readNumber(summary, 'averageScorePercentage'),
       complaintsCount: this.readNumber(summary, 'complaintsCount'),
+      suggestionsCount: this.readNumber(summary, 'suggestionsCount'),
+      commentsCount: this.readNumber(summary, 'commentsCount'),
       voiceAnswersCount: this.readNumber(summary, 'voiceAnswersCount'),
       satisfiedResponses: this.readNumber(summary, 'satisfiedResponses'),
       neutralResponses: this.readNumber(summary, 'neutralResponses'),
       unhappyResponses: this.readNumber(summary, 'unhappyResponses'),
       scoredResponses: this.readNumber(summary, 'scoredResponses'),
       unscoredResponses: this.readNumber(summary, 'unscoredResponses'),
-      hasScoreData: summary?.['hasScoreData'] === undefined ? true : Boolean(summary['hasScoreData']),
+      hasScoreData:
+        summary?.['hasScoreData'] === undefined ? true : Boolean(summary['hasScoreData']),
       satisfactionPercentage:
-        summary?.['satisfactionPercentage'] !== undefined && summary['satisfactionPercentage'] !== null
+        summary?.['satisfactionPercentage'] !== undefined &&
+        summary['satisfactionPercentage'] !== null
           ? Number(summary['satisfactionPercentage'])
           : null,
     };
@@ -237,6 +253,8 @@ export class DepartmentReportsService {
       responsesCount: this.readNumber(item, 'responsesCount'),
       averageScorePercentage: this.readNumber(item, 'averageScorePercentage'),
       complaintsCount: this.readNumber(item, 'complaintsCount'),
+      suggestionsCount: this.readNumber(item, 'suggestionsCount'),
+      commentsCount: this.readNumber(item, 'commentsCount'),
       voiceAnswersCount: this.readNumber(item, 'voiceAnswersCount'),
       lastResponseOnUtc: this.readNullableString(item, 'lastResponseOnUtc'),
       riskLevel: this.toRiskLevel(this.readString(item, 'riskLevel')),
@@ -256,6 +274,8 @@ export class DepartmentReportsService {
       responsesCount: this.readNumber(item, 'responsesCount'),
       averageScorePercentage: this.readNumber(item, 'averageScorePercentage'),
       complaintsCount: this.readNumber(item, 'complaintsCount'),
+      suggestionsCount: this.readNumber(item, 'suggestionsCount'),
+      commentsCount: this.readNumber(item, 'commentsCount'),
       riskLevel: this.toRiskLevel(this.readString(item, 'riskLevel')),
       detailsNavigation: this.toNavigation(this.readRecord(item['detailsNavigation'])),
     };
@@ -325,12 +345,14 @@ export class DepartmentReportsService {
 
   private toCharts(charts: ApiRecord | null): DashboardCharts {
     return {
-      satisfactionDistribution: this.readArray(charts?.['satisfactionDistribution']).map((item) => ({
-        category: this.toSatisfactionCategory(this.readString(item, 'category')),
-        responsesCount: this.readNumber(item, 'responsesCount'),
-        percentage: this.readNumber(item, 'percentage'),
-        detailsNavigation: this.toNavigation(this.readRecord(item['detailsNavigation'])),
-      })),
+      satisfactionDistribution: this.readArray(charts?.['satisfactionDistribution']).map(
+        (item) => ({
+          category: this.toSatisfactionCategory(this.readString(item, 'category')),
+          responsesCount: this.readNumber(item, 'responsesCount'),
+          percentage: this.readNumber(item, 'percentage'),
+          detailsNavigation: this.toNavigation(this.readRecord(item['detailsNavigation'])),
+        }),
+      ),
     };
   }
 
@@ -338,6 +360,8 @@ export class DepartmentReportsService {
     return {
       allResponses: this.toNavigation(this.readRecord(actions?.['allResponses'])),
       complaints: this.toNavigation(this.readRecord(actions?.['complaints'])),
+      suggestions: this.toNavigation(this.readRecord(actions?.['suggestions'])),
+      comments: this.toNavigation(this.readRecord(actions?.['comments'])),
       voiceAnswers: this.toNavigation(this.readRecord(actions?.['voiceAnswers'])),
     };
   }
@@ -361,7 +385,9 @@ export class DepartmentReportsService {
     };
   }
 
-  private toOperatorResponsesPagination(response: ApiRecord): DepartmentOperatorResponsesPagination {
+  private toOperatorResponsesPagination(
+    response: ApiRecord,
+  ): DepartmentOperatorResponsesPagination {
     const currentPage = this.readNumber(response, 'currentPage') || 1;
     const pageSize = this.readNumber(response, 'pageSize') || 10;
     const totalPages = this.readNumber(response, 'totalPages');
@@ -402,7 +428,9 @@ export class DepartmentReportsService {
         this.toCustomInputPreview(input),
       ),
       requestedModeAvailable:
-        item['requestedModeAvailable'] === undefined ? true : Boolean(item['requestedModeAvailable']),
+        item['requestedModeAvailable'] === undefined
+          ? true
+          : Boolean(item['requestedModeAvailable']),
       scoreDerivation: (item['scoreDerivation'] as string) ?? undefined,
     };
   }
@@ -433,7 +461,9 @@ export class DepartmentReportsService {
       historicalSurvey: (response['historicalSurvey'] as HistoricalSurvey) ?? null,
       historicalDataProvenance: (response['historicalDataProvenance'] as string) ?? undefined,
       isHistoricalDataVerified:
-        response['isHistoricalDataVerified'] === undefined ? true : Boolean(response['isHistoricalDataVerified']),
+        response['isHistoricalDataVerified'] === undefined
+          ? true
+          : Boolean(response['isHistoricalDataVerified']),
       scoreDerivation: (response['scoreDerivation'] as string) ?? null,
     };
   }
@@ -478,7 +508,9 @@ export class DepartmentReportsService {
       labelEnSnapshot: this.readNullableString(item, 'labelEnSnapshot'),
       labelArSnapshot: this.readNullableString(item, 'labelArSnapshot'),
       type: this.readString(item, 'typeSnapshot') || this.readString(item, 'type'),
-      typeName: this.readString(item, 'typeName') || customInputTypeName(item['typeSnapshot'] ?? item['type']),
+      typeName:
+        this.readString(item, 'typeName') ||
+        customInputTypeName(item['typeSnapshot'] ?? item['type']),
       stringValue: this.readNullableString(item, 'stringValue'),
       integerValue: this.readNullableNumber(item, 'integerValue'),
       dateValue: this.readNullableString(item, 'dateValue'),
@@ -564,7 +596,12 @@ export class DepartmentReportsService {
   }
 
   private toRiskLevel(value: string): DepartmentReportsRiskLevel {
-    if (value === 'HighRisk' || value === 'MediumRisk' || value === 'Healthy' || value === 'NoData') {
+    if (
+      value === 'HighRisk' ||
+      value === 'MediumRisk' ||
+      value === 'Healthy' ||
+      value === 'NoData'
+    ) {
       return value;
     }
 

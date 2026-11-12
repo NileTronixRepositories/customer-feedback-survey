@@ -1,0 +1,136 @@
+<main class="space-y-5">
+  <app-page-header
+    [title]="'flags.workspace' | t"
+    [description]="'flags.workspaceHint' | t"
+    [icon]="icon"
+  />
+  <section class="feedback-panel">
+    <form class="feedback-form row g-3 align-items-end" [formGroup]="filters" (ngSubmit)="apply()">
+      <label class="col-12 col-md-4"
+        >{{ 'flags.search' | t }}<input formControlName="searchText" type="search"
+      /></label>
+      <label class="col-6 col-md-2"
+        >{{ 'flags.type' | t
+        }}<select formControlName="type">
+          <option value="">{{ 'flags.all' | t }}</option>
+          @for (type of types; track type) {
+            <option [value]="type">{{ typeKey(type) | t }}</option>
+          }
+        </select></label
+      >
+      <label class="col-6 col-md-2"
+        >{{ 'flags.answerState' | t
+        }}<select formControlName="answered">
+          <option value="">{{ 'flags.all' | t }}</option>
+          <option value="true">{{ 'flags.answered' | t }}</option>
+          <option value="false">{{ 'flags.unanswered' | t }}</option>
+        </select></label
+      >
+      <label class="col-6 col-md-2"
+        >{{ 'flags.from' | t }}<input type="date" formControlName="from"
+      /></label>
+      <label class="col-6 col-md-2"
+        >{{ 'flags.to' | t }}<input type="date" formControlName="to"
+      /></label>
+      <label class="col-6 col-md-3"
+        >{{ 'flags.sort' | t
+        }}<select formControlName="orderSort">
+          <option value="Newest">{{ 'flags.newest' | t }}</option>
+          <option value="Oldest">{{ 'flags.oldest' | t }}</option>
+        </select></label
+      >
+      <div class="col-12 col-md-9 feedback-actions">
+        <app-button type="submit" [loading]="loading()">{{
+          'flags.apply' | t
+        }}</app-button><app-button variant="secondary" (pressed)="clear()">{{
+          'flags.clear' | t
+        }}</app-button>
+      </div>
+    </form>
+  </section>
+  @if (error()) {
+    <p class="feedback-error" role="alert">{{ error() | t }}</p>
+  }
+  <section class="feedback-panel" [attr.aria-busy]="loading()">
+    @if (loading()) {
+      <p role="status">{{ 'flags.loading' | t }}</p>
+    }
+    @if (page(); as result) {
+      <div class="overflow-x-auto">
+        <table class="feedback-table block md:table">
+          <caption class="sr-only">
+            {{
+              'flags.workspace' | t
+            }}
+          </caption>
+          <thead class="hidden md:table-header-group">
+            <tr>
+              <th scope="col">{{ 'flags.template' | t }}</th>
+              <th scope="col">{{ 'flags.branch' | t }}</th>
+              <th scope="col">{{ 'flags.operator' | t }}</th>
+              <th scope="col">{{ 'flags.submittedOn' | t }}</th>
+              <th scope="col">{{ 'flags.count' | t }}</th>
+              <th scope="col">{{ 'flags.actions' | t }}</th>
+            </tr>
+          </thead>
+          <tbody class="block md:table-row-group">
+            @for (item of result.data; track item.responseId) {
+              <tr class="block md:table-row">
+                <td class="block md:table-cell">
+                  <span class="block text-xs text-slate-600 md:hidden">{{
+                    'flags.template' | t
+                  }}</span
+                  >{{ localized(item.templateNameEn, item.templateNameAr) }}
+                </td>
+                <td class="block md:table-cell">
+                  <span class="block text-xs text-slate-600 md:hidden">{{
+                    'flags.branch' | t
+                  }}</span
+                  >{{ localized(item.branchNameEn, item.branchNameAr) }}
+                </td>
+                <td class="block md:table-cell">
+                  <span class="block text-xs text-slate-600 md:hidden">{{
+                    'flags.operator' | t
+                  }}</span
+                  >{{ localized(item.operatorNameEn, item.operatorNameAr) }}
+                </td>
+                <td class="block md:table-cell">
+                  <span class="block text-xs text-slate-600 md:hidden">{{
+                    'flags.submittedOn' | t
+                  }}</span
+                  >{{ item.submittedOnUtc | date: 'medium' }}
+                </td>
+                <td class="block md:table-cell">
+                  <span class="block text-xs text-slate-600 md:hidden">{{ 'flags.count' | t }}</span
+                  >{{ item.flagsCount }}
+                </td>
+                <td class="block md:table-cell">
+                  <a
+                    class="font-semibold text-[var(--theme-color-accent)] underline"
+                    [routerLink]="['/feedback', item.responseId]"
+                    [queryParams]="route.snapshot.queryParams"
+                    >{{ 'flags.details' | t }}</a
+                  >
+                </td>
+              </tr>
+            } @empty {
+              <tr class="block md:table-row">
+                <td colspan="6" class="block md:table-cell">
+                  {{ (hasFilters() ? 'flags.noMatches' : 'flags.noResponses') | t }}
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <app-feedback-pagination
+        [page]="result.currentPage"
+        [size]="result.pageSize"
+        [total]="result.totalItems"
+        [loading]="loading()"
+        (pageChanged)="changePage($event)"
+        (sizeChanged)="changeSize($event)"
+      />
+    }
+  </section>
+</main>

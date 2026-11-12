@@ -122,6 +122,20 @@ export const routes: Routes = [
           import('./features/super-admin/users/users.routes').then((m) => m.USERS_ROUTES),
       },
       {
+        path: 'flag-officers',
+        loadChildren: () =>
+          import('./features/response-flags/response-flags.routes').then(
+            (m) => m.FLAG_OFFICERS_ROUTES,
+          ),
+      },
+      {
+        path: 'feedback',
+        loadChildren: () =>
+          import('./features/response-flags/response-flags.routes').then(
+            (m) => m.RESPONSE_FLAGS_ROUTES,
+          ),
+      },
+      {
         path: 'operators',
         loadChildren: () =>
           import('./features/department-admin/operators/operators.routes').then(
@@ -152,9 +166,9 @@ export const routes: Routes = [
       {
         path: 'dashboard-responses',
         loadComponent: () =>
-          import(
-            './features/reports/dashboard-drill-down/presentation/pages/dashboard-responses-page/dashboard-responses-page.component'
-          ).then((m) => m.DashboardResponsesPageComponent),
+          import('./features/reports/dashboard-drill-down/presentation/pages/dashboard-responses-page/dashboard-responses-page.component').then(
+            (m) => m.DashboardResponsesPageComponent,
+          ),
       },
       {
         path: 'reports',

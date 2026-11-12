@@ -1,3 +1,4 @@
+import { FlagActor, SurveyResponseFlagType } from '../../../../shared/models/response-flag.model';
 import {
   QuestionAnswerOption,
   QuestionAnswerTypeInput,
@@ -7,9 +8,7 @@ import {
   BestRatedQuestion,
   HistoricalAvailability,
 } from '../../../../shared/models/historical-survey.model';
-import {
-  ScoreCalculationMode,
-} from '../../../../shared/models/score-calculation-mode.model';
+import { ScoreCalculationMode } from '../../../../shared/models/score-calculation-mode.model';
 import {
   DashboardCharts,
   DashboardDetailsNavigation,
@@ -61,15 +60,28 @@ export interface SurveyDashboardComplaintsQuery extends SurveyDashboardQuery {
   pageNumber: number;
   pageSize: number;
   searchText?: string;
+  answered?: boolean;
+  flagId?: string;
 }
 
 export interface SurveyDashboardComplaint {
+  itemKind: 'QuestionAnswer' | 'ResponseFlag';
+  flagId: string | null;
+  type: SurveyResponseFlagType | null;
+  brief: string | null;
+  answer: string | null;
+  createdBy: FlagActor | null;
+  answeredBy: FlagActor | null;
+  briefUpdatedBy: FlagActor | null;
+  createdOnUtc: string | null;
+  briefUpdatedOnUtc: string | null;
+  answeredOnUtc: string | null;
   responseId: string;
   templateId: string;
   templateKind: SurveyDashboardTemplateKind;
   templateNameEn: string;
   templateNameAr: string | null;
-  questionId: string;
+  questionId: string | null;
   questionTextEn: string;
   questionTextAr: string | null;
   complaintText: string;
@@ -85,15 +97,19 @@ export interface SurveyDashboardComplaint {
 }
 
 export interface SurveyDashboardComplaintGroup {
+  responsesWithComplaints?: number;
   templateId: string;
   templateKind: SurveyDashboardTemplateKind;
   templateNameEn: string;
   templateNameAr: string | null;
   complaintsCount: number;
+  suggestionsCount?: number;
+  commentsCount?: number;
   complaints: readonly SurveyDashboardComplaint[];
 }
 
 export interface SurveyDashboardComplaintsPage {
+  responsesWithFlags?: number;
   totalComplaints: number;
   responsesWithComplaints: number;
   totalResponses?: number;
@@ -184,6 +200,8 @@ export interface SurveyDashboardSummary {
   neutralResponses: number;
   unhappyResponses: number;
   complaintsCount: number;
+  suggestionsCount?: number;
+  commentsCount?: number;
   voiceAnswersCount: number;
   activeInternalTemplatesCount: number;
   activeAnonymousTemplatesCount: number;
@@ -207,6 +225,8 @@ export interface SurveyDashboardSourceMetrics {
   neutralResponses: number;
   unhappyResponses: number;
   complaintsCount: number;
+  suggestionsCount?: number;
+  commentsCount?: number;
   voiceAnswersCount: number;
   detailsNavigation: SurveyDashboardNavigation | null;
 }
@@ -222,6 +242,8 @@ export interface SurveyDashboardBranchSummary {
   hasScoreData?: boolean;
   satisfactionPercentage?: number | null;
   complaintsCount: number;
+  suggestionsCount?: number;
+  commentsCount?: number;
   voiceAnswersCount: number;
   detailsNavigation: SurveyDashboardNavigation | null;
 }
@@ -253,6 +275,8 @@ export interface SurveyDashboardTemplatePerformance {
   hasScoreData?: boolean;
   satisfactionPercentage?: number | null;
   complaintsCount: number;
+  suggestionsCount?: number;
+  commentsCount?: number;
   voiceAnswersCount: number;
   riskLevel: SurveyDashboardRiskLevel;
   detailsNavigation: SurveyDashboardNavigation | null;

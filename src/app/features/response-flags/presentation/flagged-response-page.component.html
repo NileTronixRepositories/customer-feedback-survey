@@ -1,0 +1,125 @@
+<main class="space-y-5">
+  <a routerLink="/feedback" [queryParams]="route.snapshot.queryParams" class="text-sm underline">{{
+    'flags.backToQueue' | t
+  }}</a>
+  <app-page-header [title]="'flags.responseDetails' | t" [icon]="icon" />
+  @if (loading()) {
+    <p role="status">{{ 'flags.loading' | t }}</p>
+  }
+  @if (error()) {
+    <p class="feedback-error" role="alert">{{ error() | t }}</p>
+  }
+  @if (success()) {
+    <p class="text-sm text-emerald-800" role="status">{{ success() | t }}</p>
+  }
+  @if (data(); as details) {
+    <section class="feedback-panel space-y-4">
+      <h2 class="text-lg font-bold">
+        {{ localized(details.response.templateNameEn, details.response.templateNameAr) }}
+      </h2>
+      <dl class="row g-3 text-sm">
+        <div class="col-12 col-sm-4">
+          <dt>{{ 'flags.branch' | t }}</dt>
+          <dd>{{ localized(details.response.branchNameEn, details.response.branchNameAr) }}</dd>
+        </div>
+        <div class="col-12 col-sm-4">
+          <dt>{{ 'flags.operator' | t }}</dt>
+          <dd>{{ localized(details.response.operatorNameEn, details.response.operatorNameAr) }}</dd>
+        </div>
+        <div class="col-12 col-sm-4">
+          <dt>{{ 'flags.submittedOn' | t }}</dt>
+          <dd>{{ details.response.submittedOnUtc | date: 'medium' }}</dd>
+        </div>
+      </dl>
+      <app-button variant="secondary" (pressed)="surveyOpen.set(true)">{{
+        'flags.viewSurvey' | t
+      }}</app-button>
+    </section>
+    <div class="feedback-actions">
+      <h2 class="text-lg font-bold">{{ 'flags.feedback' | t }}</h2>
+      @if (can(permissions.create)) {
+        <app-button (pressed)="openEditor('create')">{{ 'flags.add' | t }}</app-button>
+      }
+    </div>
+    @for (flag of details.flags; track flag.flagId) {
+      <app-response-flag-card
+        [flag]="flag"
+        [canEditBrief]="can(permissions.editBrief)"
+        [canAnswer]="can(permissions.answer)"
+        (edit)="openEditor($event, flag)"
+      />
+    }
+    <app-dashboard-response-details-modal
+      [open]="surveyOpen()"
+      [details]="details.response"
+      (closed)="surveyOpen.set(false)"
+    />
+  }
+  <app-modal
+    [open]="editing() !== null"
+    [title]="
+      (editing() === 'create'
+        ? 'flags.add'
+        : editing() === 'brief'
+          ? 'flags.editBrief'
+          : 'flags.writeAnswer'
+      ) | t
+    "
+    [closeOnBackdrop]="!saving()"
+    (closed)="closeEditor()"
+  >
+    <form class="feedback-form space-y-4" [formGroup]="form" (ngSubmit)="save()">
+      @if (editing() === 'create') {
+        <label
+          >{{ 'flags.type' | t
+          }}<select formControlName="type">
+            @for (type of types; track type) {
+              <option [value]="type">{{ typeKey(type) | t }}</option>
+            }
+          </select></label
+        >
+      }
+      @if (editing() !== 'answer') {
+        <label
+          >{{ 'flags.brief' | t
+          }}<textarea
+            rows="4"
+            formControlName="brief"
+            aria-required="true"
+            maxlength="1000"
+          ></textarea
+          ><span class="text-xs text-slate-600" aria-hidden="true"
+            >{{ form.controls.brief.value.length }} / 1000</span
+          ></label
+        >
+      }
+      @if (editing() === 'answer' || (editing() === 'create' && can(permissions.answer))) {
+        <label
+          >{{ 'flags.answer' | t
+          }}<textarea
+            rows="5"
+            formControlName="answer"
+            [attr.aria-required]="editing() === 'answer'"
+            maxlength="4000"
+          ></textarea
+          ><span class="text-xs text-slate-600" aria-hidden="true"
+            >{{ form.controls.answer.value.length }} / 4000</span
+          ></label
+        >
+      }
+      @if (formError()) {
+        <p class="feedback-error feedback-text" role="alert">{{ formError() | t }}</p>
+      }
+      <div class="feedback-actions">
+        <app-button type="submit" [loading]="saving()" [disabled]="denied()">{{
+          'flags.save' | t
+        }}</app-button><app-button
+          variant="secondary"
+          [disabled]="saving()"
+          (pressed)="closeEditor()"
+          >{{ 'flags.cancel' | t }}</app-button
+        >
+      </div>
+    </form>
+  </app-modal>
+</main>

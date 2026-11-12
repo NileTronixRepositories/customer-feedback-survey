@@ -1,3 +1,4 @@
+import { DashboardFeedbackCountsComponent } from '../../../../../response-flags/presentation/dashboard-feedback-counts.component';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -71,6 +72,7 @@ Chart.register(...registerables);
   selector: 'app-branch-dashboard-page',
   standalone: true,
   imports: [
+    DashboardFeedbackCountsComponent,
     ButtonComponent,
     DatePipe,
     DecimalPipe,
@@ -133,9 +135,7 @@ export class BranchDashboardPageComponent implements OnInit, OnDestroy {
   readonly activeTemplatesCount = computed(
     () =>
       this.dashboardStore.dashboard()?.summary.activeTemplatesCount ??
-      this.branchStore
-        .branch()
-        ?.templates.filter((template) => template.isActive).length ??
+      this.branchStore.branch()?.templates.filter((template) => template.isActive).length ??
       0,
   );
   readonly inactiveTemplatesCount = computed(() =>
@@ -301,7 +301,8 @@ export class BranchDashboardPageComponent implements OnInit, OnDestroy {
     return (
       this.dashboardStore
         .dashboard()
-        ?.charts.satisfactionDistribution.find((item) => item.category === category)?.percentage ?? 0
+        ?.charts.satisfactionDistribution.find((item) => item.category === category)?.percentage ??
+      0
     );
   }
 

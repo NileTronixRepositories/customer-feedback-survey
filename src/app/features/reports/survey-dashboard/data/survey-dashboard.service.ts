@@ -1,4 +1,9 @@
-import { customInputTypeName, customInputDisplayValue, normalizeCustomInputType } from '../../../../shared/models/custom-input.model';
+import { FlagActor, flagType } from '../../../../shared/models/response-flag.model';
+import {
+  customInputTypeName,
+  customInputDisplayValue,
+  normalizeCustomInputType,
+} from '../../../../shared/models/custom-input.model';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
@@ -102,17 +107,25 @@ export class SurveyDashboardService {
   }
 
   getComplaints(query: SurveyDashboardComplaintsQuery): Observable<SurveyDashboardComplaintsPage> {
+    return this.getFeedback('complaints', query);
+  }
+
+  getFeedback(
+    kind: 'complaints' | 'suggestions' | 'comments',
+    query: SurveyDashboardComplaintsQuery,
+    path?: string,
+  ): Observable<SurveyDashboardComplaintsPage> {
     let params = this.toAnalyticsParams(query, false)
-      .set('pageNumber', String(query.pageNumber))
-      .set('page', String(query.pageNumber))
-      .set('pageSize', String(query.pageSize));
-
-    if (query.searchText) {
-      params = params.set('searchText', query.searchText);
-    }
-
+      .set('pageNumber', query.pageNumber)
+      .set('pageSize', query.pageSize);
+    if (query.searchText) params = params.set('searchText', query.searchText);
+    if (query.answered !== undefined) params = params.set('answered', query.answered);
+    if (query.flagId) params = params.set('flagId', query.flagId);
     return this.http
-      .get<ApiRecord>(`${this.dashboardUrl}/complaints`, { params })
+      .get<ApiRecord>(
+        path ? this.toApiUrl(path) : `${this.dashboardUrl}/${kind}`,
+        path ? {} : { params },
+      )
       .pipe(map((response) => this.toComplaintsPage(response, query)));
   }
 
@@ -280,7 +293,8 @@ export class SurveyDashboardService {
     response: ApiRecord,
     query: SurveyDashboardComplaintsQuery,
   ): SurveyDashboardComplaintsPage {
-    const rawPage = this.readArray(response['page']);
+    const envelope = this.readRecord(response['page']);
+    const rawPage = envelope ? this.readArray(envelope['data']) : this.readArray(response['page']);
     const pageItems = rawPage.map((item) => this.toComplaint(item));
 
     const suppliedGroups = this.readArray(response['templateGroups']);
@@ -297,6 +311,7 @@ export class SurveyDashboardService {
       this.readNumber(response, 'totalCount') ||
       this.readNumber(response, 'totalComplaints') ||
       this.readNumber(response, 'totalItems') ||
+      this.readNumber(envelope, 'totalItems') ||
       this.readNumber(response, 'totalRecords') ||
       this.readNumber(response, 'total');
 
@@ -305,16 +320,24 @@ export class SurveyDashboardService {
       templateGroups.reduce((total, group) => total + group.complaints.length, 0);
 
     const totalItems = totalCountFromResponse || totalItemsInPayload;
-    const pageSize = this.readNumber(response, 'pageSize') || query.pageSize;
+    const pageSize =
+      this.readNumber(envelope, 'pageSize') ||
+      this.readNumber(response, 'pageSize') ||
+      query.pageSize;
     const totalPages =
       this.readNumber(response, 'totalPages') || Math.ceil(totalItems / (pageSize || 1)) || 1;
 
     return {
       totalComplaints: totalCountFromResponse || totalItems,
       responsesWithComplaints: this.readNumber(response, 'responsesWithComplaints'),
+      responsesWithFlags: this.readNumber(response, 'responsesWithFlags'),
+      appliedFilters: this.toAppliedFilters(this.readRecord(response['appliedFilters'])),
       totalResponses: this.readNullableNumber(response, 'totalResponses') ?? undefined,
       complaintRate: this.readNumber(response, 'complaintRate'),
-      currentPage: this.readNumber(response, 'currentPage') || query.pageNumber,
+      currentPage:
+        this.readNumber(envelope, 'currentPage') ||
+        this.readNumber(response, 'currentPage') ||
+        query.pageNumber,
       pageSize,
       totalItems,
       totalPages,
@@ -332,19 +355,36 @@ export class SurveyDashboardService {
       templateKind: this.toTemplateKind(this.readString(item, 'templateKind')),
       templateNameEn: this.readString(item, 'templateNameEn'),
       templateNameAr: this.readNullableString(item, 'templateNameAr'),
-      complaintsCount: this.readNumber(item, 'complaintsCount') || complaints.length,
+      complaintsCount:
+        this.readNumber(item, 'totalComplaints') ||
+        this.readNumber(item, 'complaintsCount') ||
+        complaints.length,
+      responsesWithComplaints: this.readNumber(item, 'responsesWithComplaints'),
+      suggestionsCount: this.readNumber(item, 'suggestionsCount'),
+      commentsCount: this.readNumber(item, 'commentsCount'),
       complaints,
     };
   }
 
   private toComplaint(item: ApiRecord): SurveyDashboardComplaint {
     return {
+      itemKind: item['itemKind'] === 'ResponseFlag' ? 'ResponseFlag' : 'QuestionAnswer',
+      flagId: this.readNullableString(item, 'flagId'),
+      type: flagType(item['type']),
+      brief: this.readNullableString(item, 'brief'),
+      answer: this.readNullableString(item, 'answer'),
+      createdBy: (item['createdBy'] as FlagActor) ?? null,
+      answeredBy: (item['answeredBy'] as FlagActor) ?? null,
+      briefUpdatedBy: (item['briefUpdatedBy'] as FlagActor) ?? null,
+      createdOnUtc: this.readNullableString(item, 'createdOnUtc'),
+      briefUpdatedOnUtc: this.readNullableString(item, 'briefUpdatedOnUtc'),
+      answeredOnUtc: this.readNullableString(item, 'answeredOnUtc'),
       responseId: this.readRecordId(item['responseId']),
       templateId: this.readRecordId(item['templateId']),
       templateKind: this.toTemplateKind(this.readString(item, 'templateKind')),
       templateNameEn: this.readString(item, 'templateNameEn'),
       templateNameAr: this.readNullableString(item, 'templateNameAr'),
-      questionId: this.readRecordId(item['questionId']),
+      questionId: this.readNullableString(item, 'questionId'),
       questionTextEn: this.readString(item, 'questionTextEn'),
       questionTextAr: this.readNullableString(item, 'questionTextAr'),
       complaintText: this.readString(item, 'complaintText'),
@@ -498,6 +538,8 @@ export class SurveyDashboardService {
       neutralResponses: this.readNumber(summary, 'neutralResponses'),
       unhappyResponses: this.readNumber(summary, 'unhappyResponses'),
       complaintsCount: this.readNumber(summary, 'complaintsCount'),
+      suggestionsCount: this.readNumber(summary, 'suggestionsCount'),
+      commentsCount: this.readNumber(summary, 'commentsCount'),
       voiceAnswersCount: this.readNumber(summary, 'voiceAnswersCount'),
       activeInternalTemplatesCount: this.readNumber(summary, 'activeInternalTemplatesCount'),
       activeAnonymousTemplatesCount: this.readNumber(summary, 'activeAnonymousTemplatesCount'),
@@ -555,6 +597,8 @@ export class SurveyDashboardService {
       neutralResponses: this.readNumber(metrics, 'neutralResponses'),
       unhappyResponses: this.readNumber(metrics, 'unhappyResponses'),
       complaintsCount: this.readNumber(metrics, 'complaintsCount'),
+      suggestionsCount: this.readNumber(metrics, 'suggestionsCount'),
+      commentsCount: this.readNumber(metrics, 'commentsCount'),
       voiceAnswersCount: this.readNumber(metrics, 'voiceAnswersCount'),
       detailsNavigation: this.toNavigation(this.readRecord(metrics?.['detailsNavigation'])),
     };
@@ -580,6 +624,8 @@ export class SurveyDashboardService {
         this.readNullableNumber(item, 'satisfactionPercentage') ??
         (hasScoreData ? this.readNullableNumber(item, 'averageScorePercentage') : null),
       complaintsCount: this.readNumber(item, 'complaintsCount'),
+      suggestionsCount: this.readNumber(item, 'suggestionsCount'),
+      commentsCount: this.readNumber(item, 'commentsCount'),
       voiceAnswersCount: this.readNumber(item, 'voiceAnswersCount'),
       detailsNavigation: this.toNavigation(this.readRecord(item['detailsNavigation'])),
     };
@@ -631,6 +677,8 @@ export class SurveyDashboardService {
     return {
       allResponses: this.toNavigation(this.readRecord(actions?.['allResponses'])),
       complaints: this.toNavigation(this.readRecord(actions?.['complaints'])),
+      suggestions: this.toNavigation(this.readRecord(actions?.['suggestions'])),
+      comments: this.toNavigation(this.readRecord(actions?.['comments'])),
       voiceAnswers: this.toNavigation(this.readRecord(actions?.['voiceAnswers'])),
     };
   }
@@ -660,6 +708,8 @@ export class SurveyDashboardService {
         this.readNullableNumber(item, 'satisfactionPercentage') ??
         (hasScoreData ? this.readNullableNumber(item, 'averageScorePercentage') : null),
       complaintsCount: this.readNumber(item, 'complaintsCount'),
+      suggestionsCount: this.readNumber(item, 'suggestionsCount'),
+      commentsCount: this.readNumber(item, 'commentsCount'),
       voiceAnswersCount: this.readNumber(item, 'voiceAnswersCount'),
       riskLevel: this.readString(item, 'riskLevel') || 'Healthy',
       detailsNavigation: this.toNavigation(this.readRecord(item['detailsNavigation'])),
@@ -873,7 +923,9 @@ export class SurveyDashboardService {
       labelEnSnapshot: this.readNullableString(item, 'labelEnSnapshot'),
       labelArSnapshot: this.readNullableString(item, 'labelArSnapshot'),
       type: this.readString(item, 'typeSnapshot') || this.readString(item, 'type'),
-      typeName: this.readString(item, 'typeName') || customInputTypeName(item['typeSnapshot'] ?? item['type']),
+      typeName:
+        this.readString(item, 'typeName') ||
+        customInputTypeName(item['typeSnapshot'] ?? item['type']),
       stringValue: this.readNullableString(item, 'stringValue'),
       integerValue: this.readNullableNumber(item, 'integerValue'),
       dateValue: this.readNullableString(item, 'dateValue'),
@@ -962,7 +1014,9 @@ export class SurveyDashboardService {
       labelEnSnapshot: this.readNullableString(item, 'labelEnSnapshot'),
       labelArSnapshot: this.readNullableString(item, 'labelArSnapshot'),
       type,
-      typeName: this.readString(item, 'typeName') || (type === 3 ? 'Date' : type === 2 ? 'Integer' : 'String'),
+      typeName:
+        this.readString(item, 'typeName') ||
+        (type === 3 ? 'Date' : type === 2 ? 'Integer' : 'String'),
       stringValue,
       integerValue,
       dateValue: this.readNullableString(item, 'dateValue'),
@@ -1123,7 +1177,12 @@ export class SurveyDashboardService {
       labelAr: this.readNullableString(item, 'labelAr'),
       type: this.readDisplayString(item['type']) || this.readString(item, 'typeName'),
       typeName:
-        this.readString(item, 'typeName') || (String(item['type']) === '3' ? 'Date' : String(item['type']) === '2' ? 'Integer' : 'String'),
+        this.readString(item, 'typeName') ||
+        (String(item['type']) === '3'
+          ? 'Date'
+          : String(item['type']) === '2'
+            ? 'Integer'
+            : 'String'),
       isRequired: this.readBoolean(item, 'isRequired'),
       minLength: this.readNullableNumber(item, 'minLength'),
       maxLength: this.readNullableNumber(item, 'maxLength'),
@@ -1251,7 +1310,6 @@ export class SurveyDashboardService {
 
     return 'SingleChoice';
   }
-
 
   private unwrapDetailsRecord(response: ApiRecord): ApiRecord {
     const data = this.readRecord(response['data']);

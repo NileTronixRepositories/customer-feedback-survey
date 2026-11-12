@@ -1,5 +1,13 @@
 import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnInit, computed, effect, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  computed,
+  effect,
+  inject,
+  signal,
+} from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import {
   Check,
@@ -55,12 +63,10 @@ interface OperatorTemplateBranchOption {
   standalone: true,
   imports: [
     ButtonComponent,
-    CardComponent,
     DatePipe,
     IconComponent,
     InputComponent,
     ModalComponent,
-    PageHeaderComponent,
     ReactiveFormsModule,
     ResetPasswordModalComponent,
     TranslatePipe,
@@ -70,11 +76,42 @@ interface OperatorTemplateBranchOption {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class OperatorsPageComponent implements OnInit {
+  readonly flagAuth = inject(AuthStore);
+  canToggleFlags(): boolean {
+    return (
+      this.flagAuth.userType() === 'SuperAdmin' && this.flagAuth.hasPermission('Operators.Update')
+    );
+  }
+  toggleFlags(operator: OperatorListItem): void {
+    if (this.canToggleFlags()) this.operatorsStore.setFlagSubmission(operator);
+  }
+
   readonly operatorsStore = inject(OperatorsStore);
-  private readonly authStore = inject(AuthStore);
+  readonly authStore = inject(AuthStore);
   private readonly formBuilder = inject(FormBuilder);
-  private readonly i18n = inject(I18nService);
+  readonly i18n = inject(I18nService);
   private readonly confirmDialog = inject(ConfirmDialogService);
+
+  readonly activeOperatorsCount = computed(
+    () => this.operatorsStore.operators().filter((o) => o.isActive).length,
+  );
+  readonly inactiveOperatorsCount = computed(
+    () => this.operatorsStore.operators().filter((o) => !o.isActive).length,
+  );
+  readonly flagsEnabledCount = computed(
+    () => this.operatorsStore.operators().filter((o) => o.canCreateFlagsOnSubmit).length,
+  );
+
+  getInitials(operator: OperatorListItem): string {
+    const name =
+      this.i18n.language() === 'ar'
+        ? operator.nameAr || operator.nameEn
+        : operator.nameEn || operator.nameAr;
+    if (!name) return 'OP';
+    const parts = name.trim().split(/\s+/);
+    if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
+    return (parts[0][0] + (parts[1]?.[0] ?? '')).toUpperCase();
+  }
 
   readonly chevronLeftIcon = ChevronLeft;
   readonly chevronDownIcon = ChevronDown;
@@ -146,7 +183,10 @@ export class OperatorsPageComponent implements OnInit {
     return this.allTemplatesForModal().filter((template) => selectedIds.has(template.templateId));
   });
   readonly selectedTemplateBranchGroups = computed<readonly OperatorTemplateBranchGroup[]>(() =>
-    this.groupTemplatesByBranch(this.selectedTemplatesForModal(), new Set(this.expandedTemplateBranchKeys())),
+    this.groupTemplatesByBranch(
+      this.selectedTemplatesForModal(),
+      new Set(this.expandedTemplateBranchKeys()),
+    ),
   );
   readonly templateBranchOptions = computed<readonly OperatorTemplateBranchOption[]>(() => {
     const templates = this.allTemplatesForModal();
@@ -211,7 +251,8 @@ export class OperatorsPageComponent implements OnInit {
   });
   readonly totalAvailableTemplatesCount = computed(() => {
     const selectedIds = new Set(this.selectedTemplateIds());
-    return this.allTemplatesForModal().filter((template) => !selectedIds.has(template.templateId)).length;
+    return this.allTemplatesForModal().filter((template) => !selectedIds.has(template.templateId))
+      .length;
   });
   readonly availableTemplatesForModal = computed(() => {
     const selectedIds = new Set(this.selectedTemplateIds());
@@ -240,7 +281,10 @@ export class OperatorsPageComponent implements OnInit {
 
     const originalIds = new Set(selection.selectedTemplates.map((template) => template.templateId));
     const currentIds = new Set(this.selectedTemplateIds());
-    return originalIds.size !== currentIds.size || [...currentIds].some((templateId) => !originalIds.has(templateId));
+    return (
+      originalIds.size !== currentIds.size ||
+      [...currentIds].some((templateId) => !originalIds.has(templateId))
+    );
   });
 
   private readonly syncSelectedTemplates = effect(() => {
@@ -249,7 +293,9 @@ export class OperatorsPageComponent implements OnInit {
       return;
     }
 
-    this.selectedTemplateIds.set(selection.selectedTemplates.map((template) => template.templateId));
+    this.selectedTemplateIds.set(
+      selection.selectedTemplates.map((template) => template.templateId),
+    );
     this.expandedTemplateBranchKeys.set(this.templateBranchKeys(selection.selectedTemplates));
   });
 
@@ -474,7 +520,9 @@ export class OperatorsPageComponent implements OnInit {
   }
 
   updateTemplatesSearchText(event: Event): void {
-    this.templatesSearchText.set(event.target instanceof HTMLInputElement ? event.target.value : '');
+    this.templatesSearchText.set(
+      event.target instanceof HTMLInputElement ? event.target.value : '',
+    );
   }
 
   searchOperatorTemplates(): void {
@@ -514,7 +562,11 @@ export class OperatorsPageComponent implements OnInit {
     const isArabic = this.i18n.language() === 'ar';
     const primary = isArabic ? branch.branchNameAr : branch.branchNameEn;
     const fallback = isArabic ? branch.branchNameEn : branch.branchNameAr;
-    const name = primary?.trim() || fallback?.trim() || branch.branchCode?.trim() || this.i18n.translate('operators.branch');
+    const name =
+      primary?.trim() ||
+      fallback?.trim() ||
+      branch.branchCode?.trim() ||
+      this.i18n.translate('operators.branch');
     if (branch.branchCode?.trim() && name !== branch.branchCode.trim()) {
       return `${name} (${branch.branchCode.trim()})`;
     }
@@ -527,14 +579,18 @@ export class OperatorsPageComponent implements OnInit {
     }
 
     this.selectedTemplateIds.update((templateIds) => [...templateIds, templateId]);
-    const template = this.allTemplatesForModal().find((currentTemplate) => currentTemplate.templateId === templateId);
+    const template = this.allTemplatesForModal().find(
+      (currentTemplate) => currentTemplate.templateId === templateId,
+    );
     if (template) {
       this.expandTemplateBranch(template);
     }
   }
 
   removeOperatorTemplate(templateId: string): void {
-    this.selectedTemplateIds.update((templateIds) => templateIds.filter((currentTemplateId) => currentTemplateId !== templateId));
+    this.selectedTemplateIds.update((templateIds) =>
+      templateIds.filter((currentTemplateId) => currentTemplateId !== templateId),
+    );
   }
 
   toggleTemplateBranch(branchKey: string): void {
@@ -546,14 +602,25 @@ export class OperatorsPageComponent implements OnInit {
   }
 
   templateBranchName(template: OperatorTemplateSelectionItem): string {
-    const primaryName = this.i18n.language() === 'ar' ? template.branchNameAr : template.branchNameEn;
-    const fallbackName = this.i18n.language() === 'ar' ? template.branchNameEn : template.branchNameAr;
-    return primaryName.trim() || fallbackName.trim() || template.branchCode.trim() || this.i18n.translate('operators.branch');
+    const primaryName =
+      this.i18n.language() === 'ar' ? template.branchNameAr : template.branchNameEn;
+    const fallbackName =
+      this.i18n.language() === 'ar' ? template.branchNameEn : template.branchNameAr;
+    return (
+      primaryName.trim() ||
+      fallbackName.trim() ||
+      template.branchCode.trim() ||
+      this.i18n.translate('operators.branch')
+    );
   }
 
   saveOperatorTemplates(): void {
     const operator = this.selectedTemplatesOperator();
-    if (!operator || !this.hasTemplateSelectionChanges() || this.operatorsStore.templatesSelectionSaving()) {
+    if (
+      !operator ||
+      !this.hasTemplateSelectionChanges() ||
+      this.operatorsStore.templatesSelectionSaving()
+    ) {
       return;
     }
 
@@ -568,7 +635,11 @@ export class OperatorsPageComponent implements OnInit {
 
   searchOperators(): void {
     const value = this.searchForm.getRawValue();
-    this.operatorsStore.search(value.searchText, value.departmentId, this.toPageSize(value.pageSize));
+    this.operatorsStore.search(
+      value.searchText,
+      value.departmentId,
+      this.toPageSize(value.pageSize),
+    );
   }
 
   clearOperatorSearch(): void {
@@ -602,7 +673,10 @@ export class OperatorsPageComponent implements OnInit {
   }
 
   canResetPassword(operator: OperatorListItem): boolean {
-    return operator.isActive && this.authStore.canResetUserPassword('OPERATOR', operator.applicationUserId);
+    return (
+      operator.isActive &&
+      this.authStore.canResetUserPassword('OPERATOR', operator.applicationUserId)
+    );
   }
 
   canDeactivate(operator: OperatorListItem): boolean {
@@ -726,13 +800,17 @@ export class OperatorsPageComponent implements OnInit {
     return [...branchGroups.values()];
   }
 
-  private templateBranchKeys(templates: readonly OperatorTemplateSelectionItem[]): readonly string[] {
+  private templateBranchKeys(
+    templates: readonly OperatorTemplateSelectionItem[],
+  ): readonly string[] {
     return [...new Set(templates.map((template) => this.templateBranchKey(template)))];
   }
 
   private expandTemplateBranch(template: OperatorTemplateSelectionItem): void {
     const branchKey = this.templateBranchKey(template);
-    this.expandedTemplateBranchKeys.update((branchKeys) => (branchKeys.includes(branchKey) ? branchKeys : [...branchKeys, branchKey]));
+    this.expandedTemplateBranchKeys.update((branchKeys) =>
+      branchKeys.includes(branchKey) ? branchKeys : [...branchKeys, branchKey],
+    );
   }
 
   private templateBranchKey(template: OperatorTemplateSelectionItem): string {

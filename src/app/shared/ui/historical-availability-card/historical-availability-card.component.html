@@ -1,67 +1,85 @@
 @if (availability(); as data) {
-  <div class="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs">
-    <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-3">
-      <div class="flex items-center gap-2.5">
+  <div class="rounded-2xl border border-slate-200/80 bg-white p-3.5 sm:p-4 shadow-xs">
+    <div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-100 mb-3">
+      <div class="flex items-center gap-2.5 min-w-0">
         <div
-          class="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-50 text-[var(--theme-color-primary)] border border-teal-100/70 shadow-2xs"
+          class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-teal-50 text-[var(--theme-color-primary)] border border-teal-100/70 shadow-2xs"
         >
           <app-icon [icon]="calendarCheckIcon" [size]="16" />
         </div>
-        <div>
-          <h4 class="text-xs font-bold text-slate-900">{{ 'historicalAvailability.title' | t }}</h4>
-          <p class="text-[11px] text-slate-500">{{ 'historicalAvailability.subtitle' | t }}</p>
+        <div class="min-w-0">
+          <h4 class="text-xs font-bold text-slate-900 truncate">{{ 'historicalAvailability.title' | t }}</h4>
+          <p class="text-[11px] text-slate-500 truncate">{{ 'historicalAvailability.subtitle' | t }}</p>
         </div>
       </div>
 
       @if (data.isHistoryComplete) {
         <span
-          class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-bold text-emerald-800 border border-emerald-200/70 shadow-2xs"
+          class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-bold text-emerald-800 border border-emerald-200/70 shadow-2xs"
         >
-          <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+          <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
           {{ 'historicalAvailability.verifiedComplete' | t }}
         </span>
       } @else {
         <span
-          class="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-2.5 py-1 text-[10px] font-bold text-amber-800 border border-amber-200/70 shadow-2xs"
+          class="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-2.5 py-1 text-[11px] font-bold text-amber-800 border border-amber-200/70 shadow-2xs"
         >
-          <app-icon [icon]="alertIcon" [size]="11" class="text-amber-600" />
+          <app-icon [icon]="alertIcon" [size]="12" class="text-amber-600" />
           {{ 'historicalAvailability.coveragePartial' | t }}
         </span>
       }
     </div>
 
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <!-- 1. Available During Period -->
       <div
-        class="p-3 rounded-xl bg-slate-50/70 border border-slate-100/80 transition hover:bg-slate-50"
+        class="flex items-center justify-between gap-3 p-3 rounded-xl bg-slate-50/70 border border-slate-200/60 transition hover:bg-slate-100/70 hover:border-slate-300/80"
       >
-        <span class="text-[10px] font-bold text-slate-500 block mb-0.5">{{
-          'historicalAvailability.availableDuringPeriod' | t
-        }}</span>
-        <span class="text-lg font-black font-mono text-slate-800">{{
-          data.availableTemplatesDuringPeriod
-        }}</span>
+        <div class="min-w-0">
+          <span class="text-[11px] font-bold text-slate-500 block truncate">{{
+            'historicalAvailability.availableDuringPeriod' | t
+          }}</span>
+          <span class="mt-0.5 text-xl sm:text-2xl font-black tracking-tight text-slate-900 font-mono">{{
+            data.availableTemplatesDuringPeriod
+          }}</span>
+        </div>
+        <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white border border-slate-200/70 text-slate-500 shadow-2xs">
+          <app-icon [icon]="calendarCheckIcon" [size]="16" />
+        </div>
       </div>
 
+      <!-- 2. Templates With Responses -->
       <div
-        class="p-3 rounded-xl bg-teal-50/50 border border-teal-100/60 transition hover:bg-teal-50/80"
+        class="flex items-center justify-between gap-3 p-3 rounded-xl bg-teal-50/40 border border-teal-100/70 transition hover:bg-teal-50/70 hover:border-teal-200/80"
       >
-        <span class="text-[10px] font-bold text-[var(--theme-color-secondary)] block mb-0.5">{{
-          'historicalAvailability.templatesWithResponses' | t
-        }}</span>
-        <span class="text-lg font-black font-mono text-[var(--theme-color-primary)]">{{
-          data.templatesWithResponsesCount
-        }}</span>
+        <div class="min-w-0">
+          <span class="text-[11px] font-bold text-[var(--theme-color-secondary)] block truncate">{{
+            'historicalAvailability.templatesWithResponses' | t
+          }}</span>
+          <span class="mt-0.5 text-xl sm:text-2xl font-black tracking-tight text-[var(--theme-color-primary)] font-mono">{{
+            data.templatesWithResponsesCount
+          }}</span>
+        </div>
+        <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-teal-100/60 border border-teal-200/60 text-[var(--theme-color-primary)] shadow-2xs">
+          <app-icon [icon]="fileCheckIcon" [size]="16" />
+        </div>
       </div>
 
+      <!-- 3. Currently Available -->
       <div
-        class="p-3 rounded-xl bg-slate-50/70 border border-slate-100/80 transition hover:bg-slate-50"
+        class="flex items-center justify-between gap-3 p-3 rounded-xl bg-slate-50/70 border border-slate-200/60 transition hover:bg-slate-100/70 hover:border-slate-300/80"
       >
-        <span class="text-[10px] font-bold text-slate-500 block mb-0.5">{{
-          'historicalAvailability.currentlyAvailable' | t
-        }}</span>
-        <span class="text-lg font-black font-mono text-slate-800">{{
-          data.currentlyAvailableTemplatesCount
-        }}</span>
+        <div class="min-w-0">
+          <span class="text-[11px] font-bold text-slate-500 block truncate">{{
+            'historicalAvailability.currentlyAvailable' | t
+          }}</span>
+          <span class="mt-0.5 text-xl sm:text-2xl font-black tracking-tight text-slate-900 font-mono">{{
+            data.currentlyAvailableTemplatesCount
+          }}</span>
+        </div>
+        <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white border border-slate-200/70 text-slate-500 shadow-2xs">
+          <app-icon [icon]="clockIcon" [size]="16" />
+        </div>
       </div>
     </div>
 

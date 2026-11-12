@@ -171,6 +171,7 @@ export class SystemReportsStore {
       scoreCalculationMode: query.scoreCalculationMode ?? 'RootQuestions',
       scoreIncludedOnly: query.scoreIncludedOnly,
       complaintItemsOnly: query.complaintItemsOnly,
+      flagType: query.flagType,
       minScorePercentage: this.normalizeNumber(query.minScorePercentage),
       maxScorePercentage: this.normalizeNumber(query.maxScorePercentage),
       hasComplaint: query.hasComplaint,

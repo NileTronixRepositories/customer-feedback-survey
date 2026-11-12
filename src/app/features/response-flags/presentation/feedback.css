@@ -1,0 +1,69 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+.feedback-panel {
+  padding: 1.5rem;
+  border: 1px solid var(--theme-color-border, #e2e8f0);
+  border-radius: 1rem;
+  background: var(--theme-color-surface, white);
+}
+.feedback-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+.feedback-form :where(input:not([type='checkbox']), select, textarea) {
+  width: 100%;
+  min-width: 0;
+  padding: 0.625rem 0.75rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.5rem;
+  background: white;
+  color: #0f172a;
+  font: inherit;
+}
+.feedback-form :where(input, select, textarea):focus-visible {
+  outline: 2px solid var(--theme-color-accent);
+  outline-offset: 2px;
+}
+.feedback-form :where(input, select, textarea):disabled {
+  background: #f1f5f9;
+  color: #475569;
+}
+.feedback-form [aria-invalid='true'] {
+  border-color: var(--theme-color-danger, #be123c);
+}
+.feedback-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: start;
+  font-size: 0.875rem;
+}
+.feedback-table :where(th, td) {
+  padding: 0.875rem;
+  border-bottom: 1px solid #e2e8f0;
+  vertical-align: top;
+  text-align: start;
+  overflow-wrap: anywhere;
+}
+.feedback-table th {
+  font-weight: 700;
+  color: #475569;
+}
+.feedback-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+.feedback-text {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.feedback-error {
+  color: var(--theme-color-danger, #be123c);
+  font-size: 0.875rem;
+}

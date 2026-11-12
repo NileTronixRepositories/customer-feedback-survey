@@ -43,6 +43,9 @@ export class BranchSatisfactionReportService {
   private toReport(response: BranchSatisfactionReportApiResponse): BranchSatisfactionReport {
     return {
       period: this.toPeriod(response.period),
+      feedbackByTemplate: response.feedbackByTemplate ?? [],
+      suggestionsNavigation: response.suggestionsNavigation ?? null,
+      commentsNavigation: response.commentsNavigation ?? null,
       overall: this.toOverall(response.overall),
       distribution: (response.distribution ?? []).map((item) => this.toDistributionItem(item)),
       byTemplate: (response.byTemplate ?? []).map((item) => this.toByTemplateItem(item)),
@@ -76,6 +79,8 @@ export class BranchSatisfactionReportService {
       neutralResponses: overall?.neutralResponses ?? 0,
       unsatisfiedResponses: overall?.unsatisfiedResponses ?? 0,
       complaintsCount: overall?.complaintsCount ?? 0,
+      suggestionsCount: overall?.suggestionsCount ?? 0,
+      commentsCount: overall?.commentsCount ?? 0,
       voiceAnswersCount: overall?.voiceAnswersCount ?? 0,
       hasScoreData: overall?.hasScoreData ?? true,
       satisfactionPercentage: overall?.satisfactionPercentage ?? null,
@@ -102,6 +107,9 @@ export class BranchSatisfactionReportService {
       score: item.score ?? 0,
       responsesCount: item.responsesCount ?? 0,
       scoredAnswersCount: item.scoredAnswersCount ?? 0,
+      complaintsCount: item.complaintsCount ?? 0,
+      suggestionsCount: item.suggestionsCount ?? 0,
+      commentsCount: item.commentsCount ?? 0,
     };
   }
 
@@ -119,6 +127,8 @@ export class BranchSatisfactionReportService {
   ): SatisfactionComplaints {
     return {
       count: complaints?.count ?? 0,
+      responsesWithComplaints: complaints?.responsesWithComplaints ?? 0,
+      detailsNavigation: complaints?.detailsNavigation ?? null,
       percentageOfResponses: complaints?.percentageOfResponses ?? 0,
     };
   }

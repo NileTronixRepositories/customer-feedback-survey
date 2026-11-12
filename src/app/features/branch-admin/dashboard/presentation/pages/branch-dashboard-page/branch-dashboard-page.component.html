@@ -156,6 +156,8 @@
       {{ dashboardStore.error() ?? '' | t }}
     </div>
   } @else if (dashboardStore.dashboard(); as dashboard) {
+    <app-dashboard-feedback-counts [counts]="dashboard.summary" [actions]="dashboard.summaryActions" />
+
     @if (dashboardStore.isEmpty()) {
       <section
         class="rounded-xl border border-slate-200 bg-white p-6 text-center shadow-sm shadow-slate-200/60 sm:p-8"
@@ -682,7 +684,7 @@
                           {{ performanceTemplateName(item) }}
                         </p>
                         <p class="mt-1 text-[11px] font-semibold text-slate-500">
-                          {{ item.complaintsCount }} {{ 'branchDashboard.complaints' | t }}
+                          {{ item.complaintsCount }}<app-dashboard-feedback-counts [counts]="item" [compact]="true" /> {{ 'branchDashboard.complaints' | t }}
                         </p>
                       </td>
                       <td class="px-3 py-3 font-bold text-slate-700">{{ item.responsesCount }}</td>
@@ -740,7 +742,7 @@
                       </p>
                       <p class="mt-1 text-[11px] font-semibold text-slate-500">
                         {{ item.responsesCount }} {{ 'branchDashboard.responsePlural' | t }} -
-                        {{ item.complaintsCount }} {{ 'branchDashboard.complaints' | t }}
+                        {{ item.complaintsCount }}<app-dashboard-feedback-counts [counts]="item" [compact]="true" /> {{ 'branchDashboard.complaints' | t }}
                       </p>
                     </div>
                     <span

@@ -9,6 +9,9 @@ export interface BranchSatisfactionReportQuery {
 }
 
 export interface BranchSatisfactionReport {
+  feedbackByTemplate?: readonly SatisfactionFeedbackByTemplate[];
+  suggestionsNavigation?: DashboardDetailsNavigation | null;
+  commentsNavigation?: DashboardDetailsNavigation | null;
   period: SatisfactionReportPeriod;
   overall: SatisfactionOverall;
   distribution: readonly SatisfactionDistributionItem[];
@@ -37,6 +40,8 @@ export interface SatisfactionOverall {
   neutralResponses: number;
   unsatisfiedResponses: number;
   complaintsCount: number;
+  suggestionsCount?: number;
+  commentsCount?: number;
   voiceAnswersCount: number;
   hasScoreData?: boolean;
   satisfactionPercentage?: number | null;
@@ -51,6 +56,9 @@ export interface SatisfactionDistributionItem {
 }
 
 export interface SatisfactionByTemplateItem {
+  complaintsCount?: number;
+  suggestionsCount?: number;
+  commentsCount?: number;
   templateId: string;
   templateNameEn: string;
   templateNameAr: string | null;
@@ -67,11 +75,26 @@ export interface SatisfactionTrendItem {
 }
 
 export interface SatisfactionComplaints {
+  responsesWithComplaints?: number;
+  detailsNavigation?: DashboardDetailsNavigation | null;
   count: number;
   percentageOfResponses: number;
 }
 
+export interface SatisfactionFeedbackByTemplate {
+  templateId: string;
+  templateNameEn: string;
+  templateNameAr: string | null;
+  responsesCount: number;
+  complaintsCount: number;
+  suggestionsCount: number;
+  commentsCount: number;
+}
+
 export interface BranchSatisfactionReportApiResponse {
+  feedbackByTemplate?: readonly SatisfactionFeedbackByTemplate[];
+  suggestionsNavigation?: DashboardDetailsNavigation | null;
+  commentsNavigation?: DashboardDetailsNavigation | null;
   period?: Partial<SatisfactionReportPeriod>;
   overall?: Partial<SatisfactionOverall>;
   distribution?: readonly Partial<SatisfactionDistributionItem>[];

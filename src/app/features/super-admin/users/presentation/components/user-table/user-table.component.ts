@@ -1,3 +1,4 @@
+import { RoleLabelPipe } from '../../../../../../shared/pipes/role-label.pipe';
 import { ChangeDetectionStrategy, Component, inject, input, output } from '@angular/core';
 import { KeyRound } from 'lucide-angular';
 import { AuthStore } from '../../../../../auth/presentation/state/auth.store';
@@ -10,7 +11,7 @@ import { ManagedUser } from '../../../domain/user-management.model';
 @Component({
   selector: 'app-user-table',
   standalone: true,
-  imports: [ButtonComponent, IconComponent, TranslatePipe],
+  imports: [ButtonComponent, IconComponent, TranslatePipe, RoleLabelPipe],
   templateUrl: './user-table.component.html',
   styleUrl: './user-table.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -22,18 +23,6 @@ export class UserTableComponent {
 
   private readonly authStore = inject(AuthStore);
   private readonly i18n = inject(I18nService);
-
-  roleLabel(role: ManagedUser['role']): string {
-    const key = {
-      SUPER_ADMIN: 'common.superAdmin',
-      BRANCH_ADMIN: 'common.branchAdmin',
-      DEPARTMENT_ADMIN: 'common.departmentAdmin',
-      BRANCH_USER: 'common.branchUser',
-      OPERATOR: 'common.operator',
-    }[role];
-
-    return this.i18n.translate(key);
-  }
 
   statusLabel(status: ManagedUser['status']): string {
     return this.i18n.translate(status === 'ACTIVE' ? 'common.active' : 'common.invited');

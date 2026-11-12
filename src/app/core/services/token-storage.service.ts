@@ -1,6 +1,13 @@
 import { Injectable, inject } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
-import { AuthSession, Role, User, UserType } from '../../shared/models/role.model';
+import {
+  AuthSession,
+  Role,
+  User,
+  UserType,
+  USER_TYPE_ROLES,
+  isUserType,
+} from '../../shared/models/role.model';
 
 const TOKEN_KEY = 'cfs_token';
 const SESSION_KEY = 'cfs_session';
@@ -106,7 +113,7 @@ export class TokenStorageService {
     const user = value['user'];
     return (
       typeof value['token'] === 'string' &&
-      this.isUserType(value['userType']) &&
+      isUserType(value['userType']) &&
       Array.isArray(value['roles']) &&
       value['roles'].every((role) => typeof role === 'string') &&
       Array.isArray(value['permissions']) &&
@@ -143,24 +150,7 @@ export class TokenStorageService {
   }
 
   private isRole(value: unknown): value is Role {
-    return (
-      value === 'SUPER_ADMIN' ||
-      value === 'BRANCH_ADMIN' ||
-      value === 'DEPARTMENT_ADMIN' ||
-      value === 'BRANCH_USER' ||
-      value === 'OPERATOR'
-    );
-  }
-
-  private isUserType(value: unknown): value is UserType {
-    return (
-      value === 'SuperAdmin' ||
-      value === 'BranchAdmin' ||
-      value === 'BranchArea' ||
-      value === 'DepartmentAdmin' ||
-      value === 'BranchUser' ||
-      value === 'Operator'
-    );
+    return Object.values(USER_TYPE_ROLES).some((role) => role === value);
   }
 
   private getSessionFromToken(): AuthSession | null {
@@ -198,8 +188,7 @@ export class TokenStorageService {
       roles,
       permissions,
       user,
-      firstLoginFlag:
-        this.readBoolean(payload, 'firstLoginFlag', 'FirstLoginFlag') ?? undefined,
+      firstLoginFlag: this.readBoolean(payload, 'firstLoginFlag', 'FirstLoginFlag') ?? undefined,
       passwordExpiredFlag:
         this.readBoolean(payload, 'passwordExpiredFlag', 'PasswordExpiredFlag') ?? undefined,
       passwordChangedOnUtc:
@@ -274,7 +263,8 @@ export class TokenStorageService {
 
   private resolveUserType(payload: Record<string, unknown>): UserType | null {
     const explicitUserType = payload['userType'] ?? payload['UserType'];
-    if (this.isUserType(explicitUserType)) {
+    if (explicitUserType === 7 || explicitUserType === '7') return 'FlagOfficer';
+    if (isUserType(explicitUserType)) {
       return explicitUserType;
     }
 
@@ -285,6 +275,7 @@ export class TokenStorageService {
       'http://schemas.microsoft.com/ws/2008/06/identity/claims/role',
     );
 
+    if (roles.some((role) => this.normalizeRole(role) === 'flagofficer')) return 'FlagOfficer';
     if (roles.some((role) => role === 'System Administrator' || role === 'SuperAdmin')) {
       return 'SuperAdmin';
     }
@@ -315,22 +306,7 @@ export class TokenStorageService {
   }
 
   private toRole(userType: UserType): Role {
-    if (userType === 'SuperAdmin') {
-      return 'SUPER_ADMIN';
-    }
-    if (userType === 'BranchAdmin') {
-      return 'BRANCH_ADMIN';
-    }
-    if (userType === 'BranchArea') {
-      return 'BRANCH_ADMIN';
-    }
-    if (userType === 'BranchUser') {
-      return 'BRANCH_USER';
-    }
-    if (userType === 'Operator') {
-      return 'OPERATOR';
-    }
-    return 'DEPARTMENT_ADMIN';
+    return USER_TYPE_ROLES[userType];
   }
 
   private resolveUser(payload: Record<string, unknown>, role: Role): User {
@@ -381,7 +357,10 @@ export class TokenStorageService {
     return typeof value === 'string' && value.length > 0 ? value : null;
   }
 
-  private readBoolean(payload: Record<string, unknown>, ...keys: readonly string[]): boolean | null {
+  private readBoolean(
+    payload: Record<string, unknown>,
+    ...keys: readonly string[]
+  ): boolean | null {
     for (const key of keys) {
       const value = this.toBoolean(payload[key]);
       if (value !== null) {

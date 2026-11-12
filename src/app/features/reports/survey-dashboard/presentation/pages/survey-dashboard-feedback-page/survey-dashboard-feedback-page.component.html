@@ -1,0 +1,606 @@
+<main class="space-y-5 animate-enter">
+  <!-- 1. EXECUTIVE HERO HEADER & LIVE METRICS (UNIFIED & FLUID - NO DETACHED BULKY BOXES) -->
+  <section
+    class="rounded-3xl border border-slate-200/90 bg-white p-4 sm:p-5 shadow-xs overflow-hidden"
+  >
+    <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+      <!-- Right (RTL): Back Button + Living Icon + Confident Title -->
+      <div class="flex items-center gap-3.5 min-w-0">
+        <button
+          type="button"
+          (click)="goBack()"
+          class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-slate-200/80 bg-slate-50/80 text-slate-600 shadow-2xs transition-all hover:bg-slate-100 hover:text-slate-900 active:scale-95 cursor-pointer focus:outline-none"
+          [title]="'common.back' | t"
+        >
+          <app-icon [icon]="backIcon" [size]="18" />
+        </button>
+
+        <div class="flex items-center gap-3 min-w-0">
+          <span
+            class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl shadow-2xs"
+            [class.bg-amber-50]="mode === 'suggestions'"
+            [class.text-amber-800]="mode === 'suggestions'"
+            [class.border]="true"
+            [class.border-amber-200/80]="mode === 'suggestions'"
+            [class.bg-cyan-50]="mode === 'comments'"
+            [class.text-[var(--theme-color-secondary)]]="mode === 'comments'"
+            [class.border-cyan-200/80]="mode === 'comments'"
+            [class.bg-rose-50]="mode === 'complaints'"
+            [class.text-rose-700]="mode === 'complaints'"
+            [class.border-rose-200/80]="mode === 'complaints'"
+          >
+            <app-icon [icon]="headerIcon" [size]="20" />
+          </span>
+
+          <div class="min-w-0">
+            <div class="flex items-center gap-2 flex-wrap">
+              <h1 class="text-xl sm:text-2xl font-black tracking-tight text-slate-900 truncate">
+                {{ titleKey | t }}
+              </h1>
+              <span
+                class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[10px] font-bold"
+                [class.bg-amber-50]="mode === 'suggestions'"
+                [class.text-amber-800]="mode === 'suggestions'"
+                [class.border]="true"
+                [class.border-amber-200/60]="mode === 'suggestions'"
+                [class.bg-cyan-50]="mode === 'comments'"
+                [class.text-[var(--theme-color-secondary)]]="mode === 'comments'"
+                [class.border-cyan-200/60]="mode === 'comments'"
+                [class.bg-rose-50]="mode === 'complaints'"
+                [class.text-rose-700]="mode === 'complaints'"
+                [class.border-rose-200/60]="mode === 'complaints'"
+              >
+                <span
+                  class="h-1.5 w-1.5 rounded-full animate-pulse"
+                  [class.bg-amber-500]="mode === 'suggestions'"
+                  [class.bg-cyan-500]="mode === 'comments'"
+                  [class.bg-rose-500]="mode === 'complaints'"
+                ></span>
+                {{
+                  mode === 'suggestions'
+                    ? ('flags.suggestions' | t)
+                    : mode === 'comments'
+                      ? ('flags.comments' | t)
+                      : ('flags.complaints' | t)
+                }}
+              </span>
+            </div>
+            <p class="text-xs font-semibold text-slate-400 mt-0.5 truncate">
+              {{ 'dashboardDrillDown.responsesTitle' | t }}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Left (RTL): Fluid Integrated Summary Metrics (No Bulky Box-in-Box) -->
+      @if (page(); as result) {
+        <div
+          class="flex flex-wrap items-center gap-4 sm:gap-6 pt-3 lg:pt-0 border-t border-slate-100 lg:border-t-0"
+        >
+          <!-- Metric 1: Total -->
+          <div class="flex items-baseline gap-2">
+            <span class="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 font-mono">
+              {{ result.totalItems }}
+            </span>
+            <span class="text-xs font-bold text-slate-500">
+              {{ titleKey | t }}
+            </span>
+          </div>
+
+          <!-- Divider -->
+          <div class="hidden sm:block h-7 w-px bg-slate-200/70"></div>
+
+          <!-- Metric 2: Distinct Responses -->
+          <div class="flex items-baseline gap-2">
+            <span class="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 font-mono">
+              {{
+                mode === 'complaints' ? result.responsesWithComplaints : result.responsesWithFlags
+              }}
+            </span>
+            <span class="text-xs font-bold text-slate-500">
+              {{ 'flags.distinctResponses' | t }}
+            </span>
+          </div>
+
+          @if (mode === 'complaints') {
+            <div class="hidden sm:block h-7 w-px bg-slate-200/70"></div>
+            <div class="flex items-baseline gap-2">
+              <span class="text-2xl sm:text-3xl font-black tracking-tight text-rose-600 font-mono">
+                {{ result.complaintRate | number: '1.0-1' }}%
+              </span>
+              <span class="text-xs font-bold text-slate-500">
+                {{ 'flags.complaintRate' | t }}
+              </span>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </section>
+
+  <!-- 2. SMART UNIFIED FILTER TOOLBAR -->
+  <section class="rounded-3xl border border-slate-200/90 bg-white p-4 sm:p-5 shadow-xs">
+    <form [formGroup]="filters" (ngSubmit)="apply()">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3.5 items-end">
+        <!-- 1. Search Field -->
+        <div
+          class="col-span-1 sm:col-span-2"
+          [class.lg:col-span-3]="auth.userType() === 'SuperAdmin'"
+          [class.lg:col-span-4]="auth.userType() !== 'SuperAdmin'"
+        >
+          <label class="block text-xs font-bold text-slate-600 mb-1.5">{{
+            'flags.search' | t
+          }}</label>
+          <div
+            class="relative flex h-10 w-full items-center rounded-xl border border-slate-200/90 bg-slate-50/85 px-3 transition hover:border-slate-300 focus-within:bg-white focus-within:border-[var(--theme-color-primary)] focus-within:ring-2 focus-within:ring-[var(--theme-color-primary)]/20"
+          >
+            <span
+              class="pointer-events-none flex h-4 w-4 shrink-0 items-center justify-center text-slate-400 me-2"
+            >
+              <app-icon [icon]="searchIcon" [size]="15" />
+            </span>
+            <input
+              type="text"
+              formControlName="searchText"
+              class="h-full w-full bg-transparent border-0 p-0 text-xs font-semibold text-slate-800 placeholder:text-slate-400 outline-none focus:outline-none focus:ring-0 leading-normal"
+              [placeholder]="'flags.search' | t"
+            />
+          </div>
+        </div>
+
+        <!-- 2. Branch Field (SuperAdmin) -->
+        @if (auth.userType() === 'SuperAdmin') {
+          <div class="col-span-1 sm:col-span-1 lg:col-span-3">
+            <label class="block text-xs font-bold text-slate-600 mb-1.5">{{
+              'flags.branch' | t
+            }}</label>
+            <div class="relative flex items-center">
+              <select
+                formControlName="branchId"
+                (change)="loadOptions()"
+                class="form-select-executive"
+              >
+                <option value="">
+                  {{ 'flags.all' | t }} ({{ 'surveyDashboard.allBranches' | t }})
+                </option>
+                @for (branch of branches(); track branch.id) {
+                  <option [value]="branch.id">{{ localized(branch.nameEn, branch.nameAr) }}</option>
+                }
+              </select>
+              <span
+                class="pointer-events-none absolute end-3 inset-y-0 flex items-center justify-center text-slate-400"
+              >
+                <app-icon [icon]="chevronDownIcon" [size]="14" />
+              </span>
+            </div>
+          </div>
+        }
+
+        <!-- 3. Source Field -->
+        <div
+          class="col-span-1 sm:col-span-1"
+          [class.lg:col-span-3]="auth.userType() === 'SuperAdmin'"
+          [class.lg:col-span-4]="auth.userType() !== 'SuperAdmin'"
+        >
+          <label class="block text-xs font-bold text-slate-600 mb-1.5">{{
+            'flags.source' | t
+          }}</label>
+          <div class="relative flex items-center">
+            <select formControlName="source" class="form-select-executive">
+              <option value="All">{{ 'flags.all' | t }}</option>
+              <option value="Internal">{{ 'surveyDashboard.sourceInternal' | t }}</option>
+              <option value="Anonymous">{{ 'surveyDashboard.sourceAnonymous' | t }}</option>
+            </select>
+            <span
+              class="pointer-events-none absolute end-3 inset-y-0 flex items-center justify-center text-slate-400"
+            >
+              <app-icon [icon]="chevronDownIcon" [size]="14" />
+            </span>
+          </div>
+        </div>
+
+        <!-- 4. Template Field -->
+        <div
+          class="col-span-1 sm:col-span-2"
+          [class.lg:col-span-3]="auth.userType() === 'SuperAdmin'"
+          [class.lg:col-span-4]="auth.userType() !== 'SuperAdmin'"
+        >
+          <label class="block text-xs font-bold text-slate-600 mb-1.5">{{
+            'flags.template' | t
+          }}</label>
+          <div class="relative flex items-center">
+            <select
+              class="form-select-executive"
+              [value]="
+                filters.controls.templateId.value || filters.controls.anonymousTemplateId.value
+              "
+              (change)="selectTemplate($any($event.target).value)"
+            >
+              <option value="">
+                {{ 'flags.all' | t }} ({{ 'surveyDashboard.allDashboardTemplates' | t }})
+              </option>
+              @for (template of templates(); track template.id) {
+                <option [value]="template.id">
+                  {{ localized(template.nameEn, template.nameAr) }}
+                </option>
+              }
+            </select>
+            <span
+              class="pointer-events-none absolute end-3 inset-y-0 flex items-center justify-center text-slate-400"
+            >
+              <app-icon [icon]="chevronDownIcon" [size]="14" />
+            </span>
+          </div>
+        </div>
+
+        <!-- 5. Date From -->
+        <div
+          class="col-span-1 sm:col-span-1"
+          [class.lg:col-span-3]="mode !== 'complaints' || auth.userType() === 'SuperAdmin'"
+          [class.lg:col-span-4]="mode === 'complaints' && auth.userType() !== 'SuperAdmin'"
+        >
+          <label class="block text-xs font-bold text-slate-600 mb-1.5">{{
+            'flags.from' | t
+          }}</label>
+          <div class="relative flex items-center">
+            <input type="date" formControlName="from" class="form-input-executive" />
+          </div>
+        </div>
+
+        <!-- 6. Date To -->
+        <div
+          class="col-span-1 sm:col-span-1"
+          [class.lg:col-span-3]="mode !== 'complaints' || auth.userType() === 'SuperAdmin'"
+          [class.lg:col-span-4]="mode === 'complaints' && auth.userType() !== 'SuperAdmin'"
+        >
+          <label class="block text-xs font-bold text-slate-600 mb-1.5">{{ 'flags.to' | t }}</label>
+          <div class="relative flex items-center">
+            <input type="date" formControlName="to" class="form-input-executive" />
+          </div>
+        </div>
+
+        <!-- 7. Answer State (if mode !== 'complaints') -->
+        @if (mode !== 'complaints') {
+          <div class="col-span-1 sm:col-span-1 lg:col-span-3">
+            <label class="block text-xs font-bold text-slate-600 mb-1.5">{{
+              'flags.answerState' | t
+            }}</label>
+            <div class="relative flex items-center">
+              <select formControlName="answered" class="form-select-executive">
+                <option value="">{{ 'flags.all' | t }}</option>
+                <option value="true">{{ 'flags.answered' | t }}</option>
+                <option value="false">{{ 'flags.unanswered' | t }}</option>
+              </select>
+              <span
+                class="pointer-events-none absolute end-3 inset-y-0 flex items-center justify-center text-slate-400"
+              >
+                <app-icon [icon]="chevronDownIcon" [size]="14" />
+              </span>
+            </div>
+          </div>
+        }
+
+        <!-- 8. Actions (Clear & Apply Buttons) -->
+        <div
+          class="col-span-1 sm:col-span-1"
+          [class.lg:col-span-3]="mode !== 'complaints' || auth.userType() === 'SuperAdmin'"
+          [class.lg:col-span-4]="mode === 'complaints' && auth.userType() !== 'SuperAdmin'"
+          [class.lg:col-start-10]="mode === 'complaints' && auth.userType() === 'SuperAdmin'"
+        >
+          <label
+            class="hidden sm:block text-xs font-bold text-transparent mb-1.5 select-none pointer-events-none"
+            >&nbsp;</label
+          >
+          <div class="flex items-center gap-2.5 h-10">
+            <button
+              type="button"
+              class="flex-1 inline-flex h-10 items-center justify-center gap-1.5 rounded-xl border border-slate-200/90 bg-white px-3 text-xs font-bold text-slate-600 shadow-2xs transition hover:bg-slate-50 hover:border-slate-300 active:scale-95 cursor-pointer"
+              (click)="clear()"
+            >
+              <app-icon [icon]="resetIcon" [size]="14" class="text-slate-500 shrink-0" />
+              <span>{{ 'flags.clear' | t }}</span>
+            </button>
+            <button
+              type="submit"
+              class="flex-1 inline-flex h-10 items-center justify-center gap-1.5 rounded-xl bg-[var(--theme-color-primary,#148496)] px-3.5 text-xs font-bold text-white shadow-2xs transition hover:opacity-95 active:scale-95 cursor-pointer disabled:opacity-50"
+              [disabled]="loading()"
+            >
+              <app-icon [icon]="searchIcon" [size]="14" class="text-white shrink-0" />
+              <span>{{ 'flags.apply' | t }}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </section>
+
+  @if (error()) {
+    <p
+      role="alert"
+      class="rounded-xl border border-rose-200 bg-rose-50/80 p-3 text-xs font-bold text-rose-700"
+    >
+      {{ error() | t }}
+    </p>
+  }
+
+  <!-- 3. CONTENT STREAM (CLEAN HUMAN-CRAFTED LIST VIEW) -->
+  <section class="space-y-3" [attr.aria-busy]="loading()">
+    <!-- View Switcher & Results Header -->
+    <div class="flex items-center justify-between px-1">
+      <div class="flex items-center gap-2">
+        <span class="text-xs font-black text-slate-800">
+          {{ 'common.all' | t }}
+        </span>
+        <span
+          class="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-slate-100 text-[11px] font-black text-slate-700"
+        >
+          {{ items().length }}
+        </span>
+      </div>
+
+      <!-- Mode Toggle: Stream vs Compact Table -->
+      <div
+        class="inline-flex items-center rounded-xl bg-slate-100 p-0.5 border border-slate-200/60"
+      >
+        <button
+          type="button"
+          class="flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-bold transition-all cursor-pointer focus:outline-none"
+          [class.bg-white]="viewMode() === 'stream'"
+          [class.text-slate-900]="viewMode() === 'stream'"
+          [class.shadow-2xs]="viewMode() === 'stream'"
+          [class.text-slate-500]="viewMode() !== 'stream'"
+          (click)="viewMode.set('stream')"
+        >
+          <app-icon [icon]="streamIcon" [size]="13" />
+          <span>{{ 'common.list' | t }}</span>
+        </button>
+        <button
+          type="button"
+          class="flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-bold transition-all cursor-pointer focus:outline-none"
+          [class.bg-white]="viewMode() === 'table'"
+          [class.text-slate-900]="viewMode() === 'table'"
+          [class.shadow-2xs]="viewMode() === 'table'"
+          [class.text-slate-500]="viewMode() !== 'table'"
+          (click)="viewMode.set('table')"
+        >
+          <app-icon [icon]="tableIcon" [size]="13" />
+          <span>{{ 'common.table' | t }}</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- STREAM FEED VIEW (Natural, Cardless Fluid Flow) -->
+    @if (viewMode() === 'stream') {
+      <div class="space-y-3">
+        @for (item of items(); track $index) {
+          <article
+            class="stream-item rounded-3xl border border-slate-200/80 bg-white p-4 sm:p-5 shadow-xs hover:border-slate-300 transition-all"
+          >
+            <!-- Top line: Source, Template, Branch & Submission Time -->
+            <div
+              class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-100"
+            >
+              <div class="flex flex-wrap items-center gap-2 text-xs">
+                <!-- Kind Badge -->
+                <span
+                  class="inline-flex items-center rounded-lg px-2 py-0.5 text-[10px] font-black"
+                  [class.bg-amber-50]="mode === 'suggestions'"
+                  [class.text-amber-800]="mode === 'suggestions'"
+                  [class.border]="true"
+                  [class.border-amber-200/60]="mode === 'suggestions'"
+                  [class.bg-cyan-50]="mode === 'comments'"
+                  [class.text-[var(--theme-color-secondary)]]="mode === 'comments'"
+                  [class.border-cyan-200/60]="mode === 'comments'"
+                  [class.bg-rose-50]="mode === 'complaints'"
+                  [class.text-rose-700]="mode === 'complaints'"
+                  [class.border-rose-200/60]="mode === 'complaints'"
+                >
+                  {{
+                    (item.itemKind === 'ResponseFlag'
+                      ? typeKey(item.type)
+                      : 'flags.questionComplaint'
+                    ) | t
+                  }}
+                </span>
+
+                <!-- Template Name -->
+                <span class="font-black text-slate-900">
+                  {{ localized(item.templateNameEn, item.templateNameAr) }}
+                </span>
+
+                <span class="text-slate-300">·</span>
+
+                <!-- Branch -->
+                <span class="font-semibold text-slate-600">
+                  {{ localized(item.branchNameEn, item.branchNameAr) }}
+                </span>
+              </div>
+
+              <!-- Date & Action Button -->
+              <div class="flex items-center gap-2.5">
+                <span class="text-[11px] font-medium text-slate-400">
+                  {{ item.submittedOnUtc | date: 'medium' }}
+                </span>
+                <app-button
+                  size="sm"
+                  variant="secondary"
+                  [disabled]="!item.detailsNavigation"
+                  (pressed)="openSurvey(item)"
+                >
+                  <app-icon [icon]="eyeIcon" [size]="13" />
+                  {{ 'flags.viewSurvey' | t }}
+                </app-button>
+              </div>
+            </div>
+
+            <!-- Content Area: The feedback message -->
+            <div class="pt-3.5 space-y-2">
+              @if (item.itemKind === 'QuestionAnswer') {
+                <p class="text-xs font-black text-slate-900">
+                  {{ localized(item.questionTextEn, item.questionTextAr) }}
+                </p>
+                <p class="text-sm font-semibold text-slate-800 leading-relaxed whitespace-pre-wrap">
+                  {{ item.complaintText }}
+                </p>
+              } @else {
+                <p class="text-sm font-semibold text-slate-800 leading-relaxed whitespace-pre-wrap">
+                  {{ item.brief || ('flags.noBrief' | t) }}
+                </p>
+                @if (item.createdBy || item.createdOnUtc) {
+                  <p class="text-[11px] text-slate-400 font-medium">
+                    {{ 'flags.createdBy' | t }}:
+                    <strong class="text-slate-700">{{ actor(item.createdBy) }}</strong> ·
+                    {{ item.createdOnUtc | date: 'medium' }}
+                  </p>
+                }
+              }
+
+              <!-- Answer / Staff Response Thread (if answered) -->
+              @if (item.answer) {
+                <div
+                  class="mt-3 flex items-start gap-2.5 rounded-2xl bg-slate-50/80 p-3.5 border border-slate-100 text-xs"
+                >
+                  <span
+                    class="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-emerald-100/70 text-emerald-800 mt-0.5"
+                  >
+                    <app-icon [icon]="checkIcon" [size]="13" />
+                  </span>
+                  <div class="min-w-0 space-y-1">
+                    <div class="flex items-center gap-2">
+                      <span class="font-black text-emerald-900">{{ 'flags.answer' | t }}:</span>
+                      @if (item.answeredBy) {
+                        <span class="text-[10px] text-slate-400 font-medium">
+                          {{ actor(item.answeredBy) }} · {{ item.answeredOnUtc | date: 'medium' }}
+                        </span>
+                      }
+                    </div>
+                    <p class="text-slate-800 font-medium leading-relaxed whitespace-pre-wrap">
+                      {{ item.answer }}
+                    </p>
+                  </div>
+                </div>
+              }
+            </div>
+          </article>
+        } @empty {
+          @if (!loading()) {
+            <div
+              class="rounded-3xl border border-dashed border-slate-200/90 bg-white py-16 text-center shadow-xs"
+            >
+              <div
+                class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-50 text-slate-300 mb-3"
+              >
+                <app-icon [icon]="inboxIcon" [size]="28" />
+              </div>
+              <p class="text-sm font-black text-slate-800">{{ 'flags.noMatches' | t }}</p>
+            </div>
+          }
+        }
+      </div>
+    } @else {
+      <!-- TABLE VIEW (Compact Density) -->
+      <div class="rounded-3xl border border-slate-200/80 bg-white shadow-xs overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-start text-xs border-collapse">
+            <thead>
+              <tr
+                class="bg-slate-50/80 border-b border-slate-200/80 text-[11px] font-black uppercase tracking-wider text-slate-500"
+              >
+                <th scope="col" class="px-4 py-3 text-start">{{ 'flags.type' | t }}</th>
+                <th scope="col" class="px-4 py-3 text-start">{{ 'flags.template' | t }}</th>
+                <th scope="col" class="px-4 py-3 text-start">{{ 'flags.branch' | t }}</th>
+                <th scope="col" class="px-4 py-3 text-start min-w-[200px]">
+                  {{ 'flags.brief' | t }}
+                </th>
+                <th scope="col" class="px-4 py-3 text-start min-w-[180px]">
+                  {{ 'flags.answer' | t }}
+                </th>
+                <th scope="col" class="px-4 py-3 text-start whitespace-nowrap">
+                  {{ 'flags.submittedOn' | t }}
+                </th>
+                <th scope="col" class="px-4 py-3 text-start whitespace-nowrap">
+                  {{ 'flags.actions' | t }}
+                </th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              @for (item of items(); track $index) {
+                <tr class="hover:bg-slate-50/60 transition-colors">
+                  <td class="px-4 py-3 font-bold text-slate-800">
+                    <span
+                      class="inline-flex items-center rounded-lg px-2 py-0.5 text-[10px] font-black"
+                      [class.bg-amber-50]="mode === 'suggestions'"
+                      [class.text-amber-800]="mode === 'suggestions'"
+                      [class.border]="true"
+                      [class.border-amber-200/60]="mode === 'suggestions'"
+                      [class.bg-cyan-50]="mode === 'comments'"
+                      [class.text-[var(--theme-color-secondary)]]="mode === 'comments'"
+                      [class.border-cyan-200/60]="mode === 'comments'"
+                      [class.bg-rose-50]="mode === 'complaints'"
+                      [class.text-rose-700]="mode === 'complaints'"
+                      [class.border-rose-200/60]="mode === 'complaints'"
+                    >
+                      {{
+                        (item.itemKind === 'ResponseFlag'
+                          ? typeKey(item.type)
+                          : 'flags.questionComplaint'
+                        ) | t
+                      }}
+                    </span>
+                  </td>
+                  <td class="px-4 py-3 font-bold text-slate-900">
+                    {{ localized(item.templateNameEn, item.templateNameAr) }}
+                  </td>
+                  <td class="px-4 py-3 font-semibold text-slate-700">
+                    {{ localized(item.branchNameEn, item.branchNameAr) }}
+                  </td>
+                  <td class="px-4 py-3 text-slate-800">
+                    {{ item.brief || item.complaintText || ('flags.noBrief' | t) }}
+                  </td>
+                  <td class="px-4 py-3 text-slate-800">
+                    {{ item.answer || '—' }}
+                  </td>
+                  <td class="px-4 py-3 text-slate-600 whitespace-nowrap text-[11px] font-medium">
+                    {{ item.submittedOnUtc | date: 'medium' }}
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap">
+                    <app-button
+                      size="sm"
+                      variant="secondary"
+                      [disabled]="!item.detailsNavigation"
+                      (pressed)="openSurvey(item)"
+                    >
+                      {{ 'flags.viewSurvey' | t }}
+                    </app-button>
+                  </td>
+                </tr>
+              } @empty {
+                @if (!loading()) {
+                  <tr>
+                    <td colspan="7" class="py-12 text-center text-slate-400 font-bold">
+                      {{ 'flags.noMatches' | t }}
+                    </td>
+                  </tr>
+                }
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
+
+    <!-- Pagination -->
+    @if (page(); as result) {
+      <div class="pt-2">
+        <app-feedback-pagination
+          [page]="result.currentPage"
+          [size]="result.pageSize"
+          [total]="result.totalItems"
+          [loading]="loading()"
+          (pageChanged)="changePage($event)"
+          (sizeChanged)="changeSize($event)"
+        />
+      </div>
+    }
+  </section>
+</main>

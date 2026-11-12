@@ -173,11 +173,9 @@ export class AuthStore {
             firstLoginFlag: response.firstLoginFlag ?? false,
             passwordExpiredFlag: response.passwordExpiredFlag ?? false,
             passwordChangedOnUtc:
-              this.toNonEmptyString(response.passwordChangedOnUtc) ??
-              session.passwordChangedOnUtc,
+              this.toNonEmptyString(response.passwordChangedOnUtc) ?? session.passwordChangedOnUtc,
             passwordExpiresOnUtc:
-              this.toNonEmptyString(response.passwordExpiresOnUtc) ??
-              session.passwordExpiresOnUtc,
+              this.toNonEmptyString(response.passwordExpiresOnUtc) ?? session.passwordExpiresOnUtc,
           };
 
           this.sessionSignal.set(updatedSession);
@@ -218,7 +216,20 @@ export class AuthStore {
     void this.router.navigateByUrl('/auth/login', { replaceUrl: true });
   }
 
+  canManageFlagOfficers(action = 'ViewAll'): boolean {
+    return (
+      (this.userType() === 'SuperAdmin' || this.userType() === 'DepartmentAdmin') &&
+      this.hasPermission(`FlagOfficers.${action}`)
+    );
+  }
+
+  canUseResponseFlags(permission = 'ResponseFlags.View'): boolean {
+    return this.userType() === 'FlagOfficer' && this.hasPermission(permission);
+  }
+
   redirectPath(): string {
+    if (this.userType() === 'FlagOfficer')
+      return this.canUseResponseFlags() ? '/feedback' : '/feedback/no-access';
     const role = this.role();
     if (this.canAccessSurveyDashboard()) {
       return '/reports/survey-dashboard';
@@ -434,7 +445,7 @@ export class AuthStore {
       return targetRole === 'BRANCH_USER';
     }
     if (actorRole === 'DEPARTMENT_ADMIN') {
-      return targetRole === 'OPERATOR';
+      return targetRole === 'OPERATOR' || targetRole === 'FLAG_OFFICER';
     }
 
     return false;
@@ -486,8 +497,7 @@ export class AuthStore {
       this.role() === 'SUPER_ADMIN' ||
       this.isBranchAdminUserType() ||
       (this.isBranchScopedActor() &&
-        (this.hasApiRole('Template Editor') ||
-          this.hasPermission(`AnonymousTemplates.${action}`)))
+        (this.hasApiRole('Template Editor') || this.hasPermission(`AnonymousTemplates.${action}`)))
     );
   }
 
@@ -511,7 +521,9 @@ export class AuthStore {
   }
 
   canAccessDepartmentReports(): boolean {
-    return this.role() === 'DEPARTMENT_ADMIN' && this.hasPermission('Reports.ViewDepartmentReports');
+    return (
+      this.role() === 'DEPARTMENT_ADMIN' && this.hasPermission('Reports.ViewDepartmentReports')
+    );
   }
 
   canAccessBranchDashboard(): boolean {
@@ -523,17 +535,11 @@ export class AuthStore {
   }
 
   canViewEvaluationSettings(): boolean {
-    return (
-      this.hasPermission('Branches.ViewEvaluationSettings') ||
-      this.isBranchAdminUserType()
-    );
+    return this.hasPermission('Branches.ViewEvaluationSettings') || this.isBranchAdminUserType();
   }
 
   canManageEvaluationSettings(): boolean {
-    return (
-      this.hasPermission('Branches.ManageEvaluationSettings') &&
-      this.isBranchAdminUserType()
-    );
+    return this.hasPermission('Branches.ManageEvaluationSettings') && this.isBranchAdminUserType();
   }
 
   isBranchAdminUserType(): boolean {
@@ -561,7 +567,9 @@ export class AuthStore {
     return role.replace(/[\s_-]/g, '').toLowerCase();
   }
 
-  private hasPasswordChangeRequirement(session: AuthSession | null = this.sessionSignal()): boolean {
+  private hasPasswordChangeRequirement(
+    session: AuthSession | null = this.sessionSignal(),
+  ): boolean {
     return session?.firstLoginFlag === true || session?.passwordExpiredFlag === true;
   }
 

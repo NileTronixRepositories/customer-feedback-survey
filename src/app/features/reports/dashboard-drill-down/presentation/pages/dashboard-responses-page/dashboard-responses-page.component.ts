@@ -1,3 +1,6 @@
+import { ResponseFlagCardComponent } from '../../../../../response-flags/presentation/response-flag-card.component';
+import { ResponseFlagDetails } from '../../../../../../shared/models/response-flag.model';
+import { ModalComponent } from '../../../../../../shared/ui/modal/modal.component';
 import { DatePipe } from '@angular/common';
 import {
   customInputHtmlType,
@@ -55,6 +58,8 @@ import {
 @Component({
   selector: 'app-dashboard-responses-page',
   imports: [
+    ResponseFlagCardComponent,
+    ModalComponent,
     ButtonComponent,
     DashboardResponseDetailsModalComponent,
     DatePipe,
@@ -68,6 +73,8 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DashboardResponsesPageComponent {
+  readonly selectedFlag = signal<ResponseFlagDetails | null>(null);
+
   readonly customInputHtmlType = customInputHtmlType;
   readonly customInputIdControl = new FormControl('', { nonNullable: true });
   readonly customInputTypeControl = new FormControl('1', { nonNullable: true });

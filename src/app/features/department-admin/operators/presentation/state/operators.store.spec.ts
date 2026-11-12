@@ -8,6 +8,7 @@ import { OperatorsStore } from './operators.store';
 
 describe('OperatorsStore', () => {
   const operator: OperatorListItem = {
+    canCreateFlagsOnSubmit: false,
     operatorId: 'operator-1',
     applicationUserId: 'user-1',
     departmentId: 'department-1',

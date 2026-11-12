@@ -1,11 +1,27 @@
-export type Role = 'SUPER_ADMIN' | 'BRANCH_ADMIN' | 'DEPARTMENT_ADMIN' | 'BRANCH_USER' | 'OPERATOR';
+export type Role =
+  'SUPER_ADMIN' | 'BRANCH_ADMIN' | 'DEPARTMENT_ADMIN' | 'BRANCH_USER' | 'OPERATOR' | 'FLAG_OFFICER';
 export type UserType =
   | 'SuperAdmin'
   | 'BranchAdmin'
   | 'BranchArea'
   | 'DepartmentAdmin'
   | 'BranchUser'
-  | 'Operator';
+  | 'Operator'
+  | 'FlagOfficer';
+
+export const USER_TYPE_ROLES: Readonly<Record<UserType, Role>> = {
+  SuperAdmin: 'SUPER_ADMIN',
+  BranchAdmin: 'BRANCH_ADMIN',
+  BranchArea: 'BRANCH_ADMIN',
+  DepartmentAdmin: 'DEPARTMENT_ADMIN',
+  BranchUser: 'BRANCH_USER',
+  Operator: 'OPERATOR',
+  FlagOfficer: 'FLAG_OFFICER',
+};
+
+export function isUserType(value: unknown): value is UserType {
+  return typeof value === 'string' && Object.hasOwn(USER_TYPE_ROLES, value);
+}
 
 export interface User {
   id: string;

@@ -62,7 +62,7 @@ export class MainLayoutComponent {
       const user = this.authStore.user();
       const role = this.authStore.role();
 
-      if (!user || role === 'SUPER_ADMIN') {
+      if (!user || role === 'SUPER_ADMIN' || role === 'FLAG_OFFICER') {
         this.branchContext.clear();
         return;
       }
@@ -100,6 +100,7 @@ export class MainLayoutComponent {
     if (role === 'DEPARTMENT_ADMIN') {
       return this.i18n.translate('common.departmentAdmin');
     }
+    if (role === 'FLAG_OFFICER') return this.i18n.translate('flags.officer');
     if (role === 'OPERATOR') {
       return this.i18n.translate('common.operator');
     }
@@ -117,6 +118,7 @@ export class MainLayoutComponent {
     if (role === 'BRANCH_USER') {
       return this.branchUserTitle();
     }
+    if (role === 'FLAG_OFFICER') return this.i18n.translate('flags.officer');
     if (role === 'OPERATOR') {
       return this.i18n.translate('layout.operatorWorkspace');
     }

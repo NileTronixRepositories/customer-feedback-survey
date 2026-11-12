@@ -17,13 +17,7 @@ import {
 export type BranchDashboardGroupBy = 'Day' | 'Month';
 export type BranchDashboardRiskLevel = 'Healthy' | 'MediumRisk' | 'HighRisk';
 export type BranchSurveyResponseQuestionType =
-  | 'SingleChoice'
-  | 'StarRating'
-  | 'Smiles'
-  | 'Complain'
-  | 'FreeText'
-  | 'Voice'
-  | 'Image';
+  'SingleChoice' | 'StarRating' | 'Smiles' | 'Complain' | 'FreeText' | 'Voice' | 'Image';
 
 export interface BranchDashboardQuery {
   from?: string;
@@ -141,6 +135,8 @@ export interface BranchDashboardSummary {
   activeTemplatesCount: number;
   templatesWithResponsesCount: number;
   complaintsCount: number;
+  suggestionsCount?: number;
+  commentsCount?: number;
   voiceAnswersCount: number;
 }
 
@@ -161,6 +157,8 @@ export interface BranchDashboardTemplatePerformance {
   averageScorePercentage: number;
   hasScoreData?: boolean;
   complaintsCount: number;
+  suggestionsCount?: number;
+  commentsCount?: number;
   riskLevel: BranchDashboardRiskLevel;
   detailsNavigation: DashboardDetailsNavigation | null;
 }

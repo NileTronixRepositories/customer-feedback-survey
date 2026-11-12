@@ -1,3 +1,5 @@
+import { DashboardFeedbackCountsComponent } from '../../../../../response-flags/presentation/dashboard-feedback-counts.component';
+import { DashboardDetailsNavigation } from '../../../../../reports/dashboard-drill-down/domain/dashboard-drill-down.model';
 import { DashboardDrillDownService } from '../../../../../reports/dashboard-drill-down/data/dashboard-drill-down.service';
 import {
   ChangeDetectionStrategy,
@@ -36,6 +38,7 @@ Chart.register(...registerables);
   selector: 'app-branch-satisfaction-report-panel',
   standalone: true,
   imports: [
+    DashboardFeedbackCountsComponent,
     ButtonComponent,
     DecimalPipe,
     IconComponent,
@@ -49,6 +52,11 @@ Chart.register(...registerables);
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BranchSatisfactionReportPanelComponent implements OnInit, OnDestroy {
+  openFeedback(navigation: DashboardDetailsNavigation | null | undefined): void {
+    if (navigation)
+      this.drillDown.open({ title: this.i18n.translate('flags.complaints'), navigation });
+  }
+
   readonly templates = input<readonly BranchAdminTemplate[]>([]);
   readonly reportStore = inject(BranchSatisfactionReportStore);
   private readonly drillDown = inject(DashboardDrillDownService);
@@ -144,7 +152,9 @@ export class BranchSatisfactionReportPanelComponent implements OnInit, OnDestroy
     return item.labelEn || item.labelAr || String(item.value);
   }
 
-  byTemplateLabel(item: SatisfactionByTemplateItem): string {
+  byTemplateLabel(
+    item: Pick<SatisfactionByTemplateItem, 'templateNameEn' | 'templateNameAr'>,
+  ): string {
     if (this.i18n.language() === 'ar') {
       return item.templateNameAr || item.templateNameEn || '-';
     }
@@ -202,10 +212,11 @@ export class BranchSatisfactionReportPanelComponent implements OnInit, OnDestroy
       options: {
         onClick: (_event, elements) => {
           const point = trend[elements[0]?.index ?? -1];
-          if (point?.detailsNavigation) this.drillDown.open({
-            title: this.i18n.translate('branchDashboard.trendTitle'),
-            navigation: point.detailsNavigation,
-          });
+          if (point?.detailsNavigation)
+            this.drillDown.open({
+              title: this.i18n.translate('branchDashboard.trendTitle'),
+              navigation: point.detailsNavigation,
+            });
         },
         responsive: true,
         maintainAspectRatio: false,

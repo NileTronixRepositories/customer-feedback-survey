@@ -1,4 +1,11 @@
-import { customInputTypeName, customInputDisplayValue } from '../../../../shared/models/custom-input.model';
+import {
+  ResponseFlagApiDetails,
+  toResponseFlag,
+} from '../../../../shared/models/response-flag.model';
+import {
+  customInputTypeName,
+  customInputDisplayValue,
+} from '../../../../shared/models/custom-input.model';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
@@ -114,6 +121,7 @@ export class SystemReportsService {
       params = params.set('satisfactionCategory', query.satisfactionCategory);
     if (query.isScored !== undefined) params = params.set('isScored', String(query.isScored));
     if (query.questionId) params = params.set('questionId', query.questionId);
+    if (query.flagType !== undefined) params = params.set('flagType', String(query.flagType));
     if (query.customInputId) params = params.set('customInputId', query.customInputId);
     if (query.dateBasis !== undefined) params = params.set('dateBasis', String(query.dateBasis));
     if (query.customInputType) params = params.set('customInputType', query.customInputType);
@@ -217,6 +225,8 @@ export class SystemReportsService {
             ? averageScorePercentage
             : null,
       complaintsCount: this.readNumber(summary, 'complaintsCount'),
+      suggestionsCount: this.readNumber(summary, 'suggestionsCount'),
+      commentsCount: this.readNumber(summary, 'commentsCount'),
       voiceAnswersCount: this.readNumber(summary, 'voiceAnswersCount'),
     };
   }
@@ -239,6 +249,8 @@ export class SystemReportsService {
       responsesCount: this.readNumber(item, 'responsesCount'),
       averageScorePercentage: this.readNumber(item, 'averageScorePercentage'),
       complaintsCount: this.readNumber(item, 'complaintsCount'),
+      suggestionsCount: this.readNumber(item, 'suggestionsCount'),
+      commentsCount: this.readNumber(item, 'commentsCount'),
       voiceAnswersCount: this.readNumber(item, 'voiceAnswersCount'),
       activeTemplatesCount: this.readNumber(item, 'activeTemplatesCount'),
       riskLevel: this.toRiskLevel(this.readString(item, 'riskLevel')),
@@ -248,6 +260,9 @@ export class SystemReportsService {
 
   private toDepartmentActivity(item: ApiRecord): SystemDepartmentActivity {
     return {
+      complaintsCount: this.readNumber(item, 'complaintsCount'),
+      suggestionsCount: this.readNumber(item, 'suggestionsCount'),
+      commentsCount: this.readNumber(item, 'commentsCount'),
       departmentId: this.readString(item, 'departmentId'),
       departmentNameEn: this.readString(item, 'departmentNameEn'),
       departmentNameAr: this.readNullableString(item, 'departmentNameAr'),
@@ -269,6 +284,8 @@ export class SystemReportsService {
       responsesCount: this.readNumber(item, 'responsesCount'),
       averageScorePercentage: this.readNumber(item, 'averageScorePercentage'),
       complaintsCount: this.readNumber(item, 'complaintsCount'),
+      suggestionsCount: this.readNumber(item, 'suggestionsCount'),
+      commentsCount: this.readNumber(item, 'commentsCount'),
       riskLevel: this.toRiskLevel(this.readString(item, 'riskLevel')),
       detailsNavigation: this.toNavigation(this.readRecord(item['detailsNavigation'])),
     };
@@ -304,6 +321,8 @@ export class SystemReportsService {
     return {
       allResponses: this.toNavigation(this.readRecord(actions?.['allResponses'])),
       complaints: this.toNavigation(this.readRecord(actions?.['complaints'])),
+      suggestions: this.toNavigation(this.readRecord(actions?.['suggestions'])),
+      comments: this.toNavigation(this.readRecord(actions?.['comments'])),
       voiceAnswers: this.toNavigation(this.readRecord(actions?.['voiceAnswers'])),
     };
   }
@@ -330,6 +349,10 @@ export class SystemReportsService {
 
   private toResponseListItem(item: ApiRecord): SystemResponseListItem {
     return {
+      detailsNavigation: this.toNavigation(this.readRecord(item['detailsNavigation'])),
+      itemKind: item['itemKind'] === 'ResponseFlag' ? 'ResponseFlag' : 'QuestionAnswer',
+      flagId: this.readNullableString(item, 'flagId'),
+      flag: item['flag'] ? toResponseFlag(item['flag'] as ResponseFlagApiDetails) : null,
       ...this.toResponseIdentity(item),
       submittedOnUtc: this.readString(item, 'submittedOnUtc'),
       actualScore: this.readNumber(item, 'actualScore'),
@@ -427,7 +450,9 @@ export class SystemReportsService {
       labelEnSnapshot: this.readNullableString(item, 'labelEnSnapshot'),
       labelArSnapshot: this.readNullableString(item, 'labelArSnapshot'),
       type: this.readString(item, 'typeSnapshot') || this.readString(item, 'type'),
-      typeName: this.readString(item, 'typeName') || customInputTypeName(item['typeSnapshot'] ?? item['type']),
+      typeName:
+        this.readString(item, 'typeName') ||
+        customInputTypeName(item['typeSnapshot'] ?? item['type']),
       stringValue: this.readNullableString(item, 'stringValue'),
       integerValue: this.readNullableNumber(item, 'integerValue'),
       dateValue: this.readNullableString(item, 'dateValue'),

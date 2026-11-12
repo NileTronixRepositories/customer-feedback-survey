@@ -1,3 +1,4 @@
+import { OperatorSurveyFlag } from '../../../../../shared/models/response-flag.model';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { finalize, take } from 'rxjs';
@@ -54,7 +55,9 @@ export class OperatorTemplatesStore {
       inactiveTemplateIds.has(template.templateId) ? { ...template, isActive: false } : template,
     );
   });
-  readonly templatesCount = computed(() => this.myTemplatesSignal()?.templatesCount ?? this.templates().length);
+  readonly templatesCount = computed(
+    () => this.myTemplatesSignal()?.templatesCount ?? this.templates().length,
+  );
   readonly questionsCount = computed(() =>
     this.templates().reduce((total, template) => total + template.questionsCount, 0),
   );
@@ -99,6 +102,7 @@ export class OperatorTemplatesStore {
     customInputs: readonly OperatorTemplateCustomInputSubmission[],
     onSubmitted: (response: OperatorTemplateResponseResult) => void,
     onRejected?: (errorKey: string) => void,
+    flags: readonly OperatorSurveyFlag[] = [],
   ): void {
     if (this.submittingSignal()) {
       return;
@@ -110,7 +114,7 @@ export class OperatorTemplatesStore {
     this.submittedResponseSignal.set(null);
 
     this.operatorTemplatesService
-      .submitResponse(templateId, answers, customInputs)
+      .submitResponse(templateId, answers, customInputs, flags)
       .pipe(
         take(1),
         finalize(() => this.submittingSignal.set(false)),
@@ -193,7 +197,13 @@ export class OperatorTemplatesStore {
     }
 
     const firstError = errorBody.errors?.[0];
-    const marker = [firstError?.code, firstError?.messageName, firstError?.message, errorBody.detail, errorBody.title]
+    const marker = [
+      firstError?.code,
+      firstError?.messageName,
+      firstError?.message,
+      errorBody.detail,
+      errorBody.title,
+    ]
       .filter((value): value is string => typeof value === 'string')
       .join(' ');
     const normalizedMarker = marker.replace(/[\s_.-]/g, '').toLowerCase();
@@ -210,7 +220,10 @@ export class OperatorTemplatesStore {
     if (normalizedMarker.includes('visiblequestions') && normalizedMarker.includes('required')) {
       return 'operatorTemplates.visibleQuestionsRequired';
     }
-    if (normalizedMarker.includes('hiddenquestionanswer') && normalizedMarker.includes('notallowed')) {
+    if (
+      normalizedMarker.includes('hiddenquestionanswer') &&
+      normalizedMarker.includes('notallowed')
+    ) {
       return 'operatorTemplates.hiddenQuestionAnswerNotAllowed';
     }
     if (normalizedMarker.includes('custominputdate')) return 'customInputs.invalidDate';
@@ -223,22 +236,46 @@ export class OperatorTemplatesStore {
     if (normalizedMarker.includes('custominput') && normalizedMarker.includes('required')) {
       return 'operatorTemplates.customInputRequired';
     }
-    if (normalizedMarker.includes('custominput') && normalizedMarker.includes('type') && normalizedMarker.includes('invalid')) {
+    if (
+      normalizedMarker.includes('custominput') &&
+      normalizedMarker.includes('type') &&
+      normalizedMarker.includes('invalid')
+    ) {
       return 'operatorTemplates.customInputTypeInvalid';
     }
-    if (normalizedMarker.includes('custominput') && normalizedMarker.includes('string') && normalizedMarker.includes('minlength')) {
+    if (
+      normalizedMarker.includes('custominput') &&
+      normalizedMarker.includes('string') &&
+      normalizedMarker.includes('minlength')
+    ) {
       return 'operatorTemplates.customInputMinLength';
     }
-    if (normalizedMarker.includes('custominput') && normalizedMarker.includes('string') && normalizedMarker.includes('maxlength')) {
+    if (
+      normalizedMarker.includes('custominput') &&
+      normalizedMarker.includes('string') &&
+      normalizedMarker.includes('maxlength')
+    ) {
       return 'operatorTemplates.customInputMaxLength';
     }
-    if (normalizedMarker.includes('custominput') && normalizedMarker.includes('integer') && normalizedMarker.includes('invalid')) {
+    if (
+      normalizedMarker.includes('custominput') &&
+      normalizedMarker.includes('integer') &&
+      normalizedMarker.includes('invalid')
+    ) {
       return 'operatorTemplates.customInputInteger';
     }
-    if (normalizedMarker.includes('custominput') && normalizedMarker.includes('integer') && normalizedMarker.includes('minvalue')) {
+    if (
+      normalizedMarker.includes('custominput') &&
+      normalizedMarker.includes('integer') &&
+      normalizedMarker.includes('minvalue')
+    ) {
       return 'operatorTemplates.customInputMinValue';
     }
-    if (normalizedMarker.includes('custominput') && normalizedMarker.includes('integer') && normalizedMarker.includes('maxvalue')) {
+    if (
+      normalizedMarker.includes('custominput') &&
+      normalizedMarker.includes('integer') &&
+      normalizedMarker.includes('maxvalue')
+    ) {
       return 'operatorTemplates.customInputMaxValue';
     }
 

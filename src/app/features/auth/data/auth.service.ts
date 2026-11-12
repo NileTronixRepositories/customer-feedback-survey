@@ -3,7 +3,13 @@ import { Injectable, inject } from '@angular/core';
 import { Observable, catchError, map, of, switchMap, throwError } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { SKIP_AUTH } from '../../../core/interceptors/auth.interceptor';
-import { AuthSession, Role, User, UserType } from '../../../shared/models/role.model';
+import {
+  AuthSession,
+  User,
+  UserType,
+  USER_TYPE_ROLES,
+  isUserType,
+} from '../../../shared/models/role.model';
 import {
   AuthLoginResult,
   BranchUserMyRolesResponse,
@@ -15,15 +21,6 @@ import {
   LoginCredentials,
   LoginResponse,
 } from '../domain/auth.model';
-
-const USER_TYPE_ROLE_MAP: Record<UserType, Role> = {
-  SuperAdmin: 'SUPER_ADMIN',
-  BranchAdmin: 'BRANCH_ADMIN',
-  BranchArea: 'BRANCH_ADMIN',
-  DepartmentAdmin: 'DEPARTMENT_ADMIN',
-  BranchUser: 'BRANCH_USER',
-  Operator: 'OPERATOR',
-};
 
 const AUTH_ERROR_KEYS: Record<string, string> = {
   'Auth.Login.InvalidCredentials': 'auth.invalidCredentials',
@@ -159,7 +156,7 @@ export class AuthService {
     selectedBranch: LoginBranchSelection | null = null,
   ): AuthSession {
     const userType = this.resolveUserType(response);
-    const role = USER_TYPE_ROLE_MAP[userType];
+    const role = USER_TYPE_ROLES[userType];
     const tokenPayload = this.decodeJwtPayload(response.token);
     const user: User = {
       id: this.resolveApplicationUserId(response, tokenPayload, branchUserRoles, userNameOrEmail),
@@ -289,9 +286,16 @@ export class AuthService {
   }
 
   private resolveUserType(response: LoginResponse): UserType {
-    if (this.isUserType(response.userType)) {
-      return response.userType;
-    }
+    if (response.userType === 7 || response.userType === '7') return 'FlagOfficer';
+    if (isUserType(response.userType)) return response.userType;
+    const payload = this.decodeJwtPayload(response.token);
+    const tokenType = payload?.['userType'] ?? payload?.['UserType'];
+    if (isUserType(tokenType)) return tokenType;
+    if (
+      String(tokenType) === '7' ||
+      response.roles?.some((role) => this.normalizeRole(role) === 'flagofficer')
+    )
+      return 'FlagOfficer';
 
     if (response.requiresBranchSelection === true) {
       return 'BranchArea';
@@ -318,17 +322,6 @@ export class AuthService {
     }
 
     return 'DepartmentAdmin';
-  }
-
-  private isUserType(value: unknown): value is UserType {
-    return (
-      value === 'SuperAdmin' ||
-      value === 'BranchAdmin' ||
-      value === 'BranchArea' ||
-      value === 'DepartmentAdmin' ||
-      value === 'BranchUser' ||
-      value === 'Operator'
-    );
   }
 
   private resolveApiRoles(

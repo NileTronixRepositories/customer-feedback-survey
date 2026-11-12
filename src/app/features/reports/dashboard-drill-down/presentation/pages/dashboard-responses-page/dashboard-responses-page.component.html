@@ -186,7 +186,7 @@
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100 text-[11px] bg-white">
-              @for (item of result.data; track item.responseId) {
+              @for (item of result.data; track $index) {
                 <tr class="transition hover:bg-slate-50/80">
                   <td class="px-2.5 py-2">
                     <span
@@ -299,7 +299,8 @@
                     </p>
                   </td>
                   <td class="px-2.5 py-2 text-center whitespace-nowrap">
-                    <button
+                    @if (item.flag) { <app-button size="sm" variant="secondary" (pressed)="selectedFlag.set(item.flag!)">{{ 'flags.feedback' | t }}</app-button> }
+<button
                       class="inline-flex items-center gap-1 rounded-lg border border-cyan-200/80 bg-cyan-50/70 px-2 py-1 text-[11px] font-bold text-[var(--theme-color-secondary)] transition hover:bg-cyan-100 hover:border-cyan-300 cursor-pointer"
                       type="button"
                       (click)="openDetails(item)"
@@ -356,3 +357,5 @@
     (closed)="closeDetails()"
   />
 </main>
+
+<app-modal [open]="selectedFlag() !== null" [title]="'flags.feedback' | t" size="lg" (closed)="selectedFlag.set(null)">@if (selectedFlag(); as flag) { <app-response-flag-card [flag]="flag" /> }</app-modal>

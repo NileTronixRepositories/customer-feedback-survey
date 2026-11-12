@@ -61,6 +61,15 @@
       {{ reportStore.error() ?? '' | t }}
     </div>
   } @else if (reportStore.report(); as report) {
+    <app-dashboard-feedback-counts [counts]="report.overall" [actions]="{ suggestions: report.suggestionsNavigation, comments: report.commentsNavigation }" />
+    <section class="mt-4 space-y-3" aria-labelledby="branch-feedback-table-title">
+      <h3 id="branch-feedback-table-title" class="text-sm font-bold">{{ 'flags.byTemplate' | t }}</h3>
+      <p class="text-sm text-slate-600">{{ 'flags.distinctResponses' | t }}: {{ report.complaints.responsesWithComplaints ?? 0 }}</p>
+      <div class="overflow-x-auto"><table class="w-full text-start text-sm"><thead><tr><th class="p-2 text-start">{{ 'flags.template' | t }}</th><th class="p-2 text-start">{{ 'flags.totalResponses' | t }}</th><th class="p-2 text-start">{{ 'flags.complaints' | t }}</th><th class="p-2 text-start">{{ 'flags.suggestions' | t }}</th><th class="p-2 text-start">{{ 'flags.comments' | t }}</th></tr></thead><tbody>
+      @for (item of report.feedbackByTemplate ?? []; track item.templateId) { <tr class="border-t border-slate-100"><td class="p-2">{{ byTemplateLabel(item) }}</td><td class="p-2">{{ item.responsesCount }}</td><td class="p-2">{{ item.complaintsCount }}</td><td class="p-2">{{ item.suggestionsCount }}</td><td class="p-2">{{ item.commentsCount }}</td></tr> }
+      </tbody></table></div>
+    </section>
+
     <!-- Historical Mode Availability Warning Banner -->
     @if (report.requestedModeAvailable === false) {
       <div class="mt-4">
@@ -148,12 +157,12 @@
             <div class="min-w-0 border-slate-100 xl:border-e xl:pe-4">
               <p class="truncate font-bold text-slate-400">{{ 'branchReports.complaints' | t }}</p>
               <p class="mt-1 text-sm font-extrabold text-slate-950">
-                {{ report.complaints.count }}
+                <button type="button" class="font-bold underline" [disabled]="!report.complaints.detailsNavigation" (click)="openFeedback(report.complaints.detailsNavigation)">{{ report.complaints.count }}</button>
               </p>
             </div>
             <div class="min-w-0 border-slate-100 xl:border-e xl:pe-4">
               <p class="truncate font-bold text-slate-400">
-                {{ 'branchReports.complaintRate' | t }}
+                {{ 'flags.itemsPer100' | t }}
               </p>
               <p class="mt-1 text-sm font-extrabold text-slate-950">
                 {{ report.complaints.percentageOfResponses | number: '1.0-1' }}%

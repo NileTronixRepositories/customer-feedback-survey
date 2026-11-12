@@ -17,13 +17,7 @@ export type DepartmentReportsGroupBy = 'Day' | 'Month';
 export type DepartmentReportsRiskLevel = 'Healthy' | 'MediumRisk' | 'HighRisk' | 'NoData';
 export type DepartmentReportsOrderSort = 'Newest' | 'Oldest';
 export type DepartmentResponseQuestionType =
-  | 'SingleChoice'
-  | 'StarRating'
-  | 'Smiles'
-  | 'Complain'
-  | 'FreeText'
-  | 'Voice'
-  | 'Image';
+  'SingleChoice' | 'StarRating' | 'Smiles' | 'Complain' | 'FreeText' | 'Voice' | 'Image';
 
 export interface DepartmentDashboardQuery {
   from?: string;
@@ -73,6 +67,8 @@ export interface DepartmentDashboardSummary {
   totalResponses: number;
   averageScorePercentage: number;
   complaintsCount: number;
+  suggestionsCount?: number;
+  commentsCount?: number;
   voiceAnswersCount: number;
   satisfiedResponses: number;
   neutralResponses: number;
@@ -98,6 +94,8 @@ export interface DepartmentOperatorPerformance {
   responsesCount: number;
   averageScorePercentage: number;
   complaintsCount: number;
+  suggestionsCount?: number;
+  commentsCount?: number;
   voiceAnswersCount: number;
   lastResponseOnUtc: string | null;
   riskLevel: DepartmentReportsRiskLevel;
@@ -115,6 +113,8 @@ export interface DepartmentTemplatePerformance {
   responsesCount: number;
   averageScorePercentage: number;
   complaintsCount: number;
+  suggestionsCount?: number;
+  commentsCount?: number;
   riskLevel: DepartmentReportsRiskLevel;
   detailsNavigation: DashboardDetailsNavigation | null;
 }
@@ -252,7 +252,8 @@ export interface DepartmentResponseDetails {
   customInputs: readonly DepartmentResponseCustomInput[];
   answers: readonly DepartmentResponseAnswer[];
   historicalSurvey?: HistoricalSurvey | null;
-  historicalDataProvenance?: 'CapturedAtSubmission' | 'LegacyReconstructed' | 'LegacyIncomplete' | string;
+  historicalDataProvenance?:
+    'CapturedAtSubmission' | 'LegacyReconstructed' | 'LegacyIncomplete' | string;
   isHistoricalDataVerified?: boolean;
   scoreDerivation?: 'SubmissionSnapshot' | 'StoredRootBaseline' | string | null;
 }

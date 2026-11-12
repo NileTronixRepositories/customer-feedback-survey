@@ -20,7 +20,7 @@
             <td class="whitespace-nowrap px-4 py-3 font-semibold text-slate-800">
               {{ user.name }}
             </td>
-            <td class="whitespace-nowrap px-4 py-3 text-slate-700">{{ roleLabel(user.role) }}</td>
+            <td class="whitespace-nowrap px-4 py-3 text-slate-700">{{ user.role | roleLabel }}</td>
             <td class="whitespace-nowrap px-4 py-3 text-slate-700">{{ user.scope }}</td>
             <td class="whitespace-nowrap px-4 py-3 text-slate-700">
               <span

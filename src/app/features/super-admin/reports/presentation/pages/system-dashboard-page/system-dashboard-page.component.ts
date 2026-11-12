@@ -1,3 +1,4 @@
+import { DashboardFeedbackCountsComponent } from '../../../../../response-flags/presentation/dashboard-feedback-counts.component';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
@@ -49,6 +50,7 @@ import { DashboardSummaryActionsComponent } from '../../../../../reports/dashboa
   selector: 'app-system-dashboard-page',
   standalone: true,
   imports: [
+    DashboardFeedbackCountsComponent,
     ButtonComponent,
     DatePipe,
     PageHeaderComponent,

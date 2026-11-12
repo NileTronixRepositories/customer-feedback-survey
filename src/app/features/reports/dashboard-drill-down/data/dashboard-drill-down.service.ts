@@ -1,3 +1,7 @@
+import {
+  ResponseFlagApiDetails,
+  toResponseFlag,
+} from '../../../../shared/models/response-flag.model';
 import { customInputDisplayValue } from '../../../../shared/models/custom-input.model';
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
@@ -27,6 +31,16 @@ export class DashboardDrillDownService {
 
   open(context: DashboardDrillDownContext): void {
     if (!this.isSupported(context.navigation)) {
+      return;
+    }
+
+    const feedbackPath = context.navigation.path
+      .split('?')[0]
+      .match(/^\/api\/reports\/survey-dashboard\/(complaints|suggestions|comments)$/);
+    if (feedbackPath) {
+      void this.router.navigate(['/reports/survey-dashboard', feedbackPath[1]], {
+        queryParams: { path: context.navigation.path },
+      });
       return;
     }
 
@@ -73,14 +87,12 @@ export class DashboardDrillDownService {
 
     return this.http
       .get<ApiRecord>(this.apiUrl(navigation.path))
-      .pipe(map((response) => this.toResponseDetails(response)));
+      .pipe(map((response) => this.mapResponseDetails(response)));
   }
 
   updatePath(
     originalPath: string,
-    updates: Readonly<
-      Partial<Record<'pageNumber' | 'pageSize' | 'searchText' | 'orderSort' | 'customInputId' | 'customInputType' | 'customInputValue', string | number>>
-    >,
+    updates: Readonly<Record<string, string | number | null | undefined>>,
   ): string {
     if (!this.parsePath(originalPath)) {
       return originalPath;
@@ -149,6 +161,8 @@ export class DashboardDrillDownService {
   }
 
   private toResponsesPage(response: ApiRecord): DashboardResponsesPage {
+    const nestedPage = this.readRecord(response['page']);
+    response = nestedPage ?? response;
     const data = this.readArray(response['data']).map((item) => this.toResponseListItem(item));
     const currentPage = this.readNumber(response, 'currentPage') || 1;
     const pageSize = this.readNumber(response, 'pageSize') || 10;
@@ -174,6 +188,9 @@ export class DashboardDrillDownService {
 
   private toResponseListItem(item: ApiRecord): DashboardResponseListItem {
     return {
+      itemKind: item['itemKind'] === 'ResponseFlag' ? 'ResponseFlag' : 'QuestionAnswer',
+      flagId: this.readNullableString(item, 'flagId'),
+      flag: item['flag'] ? toResponseFlag(item['flag'] as ResponseFlagApiDetails) : null,
       responseId:
         this.readString(item, 'responseId') ||
         this.readString(item, 'surveyResponseId') ||
@@ -214,7 +231,7 @@ export class DashboardDrillDownService {
     };
   }
 
-  private toResponseDetails(response: ApiRecord): DashboardResponseDetails {
+  mapResponseDetails(response: ApiRecord): DashboardResponseDetails {
     const score = this.readRecord(response['score']);
     const template = this.readRecord(response['template']);
     const branch = this.readRecord(response['branch']);
@@ -309,7 +326,9 @@ export class DashboardDrillDownService {
 
     const type =
       this.readString(item, customInput ? 'typeName' : 'questionTypeName') ||
-      (customInput ? this.readString(item, 'typeSnapshot') || this.readString(item, 'type') : questionType);
+      (customInput
+        ? this.readString(item, 'typeSnapshot') || this.readString(item, 'type')
+        : questionType);
 
     const rawVoice =
       this.readNullableString(item, 'voiceFileUrl') ??

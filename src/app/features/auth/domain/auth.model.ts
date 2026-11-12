@@ -15,7 +15,7 @@ export interface LoginBranchSelection {
 export interface LoginResponse {
   token: string;
   applicationUserId?: string | null;
-  userType?: UserType | string;
+  userType?: UserType | string | number;
   requiresBranchSelection?: boolean;
   firstLoginFlag?: boolean;
   passwordExpiredFlag?: boolean;
@@ -63,9 +63,7 @@ export interface PasswordChangeRequiredLoginResult {
 }
 
 export type AuthLoginResult =
-  | AuthenticatedLoginResult
-  | BranchSelectionLoginResult
-  | PasswordChangeRequiredLoginResult;
+  AuthenticatedLoginResult | BranchSelectionLoginResult | PasswordChangeRequiredLoginResult;
 
 export interface ChangePasswordRequest {
   newPassword: string;

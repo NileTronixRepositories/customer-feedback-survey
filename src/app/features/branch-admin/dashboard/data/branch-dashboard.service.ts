@@ -1,4 +1,7 @@
-import { customInputTypeName, customInputDisplayValue } from '../../../../shared/models/custom-input.model';
+import {
+  customInputTypeName,
+  customInputDisplayValue,
+} from '../../../../shared/models/custom-input.model';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
@@ -121,7 +124,8 @@ export class BranchDashboardService {
     if (query.hasVoice !== undefined) {
       params = params.set('hasVoice', String(query.hasVoice));
     }
-    if (query.satisfactionCategory) params = params.set('satisfactionCategory', query.satisfactionCategory);
+    if (query.satisfactionCategory)
+      params = params.set('satisfactionCategory', query.satisfactionCategory);
     if (query.isScored !== undefined) params = params.set('isScored', String(query.isScored));
     if (query.questionId) params = params.set('questionId', query.questionId);
     if (query.customInputId) params = params.set('customInputId', query.customInputId);
@@ -209,6 +213,8 @@ export class BranchDashboardService {
       activeTemplatesCount: this.readNumber(summary, 'activeTemplatesCount'),
       templatesWithResponsesCount: this.readNumber(summary, 'templatesWithResponsesCount'),
       complaintsCount: this.readNumber(summary, 'complaintsCount'),
+      suggestionsCount: this.readNumber(summary, 'suggestionsCount'),
+      commentsCount: this.readNumber(summary, 'commentsCount'),
       voiceAnswersCount: this.readNumber(summary, 'voiceAnswersCount'),
     };
   }
@@ -243,6 +249,8 @@ export class BranchDashboardService {
       averageScorePercentage: this.readNumber(item, 'averageScorePercentage'),
       hasScoreData,
       complaintsCount: this.readNumber(item, 'complaintsCount'),
+      suggestionsCount: this.readNumber(item, 'suggestionsCount'),
+      commentsCount: this.readNumber(item, 'commentsCount'),
       riskLevel: this.toRiskLevel(this.readString(item, 'riskLevel')),
       detailsNavigation: this.toNavigation(this.readRecord(item['detailsNavigation'])),
     };
@@ -332,12 +340,14 @@ export class BranchDashboardService {
 
   private toCharts(charts: ApiRecord | null): DashboardCharts {
     return {
-      satisfactionDistribution: this.readArray(charts?.['satisfactionDistribution']).map((item) => ({
-        category: this.toSatisfactionCategory(this.readString(item, 'category')),
-        responsesCount: this.readNumber(item, 'responsesCount'),
-        percentage: this.readNumber(item, 'percentage'),
-        detailsNavigation: this.toNavigation(this.readRecord(item['detailsNavigation'])),
-      })),
+      satisfactionDistribution: this.readArray(charts?.['satisfactionDistribution']).map(
+        (item) => ({
+          category: this.toSatisfactionCategory(this.readString(item, 'category')),
+          responsesCount: this.readNumber(item, 'responsesCount'),
+          percentage: this.readNumber(item, 'percentage'),
+          detailsNavigation: this.toNavigation(this.readRecord(item['detailsNavigation'])),
+        }),
+      ),
     };
   }
 
@@ -345,6 +355,8 @@ export class BranchDashboardService {
     return {
       allResponses: this.toNavigation(this.readRecord(actions?.['allResponses'])),
       complaints: this.toNavigation(this.readRecord(actions?.['complaints'])),
+      suggestions: this.toNavigation(this.readRecord(actions?.['suggestions'])),
+      comments: this.toNavigation(this.readRecord(actions?.['comments'])),
       voiceAnswers: this.toNavigation(this.readRecord(actions?.['voiceAnswers'])),
     };
   }
@@ -415,7 +427,9 @@ export class BranchDashboardService {
       labelEnSnapshot: this.readNullableString(item, 'labelEnSnapshot'),
       labelArSnapshot: this.readNullableString(item, 'labelArSnapshot'),
       type: this.readString(item, 'typeSnapshot') || this.readString(item, 'type'),
-      typeName: this.readString(item, 'typeName') || customInputTypeName(item['typeSnapshot'] ?? item['type']),
+      typeName:
+        this.readString(item, 'typeName') ||
+        customInputTypeName(item['typeSnapshot'] ?? item['type']),
       stringValue: this.readNullableString(item, 'stringValue'),
       integerValue: this.readNullableNumber(item, 'integerValue'),
       dateValue: this.readNullableString(item, 'dateValue'),
@@ -445,7 +459,9 @@ export class BranchDashboardService {
       imageFileUrl:
         this.readNullableString(item, 'imageFileUrl') ?? this.readNullableString(item, 'imageUrl'),
       displayValue: this.readString(item, 'displayValue'),
-      children: this.readResponseAnswerChildren(item).map((answer) => this.toResponseAnswer(answer)),
+      children: this.readResponseAnswerChildren(item).map((answer) =>
+        this.toResponseAnswer(answer),
+      ),
     };
   }
 

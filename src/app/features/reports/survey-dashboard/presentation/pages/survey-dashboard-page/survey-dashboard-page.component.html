@@ -186,14 +186,14 @@
 
           <!-- Filter Action Buttons & Advanced Toggle -->
           <div
-            class="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-slate-100"
+            class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-100"
           >
             <button
               type="button"
-              class="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-[var(--theme-color-secondary)] transition focus:outline-none"
+              class="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-bold text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition focus:outline-none"
               (click)="toggleCalculationOptions()"
             >
-              <app-icon [icon]="slidersIcon" [size]="14" />
+              <app-icon [icon]="slidersIcon" [size]="14" class="text-slate-400" />
               <span>{{ 'surveyDashboard.advancedOptions' | t }}</span>
               <span class="text-[10px] text-slate-400"
                 >({{ calculationOptionsOpen() ? '▲' : '▼' }})</span
@@ -203,7 +203,7 @@
             <div class="flex items-center gap-2">
               <button
                 type="button"
-                class="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-bold text-slate-600 transition hover:bg-slate-50 hover:border-slate-300"
+                class="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-slate-200/80 bg-white px-3.5 text-xs font-bold text-slate-600 shadow-2xs transition hover:bg-slate-50 hover:border-slate-300 active:translate-y-px"
                 (click)="clearFilters()"
               >
                 <app-icon [icon]="resetIcon" [size]="14" />
@@ -636,74 +636,6 @@
       </div>
     </section>
   } @else if (store.dashboard(); as dashboard) {
-    <!-- Executive Context Strip -->
-    <section
-      class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200/80 bg-white/90 px-4 py-3 shadow-xs"
-    >
-      <div class="flex flex-wrap items-center gap-2 text-xs">
-        <!-- Period Badge -->
-        <div
-          class="inline-flex items-center gap-1.5 rounded-xl bg-slate-50 border border-slate-200/70 px-3 py-1.5 font-bold text-slate-700 shadow-2xs"
-        >
-          <app-icon class="text-slate-400" [icon]="calendarIcon" [size]="13" />
-          <span class="text-slate-400 font-semibold">{{ 'surveyDashboard.period' | t }}:</span>
-          <span class="font-black text-slate-900">
-            {{ dashboard.period.from ? (dashboard.period.from | date: 'mediumDate') : '-' }} -
-            {{ dashboard.period.to ? (dashboard.period.to | date: 'mediumDate') : '-' }}
-          </span>
-          <span class="text-[10px] text-slate-400 font-medium"
-            >({{
-              dashboard.period.groupBy === 'Month'
-                ? ('surveyDashboard.month' | t)
-                : ('surveyDashboard.day' | t)
-            }})</span
-          >
-        </div>
-
-        <!-- Scope Badge -->
-        <div
-          class="inline-flex items-center gap-1.5 rounded-xl bg-slate-50 border border-slate-200/70 px-3 py-1.5 font-bold text-slate-700 shadow-2xs"
-        >
-          <app-icon class="text-[var(--theme-color-accent)]" [icon]="branchIcon" [size]="13" />
-          <span class="text-slate-400 font-semibold">{{ 'surveyDashboard.scope' | t }}:</span>
-          <span class="font-black text-slate-900">
-            {{
-              dashboard.scope.branchNameEn || dashboard.scope.branchNameAr
-                ? localized(dashboard.scope.branchNameEn, dashboard.scope.branchNameAr)
-                : ('surveyDashboard.allBranches' | t)
-            }}
-          </span>
-        </div>
-      </div>
-
-      <!-- Applied Filter Tags -->
-      <div class="flex flex-wrap items-center gap-1.5">
-        <span
-          class="rounded-lg px-2.5 py-1 text-[11px] font-black {{
-            sourceClass(dashboard.appliedFilters.source)
-          }}"
-        >
-          {{ sourceLabel(dashboard.appliedFilters.source) }}
-        </span>
-        @if (dashboard.appliedFilters.templateKind) {
-          <span
-            class="rounded-lg px-2.5 py-1 text-[11px] font-black {{
-              templateKindClass(dashboard.appliedFilters.templateKind)
-            }}"
-          >
-            {{ templateKindLabel(dashboard.appliedFilters.templateKind) }}
-          </span>
-        }
-        <span class="rounded-lg bg-slate-100 px-2 py-1 text-[10px] font-bold text-slate-600">
-          {{ 'surveyDashboard.topQuestions' | t }}: {{ dashboard.appliedFilters.topQuestionsCount }}
-        </span>
-        <span class="rounded-lg bg-slate-100 px-2 py-1 text-[10px] font-bold text-slate-600">
-          {{ 'surveyDashboard.criticalScore' | t }}:
-          {{ dashboard.appliedFilters.criticalScoreThreshold }}%
-        </span>
-      </div>
-    </section>
-
     @if (store.isEmpty()) {
       <section
         class="rounded-2xl border border-dashed border-slate-200 bg-white p-12 text-center shadow-xs"
@@ -725,266 +657,439 @@
         />
       }
 
-      <!-- Historical Availability Metrics Card -->
-      @if (dashboard.availability) {
-        <app-historical-availability-card [availability]="dashboard.availability" />
-      }
-
-      <!-- ==================== TIER 1: PRIMARY HERO KPI METRICS ==================== -->
-      <section class="grid gap-2.5 sm:grid-cols-2 xl:grid-cols-4">
-        <!-- 1. Overall Satisfaction Score -->
-        <article
-          class="relative overflow-hidden rounded-xl border border-slate-200/80 bg-white p-3 shadow-2xs transition hover:border-slate-300 hover:shadow-xs"
+      <!-- ==================== UNIFIED EXECUTIVE DASHBOARD COCKPIT (SINGLE BLOCK) ==================== -->
+      <section class="rounded-3xl border border-slate-200/90 bg-white shadow-xs overflow-hidden">
+        <!-- 1. Header Strip: Context & Catchy Suggestions / Comments -->
+        <div
+          class="flex flex-col gap-3.5 p-4 sm:px-5 sm:py-3.5 bg-gradient-to-b from-slate-50/80 via-slate-50/40 to-white border-b border-slate-100 lg:flex-row lg:items-center lg:justify-between"
         >
-          <div class="flex items-start justify-between gap-2">
-            <div class="min-w-0">
-              <p class="text-[11px] font-bold text-slate-500 truncate">
-                {{ 'surveyDashboard.averageScore' | t }}
-              </p>
-              <p class="mt-0.5 text-2xl font-black tracking-tight text-slate-900">
-                {{
-                  scoreLabel(
-                    dashboard.summary.averageScorePercentage,
-                    dashboard.summary.hasScoreData
-                  )
-                }}
-              </p>
-            </div>
-            <span
-              class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
-              [class.bg-emerald-50]="
-                dashboard.summary.hasScoreData &&
-                (dashboard.summary.averageScorePercentage ?? 0) >= 80
-              "
-              [class.text-emerald-600]="
-                dashboard.summary.hasScoreData &&
-                (dashboard.summary.averageScorePercentage ?? 0) >= 80
-              "
-              [class.bg-amber-50]="
-                dashboard.summary.hasScoreData &&
-                (dashboard.summary.averageScorePercentage ?? 0) >= 60 &&
-                (dashboard.summary.averageScorePercentage ?? 0) < 80
-              "
-              [class.text-amber-600]="
-                dashboard.summary.hasScoreData &&
-                (dashboard.summary.averageScorePercentage ?? 0) >= 60 &&
-                (dashboard.summary.averageScorePercentage ?? 0) < 80
-              "
-              [class.bg-rose-50]="
-                dashboard.summary.hasScoreData &&
-                (dashboard.summary.averageScorePercentage ?? 0) < 60
-              "
-              [class.text-rose-600]="
-                dashboard.summary.hasScoreData &&
-                (dashboard.summary.averageScorePercentage ?? 0) < 60
-              "
-              [class.bg-slate-100]="!dashboard.summary.hasScoreData"
-              [class.text-slate-400]="!dashboard.summary.hasScoreData"
+          <!-- Scope, Period, & Filter Tags -->
+          <div class="flex flex-wrap items-center gap-2 text-xs">
+            <!-- Period Badge -->
+            <div
+              class="inline-flex items-center gap-1.5 rounded-xl bg-white border border-slate-200/80 px-3 py-1.5 font-bold text-slate-700 shadow-2xs"
             >
-              <app-icon [icon]="trendIcon" [size]="16" />
-            </span>
-          </div>
-
-          <div class="mt-2 flex flex-wrap gap-1 text-[9px] font-bold">
-            <span class="rounded-md bg-emerald-50 px-1.5 py-0.5 text-emerald-700">
-              {{ dashboard.summary.satisfiedResponses }} {{ 'surveyDashboard.satisfied' | t }}
-            </span>
-            <span class="rounded-md bg-amber-50 px-1.5 py-0.5 text-amber-700">
-              {{ dashboard.summary.neutralResponses }} {{ 'surveyDashboard.neutral' | t }}
-            </span>
-            <span class="rounded-md bg-rose-50 px-1.5 py-0.5 text-rose-700">
-              {{ dashboard.summary.unhappyResponses }} {{ 'surveyDashboard.unhappy' | t }}
-            </span>
-          </div>
-        </article>
-
-        <!-- 2. Total Responses -->
-        <button
-          class="group rounded-xl border border-slate-200/80 bg-white p-3 text-start shadow-2xs transition hover:border-slate-300 hover:shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-300"
-          type="button"
-          [disabled]="!hasNavigation(dashboard.summaryActions.allResponses)"
-          (click)="openNavigation(dashboard.summaryActions.allResponses)"
-        >
-          <div class="flex items-start justify-between gap-2">
-            <div class="min-w-0">
-              <p class="text-[11px] font-bold text-slate-500 truncate">
-                {{ 'surveyDashboard.totalResponses' | t }}
-              </p>
-              <p class="mt-0.5 text-2xl font-black tracking-tight text-slate-900">
-                {{ dashboard.summary.totalResponses }}
-              </p>
-            </div>
-            <span
-              class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-cyan-50 text-[var(--theme-color-secondary)] transition group-hover:bg-cyan-100"
-            >
-              <app-icon [icon]="responsesIcon" [size]="16" />
-            </span>
-          </div>
-
-          <p class="mt-2 text-[10px] font-medium text-slate-500 truncate">
-            <span class="font-bold text-slate-900">{{ dashboard.summary.scoredResponses }}</span>
-            {{ 'surveyDashboard.scored' | t }}
-            <span class="text-slate-300 mx-1">/</span>
-            <span class="font-bold text-slate-900">{{ dashboard.summary.unscoredResponses }}</span>
-            {{ 'surveyDashboard.unscored' | t }}
-          </p>
-        </button>
-
-        <!-- 3. Complaints Alert -->
-        <button
-          class="group rounded-xl border border-slate-200/80 bg-white p-3 text-start shadow-2xs transition hover:border-slate-300 hover:shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-300"
-          type="button"
-          (click)="openComplaints()"
-        >
-          <div class="flex items-start justify-between gap-2">
-            <div class="min-w-0">
-              <p class="text-[11px] font-bold text-slate-500 truncate">
-                {{ 'surveyDashboard.complaints' | t }}
-              </p>
-              <p
-                class="mt-0.5 text-2xl font-black tracking-tight"
-                [class.text-rose-600]="dashboard.summary.complaintsCount > 0"
-                [class.text-slate-900]="dashboard.summary.complaintsCount === 0"
-              >
-                {{ dashboard.summary.complaintsCount }}
-              </p>
-            </div>
-            <span
-              class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
-              [class.bg-rose-50]="dashboard.summary.complaintsCount > 0"
-              [class.text-rose-600]="dashboard.summary.complaintsCount > 0"
-              [class.bg-slate-100]="dashboard.summary.complaintsCount === 0"
-              [class.text-slate-400]="dashboard.summary.complaintsCount === 0"
-            >
-              <app-icon [icon]="complaintIcon" [size]="16" />
-            </span>
-          </div>
-
-          <div class="mt-2 truncate">
-            @if (dashboard.summary.complaintsCount > 0) {
-              <span
-                class="inline-flex items-center gap-1 rounded-md bg-rose-50 px-1.5 py-0.5 text-[9px] font-bold text-rose-700 border border-rose-200/60"
-              >
-                <span class="h-1.5 w-1.5 rounded-full bg-rose-500"></span>
-                {{ 'surveyDashboard.requiresFollowUp' | t }}
+              <app-icon class="text-slate-400" [icon]="calendarIcon" [size]="13" />
+              <span class="text-slate-400 font-semibold">{{ 'surveyDashboard.period' | t }}:</span>
+              <span class="font-black text-slate-900">
+                {{ dashboard.period.from ? (dashboard.period.from | date: 'mediumDate') : '-' }} -
+                {{ dashboard.period.to ? (dashboard.period.to | date: 'mediumDate') : '-' }}
               </span>
-            } @else {
-              <span class="text-[10px] font-medium text-slate-400">
-                {{ 'surveyDashboard.healthy' | t }}
+              <span class="text-[10px] text-slate-400 font-medium"
+                >({{
+                  dashboard.period.groupBy === 'Month'
+                    ? ('surveyDashboard.month' | t)
+                    : ('surveyDashboard.day' | t)
+                }})</span
+              >
+            </div>
+
+            <!-- Scope Badge -->
+            <div
+              class="inline-flex items-center gap-1.5 rounded-xl bg-white border border-slate-200/80 px-3 py-1.5 font-bold text-slate-700 shadow-2xs"
+            >
+              <app-icon class="text-[var(--theme-color-secondary)]" [icon]="branchIcon" [size]="13" />
+              <span class="text-slate-400 font-semibold">{{ 'surveyDashboard.scope' | t }}:</span>
+              <span class="font-black text-slate-900">
+                {{
+                  dashboard.scope.branchNameEn || dashboard.scope.branchNameAr
+                    ? localized(dashboard.scope.branchNameEn, dashboard.scope.branchNameAr)
+                    : ('surveyDashboard.allBranches' | t)
+                }}
+              </span>
+            </div>
+
+            <!-- Applied Filter Tags -->
+            <span
+              class="rounded-lg px-2.5 py-1 text-[11px] font-black {{
+                sourceClass(dashboard.appliedFilters.source)
+              }}"
+            >
+              {{ sourceLabel(dashboard.appliedFilters.source) }}
+            </span>
+            @if (dashboard.appliedFilters.templateKind) {
+              <span
+                class="rounded-lg px-2.5 py-1 text-[11px] font-black {{
+                  templateKindClass(dashboard.appliedFilters.templateKind)
+                }}"
+              >
+                {{ templateKindLabel(dashboard.appliedFilters.templateKind) }}
               </span>
             }
+            <span class="rounded-lg bg-slate-100 px-2 py-1 text-[10px] font-bold text-slate-600">
+              {{ 'surveyDashboard.topQuestions' | t }}: {{ dashboard.appliedFilters.topQuestionsCount }}
+            </span>
+            <span class="rounded-lg bg-slate-100 px-2 py-1 text-[10px] font-bold text-slate-600">
+              {{ 'surveyDashboard.criticalScore' | t }}:
+              {{ dashboard.appliedFilters.criticalScoreThreshold }}%
+            </span>
           </div>
-        </button>
 
-        <!-- 4. Voice Audio Feedback -->
-        <button
-          class="group rounded-xl border border-slate-200/80 bg-white p-3 text-start shadow-2xs transition hover:border-slate-300 hover:shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-300"
-          type="button"
-          [disabled]="!hasNavigation(dashboard.summaryActions.voiceAnswers)"
-          (click)="openNavigation(dashboard.summaryActions.voiceAnswers)"
-        >
-          <div class="flex items-start justify-between gap-2">
-            <div class="min-w-0">
-              <p class="text-[11px] font-bold text-slate-500 truncate">
-                {{ 'surveyDashboard.voiceAnswers' | t }}
-              </p>
-              <p class="mt-0.5 text-2xl font-black tracking-tight text-slate-900">
-                {{ dashboard.summary.voiceAnswersCount }}
-              </p>
-            </div>
-            <span
-              class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-cyan-50 text-cyan-600 transition group-hover:bg-cyan-100"
+          <!-- Catchy Highlights: Suggestions & Comments Badges -->
+          <div class="flex items-center gap-2.5 border-t border-slate-100 pt-2 lg:border-t-0 lg:pt-0">
+            <!-- Suggestions Badge -->
+            <button
+              type="button"
+              class="group inline-flex items-center gap-2.5 rounded-xl border border-amber-200/90 bg-gradient-to-r from-amber-50 to-amber-100/60 px-3 py-1.5 text-xs shadow-2xs transition-all hover:from-amber-100 hover:to-amber-200/70 hover:border-amber-300 hover:shadow-xs active:scale-[0.98] cursor-pointer focus:outline-none"
+              [disabled]="!dashboard.summaryActions.suggestions"
+              (click)="openFeedbackMetric('suggestions', dashboard.summaryActions.suggestions)"
+              [title]="'flags.suggestions' | t"
             >
-              <app-icon [icon]="micIcon" [size]="16" />
-            </span>
-          </div>
+              <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-amber-200/80 text-amber-800 shadow-2xs transition group-hover:scale-105">
+                <app-icon [icon]="lightbulbIcon" [size]="14" />
+              </span>
+              <span class="font-black text-amber-950">{{ 'flags.suggestions' | t }}</span>
+              <span class="inline-flex min-w-[22px] h-5.5 items-center justify-center rounded-lg bg-white/95 px-1.5 text-xs font-black text-amber-900 border border-amber-300/80 shadow-2xs">
+                {{ dashboard.summary.suggestionsCount ?? 0 }}
+              </span>
+            </button>
 
-          <p class="mt-2 text-[10px] font-medium text-slate-500 truncate">
-            {{ 'surveyDashboard.audioFeedbackCaptured' | t }}
-          </p>
-        </button>
-      </section>
-
-      <!-- ==================== TIER 2: SECONDARY OPERATIONAL STRIP ==================== -->
-      <section class="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
-        <!-- Authorized Templates -->
-        <div
-          class="rounded-xl border border-slate-200/70 bg-slate-50/60 px-3 py-2 shadow-2xs transition hover:bg-slate-50/90"
-        >
-          <p class="text-[10px] font-bold text-slate-400 truncate">
-            {{ 'surveyDashboard.internalResponses' | t }}
-          </p>
-          <div class="mt-0.5 flex items-baseline justify-between gap-2">
-            <span class="text-base font-black text-slate-900">
-              {{ dashboard.summary.internalResponses }}
-            </span>
-            <span class="text-[10px] font-medium text-slate-500 truncate">
-              {{ 'surveyDashboard.activeInternalTemplates' | t }}:
-              <strong class="text-slate-700 font-bold">{{
-                dashboard.summary.activeInternalTemplatesCount
-              }}</strong>
-            </span>
+            <!-- Comments Badge -->
+            <button
+              type="button"
+              class="group inline-flex items-center gap-2.5 rounded-xl border border-cyan-200/90 bg-gradient-to-r from-cyan-50 to-teal-50/70 px-3 py-1.5 text-xs shadow-2xs transition-all hover:from-cyan-100 hover:to-teal-100/80 hover:border-cyan-300 hover:shadow-xs active:scale-[0.98] cursor-pointer focus:outline-none"
+              [disabled]="!dashboard.summaryActions.comments"
+              (click)="openFeedbackMetric('comments', dashboard.summaryActions.comments)"
+              [title]="'flags.comments' | t"
+            >
+              <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-cyan-100 text-[var(--theme-color-secondary)] shadow-2xs transition group-hover:scale-105">
+                <app-icon [icon]="messageSquareIcon" [size]="14" />
+              </span>
+              <span class="font-black text-cyan-950">{{ 'flags.comments' | t }}</span>
+              <span class="inline-flex min-w-[22px] h-5.5 items-center justify-center rounded-lg bg-white/95 px-1.5 text-xs font-black text-[var(--theme-color-secondary)] border border-cyan-300/80 shadow-2xs">
+                {{ dashboard.summary.commentsCount ?? 0 }}
+              </span>
+            </button>
           </div>
         </div>
 
-        <!-- Anonymous Templates -->
-        <div
-          class="rounded-xl border border-slate-200/70 bg-slate-50/60 px-3 py-2 shadow-2xs transition hover:bg-slate-50/90"
-        >
-          <p class="text-[10px] font-bold text-slate-400 truncate">
-            {{ 'surveyDashboard.anonymousResponses' | t }}
-          </p>
-          <div class="mt-0.5 flex items-baseline justify-between gap-2">
-            <span class="text-base font-black text-slate-900">
-              {{ dashboard.summary.anonymousResponses }}
-            </span>
-            <span class="text-[10px] font-medium text-slate-500 truncate">
-              {{ 'surveyDashboard.activeAnonymousTemplates' | t }}:
-              <strong class="text-slate-700 font-bold">{{
-                dashboard.summary.activeAnonymousTemplatesCount
-              }}</strong>
-            </span>
-          </div>
-        </div>
+        <!-- 2. Primary KPI Metrics Grid (Seamless borderless 4 columns) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x rtl:sm:divide-x-reverse divide-slate-100">
+          <!-- 1. Overall Satisfaction Score -->
+          <article class="p-4 sm:p-5 transition hover:bg-slate-50/50">
+            <div class="flex items-start justify-between gap-2">
+              <div class="min-w-0">
+                <p class="text-xs font-bold text-slate-500 truncate">
+                  {{ 'surveyDashboard.averageScore' | t }}
+                </p>
+                <p class="mt-1 text-2xl sm:text-3xl font-black tracking-tight text-slate-900">
+                  {{
+                    scoreLabel(
+                      dashboard.summary.averageScorePercentage,
+                      dashboard.summary.hasScoreData
+                    )
+                  }}
+                </p>
+              </div>
+              <span
+                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl shadow-2xs"
+                [class.bg-emerald-50]="
+                  dashboard.summary.hasScoreData &&
+                  (dashboard.summary.averageScorePercentage ?? 0) >= 80
+                "
+                [class.text-emerald-600]="
+                  dashboard.summary.hasScoreData &&
+                  (dashboard.summary.averageScorePercentage ?? 0) >= 80
+                "
+                [class.border]="true"
+                [class.border-emerald-100]="
+                  dashboard.summary.hasScoreData &&
+                  (dashboard.summary.averageScorePercentage ?? 0) >= 80
+                "
+                [class.bg-amber-50]="
+                  dashboard.summary.hasScoreData &&
+                  (dashboard.summary.averageScorePercentage ?? 0) >= 60 &&
+                  (dashboard.summary.averageScorePercentage ?? 0) < 80
+                "
+                [class.text-amber-600]="
+                  dashboard.summary.hasScoreData &&
+                  (dashboard.summary.averageScorePercentage ?? 0) >= 60 &&
+                  (dashboard.summary.averageScorePercentage ?? 0) < 80
+                "
+                [class.border-amber-100]="
+                  dashboard.summary.hasScoreData &&
+                  (dashboard.summary.averageScorePercentage ?? 0) >= 60 &&
+                  (dashboard.summary.averageScorePercentage ?? 0) < 80
+                "
+                [class.bg-rose-50]="
+                  dashboard.summary.hasScoreData &&
+                  (dashboard.summary.averageScorePercentage ?? 0) < 60
+                "
+                [class.text-rose-600]="
+                  dashboard.summary.hasScoreData &&
+                  (dashboard.summary.averageScorePercentage ?? 0) < 60
+                "
+                [class.border-rose-100]="
+                  dashboard.summary.hasScoreData &&
+                  (dashboard.summary.averageScorePercentage ?? 0) < 60
+                "
+                [class.bg-slate-100]="!dashboard.summary.hasScoreData"
+                [class.text-slate-400]="!dashboard.summary.hasScoreData"
+                [class.border-slate-200]="!dashboard.summary.hasScoreData"
+              >
+                <app-icon [icon]="trendIcon" [size]="18" />
+              </span>
+            </div>
 
-        <!-- Templates With Responses -->
-        <div
-          class="rounded-xl border border-slate-200/70 bg-slate-50/60 px-3 py-2 shadow-2xs transition hover:bg-slate-50/90"
-        >
-          <p class="text-[10px] font-bold text-slate-400 truncate">
-            {{ 'surveyDashboard.templatesWithResponses' | t }}
-          </p>
-          <div class="mt-0.5 flex items-baseline justify-between gap-2">
-            <span class="text-base font-black text-slate-900">
-              {{ dashboard.summary.templatesWithResponsesCount }}
-            </span>
-            <span class="text-[10px] font-medium text-slate-500 truncate">
-              {{ 'surveyDashboard.internalAnonymousCoverage' | t }}
-            </span>
-          </div>
-        </div>
+            <div class="mt-3 flex flex-wrap gap-1.5 text-[10px] font-bold">
+              <span class="rounded-lg bg-emerald-50 border border-emerald-100/80 px-2 py-0.5 text-emerald-700">
+                {{ dashboard.summary.satisfiedResponses }} {{ 'surveyDashboard.satisfied' | t }}
+              </span>
+              <span class="rounded-lg bg-amber-50 border border-amber-100/80 px-2 py-0.5 text-amber-700">
+                {{ dashboard.summary.neutralResponses }} {{ 'surveyDashboard.neutral' | t }}
+              </span>
+              <span class="rounded-lg bg-rose-50 border border-rose-100/80 px-2 py-0.5 text-rose-700">
+                {{ dashboard.summary.unhappyResponses }} {{ 'surveyDashboard.unhappy' | t }}
+              </span>
+            </div>
+          </article>
 
-        <!-- Branches Coverage (If SuperAdmin or single branch view) -->
-        <div
-          class="rounded-xl border border-slate-200/70 bg-slate-50/60 px-3 py-2 shadow-2xs transition hover:bg-slate-50/90"
-        >
-          <p class="text-[10px] font-bold text-slate-400 truncate">
-            {{ 'surveyDashboard.branches' | t }}
-          </p>
-          <div class="mt-0.5 flex items-baseline justify-between gap-2">
-            <span class="text-base font-black text-slate-900">
-              @if (isSuperAdmin()) {
-                {{ dashboard.summary.branchesWithResponsesCount }} /
-                {{ dashboard.summary.branchesCount }}
+          <!-- 2. Total Responses -->
+          <button
+            class="group p-4 sm:p-5 text-start transition hover:bg-slate-50/50 cursor-pointer focus-visible:outline-none focus-visible:bg-slate-50"
+            type="button"
+            [disabled]="!hasNavigation(dashboard.summaryActions.allResponses)"
+            (click)="openNavigation(dashboard.summaryActions.allResponses)"
+          >
+            <div class="flex items-start justify-between gap-2">
+              <div class="min-w-0">
+                <p class="text-xs font-bold text-slate-500 truncate">
+                  {{ 'surveyDashboard.totalResponses' | t }}
+                </p>
+                <p class="mt-1 text-2xl sm:text-3xl font-black tracking-tight text-slate-900 group-hover:text-[var(--theme-color-secondary)] transition-colors">
+                  {{ dashboard.summary.totalResponses }}
+                </p>
+              </div>
+              <span
+                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-cyan-50 border border-cyan-100 text-[var(--theme-color-secondary)] shadow-2xs transition group-hover:bg-cyan-100 group-hover:scale-105"
+              >
+                <app-icon [icon]="responsesIcon" [size]="18" />
+              </span>
+            </div>
+
+            <p class="mt-3 text-[11px] font-semibold text-slate-500 truncate">
+              <span class="font-bold text-slate-900">{{ dashboard.summary.scoredResponses }}</span>
+              {{ 'surveyDashboard.scored' | t }}
+              <span class="text-slate-300 mx-1">/</span>
+              <span class="font-bold text-slate-900">{{ dashboard.summary.unscoredResponses }}</span>
+              {{ 'surveyDashboard.unscored' | t }}
+            </p>
+          </button>
+
+          <!-- 3. Complaints Alert -->
+          <button
+            class="group p-4 sm:p-5 text-start transition hover:bg-slate-50/50 cursor-pointer focus-visible:outline-none focus-visible:bg-slate-50"
+            type="button"
+            (click)="openComplaints()"
+          >
+            <div class="flex items-start justify-between gap-2">
+              <div class="min-w-0">
+                <p class="text-xs font-bold text-slate-500 truncate">
+                  {{ 'surveyDashboard.complaints' | t }}
+                </p>
+                <p
+                  class="mt-1 text-2xl sm:text-3xl font-black tracking-tight transition-colors"
+                  [class.text-rose-600]="dashboard.summary.complaintsCount > 0"
+                  [class.text-slate-900]="dashboard.summary.complaintsCount === 0"
+                >
+                  {{ dashboard.summary.complaintsCount }}
+                </p>
+              </div>
+              <span
+                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl shadow-2xs transition group-hover:scale-105"
+                [class.bg-rose-50]="dashboard.summary.complaintsCount > 0"
+                [class.text-rose-600]="dashboard.summary.complaintsCount > 0"
+                [class.border]="true"
+                [class.border-rose-100]="dashboard.summary.complaintsCount > 0"
+                [class.bg-slate-100]="dashboard.summary.complaintsCount === 0"
+                [class.text-slate-400]="dashboard.summary.complaintsCount === 0"
+                [class.border-slate-200]="dashboard.summary.complaintsCount === 0"
+              >
+                <app-icon [icon]="complaintIcon" [size]="18" />
+              </span>
+            </div>
+
+            <div class="mt-3 truncate">
+              @if (dashboard.summary.complaintsCount > 0) {
+                <span
+                  class="inline-flex items-center gap-1.5 rounded-lg bg-rose-50 px-2 py-0.5 text-[10px] font-bold text-rose-700 border border-rose-200/60"
+                >
+                  <span class="h-1.5 w-1.5 rounded-full bg-rose-500 animate-pulse"></span>
+                  {{ 'surveyDashboard.requiresFollowUp' | t }}
+                </span>
               } @else {
-                1 / 1
+                <span class="inline-flex items-center gap-1.5 text-[11px] font-bold text-emerald-600">
+                  <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                  {{ 'surveyDashboard.healthy' | t }}
+                </span>
               }
-            </span>
-            <span class="text-[10px] font-medium text-slate-500 truncate">
-              {{ 'surveyDashboard.branchesWithResponses' | t }}
-            </span>
+            </div>
+          </button>
+
+          <!-- 4. Voice Audio Feedback -->
+          <button
+            class="group p-4 sm:p-5 text-start transition hover:bg-slate-50/50 cursor-pointer focus-visible:outline-none focus-visible:bg-slate-50"
+            type="button"
+            [disabled]="!hasNavigation(dashboard.summaryActions.voiceAnswers)"
+            (click)="openNavigation(dashboard.summaryActions.voiceAnswers)"
+          >
+            <div class="flex items-start justify-between gap-2">
+              <div class="min-w-0">
+                <p class="text-xs font-bold text-slate-500 truncate">
+                  {{ 'surveyDashboard.voiceAnswers' | t }}
+                </p>
+                <p class="mt-1 text-2xl sm:text-3xl font-black tracking-tight text-slate-900 group-hover:text-cyan-700 transition-colors">
+                  {{ dashboard.summary.voiceAnswersCount }}
+                </p>
+              </div>
+              <span
+                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-cyan-50 border border-cyan-100 text-cyan-600 shadow-2xs transition group-hover:bg-cyan-100 group-hover:scale-105"
+              >
+                <app-icon [icon]="micIcon" [size]="18" />
+              </span>
+            </div>
+
+            <p class="mt-3 text-[11px] font-semibold text-slate-500 truncate">
+              {{ 'surveyDashboard.audioFeedbackCaptured' | t }}
+            </p>
+          </button>
+        </div>
+
+        <!-- 3. Secondary Operational Strip (Integrated sub-metrics ribbon) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 p-3.5 sm:px-5 sm:py-3 bg-slate-50/50 border-t border-slate-100 divide-y sm:divide-y-0 lg:divide-x rtl:lg:divide-x-reverse divide-slate-100">
+          <!-- Authorized Templates -->
+          <div class="p-1 sm:px-3 first:pt-0 lg:first:px-1">
+            <p class="text-[11px] font-bold text-slate-400 truncate">
+              {{ 'surveyDashboard.internalResponses' | t }}
+            </p>
+            <div class="mt-1 flex items-baseline justify-between gap-2">
+              <span class="text-xl font-black tracking-tight text-slate-900">
+                {{ dashboard.summary.internalResponses }}
+              </span>
+              <span class="text-[11px] font-semibold text-slate-500 truncate">
+                {{ 'surveyDashboard.activeInternalTemplates' | t }}:
+                <strong class="text-slate-700 font-bold">{{
+                  dashboard.summary.activeInternalTemplatesCount
+                }}</strong>
+              </span>
+            </div>
+          </div>
+
+          <!-- Anonymous Templates -->
+          <div class="p-1 sm:px-3 pt-3 sm:pt-1">
+            <p class="text-[11px] font-bold text-slate-400 truncate">
+              {{ 'surveyDashboard.anonymousResponses' | t }}
+            </p>
+            <div class="mt-1 flex items-baseline justify-between gap-2">
+              <span class="text-xl font-black tracking-tight text-slate-900">
+                {{ dashboard.summary.anonymousResponses }}
+              </span>
+              <span class="text-[11px] font-semibold text-slate-500 truncate">
+                {{ 'surveyDashboard.activeAnonymousTemplates' | t }}:
+                <strong class="text-slate-700 font-bold">{{
+                  dashboard.summary.activeAnonymousTemplatesCount
+                }}</strong>
+              </span>
+            </div>
+          </div>
+
+          <!-- Templates With Responses -->
+          <div class="p-1 sm:px-3 pt-3 sm:pt-1">
+            <p class="text-[11px] font-bold text-slate-400 truncate">
+              {{ 'surveyDashboard.templatesWithResponses' | t }}
+            </p>
+            <div class="mt-1 flex items-baseline justify-between gap-2">
+              <span class="text-xl font-black tracking-tight text-slate-900">
+                {{ dashboard.summary.templatesWithResponsesCount }}
+              </span>
+              <span class="text-[11px] font-semibold text-slate-500 truncate">
+                {{ 'surveyDashboard.internalAnonymousCoverage' | t }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Branches Coverage -->
+          <div class="p-1 sm:px-3 pt-3 sm:pt-1">
+            <p class="text-[11px] font-bold text-slate-400 truncate">
+              {{ 'surveyDashboard.branches' | t }}
+            </p>
+            <div class="mt-1 flex items-baseline justify-between gap-2">
+              <span class="text-xl font-black tracking-tight text-slate-900">
+                @if (isSuperAdmin()) {
+                  {{ dashboard.summary.branchesWithResponsesCount }} /
+                  {{ dashboard.summary.branchesCount }}
+                } @else {
+                  1 / 1
+                }
+              </span>
+              <span class="text-[11px] font-semibold text-slate-500 truncate">
+                {{ 'surveyDashboard.branchesWithResponses' | t }}
+              </span>
+            </div>
           </div>
         </div>
+
+        <!-- 4. Historical Availability Footer Ribbon (Integrated seamlessly) -->
+        @if (dashboard.availability; as data) {
+          <div class="p-3 sm:px-5 sm:py-3.5 bg-white border-t border-slate-100">
+            <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+              <!-- Title & Status pill -->
+              <div class="flex items-center gap-2.5 min-w-0">
+                <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-teal-50 text-[var(--theme-color-primary)] border border-teal-100 shadow-2xs">
+                  <app-icon [icon]="calendarIcon" [size]="15" />
+                </span>
+                <div class="min-w-0">
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <span class="text-xs font-black text-slate-800">{{ 'historicalAvailability.title' | t }}</span>
+                    @if (data.isHistoryComplete) {
+                      <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-0.5 text-[10px] font-bold text-emerald-800 border border-emerald-200/70 shadow-2xs">
+                        <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                        {{ 'historicalAvailability.verifiedComplete' | t }}
+                      </span>
+                    } @else {
+                      <span class="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-2.5 py-0.5 text-[10px] font-bold text-amber-800 border border-amber-200/70 shadow-2xs">
+                        <app-icon [icon]="alertIcon" [size]="11" class="text-amber-600" />
+                        {{ 'historicalAvailability.coveragePartial' | t }}
+                      </span>
+                    }
+                  </div>
+                  <p class="text-[11px] text-slate-400 truncate mt-0.5">{{ 'historicalAvailability.subtitle' | t }}</p>
+                </div>
+              </div>
+
+              <!-- 3 Compact Availability Stats -->
+              <div class="grid grid-cols-3 gap-2 sm:gap-3 shrink-0">
+                <div class="rounded-xl bg-slate-50/80 border border-slate-200/70 px-3 py-1.5 text-center sm:text-start shadow-2xs">
+                  <span class="block text-[10px] font-bold text-slate-500 truncate">{{ 'historicalAvailability.availableDuringPeriod' | t }}</span>
+                  <span class="text-base sm:text-lg font-black text-slate-900 font-mono">{{ data.availableTemplatesDuringPeriod }}</span>
+                </div>
+                <div class="rounded-xl bg-teal-50/50 border border-teal-100/80 px-3 py-1.5 text-center sm:text-start shadow-2xs">
+                  <span class="block text-[10px] font-bold text-[var(--theme-color-secondary)] truncate">{{ 'historicalAvailability.templatesWithResponses' | t }}</span>
+                  <span class="text-base sm:text-lg font-black text-[var(--theme-color-primary)] font-mono">{{ data.templatesWithResponsesCount }}</span>
+                </div>
+                <div class="rounded-xl bg-slate-50/80 border border-slate-200/70 px-3 py-1.5 text-center sm:text-start shadow-2xs">
+                  <span class="block text-[10px] font-bold text-slate-500 truncate">{{ 'historicalAvailability.currentlyAvailable' | t }}</span>
+                  <span class="text-base sm:text-lg font-black text-slate-900 font-mono">{{ data.currentlyAvailableTemplatesCount }}</span>
+                </div>
+              </div>
+            </div>
+
+            @if (!data.isHistoryComplete) {
+              <div class="mt-2.5 flex items-start gap-2 rounded-xl bg-amber-50/70 p-2.5 text-[11px] text-amber-950 border border-amber-200/60">
+                <app-icon [icon]="alertIcon" [size]="14" class="text-amber-600 shrink-0 mt-0.5" />
+                <div class="space-y-0.5">
+                  <p class="leading-relaxed">{{ 'historicalAvailability.incompleteWarning' | t }}</p>
+                  @if (data.coverageStartsOnUtc) {
+                    <p class="font-bold text-amber-900">
+                      {{ 'historicalAvailability.coverageStarts' | t }}:
+                      <span class="font-mono">{{ data.coverageStartsOnUtc | date: 'mediumDate' }}</span>
+                    </p>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        }
       </section>
 
       <!-- ==================== ANALYTICS COCKPIT: 2 COLUMNS ==================== -->
@@ -1068,7 +1173,7 @@
                     <span
                       class="rounded-lg bg-white px-2.5 py-1 text-[11px] font-black text-slate-800 border border-slate-200/60 shadow-2xs"
                     >
-                      {{ breakdownAverage(entry.metrics) }}
+                      {{ breakdownAverage(entry.metrics) }}<span class="block text-xs">{{ entry.metrics.complaintsCount }} {{ 'flags.complaints' | t }}</span><app-dashboard-feedback-counts [counts]="entry.metrics" [compact]="true" />
                     </span>
                   </div>
 
@@ -1803,7 +1908,7 @@
                               [class.text-rose-600]="template.complaintsCount > 0"
                               [class.text-slate-900]="template.complaintsCount === 0"
                             >
-                              {{ template.complaintsCount }}
+                              {{ template.complaintsCount }}<app-dashboard-feedback-counts [counts]="template" [compact]="true" />
                             </p>
                           </div>
                           <div class="rounded-lg bg-white p-2 border border-slate-100">
@@ -1913,7 +2018,7 @@
                               [class.text-rose-600]="template.complaintsCount > 0"
                               [class.text-slate-800]="template.complaintsCount === 0"
                             >
-                              {{ template.complaintsCount }}
+                              {{ template.complaintsCount }}<app-dashboard-feedback-counts [counts]="template" [compact]="true" />
                             </td>
                             <td class="px-3.5 py-3 font-black text-slate-800">
                               {{ template.voiceAnswersCount }}
@@ -2656,7 +2761,7 @@
                                 [class.text-rose-600]="branch.complaintsCount > 0"
                                 [class.text-slate-900]="branch.complaintsCount === 0"
                               >
-                                {{ branch.complaintsCount }}
+                                {{ branch.complaintsCount }}<app-dashboard-feedback-counts [counts]="branch" [compact]="true" />
                               </p>
                             </div>
                             <div class="rounded-lg bg-white p-2 border border-slate-100">
@@ -2745,7 +2850,7 @@
                                 [class.text-rose-600]="branch.complaintsCount > 0"
                                 [class.text-slate-800]="branch.complaintsCount === 0"
                               >
-                                {{ branch.complaintsCount }}
+                                {{ branch.complaintsCount }}<app-dashboard-feedback-counts [counts]="branch" [compact]="true" />
                               </td>
                               <td class="px-3.5 py-3 font-black text-slate-800">
                                 {{ branch.voiceAnswersCount }}

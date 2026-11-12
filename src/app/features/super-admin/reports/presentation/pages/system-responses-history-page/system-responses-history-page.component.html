@@ -1,6 +1,8 @@
 <div class="w-full space-y-3 sm:space-y-4">
   <section class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/60">
     <form class="flex flex-col gap-3" [formGroup]="filtersForm" (ngSubmit)="applyFilters()">
+      <label class="block"><span class="mb-1 block text-xs font-semibold">{{ 'flags.type' | t }}</span><select class="filter-control" formControlName="flagType"><option value="">{{ 'flags.all' | t }}</option><option value="2">{{ 'flags.suggestions' | t }}</option><option value="3">{{ 'flags.comments' | t }}</option></select></label>
+
       <div class="flex flex-wrap items-end gap-3">
         <label class="filter-label flex-1 min-w-[240px]">
           <span class="filter-label-text">{{ 'systemResponsesHistory.search' | t }}</span>
@@ -201,7 +203,7 @@
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100">
-              @for (row of page.data; track row.surveyResponseId) {
+              @for (row of page.data; track $index) {
                 <tr>
                   <td>{{ row.submittedOnUtc ? (row.submittedOnUtc | date: 'medium') : '-' }}</td>
                   <td class="font-bold">{{ localized(row.branchNameEn, row.branchNameAr) }}</td>
@@ -275,7 +277,8 @@
                     </div>
                   </td>
                   <td class="text-end">
-                    <button
+                    @if (row.flag) { <app-button size="sm" variant="secondary" (pressed)="selectedFlag.set(row.flag!)">{{ 'flags.feedback' | t }}</app-button> }
+<button
                       class="rounded-lg border border-slate-200 px-2.5 py-1 text-[10px] font-black hover:bg-slate-50"
                       type="button"
                       (click)="openDetails(row)"
@@ -322,3 +325,5 @@
   [details]="store.details()"
   (closed)="store.closeDetails()"
 />
+
+<app-modal [open]="selectedFlag() !== null" [title]="'flags.feedback' | t" size="lg" (closed)="selectedFlag.set(null)">@if (selectedFlag(); as flag) { <app-response-flag-card [flag]="flag" /> }</app-modal>

@@ -1,0 +1,1255 @@
+<div class="space-y-4 sm:space-y-5 animate-enter">
+  <!-- 1. EXECUTIVE HERO HEADER -->
+  <section
+    class="executive-hero-card rounded-3xl border border-slate-200/90 bg-white p-4.5 sm:p-6 shadow-xs relative overflow-hidden"
+  >
+    <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between relative z-10">
+      <!-- Title, Badge & Icon -->
+      <div class="flex items-center gap-3.5 sm:gap-4 min-w-0">
+        <div
+          class="flex h-12 w-12 sm:h-13 sm:w-13 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--theme-color-primary,#148496)] to-[var(--theme-color-secondary,#0f6f7f)] text-white shadow-md shadow-teal-950/15 ring-4 ring-teal-500/10"
+        >
+          <i class="fa-solid fa-user-shield text-xl sm:text-2xl"></i>
+        </div>
+
+        <div class="min-w-0">
+          <div class="flex items-center gap-2 flex-wrap">
+            <h1 class="text-xl sm:text-2xl font-black tracking-tight text-slate-900 truncate">
+              {{ 'flags.officers' | t }}
+            </h1>
+            <span
+              class="inline-flex items-center gap-1.5 rounded-full px-3 py-0.5 text-[11px] font-black bg-teal-50 text-[var(--theme-color-primary,#148496)] border border-teal-200/70 shadow-2xs"
+            >
+              <span class="h-1.5 w-1.5 rounded-full bg-teal-500 animate-pulse"></span>
+              <i class="fa-solid fa-comments text-[10px]"></i>
+              <span class="truncate">{{ 'flags.workspace' | t }}</span>
+            </span>
+          </div>
+          <p class="text-xs font-semibold text-slate-500 mt-1 truncate">
+            {{ 'flags.officersHint' | t }}
+          </p>
+        </div>
+      </div>
+
+      <!-- Action Buttons & Feedback Alerts -->
+      <div class="flex flex-wrap items-center gap-2.5 sm:gap-3">
+        @if (success()) {
+          <span
+            class="inline-flex items-center gap-2 rounded-xl bg-emerald-50 border border-emerald-200/90 px-3.5 py-2 text-xs font-bold text-emerald-800 shadow-2xs animate-enter"
+          >
+            <i class="fa-solid fa-circle-check text-emerald-600 text-sm"></i>
+            <span>{{ success() | t }}</span>
+          </span>
+        }
+
+        @if (createdOfficerId() && can('AssignRoles')) {
+          <button
+            type="button"
+            class="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-teal-200/90 bg-teal-50/80 px-4 text-xs font-black text-[var(--theme-color-primary,#148496)] shadow-2xs transition hover:bg-teal-100/90 active:scale-95 cursor-pointer"
+            (click)="open(createdOfficerId(), 'roles')"
+          >
+            <i class="fa-solid fa-shield-halved text-sm"></i>
+            <span>{{ 'flags.managePermissions' | t }}</span>
+          </button>
+        }
+
+        @if (can('Create')) {
+          <button
+            type="button"
+            class="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[var(--theme-color-primary,#148496)] to-[var(--theme-color-secondary,#0f6f7f)] px-4.5 text-xs font-black text-white shadow-sm shadow-teal-950/20 transition hover:brightness-105 active:scale-95 cursor-pointer"
+            (click)="create()"
+          >
+            <i class="fa-solid fa-user-plus text-sm"></i>
+            <span>{{ 'flags.addOfficer' | t }}</span>
+          </button>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. EXECUTIVE QUICK STATS BAR -->
+  <section class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-3.5">
+    <!-- Stat 1: Total Officers -->
+    <div
+      class="stat-card flex items-center gap-3 sm:gap-3.5 rounded-2xl border border-slate-200/80 bg-white p-3.5 sm:p-4 shadow-xs transition-all hover:border-teal-300 hover:shadow-sm"
+    >
+      <div
+        class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-teal-50 text-[var(--theme-color-primary,#148496)] border border-teal-200/70"
+      >
+        <i class="fa-solid fa-users text-lg"></i>
+      </div>
+      <div class="min-w-0 flex-1">
+        <span class="block text-[11px] font-bold text-slate-500 truncate">{{
+          'flags.totalOfficers' | t
+        }}</span>
+        <span class="block text-xl font-black text-slate-900 tracking-tight">{{
+          page()?.totalItems ?? 0
+        }}</span>
+      </div>
+    </div>
+
+    <!-- Stat 2: Active Accounts -->
+    <div
+      class="stat-card flex items-center gap-3 sm:gap-3.5 rounded-2xl border border-slate-200/80 bg-white p-3.5 sm:p-4 shadow-xs transition-all hover:border-emerald-300 hover:shadow-sm"
+    >
+      <div
+        class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-200/70"
+      >
+        <i class="fa-solid fa-user-check text-lg"></i>
+      </div>
+      <div class="min-w-0 flex-1">
+        <div class="flex items-center gap-1.5">
+          <span class="block text-[11px] font-bold text-slate-500 truncate">{{
+            'flags.activeOfficers' | t
+          }}</span>
+          <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+        </div>
+        <span class="block text-xl font-black text-emerald-700 tracking-tight">{{
+          activeOfficersCount()
+        }}</span>
+      </div>
+    </div>
+
+    <!-- Stat 3: Inactive Accounts -->
+    <div
+      class="stat-card flex items-center gap-3 sm:gap-3.5 rounded-2xl border border-slate-200/80 bg-white p-3.5 sm:p-4 shadow-xs transition-all hover:border-slate-300 hover:shadow-sm"
+    >
+      <div
+        class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500 border border-slate-200/70"
+      >
+        <i class="fa-solid fa-user-xmark text-lg"></i>
+      </div>
+      <div class="min-w-0 flex-1">
+        <span class="block text-[11px] font-bold text-slate-500 truncate">{{
+          'flags.inactiveOfficers' | t
+        }}</span>
+        <span class="block text-xl font-black text-slate-700 tracking-tight">{{
+          inactiveOfficersCount()
+        }}</span>
+      </div>
+    </div>
+
+    <!-- Stat 4: Departments Scope -->
+    <div
+      class="stat-card flex items-center gap-3 sm:gap-3.5 rounded-2xl border border-slate-200/80 bg-white p-3.5 sm:p-4 shadow-xs transition-all hover:border-sky-300 hover:shadow-sm"
+    >
+      <div
+        class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-sky-50 text-sky-600 border border-sky-200/70"
+      >
+        <i class="fa-solid fa-building text-lg"></i>
+      </div>
+      <div class="min-w-0 flex-1">
+        <span class="block text-[11px] font-bold text-slate-500 truncate">{{
+          'flags.departments' | t
+        }}</span>
+        <span class="block text-xl font-black text-slate-900 tracking-tight">
+          @if (auth.userType() === 'SuperAdmin') {
+            {{ departments().length || departmentsCount() }}
+          } @else {
+            1
+          }
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. SMART UNIFIED FILTER TOOLBAR -->
+  <section class="rounded-3xl border border-slate-200/90 bg-white p-4 sm:p-5 shadow-xs">
+    <form [formGroup]="filters" (ngSubmit)="load(1)">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3 sm:gap-3.5 items-end">
+        <!-- 1. Search Field -->
+        <div
+          class="col-span-1 sm:col-span-2"
+          [class.lg:col-span-5]="auth.userType() === 'SuperAdmin'"
+          [class.lg:col-span-6]="auth.userType() !== 'SuperAdmin'"
+        >
+          <label class="block text-xs font-bold text-slate-700 mb-1.5">
+            <i
+              class="fa-solid fa-magnifying-glass text-[11px] text-[var(--theme-color-primary,#148496)] me-1"
+            ></i>
+            {{ 'flags.search' | t }}
+          </label>
+          <div
+            class="relative flex h-10.5 w-full items-center rounded-xl border border-slate-200/90 bg-slate-50/80 px-3 transition hover:border-slate-300 focus-within:bg-white focus-within:border-[var(--theme-color-primary)] focus-within:ring-3 focus-within:ring-[var(--theme-color-primary)]/15"
+          >
+            <span
+              class="pointer-events-none flex h-4 w-4 shrink-0 items-center justify-center text-slate-400 me-2.5"
+            >
+              <i class="fa-solid fa-magnifying-glass text-xs"></i>
+            </span>
+            <input
+              type="text"
+              formControlName="searchText"
+              class="h-full w-full bg-transparent border-0 p-0 text-xs font-bold text-slate-800 placeholder:text-slate-400 outline-none focus:outline-none focus:ring-0 leading-normal"
+              [placeholder]="'flags.search' | t"
+            />
+            @if (filters.controls.searchText.value) {
+              <button
+                type="button"
+                class="flex h-5 w-5 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-200 hover:text-slate-700 cursor-pointer ms-1"
+                (click)="clearSearchText()"
+                [title]="'flags.clear' | t"
+              >
+                <i class="fa-solid fa-xmark text-xs"></i>
+              </button>
+            }
+          </div>
+        </div>
+
+        <!-- 2. Department Field (SuperAdmin) -->
+        @if (auth.userType() === 'SuperAdmin') {
+          <div class="col-span-1 sm:col-span-1 lg:col-span-3">
+            <label class="block text-xs font-bold text-slate-700 mb-1.5">
+              <i
+                class="fa-solid fa-building-user text-[11px] text-[var(--theme-color-primary,#148496)] me-1"
+              ></i>
+              {{ 'flags.department' | t }}
+            </label>
+            <div class="relative flex items-center">
+              <select formControlName="departmentId" class="form-select-executive">
+                <option value="">{{ 'flags.allDepartments' | t }}</option>
+                @for (department of departments(); track department.id) {
+                  <option [value]="department.id">
+                    {{ localized(department.nameEn, department.nameAr) }}
+                  </option>
+                }
+              </select>
+              <span
+                class="pointer-events-none absolute end-3 inset-y-0 flex items-center justify-center text-slate-400"
+              >
+                <i class="fa-solid fa-chevron-down text-[11px]"></i>
+              </span>
+            </div>
+          </div>
+        }
+
+        <!-- 3. Sort Field -->
+        <div
+          class="col-span-1 sm:col-span-1"
+          [class.lg:col-span-2]="auth.userType() === 'SuperAdmin'"
+          [class.lg:col-span-3]="auth.userType() !== 'SuperAdmin'"
+        >
+          <label class="block text-xs font-bold text-slate-700 mb-1.5">
+            <i
+              class="fa-solid fa-arrow-down-wide-short text-[11px] text-[var(--theme-color-primary,#148496)] me-1"
+            ></i>
+            {{ 'flags.sort' | t }}
+          </label>
+          <div class="relative flex items-center">
+            <select formControlName="orderSort" class="form-select-executive">
+              <option value="Newest">{{ 'flags.newest' | t }}</option>
+              <option value="Oldest">{{ 'flags.oldest' | t }}</option>
+            </select>
+            <span
+              class="pointer-events-none absolute end-3 inset-y-0 flex items-center justify-center text-slate-400"
+            >
+              <i class="fa-solid fa-chevron-down text-[11px]"></i>
+            </span>
+          </div>
+        </div>
+
+        <!-- 4. Action Buttons (Clear & Apply) -->
+        <div
+          class="col-span-1 sm:col-span-2"
+          [class.lg:col-span-2]="auth.userType() === 'SuperAdmin'"
+          [class.lg:col-span-3]="auth.userType() !== 'SuperAdmin'"
+        >
+          <label
+            class="hidden sm:block text-xs font-bold text-transparent mb-1.5 select-none pointer-events-none"
+            >&nbsp;</label
+          >
+          <div class="flex items-center gap-2 h-10.5">
+            <button
+              type="button"
+              class="flex-1 inline-flex h-10.5 items-center justify-center gap-1.5 rounded-xl border border-slate-200/90 bg-white px-3 text-xs font-bold text-slate-700 shadow-2xs transition hover:bg-slate-50 hover:border-slate-300 active:scale-95 cursor-pointer"
+              (click)="clear()"
+              [title]="'flags.clear' | t"
+            >
+              <i class="fa-solid fa-arrow-rotate-left text-xs text-slate-500"></i>
+              <span>{{ 'flags.clear' | t }}</span>
+            </button>
+            <button
+              type="submit"
+              class="flex-1 inline-flex h-10.5 items-center justify-center gap-1.5 rounded-xl bg-[var(--theme-color-primary,#148496)] px-3.5 text-xs font-bold text-white shadow-2xs transition hover:opacity-95 active:scale-95 cursor-pointer disabled:opacity-50"
+              [disabled]="loading()"
+            >
+              @if (loading()) {
+                <i class="fa-solid fa-circle-notch fa-spin text-xs"></i>
+              } @else {
+                <i class="fa-solid fa-filter text-xs"></i>
+              }
+              <span>{{ 'flags.apply' | t }}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </section>
+
+  @if (error()) {
+    <div
+      role="alert"
+      class="flex items-center gap-2.5 rounded-2xl border border-rose-200 bg-rose-50/90 p-4 text-xs font-bold text-rose-700 shadow-2xs animate-enter"
+    >
+      <i class="fa-solid fa-triangle-exclamation text-rose-500 text-sm"></i>
+      <span>{{ error() | t }}</span>
+    </div>
+  }
+
+  <!-- 4. DATA SECTION (TABLE & RESPONSIVE CARDS) -->
+  <section class="space-y-3" [attr.aria-busy]="loading()">
+    @if (page(); as result) {
+      <!-- Section Title & Counter -->
+      <div class="flex items-center justify-between px-1">
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-black text-slate-800">
+            {{ 'flags.officers' | t }}
+          </span>
+          <span
+            class="inline-flex items-center justify-center min-w-[22px] h-5.5 px-2 rounded-full bg-teal-50 border border-teal-200/80 text-[11px] font-black text-[var(--theme-color-primary,#148496)]"
+          >
+            {{ result.totalItems }}
+          </span>
+        </div>
+        @if (hasActiveFilters()) {
+          <button
+            type="button"
+            class="inline-flex items-center gap-1.5 text-[11px] font-bold text-[var(--theme-color-primary,#148496)] hover:underline cursor-pointer"
+            (click)="clear()"
+          >
+            <i class="fa-solid fa-xmark text-[10px]"></i>
+            <span>{{ 'flags.clear' | t }}</span>
+          </button>
+        }
+      </div>
+
+      <!-- DESKTOP / TABLET DATA TABLE (md and up) -->
+      <div
+        class="hidden md:block rounded-3xl border border-slate-200/80 bg-white shadow-xs overflow-hidden"
+      >
+        <div class="overflow-x-auto">
+          <table class="w-full text-start text-xs border-collapse">
+            <thead>
+              <tr
+                class="bg-gradient-to-r from-slate-50 via-teal-50/25 to-slate-50 border-b border-slate-200/80 text-[11px] font-black uppercase tracking-wider text-slate-600"
+              >
+                <th scope="col" class="px-4 py-3.5 text-start whitespace-nowrap">
+                  <i class="fa-solid fa-user-tie text-[10px] text-slate-400 me-1.5"></i>
+                  {{ 'flags.name' | t }}
+                </th>
+                <th scope="col" class="px-4 py-3.5 text-start whitespace-nowrap">
+                  <i class="fa-solid fa-at text-[10px] text-slate-400 me-1.5"></i>
+                  {{ 'flags.username' | t }}
+                </th>
+                <th scope="col" class="px-4 py-3.5 text-start whitespace-nowrap">
+                  <i class="fa-solid fa-building text-[10px] text-slate-400 me-1.5"></i>
+                  {{ 'flags.department' | t }}
+                </th>
+                <th scope="col" class="px-4 py-3.5 text-start whitespace-nowrap">
+                  <i class="fa-solid fa-address-book text-[10px] text-slate-400 me-1.5"></i>
+                  {{ 'flags.contact' | t }}
+                </th>
+                <th scope="col" class="px-4 py-3.5 text-start whitespace-nowrap">
+                  <i class="fa-solid fa-shield-heart text-[10px] text-slate-400 me-1.5"></i>
+                  {{ 'flags.status' | t }}
+                </th>
+                <th scope="col" class="px-4 py-3.5 text-start min-w-[190px]">
+                  <i class="fa-solid fa-key text-[10px] text-slate-400 me-1.5"></i>
+                  {{ 'flags.permissions' | t }}
+                </th>
+                <th scope="col" class="px-4 py-3.5 text-start whitespace-nowrap">
+                  <i class="fa-solid fa-sliders text-[10px] text-slate-400 me-1.5"></i>
+                  {{ 'flags.actions' | t }}
+                </th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              @for (officer of result.data; track officer.flagOfficerId) {
+                <tr class="hover:bg-slate-50/70 transition-colors group">
+                  <!-- Name with Avatar -->
+                  <td class="px-4 py-3.5">
+                    <div class="flex items-center gap-3 min-w-0">
+                      <div
+                        class="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-teal-500 to-cyan-600 text-white font-black text-xs shadow-2xs"
+                      >
+                        {{ getInitials(officer) }}
+                        <span
+                          class="absolute -bottom-0.5 -end-0.5 h-2.5 w-2.5 rounded-full ring-2 ring-white"
+                          [class.bg-emerald-500]="officer.isActive"
+                          [class.bg-slate-400]="!officer.isActive"
+                        ></span>
+                      </div>
+                      <div class="min-w-0">
+                        <span class="block font-black text-slate-900 truncate">
+                          {{ localized(officer.nameEn, officer.nameAr) }}
+                        </span>
+                        <span class="block text-[10px] font-semibold text-slate-400 mt-0.5">
+                          {{ officer.createdOnUtc | date: 'mediumDate' }}
+                        </span>
+                      </div>
+                    </div>
+                  </td>
+
+                  <!-- Username -->
+                  <td class="px-4 py-3.5">
+                    <span
+                      class="inline-flex items-center gap-1 rounded-lg bg-slate-100/90 px-2.5 py-1 font-mono text-[11px] font-bold text-slate-700 border border-slate-200/60"
+                    >
+                      <i class="fa-solid fa-at text-[10px] text-slate-400"></i>
+                      <span>{{ officer.userName }}</span>
+                    </span>
+                  </td>
+
+                  <!-- Department -->
+                  <td class="px-4 py-3.5">
+                    <span class="inline-flex items-center gap-1.5 font-bold text-slate-700">
+                      <i class="fa-solid fa-building text-xs text-teal-600/70 shrink-0"></i>
+                      <span class="truncate">{{
+                        localized(officer.departmentNameEn, officer.departmentNameAr)
+                      }}</span>
+                    </span>
+                  </td>
+
+                  <!-- Contact Details -->
+                  <td class="px-4 py-3.5 text-slate-700">
+                    <div class="space-y-1">
+                      <a
+                        [href]="'mailto:' + officer.email"
+                        class="flex items-center gap-1.5 text-[11px] font-bold text-slate-600 hover:text-[var(--theme-color-primary,#148496)] transition"
+                      >
+                        <i class="fa-solid fa-envelope text-[11px] text-slate-400 shrink-0"></i>
+                        <span class="truncate max-w-[180px]">{{ officer.email }}</span>
+                      </a>
+                      @if (officer.phoneNumber) {
+                        <a
+                          [href]="'tel:' + officer.phoneNumber"
+                          class="flex items-center gap-1.5 text-[11px] font-medium text-slate-500 hover:text-slate-800 transition"
+                        >
+                          <i class="fa-solid fa-phone text-[11px] text-slate-400 shrink-0"></i>
+                          <span>{{ officer.phoneNumber }}</span>
+                        </a>
+                      }
+                    </div>
+                  </td>
+
+                  <!-- Status -->
+                  <td class="px-4 py-3.5 whitespace-nowrap">
+                    @if (officer.isActive) {
+                      <span
+                        class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-black text-emerald-800 border border-emerald-200/80 shadow-2xs"
+                      >
+                        <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                        {{ 'flags.active' | t }}
+                      </span>
+                    } @else {
+                      <span
+                        class="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold text-slate-600 border border-slate-200/80"
+                      >
+                        <span class="h-1.5 w-1.5 rounded-full bg-slate-400"></span>
+                        {{ 'flags.inactive' | t }}
+                      </span>
+                    }
+                  </td>
+
+                  <!-- Permissions -->
+                  <td class="px-4 py-3.5">
+                    <div class="flex flex-wrap gap-1.5">
+                      @for (role of officer.roles; track role.roleId) {
+                        <span
+                          class="inline-flex items-center gap-1 rounded-lg bg-teal-50 px-2 py-0.5 text-[10px] font-bold text-[var(--theme-color-primary,#148496)] border border-teal-200/60 shadow-2xs"
+                        >
+                          <i class="fa-solid fa-shield-halved text-[9px] opacity-75"></i>
+                          <span>{{ 'flags.' + role.permission | t }}</span>
+                        </span>
+                      } @empty {
+                        <span class="text-slate-400 font-medium text-[11px]">—</span>
+                      }
+                    </div>
+                  </td>
+
+                  <!-- Actions -->
+                  <td class="px-4 py-3.5 whitespace-nowrap">
+                    <div class="flex items-center gap-1.5">
+                      @if (can('ViewDetails')) {
+                        <button
+                          type="button"
+                          class="action-btn text-teal-600 hover:bg-teal-50 hover:border-teal-200"
+                          [title]="'flags.details' | t"
+                          (click)="open(officer.flagOfficerId, 'view')"
+                        >
+                          <i class="fa-solid fa-eye text-xs"></i>
+                        </button>
+                      }
+
+                      @if (can('Update')) {
+                        <button
+                          type="button"
+                          class="action-btn text-sky-600 hover:bg-sky-50 hover:border-sky-200"
+                          [title]="'flags.edit' | t"
+                          (click)="open(officer.flagOfficerId, 'edit')"
+                        >
+                          <i class="fa-solid fa-pen-to-square text-xs"></i>
+                        </button>
+                      }
+
+                      @if (can('AssignRoles')) {
+                        <button
+                          type="button"
+                          class="action-btn text-indigo-600 hover:bg-indigo-50 hover:border-indigo-200"
+                          [title]="'flags.managePermissions' | t"
+                          (click)="open(officer.flagOfficerId, 'roles')"
+                        >
+                          <i class="fa-solid fa-shield-halved text-xs"></i>
+                        </button>
+                      }
+
+                      @if (can(officer.isActive ? 'Deactivate' : 'Restore')) {
+                        <button
+                          type="button"
+                          class="action-btn"
+                          [class.text-rose-600]="officer.isActive"
+                          [class.hover:bg-rose-50]="officer.isActive"
+                          [class.hover:border-rose-200]="officer.isActive"
+                          [class.text-emerald-600]="!officer.isActive"
+                          [class.hover:bg-emerald-50]="!officer.isActive"
+                          [class.hover:border-emerald-200]="!officer.isActive"
+                          [title]="(officer.isActive ? 'flags.deactivate' : 'flags.restore') | t"
+                          [disabled]="saving() || denied()"
+                          (click)="setActive(officer)"
+                        >
+                          <i
+                            [class]="
+                              officer.isActive
+                                ? 'fa-solid fa-user-slash text-xs'
+                                : 'fa-solid fa-user-check text-xs'
+                            "
+                          ></i>
+                        </button>
+                      }
+
+                      @if (auth.hasPermission('Users.ResetPassword')) {
+                        <button
+                          type="button"
+                          class="action-btn text-amber-600 hover:bg-amber-50 hover:border-amber-200"
+                          [title]="'flags.resetPassword' | t"
+                          (click)="resetTarget.set(officer)"
+                        >
+                          <i class="fa-solid fa-key text-xs"></i>
+                        </button>
+                      }
+                    </div>
+                  </td>
+                </tr>
+              } @empty {
+                @if (!loading()) {
+                  <tr>
+                    <td colspan="7" class="py-14 text-center">
+                      <div class="empty-state-box max-w-md mx-auto p-6 rounded-2xl">
+                        <div
+                          class="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-teal-50 text-[var(--theme-color-primary,#148496)] border border-teal-200/80 mb-3.5 shadow-xs"
+                        >
+                          <i class="fa-solid fa-users-slash text-2xl"></i>
+                        </div>
+                        <h3 class="text-sm font-black text-slate-800 mb-1">
+                          {{ 'flags.noOfficers' | t }}
+                        </h3>
+                        <p class="text-xs font-semibold text-slate-500 mb-4">
+                          {{ 'flags.noOfficersDesc' | t }}
+                        </p>
+                        @if (hasActiveFilters()) {
+                          <button
+                            type="button"
+                            class="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-bold text-slate-700 shadow-2xs hover:bg-slate-50 cursor-pointer"
+                            (click)="clear()"
+                          >
+                            <i class="fa-solid fa-arrow-rotate-left text-xs"></i>
+                            <span>{{ 'flags.clear' | t }}</span>
+                          </button>
+                        } @else if (can('Create')) {
+                          <button
+                            type="button"
+                            class="inline-flex items-center gap-1.5 rounded-xl bg-[var(--theme-color-primary,#148496)] px-4 py-2 text-xs font-bold text-white shadow-2xs hover:opacity-95 cursor-pointer"
+                            (click)="create()"
+                          >
+                            <i class="fa-solid fa-user-plus text-xs"></i>
+                            <span>{{ 'flags.addOfficer' | t }}</span>
+                          </button>
+                        }
+                      </div>
+                    </td>
+                  </tr>
+                }
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- MOBILE RESPONSIVE CARDS VIEW (md and below) -->
+      <div class="block md:hidden space-y-3">
+        @for (officer of result.data; track officer.flagOfficerId) {
+          <article
+            class="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs space-y-3.5"
+          >
+            <!-- Top Card Header: Avatar, Name, Status -->
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex items-center gap-3 min-w-0">
+                <div
+                  class="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-teal-500 to-cyan-600 text-white font-black text-xs shadow-2xs"
+                >
+                  {{ getInitials(officer) }}
+                  <span
+                    class="absolute -bottom-0.5 -end-0.5 h-2.5 w-2.5 rounded-full ring-2 ring-white"
+                    [class.bg-emerald-500]="officer.isActive"
+                    [class.bg-slate-400]="!officer.isActive"
+                  ></span>
+                </div>
+                <div class="min-w-0">
+                  <h3 class="font-black text-sm text-slate-900 truncate">
+                    {{ localized(officer.nameEn, officer.nameAr) }}
+                  </h3>
+                  <div class="flex items-center gap-1.5 mt-0.5">
+                    <span
+                      class="inline-flex items-center gap-1 rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[10px] font-bold text-slate-600"
+                    >
+                      @{{ officer.userName }}
+                    </span>
+                    <span class="text-[10px] text-slate-400">·</span>
+                    <span class="text-[10px] text-slate-400">{{
+                      officer.createdOnUtc | date: 'shortDate'
+                    }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Status Badge -->
+              <div class="shrink-0">
+                @if (officer.isActive) {
+                  <span
+                    class="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-black text-emerald-800 border border-emerald-200"
+                  >
+                    <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    {{ 'flags.active' | t }}
+                  </span>
+                } @else {
+                  <span
+                    class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-600 border border-slate-200"
+                  >
+                    <span class="h-1.5 w-1.5 rounded-full bg-slate-400"></span>
+                    {{ 'flags.inactive' | t }}
+                  </span>
+                }
+              </div>
+            </div>
+
+            <!-- Details: Department & Contacts -->
+            <div class="grid grid-cols-1 gap-2 pt-1 border-t border-slate-100 text-xs">
+              <div class="flex items-center gap-2 text-slate-700">
+                <i
+                  class="fa-solid fa-building text-teal-600/70 text-xs w-4 text-center shrink-0"
+                ></i>
+                <span class="font-bold truncate">{{
+                  localized(officer.departmentNameEn, officer.departmentNameAr)
+                }}</span>
+              </div>
+              <div class="flex items-center gap-2 text-slate-600">
+                <i class="fa-solid fa-envelope text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                <a
+                  [href]="'mailto:' + officer.email"
+                  class="font-medium text-slate-600 hover:text-teal-600 truncate"
+                  >{{ officer.email }}</a
+                >
+              </div>
+              @if (officer.phoneNumber) {
+                <div class="flex items-center gap-2 text-slate-600">
+                  <i class="fa-solid fa-phone text-slate-400 text-xs w-4 text-center shrink-0"></i>
+                  <a [href]="'tel:' + officer.phoneNumber" class="font-medium text-slate-600">{{
+                    officer.phoneNumber
+                  }}</a>
+                </div>
+              }
+            </div>
+
+            <!-- Permissions Tags -->
+            <div class="pt-1">
+              <span
+                class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5"
+                >{{ 'flags.permissions' | t }}</span
+              >
+              <div class="flex flex-wrap gap-1.5">
+                @for (role of officer.roles; track role.roleId) {
+                  <span
+                    class="inline-flex items-center gap-1 rounded-lg bg-teal-50 px-2 py-0.5 text-[10px] font-bold text-[var(--theme-color-primary,#148496)] border border-teal-200/60"
+                  >
+                    <i class="fa-solid fa-shield-halved text-[9px] opacity-75"></i>
+                    <span>{{ 'flags.' + role.permission | t }}</span>
+                  </span>
+                } @empty {
+                  <span class="text-slate-400 font-medium text-[11px]">—</span>
+                }
+              </div>
+            </div>
+
+            <!-- Card Action Buttons Strip -->
+            <div class="flex items-center justify-end gap-1.5 pt-2 border-t border-slate-100">
+              @if (can('ViewDetails')) {
+                <button
+                  type="button"
+                  class="action-btn text-teal-600 hover:bg-teal-50 hover:border-teal-200"
+                  [title]="'flags.details' | t"
+                  (click)="open(officer.flagOfficerId, 'view')"
+                >
+                  <i class="fa-solid fa-eye text-xs"></i>
+                </button>
+              }
+
+              @if (can('Update')) {
+                <button
+                  type="button"
+                  class="action-btn text-sky-600 hover:bg-sky-50 hover:border-sky-200"
+                  [title]="'flags.edit' | t"
+                  (click)="open(officer.flagOfficerId, 'edit')"
+                >
+                  <i class="fa-solid fa-pen-to-square text-xs"></i>
+                </button>
+              }
+
+              @if (can('AssignRoles')) {
+                <button
+                  type="button"
+                  class="action-btn text-indigo-600 hover:bg-indigo-50 hover:border-indigo-200"
+                  [title]="'flags.managePermissions' | t"
+                  (click)="open(officer.flagOfficerId, 'roles')"
+                >
+                  <i class="fa-solid fa-shield-halved text-xs"></i>
+                </button>
+              }
+
+              @if (can(officer.isActive ? 'Deactivate' : 'Restore')) {
+                <button
+                  type="button"
+                  class="action-btn"
+                  [class.text-rose-600]="officer.isActive"
+                  [class.hover:bg-rose-50]="officer.isActive"
+                  [class.text-emerald-600]="!officer.isActive"
+                  [class.hover:bg-emerald-50]="!officer.isActive"
+                  [title]="(officer.isActive ? 'flags.deactivate' : 'flags.restore') | t"
+                  [disabled]="saving() || denied()"
+                  (click)="setActive(officer)"
+                >
+                  <i
+                    [class]="
+                      officer.isActive
+                        ? 'fa-solid fa-user-slash text-xs'
+                        : 'fa-solid fa-user-check text-xs'
+                    "
+                  ></i>
+                </button>
+              }
+
+              @if (auth.hasPermission('Users.ResetPassword')) {
+                <button
+                  type="button"
+                  class="action-btn text-amber-600 hover:bg-amber-50 hover:border-amber-200"
+                  [title]="'flags.resetPassword' | t"
+                  (click)="resetTarget.set(officer)"
+                >
+                  <i class="fa-solid fa-key text-xs"></i>
+                </button>
+              }
+            </div>
+          </article>
+        } @empty {
+          @if (!loading()) {
+            <div
+              class="empty-state-box text-center p-8 rounded-3xl bg-white border border-slate-200/80 shadow-xs"
+            >
+              <div
+                class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-teal-50 text-[var(--theme-color-primary,#148496)] border border-teal-200/80 mb-3 shadow-xs"
+              >
+                <i class="fa-solid fa-users-slash text-xl"></i>
+              </div>
+              <h3 class="text-sm font-black text-slate-800 mb-1">
+                {{ 'flags.noOfficers' | t }}
+              </h3>
+              <p class="text-xs font-semibold text-slate-500 mb-4">
+                {{ 'flags.noOfficersDesc' | t }}
+              </p>
+              @if (hasActiveFilters()) {
+                <button
+                  type="button"
+                  class="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-bold text-slate-700 shadow-2xs hover:bg-slate-50 cursor-pointer"
+                  (click)="clear()"
+                >
+                  <i class="fa-solid fa-arrow-rotate-left text-xs"></i>
+                  <span>{{ 'flags.clear' | t }}</span>
+                </button>
+              } @else if (can('Create')) {
+                <button
+                  type="button"
+                  class="inline-flex items-center gap-1.5 rounded-xl bg-[var(--theme-color-primary,#148496)] px-4 py-2 text-xs font-bold text-white shadow-2xs hover:opacity-95 cursor-pointer"
+                  (click)="create()"
+                >
+                  <i class="fa-solid fa-user-plus text-xs"></i>
+                  <span>{{ 'flags.addOfficer' | t }}</span>
+                </button>
+              }
+            </div>
+          }
+        }
+      </div>
+
+      <!-- Pagination -->
+      <div class="pt-2">
+        <app-feedback-pagination
+          [page]="result.currentPage"
+          [size]="result.pageSize"
+          [total]="result.totalItems"
+          [loading]="loading()"
+          (pageChanged)="load($event)"
+          (sizeChanged)="changeSize($event)"
+        />
+      </div>
+    }
+  </section>
+</div>
+
+<!-- 5. MODALS (Create, Edit, View, Roles) -->
+<app-modal
+  [open]="mode() !== null"
+  [title]="modalTitle() | t"
+  [subtitle]="modalSubtitle() | t"
+  [icon]="modalIcon()"
+  size="md"
+  [closeOnBackdrop]="!saving()"
+  (closed)="close()"
+>
+  @if (detailLoading()) {
+    <div class="py-12 text-center text-sm font-bold text-slate-400">
+      <i
+        class="fa-solid fa-circle-notch fa-spin text-2xl text-[var(--theme-color-primary,#148496)] mb-2 block mx-auto"
+      ></i>
+      <span>{{ 'flags.loading' | t }}</span>
+    </div>
+  }
+
+  @if (formError()) {
+    <div
+      class="flex items-center gap-2.5 rounded-xl border border-rose-200 bg-rose-50/95 p-3.5 text-xs font-bold text-rose-700 mb-3.5 shadow-2xs"
+      role="alert"
+    >
+      <i class="fa-solid fa-triangle-exclamation text-rose-500 text-sm shrink-0"></i>
+      <span>{{ formError() | t }}</span>
+    </div>
+  }
+
+  @if (!detailLoading() && (selected() || mode() === 'create')) {
+    <!-- ROLES PERMISSIONS MODAL -->
+    @if (mode() === 'roles') {
+      <form class="space-y-3.5" (submit)="$event.preventDefault(); saveRoles()">
+        <div class="space-y-2.5">
+          @for (role of roleOptions(); track role.roleId) {
+            <label
+              class="group flex items-start gap-3 rounded-xl border border-slate-200/80 bg-slate-50/60 p-3.5 transition hover:bg-teal-50/35 hover:border-teal-200/90 cursor-pointer"
+            >
+              <input
+                type="checkbox"
+                class="mt-0.5 h-4.5 w-4.5 rounded border-slate-300 text-[var(--theme-color-primary,#148496)] focus:ring-[var(--theme-color-primary,#148496)] cursor-pointer"
+                [checked]="selectedRoleIds().has(role.roleId)"
+                (change)="toggleRole(role.roleId, $any($event.target).checked)"
+                [disabled]="saving() || denied()"
+              />
+              <span class="min-w-0 flex-1">
+                <span
+                  class="flex items-center gap-1.5 text-xs font-black text-slate-800 group-hover:text-[var(--theme-color-primary,#148496)] transition-colors"
+                >
+                  <i
+                    class="fa-solid fa-shield-halved text-[11px] text-[var(--theme-color-primary,#148496)]"
+                  ></i>
+                  <span>{{ 'flags.' + role.permission | t }}</span>
+                </span>
+                <span class="block text-[11px] font-semibold text-slate-500 mt-1 leading-relaxed">
+                  {{ 'flags.' + role.permission + '.hint' | t }}
+                </span>
+              </span>
+            </label>
+          }
+        </div>
+        <p class="text-xs text-slate-500 font-semibold flex items-center gap-1.5">
+          <i class="fa-solid fa-circle-info text-teal-600 text-xs"></i>
+          <span>{{ 'flags.permissionsHint' | t }}</span>
+        </p>
+        <div class="modal-form-footer">
+          <button
+            type="button"
+            class="inline-flex h-10 items-center justify-center rounded-xl border border-slate-200/90 bg-white px-4.5 text-xs font-bold text-slate-700 shadow-2xs transition hover:bg-slate-50 hover:border-slate-300 active:scale-95 cursor-pointer disabled:opacity-50"
+            [disabled]="saving() || denied()"
+            (click)="close()"
+          >
+            {{ 'flags.cancel' | t }}
+          </button>
+          <button
+            type="submit"
+            class="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[var(--theme-color-primary,#148496)] to-[var(--theme-color-secondary,#0f6f7f)] px-6 text-xs font-bold text-white shadow-xs transition hover:opacity-95 active:scale-95 cursor-pointer disabled:opacity-50"
+            [disabled]="saving() || denied()"
+          >
+            @if (saving()) {
+              <i class="fa-solid fa-circle-notch fa-spin text-xs"></i>
+            } @else {
+              <i class="fa-solid fa-check text-xs"></i>
+            }
+            <span>{{ 'flags.save' | t }}</span>
+          </button>
+        </div>
+      </form>
+    } @else if (mode() === 'view') {
+      <!-- VIEW DETAILS MODAL -->
+      @if (selected(); as officer) {
+        <div class="space-y-3.5 text-xs">
+          <!-- Header Identity Banner -->
+          <div
+            class="flex items-center gap-3.5 p-3.5 rounded-2xl bg-gradient-to-r from-teal-50/70 via-cyan-50/40 to-slate-50 border border-teal-100"
+          >
+            <div
+              class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-teal-500 to-cyan-600 text-white font-black text-sm shadow-2xs"
+            >
+              {{ getInitials(officer) }}
+            </div>
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center gap-2 flex-wrap">
+                <h3 class="font-black text-sm text-slate-900 truncate">
+                  {{ localized(officer.nameEn, officer.nameAr) }}
+                </h3>
+                <span
+                  class="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-black"
+                  [class.bg-emerald-50]="officer.isActive"
+                  [class.text-emerald-800]="officer.isActive"
+                  [class.border]="true"
+                  [class.border-emerald-200]="officer.isActive"
+                  [class.bg-slate-100]="!officer.isActive"
+                  [class.text-slate-600]="!officer.isActive"
+                  [class.border-slate-200]="!officer.isActive"
+                >
+                  <span
+                    class="h-1.5 w-1.5 rounded-full"
+                    [class.bg-emerald-500]="officer.isActive"
+                    [class.animate-pulse]="officer.isActive"
+                    [class.bg-slate-400]="!officer.isActive"
+                  ></span>
+                  {{ (officer.isActive ? 'flags.active' : 'flags.inactive') | t }}
+                </span>
+              </div>
+              <span class="block font-mono text-[11px] font-bold text-slate-500 mt-0.5">
+                @{{ officer.userName }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Detail Grid -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div class="rounded-xl border border-slate-200/70 bg-slate-50/80 p-3.5">
+              <span class="text-slate-400 font-bold block mb-1">
+                <i class="fa-solid fa-building text-[10px] me-1"></i>
+                {{ 'flags.department' | t }}
+              </span>
+              <span class="font-black text-slate-800">{{
+                localized(officer.departmentNameEn, officer.departmentNameAr)
+              }}</span>
+            </div>
+
+            <div class="rounded-xl border border-slate-200/70 bg-slate-50/80 p-3.5">
+              <span class="text-slate-400 font-bold block mb-1">
+                <i class="fa-solid fa-envelope text-[10px] me-1"></i>
+                {{ 'flags.email' | t }}
+              </span>
+              <span class="font-bold text-slate-800 truncate block">{{ officer.email }}</span>
+            </div>
+
+            <div class="rounded-xl border border-slate-200/70 bg-slate-50/80 p-3.5">
+              <span class="text-slate-400 font-bold block mb-1">
+                <i class="fa-solid fa-phone text-[10px] me-1"></i>
+                {{ 'flags.phone' | t }}
+              </span>
+              <span class="font-bold text-slate-800">{{ officer.phoneNumber || '—' }}</span>
+            </div>
+
+            <div class="rounded-xl border border-slate-200/70 bg-slate-50/80 p-3.5">
+              <span class="text-slate-400 font-bold block mb-1">
+                <i class="fa-solid fa-calendar-days text-[10px] me-1"></i>
+                {{ 'flags.createdOn' | t }}
+              </span>
+              <span class="font-bold text-slate-700">{{
+                officer.createdOnUtc | date: 'medium'
+              }}</span>
+            </div>
+
+            <div
+              class="col-span-1 sm:col-span-2 rounded-xl border border-slate-200/70 bg-slate-50/80 p-3.5"
+            >
+              <span class="text-slate-400 font-bold block mb-2">
+                <i
+                  class="fa-solid fa-shield-halved text-[10px] me-1 text-[var(--theme-color-primary,#148496)]"
+                ></i>
+                {{ 'flags.permissions' | t }}
+              </span>
+              <div class="flex flex-wrap gap-1.5">
+                @for (role of officer.roles; track role.roleId) {
+                  <span
+                    class="inline-flex items-center gap-1 rounded-lg bg-teal-50 px-2.5 py-1 text-[11px] font-bold text-[var(--theme-color-primary,#148496)] border border-teal-200/60 shadow-2xs"
+                  >
+                    <i class="fa-solid fa-shield text-[9px]"></i>
+                    <span>{{ 'flags.' + role.permission | t }}</span>
+                  </span>
+                } @empty {
+                  <span class="text-slate-400">—</span>
+                }
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-form-footer">
+            <button
+              type="button"
+              class="inline-flex h-10 items-center justify-center rounded-xl border border-slate-200/90 bg-white px-6 text-xs font-bold text-slate-700 shadow-2xs transition hover:bg-slate-50 hover:border-slate-300 active:scale-95 cursor-pointer"
+              (click)="close()"
+            >
+              {{ 'flags.cancel' | t }}
+            </button>
+          </div>
+        </div>
+      }
+    } @else {
+      <!-- CREATE / EDIT PROFILE FORM MODAL -->
+      <form class="space-y-3.5" [formGroup]="form" (ngSubmit)="saveProfile()">
+        <!-- Department (if SuperAdmin and create mode) -->
+        @if (mode() === 'create' && auth.userType() === 'SuperAdmin') {
+          <div class="space-y-1.5">
+            <label class="flex items-center gap-1.5 text-xs font-black text-slate-700">
+              <i
+                class="fa-solid fa-building text-[11px] text-[var(--theme-color-primary,#148496)]"
+              ></i>
+              <span>{{ 'flags.department' | t }}</span>
+              <span class="text-rose-500">*</span>
+            </label>
+            <div class="relative flex items-center">
+              <select
+                formControlName="departmentId"
+                class="form-select-executive"
+                [attr.aria-invalid]="fieldError('departmentId')"
+              >
+                <option value="">{{ 'flags.selectDepartment' | t }}</option>
+                @for (department of departments(); track department.id) {
+                  <option [value]="department.id">
+                    {{ localized(department.nameEn, department.nameAr) }}
+                  </option>
+                }
+              </select>
+              <span
+                class="pointer-events-none absolute end-3.5 inset-y-0 flex items-center justify-center text-slate-400"
+              >
+                <i class="fa-solid fa-chevron-down text-xs"></i>
+              </span>
+            </div>
+            @if (fieldError('departmentId')) {
+              <span class="flex items-center gap-1 text-[11px] font-bold text-rose-600 mt-1">
+                <i class="fa-solid fa-circle-exclamation text-[10px]"></i>
+                {{ 'flags.required' | t }}
+              </span>
+            }
+          </div>
+        }
+
+        <!-- Account Credentials (Username & Password) -->
+        @if (mode() === 'create') {
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+            <!-- Username -->
+            <div class="space-y-1.5">
+              <label class="flex items-center gap-1.5 text-xs font-black text-slate-700">
+                <i class="fa-solid fa-at text-[11px] text-[var(--theme-color-primary,#148496)]"></i>
+                <span>{{ 'flags.username' | t }}</span>
+                <span class="text-rose-500">*</span>
+              </label>
+              <input
+                type="text"
+                formControlName="userName"
+                maxlength="100"
+                autocomplete="off"
+                placeholder="e.g. officer.john"
+                class="form-input-executive"
+                [attr.aria-invalid]="fieldError('userName')"
+              />
+              @if (fieldError('userName')) {
+                <span class="flex items-center gap-1 text-[11px] font-bold text-rose-600 mt-1">
+                  <i class="fa-solid fa-circle-exclamation text-[10px]"></i>
+                  {{ 'flags.required' | t }}
+                </span>
+              }
+            </div>
+
+            <!-- Password -->
+            <div class="space-y-1.5">
+              <label class="flex items-center gap-1.5 text-xs font-black text-slate-700">
+                <i
+                  class="fa-solid fa-lock text-[11px] text-[var(--theme-color-primary,#148496)]"
+                ></i>
+                <span>{{ 'flags.password' | t }}</span>
+                <span class="text-rose-500">*</span>
+              </label>
+              <div class="relative flex items-center">
+                <input
+                  [type]="showPassword() ? 'text' : 'password'"
+                  formControlName="password"
+                  minlength="8"
+                  maxlength="200"
+                  autocomplete="new-password"
+                  placeholder="••••••••"
+                  class="form-input-executive form-input-password"
+                  [attr.aria-invalid]="fieldError('password')"
+                />
+                <button
+                  type="button"
+                  class="absolute end-1.5 inset-y-1 flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer"
+                  (click)="togglePassword()"
+                  [title]="(showPassword() ? 'flags.hidePassword' : 'flags.showPassword') | t"
+                >
+                  <i
+                    [class]="
+                      showPassword() ? 'fa-solid fa-eye-slash text-xs' : 'fa-solid fa-eye text-xs'
+                    "
+                  ></i>
+                </button>
+              </div>
+              @if (fieldError('password')) {
+                <span class="flex items-center gap-1 text-[11px] font-bold text-rose-600 mt-1">
+                  <i class="fa-solid fa-circle-exclamation text-[10px]"></i>
+                  {{ 'flags.passwordHint' | t }}
+                </span>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- Names (English & Arabic) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          <!-- English Name -->
+          <div class="space-y-1.5">
+            <label class="flex items-center gap-1.5 text-xs font-black text-slate-700">
+              <i class="fa-solid fa-font text-[11px] text-[var(--theme-color-primary,#148496)]"></i>
+              <span>{{ 'flags.nameEn' | t }}</span>
+              <span class="text-rose-500">*</span>
+            </label>
+            <input
+              type="text"
+              formControlName="nameEn"
+              maxlength="200"
+              placeholder="e.g. John Doe"
+              class="form-input-executive"
+              [attr.aria-invalid]="fieldError('nameEn')"
+            />
+            @if (fieldError('nameEn')) {
+              <span class="flex items-center gap-1 text-[11px] font-bold text-rose-600 mt-1">
+                <i class="fa-solid fa-circle-exclamation text-[10px]"></i>
+                {{ 'flags.required' | t }}
+              </span>
+            }
+          </div>
+
+          <!-- Arabic Name -->
+          <div class="space-y-1.5">
+            <label class="flex items-center gap-1.5 text-xs font-black text-slate-700">
+              <i
+                class="fa-solid fa-language text-[11px] text-[var(--theme-color-primary,#148496)]"
+              ></i>
+              <span>{{ 'flags.nameAr' | t }}</span>
+            </label>
+            <input
+              type="text"
+              formControlName="nameAr"
+              maxlength="200"
+              placeholder="مثال: جون دو"
+              class="form-input-executive"
+            />
+          </div>
+        </div>
+
+        <!-- Contact Details (Email & Phone) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          <!-- Email -->
+          <div class="space-y-1.5">
+            <label class="flex items-center gap-1.5 text-xs font-black text-slate-700">
+              <i
+                class="fa-solid fa-envelope text-[11px] text-[var(--theme-color-primary,#148496)]"
+              ></i>
+              <span>{{ 'flags.email' | t }}</span>
+              <span class="text-rose-500">*</span>
+            </label>
+            <input
+              type="email"
+              formControlName="email"
+              maxlength="200"
+              placeholder="officer@company.com"
+              class="form-input-executive"
+              [attr.aria-invalid]="fieldError('email')"
+            />
+            @if (fieldError('email')) {
+              <span class="flex items-center gap-1 text-[11px] font-bold text-rose-600 mt-1">
+                <i class="fa-solid fa-circle-exclamation text-[10px]"></i>
+                {{ 'flags.emailInvalid' | t }}
+              </span>
+            }
+          </div>
+
+          <!-- Phone -->
+          <div class="space-y-1.5">
+            <label class="flex items-center gap-1.5 text-xs font-black text-slate-700">
+              <i
+                class="fa-solid fa-phone text-[11px] text-[var(--theme-color-primary,#148496)]"
+              ></i>
+              <span>{{ 'flags.phone' | t }}</span>
+            </label>
+            <input
+              type="tel"
+              formControlName="phoneNumber"
+              maxlength="30"
+              placeholder="+966 50 123 4567"
+              class="form-input-executive"
+            />
+          </div>
+        </div>
+
+        <!-- Footer Actions -->
+        <div class="modal-form-footer">
+          <button
+            type="button"
+            class="inline-flex h-10 items-center justify-center rounded-xl border border-slate-200/90 bg-white px-4.5 text-xs font-bold text-slate-700 shadow-2xs transition hover:bg-slate-50 hover:border-slate-300 active:scale-95 cursor-pointer disabled:opacity-50"
+            [disabled]="saving() || denied()"
+            (click)="close()"
+          >
+            {{ 'flags.cancel' | t }}
+          </button>
+          <button
+            type="submit"
+            class="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[var(--theme-color-primary,#148496)] to-[var(--theme-color-secondary,#0f6f7f)] px-6 text-xs font-bold text-white shadow-xs transition hover:opacity-95 active:scale-95 cursor-pointer disabled:opacity-50"
+            [disabled]="saving() || denied()"
+          >
+            @if (saving()) {
+              <i class="fa-solid fa-circle-notch fa-spin text-xs"></i>
+            } @else {
+              <i class="fa-solid fa-check text-xs"></i>
+            }
+            <span>{{ 'flags.save' | t }}</span>
+          </button>
+        </div>
+      </form>
+    }
+  }
+</app-modal>
+
+<!-- Reset Password Modal -->
+<app-reset-password-modal
+  [open]="resetTarget() !== null"
+  [loading]="saving()"
+  [selectedUserLabel]="resetTarget()?.nameEn || ''"
+  (closed)="resetTarget.set(null)"
+  (confirmed)="resetPassword($event)"
+/>

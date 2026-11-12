@@ -1,3 +1,4 @@
+import { DashboardFeedbackCountsComponent } from '../../../../../response-flags/presentation/dashboard-feedback-counts.component';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -60,6 +61,7 @@ Chart.register(...registerables);
   selector: 'app-department-dashboard-page',
   standalone: true,
   imports: [
+    DashboardFeedbackCountsComponent,
     ButtonComponent,
     DashboardSummaryActionsComponent,
     DatePipe,
@@ -123,9 +125,10 @@ export class DepartmentDashboardPageComponent implements OnInit, OnDestroy {
     return {
       total: summary.totalOperators,
       active: summary.activeOperators,
-      activePercentage: summary.totalOperators > 0
-        ? Math.round((summary.activeOperators / summary.totalOperators) * 100)
-        : 0,
+      activePercentage:
+        summary.totalOperators > 0
+          ? Math.round((summary.activeOperators / summary.totalOperators) * 100)
+          : 0,
     };
   });
 
@@ -198,7 +201,10 @@ export class DepartmentDashboardPageComponent implements OnInit, OnDestroy {
     effect(() => {
       const segments = this.store.dashboard()?.customInputSegments ?? [];
       const selectedName = this.selectedSegmentName();
-      if (segments.length > 0 && !segments.some((segment) => segment.customInputId === selectedName)) {
+      if (
+        segments.length > 0 &&
+        !segments.some((segment) => segment.customInputId === selectedName)
+      ) {
         this.selectedSegmentName.set(segments[0].customInputId);
       }
     });
@@ -262,7 +268,10 @@ export class DepartmentDashboardPageComponent implements OnInit, OnDestroy {
   }
 
   openCriticalResponse(response: DepartmentCriticalResponse): void {
-    this.openNavigation(response.detailsNavigation, this.i18n.translate('dashboardDrillDown.responseDetails'));
+    this.openNavigation(
+      response.detailsNavigation,
+      this.i18n.translate('dashboardDrillDown.responseDetails'),
+    );
   }
 
   openDrillDown(event: { title: string; navigation: DashboardDetailsNavigation }): void {
@@ -311,9 +320,11 @@ export class DepartmentDashboardPageComponent implements OnInit, OnDestroy {
   }
 
   customInputTypeLabel(typeName: string): string {
-    if (typeName?.toLowerCase() === 'date' || typeName === '3') return this.i18n.translate('branchTemplates.customInputTypeDate');
+    if (typeName?.toLowerCase() === 'date' || typeName === '3')
+      return this.i18n.translate('branchTemplates.customInputTypeDate');
     if (typeName === 'String') return this.i18n.translate('branchTemplates.customInputTypeString');
-    if (typeName === 'Integer') return this.i18n.translate('branchTemplates.customInputTypeInteger');
+    if (typeName === 'Integer')
+      return this.i18n.translate('branchTemplates.customInputTypeInteger');
 
     return typeName || '-';
   }
@@ -403,8 +414,7 @@ export class DepartmentDashboardPageComponent implements OnInit, OnDestroy {
         maintainAspectRatio: false,
         locale: language,
         onClick: (_event, elements) => {
-          const point: DepartmentDashboardTrendPoint | undefined =
-            trend[elements[0]?.index ?? -1];
+          const point: DepartmentDashboardTrendPoint | undefined = trend[elements[0]?.index ?? -1];
           if (point?.detailsNavigation) {
             this.openNavigation(point.detailsNavigation, point.period);
           }

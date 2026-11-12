@@ -8,13 +8,24 @@ import { surveyDashboardAccessGuard } from './presentation/guards/survey-dashboa
 import { SurveyDashboardStore } from './presentation/state/survey-dashboard.store';
 
 export const SURVEY_DASHBOARD_ROUTES: Routes = [
-  {
-    path: 'complaints',
+  ...(['suggestions', 'comments'] as const).map((kind) => ({
+    path: kind,
+    data: { feedbackKind: kind },
     canActivate: [surveyDashboardAccessGuard],
     providers: [SurveyDashboardService],
     loadComponent: () =>
-      import('./presentation/pages/survey-dashboard-complaints-page/survey-dashboard-complaints-page.component').then(
-        (m) => m.SurveyDashboardComplaintsPageComponent,
+      import('./presentation/pages/survey-dashboard-feedback-page/survey-dashboard-feedback-page.component').then(
+        (m) => m.SurveyDashboardFeedbackPageComponent,
+      ),
+  })),
+  {
+    path: 'complaints',
+    data: { feedbackKind: 'complaints' },
+    canActivate: [surveyDashboardAccessGuard],
+    providers: [SurveyDashboardService],
+    loadComponent: () =>
+      import('./presentation/pages/survey-dashboard-feedback-page/survey-dashboard-feedback-page.component').then(
+        (m) => m.SurveyDashboardFeedbackPageComponent,
       ),
   },
   {

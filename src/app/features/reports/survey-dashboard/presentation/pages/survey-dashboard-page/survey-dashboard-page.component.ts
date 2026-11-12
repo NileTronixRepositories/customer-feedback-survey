@@ -1,3 +1,4 @@
+import { DashboardFeedbackCountsComponent } from '../../../../../response-flags/presentation/dashboard-feedback-counts.component';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
@@ -41,6 +42,8 @@ import {
   MapPin,
   ShieldCheck,
   User,
+  Lightbulb,
+  MessageSquare,
 } from 'lucide-angular';
 import { I18nService } from '../../../../../../core/services/i18n.service';
 import { ThemeColorService } from '../../../../../../core/theme/theme-color.service';
@@ -102,6 +105,7 @@ Chart.register(...registerables);
   selector: 'app-survey-dashboard-page',
   standalone: true,
   imports: [
+    DashboardFeedbackCountsComponent,
     ButtonComponent,
     DatePipe,
     PageHeaderComponent,
@@ -163,6 +167,8 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
   readonly mapPinIcon = MapPin;
   readonly shieldCheckIcon = ShieldCheck;
   readonly userIcon = User;
+  readonly lightbulbIcon = Lightbulb;
+  readonly messageSquareIcon = MessageSquare;
   readonly activeTableTab = signal<
     'templates' | 'bestQuestions' | 'questions' | 'critical' | 'branches' | 'all'
   >('templates');
@@ -584,6 +590,18 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
     if (navigation) {
       this.drillDown.open({
         title: this.i18n.translate('dashboardDrillDown.responsesTitle'),
+        navigation,
+      });
+    }
+  }
+
+  openFeedbackMetric(
+    metric: 'suggestions' | 'comments',
+    navigation: DashboardDetailsNavigation | null | undefined
+  ): void {
+    if (navigation) {
+      this.drillDown.open({
+        title: this.i18n.translate(`flags.${metric}`),
         navigation,
       });
     }

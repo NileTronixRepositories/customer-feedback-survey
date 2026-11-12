@@ -1,9 +1,7 @@
-import {
-  CreatedByUser,
-  CreatedByUserApiResponse,
-} from '../../../../shared/models/audit.model';
+import { CreatedByUser, CreatedByUserApiResponse } from '../../../../shared/models/audit.model';
 
 export interface OperatorListItem {
+  canCreateFlagsOnSubmit: boolean;
   operatorId: string;
   applicationUserId: string;
   departmentId: string;
@@ -138,6 +136,7 @@ export interface UpdateOperatorTemplatesPayload {
 }
 
 export interface OperatorApiResponse {
+  canCreateFlagsOnSubmit?: boolean;
   operatorId?: string | number;
   applicationUserId?: string | number;
   departmentId?: string | number;
